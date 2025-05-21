@@ -1,0 +1,144 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Animal Crossing ID Game</title>
+  <link rel="icon" href="favicon.ico" type="image/x-icon">
+  <link rel="stylesheet" href="css/styles.css">
+  <link href="https://fonts.googleapis.com/css2?family=Quicksand:wght@400;600&display=swap" rel="stylesheet">
+</head>
+<body>
+  <div id="app">
+    <!-- Navigation Bar -->
+    <nav class="navbar">
+      <div class="navbar-brand">
+        <h1>Animal Crossing ID Game</h1>
+      </div>
+      <div class="navbar-controls">
+        <div id="timer">Time: 15</div>
+        <div id="score">Score: 0</div>
+        <button id="logout-btn" class="btn btn-logout">Logout</button>
+      </div>
+    </nav>
+
+    <!-- Main Game Area -->
+    <main class="game-container">
+      <!-- Category Selection -->
+      <div class="category-selector">
+        <label for="category">Select Category:</label>
+        <select id="category">
+          <option value="fish">Fish</option>
+          <option value="bugs">Bugs</option>
+          <option value="fossils">Fossils</option>
+          <option value="art">Art</option>
+          <option value="songs">Songs</option>
+          <option value="sea-creatures">Sea Creatures</option>
+        </select>
+      </div>
+
+      <!-- Game Display -->
+      <div class="game-display">
+        <div id="loading" class="loading-spinner">
+          <div class="spinner"></div>
+          <p>Loading game...</p>
+        </div>
+        
+        <div id="game-content" style="display: none;">
+          <!-- Image Display -->
+          <div class="image-container">
+            <div id="loading-indicator" class="loading-indicator">
+              <div class="leaf-spinner"></div>
+              <p>Loading item...</p>
+            </div>
+            <img id="imageDisplay" alt="Animal Crossing Item" class="item-image" />
+          </div>
+
+          <!-- Guess Input -->
+          <div class="guess-container">
+            <input 
+              type="text" 
+              id="guess-input" 
+              placeholder="Enter your guess..." 
+              autocomplete="off"
+              disabled
+            />
+            <button id="submit-guess" class="btn btn-primary" disabled>Submit</button>
+          </div>
+
+          <!-- Feedback -->
+          <div id="feedback" class="feedback"></div>
+
+          <!-- Game Controls -->
+          <div class="game-controls">
+            <button id="start-round" class="btn btn-start">Start Round</button>
+            <button id="next-btn" class="btn btn-next" style="display: none;">Next Item</button>
+          </div>
+        </div>
+      </div>
+    </main>
+
+    <!-- Leaderboard Section -->
+    <aside class="leaderboard-container">
+      <h2>Leaderboard</h2>
+      <div id="leaderboard" class="leaderboard">
+        <div class="leaderboard-header">
+          <span>Rank</span>
+          <span>Name</span>
+          <span>Score</span>
+        </div>
+        <div id="leaderboard-entries" class="leaderboard-entries">
+          <div class="leaderboard-loading">Loading leaderboard...</div>
+        </div>
+      </div>
+    </aside>
+  </div>
+
+  <!-- High Score Modal -->
+  <div id="high-score-modal" class="modal">
+    <div class="modal-content">
+      <h2>New High Score! 🎉</h2>
+      <p>Congratulations! You've achieved a new high score of <span id="high-score-value">0</span>!</p>
+      <div class="form-group">
+        <label for="player-name">Enter your name:</label>
+        <input type="text" id="player-name" maxlength="20" placeholder="Your name" />
+      </div>
+      <div class="modal-buttons">
+        <button id="save-score" class="btn btn-primary">Save Score</button>
+        <button id="cancel-save" class="btn btn-secondary">Cancel</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Error Toast -->
+  <div id="error-toast" class="toast">
+    <div class="toast-content">
+      <span id="toast-message">An error occurred</span>
+      <button id="toast-close" class="toast-close">&times;</button>
+    </div>
+  </div>
+
+  <!-- Scripts -->
+  <script src="js/app.js" type="module"></script>
+  <script>
+    // Initialize the application when the DOM is fully loaded
+    document.addEventListener('DOMContentLoaded', () => {
+      // Show loading state
+      const loadingElement = document.getElementById('loading');
+      const gameContent = document.getElementById('game-content');
+      
+      // Simulate loading (replace with actual initialization)
+      setTimeout(() => {
+        loadingElement.style.display = 'none';
+        gameContent.style.display = 'block';
+      }, 1500);
+      
+      // Initialize the app
+      if (window.app) {
+        // The app is already initialized by the module
+        console.log('App initialized');
+      }
+    });
+  </script>
+</body>
+</html>

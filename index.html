@@ -1,0 +1,512 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Animal Crossing Game Portal</title>
+    <link
+      href="https://fonts.googleapis.com/css2?family=Quicksand:wght@400;600&display=swap"
+      rel="stylesheet"
+    />
+    <script src="fontfaceobserver.js"></script>
+    <script src="fontInstaller.js"></script>
+    <style>
+      * {
+        box-sizing: border-box;
+      }
+
+      @font-face {
+        font-family: 'ACfont';
+        src: url('fonts/ACfont.otf') format('opentype');
+        font-display: swap;
+      }
+
+      * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+        font-family: 'ACfont', Arial, sans-serif;
+      }
+
+      body {
+        margin: 0;
+        padding: 20px;
+        background-color: #f0f8ff;
+        color: #5a3d2b;
+        background-image: url("images/background.jpg");
+        background-size: cover;
+        background-position: center;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        min-height: 100vh;
+      }
+
+      .container {
+        position: relative;
+        width: 95%;
+        max-width: 1200px;
+        height: auto;
+        background: #fefae0;
+        border-radius: 25px;
+        box-shadow: 0 10px 25px rgba(0, 0, 0, 0.2);
+        overflow: hidden;
+        padding: 40px 20px;
+        text-align: center;
+        border: 6px solid #8c644d;
+        box-sizing: border-box;
+      }
+
+      h1 {
+        color: #4b6043;
+        font-size: 2rem;
+        margin-bottom: 10px;
+      }
+
+      p {
+        color: #5b7553;
+        font-size: 1.1rem;
+        margin-bottom: 20px;
+      }
+
+      button {
+        padding: 12px 24px;
+        margin: 10px;
+        border-radius: 30px;
+        border: 2px solid #4b6043;
+        background-color: #b5e48c;
+        color: #4b6043;
+        font-family: "ACfont", "Arial", sans-serif;
+        font-weight: bold;
+        font-size: 1rem;
+        cursor: pointer;
+        transition: background 0.3s ease, transform 0.2s ease;
+      }
+
+      button:hover {
+        background-color: #99d98c;
+        transform: scale(1.05);
+      }
+
+      input {
+        padding: 12px;
+        margin-bottom: 15px;
+        border: 2px solid #ccd5ae;
+        border-radius: 10px;
+        width: 90%;
+        max-width: 350px;
+        box-sizing: border-box;
+        font-size: 1rem;
+      }
+      
+      .error-message {
+        color: #d32f2f;
+        font-size: 0.85rem;
+        margin-bottom: 10px;
+        text-align: center;
+        min-height: 20px;
+        width: 100%;
+      }
+
+      .form-container {
+        display: none;
+        flex-direction: column;
+        align-items: center;
+        margin-top: 20px;
+      }
+
+      .form-container.active {
+        display: flex;
+      }
+
+      form {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+      }
+
+      @media (max-width: 768px) {
+        body {
+          padding: 10px;
+        }
+        
+        .container {
+          padding: 20px 10px;
+          width: 95%;
+        }
+
+        h1 {
+          font-size: 1.7rem;
+        }
+        
+        p {
+          font-size: 1rem;
+        }
+        
+        button {
+          padding: 10px 20px;
+          margin: 8px;
+          font-size: 0.9rem;
+        }
+      }
+      
+      @media (max-width: 480px) {
+        .container {
+          padding: 15px 10px;
+          border-width: 4px;
+        }
+        
+        h1 {
+          font-size: 1.4rem;
+          margin-bottom: 8px;
+        }
+        
+        p {
+          font-size: 0.9rem;
+          margin-bottom: 15px;
+        }
+        
+        button {
+          padding: 8px 16px;
+          margin: 5px;
+          font-size: 0.85rem;
+        }
+        
+        input {
+          width: 95%;
+          padding: 10px;
+          font-size: 0.95rem;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <main class="container" id="container">
+      <h1>🌿 Welcome to the Animal Crossing Identifier Game Portal! 🌿</h1>
+      <p>Play as a guest or sign in to track your progress</p>
+      <button id="playAsGuest" aria-label="Play as Guest">Play as Guest</button>
+      <button id="showLoginOptions" aria-label="Sign In or Register">
+        Sign In / Register
+      </button>
+
+      <div class="form-container sign-up-container" id="signUpForm">
+        <h2>Create Your Account</h2>
+        <form id="signupForm">
+          <input type="text" id="signupUsername" name="username" placeholder="Username" maxlength="10" autocomplete="username" required />
+          <input type="email" id="signupEmail" name="email" placeholder="Email" autocomplete="email" required />
+          <input type="password" id="signupPassword" name="password" placeholder="Password" autocomplete="new-password" required />
+          <div id="signupError" class="error-message"></div>
+          <button type="submit">Sign Up</button>
+        </form>
+      </div>
+
+      <div class="form-container sign-in-container" id="signInForm">
+        <h2>Log In</h2>
+        <form id="loginForm">
+          <input type="text" id="loginUsername" name="username" placeholder="Username or Email" autocomplete="username" required />
+          <input type="password" id="loginPassword" name="password" placeholder="Password" autocomplete="current-password" required />
+          <div id="loginError" class="error-message"></div>
+          <button type="submit">Log In</button>
+        </form>
+      </div>
+    </main>
+
+    <script>
+      // API URL - change this to match your server
+      const API_URL = 'http://localhost:3002';
+      
+      // Check if we're running in standalone mode (file:// protocol)
+      function isStandaloneMode() {
+        return window.location.protocol === 'file:' || 
+               localStorage.getItem('force_standalone') === 'true' || 
+               localStorage.getItem('standalone_confirmed_this_session') === 'true';
+      }
+      
+      // Function to check if the server is available
+      async function checkServerAvailable() {
+        try {
+          console.log('Checking server availability at:', API_URL);
+          const controller = new AbortController();
+          const timeoutId = setTimeout(() => controller.abort(), 5000); // 5 second timeout
+          
+          // Try direct health check first
+          try {
+            const response = await fetch(`${API_URL}/health`, {
+              method: 'GET',
+              signal: controller.signal,
+              mode: 'cors',
+              headers: {
+                'Accept': 'application/json'
+              }
+            });
+            
+            clearTimeout(timeoutId);
+            if (response.ok) {
+              console.log('Server is available');
+              return true;
+            }
+          } catch (healthError) {
+            console.log('Health check failed, trying root endpoint');
+          }
+          
+          // If health check fails, try root endpoint
+          const baseUrl = API_URL.split('/api')[0];
+          const rootResponse = await fetch(baseUrl, {
+            method: 'GET',
+            signal: controller.signal,
+            mode: 'cors',
+            headers: {
+              'Accept': 'application/json'
+            }
+          });
+          
+          clearTimeout(timeoutId);
+          console.log('Root endpoint check result:', rootResponse.ok);
+          return rootResponse.ok;
+        } catch (error) {
+          console.error('Server availability check failed:', error);
+          return false;
+        }
+      }
+      
+      // Function to show error messages
+      function showError(elementId, message) {
+        const errorElement = document.getElementById(elementId);
+        errorElement.textContent = message;
+        errorElement.style.display = 'block';
+      }
+      
+      // Function to clear error messages
+      function clearErrors() {
+        document.getElementById('loginError').textContent = '';
+        document.getElementById('signupError').textContent = '';
+      }
+      
+      // Function to save auth token to localStorage
+      function saveAuthToken(token, username) {
+        localStorage.setItem('acnh_auth_token', token);
+        localStorage.setItem('acnh_username', username);
+      }
+      
+      // Event listener for guest play button
+      document
+        .getElementById("playAsGuest")
+        .addEventListener("click", async function () {
+          // Clear any existing auth data
+          localStorage.removeItem('acnh_auth_token');
+          localStorage.removeItem('acnh_username');
+          localStorage.setItem('acnh_guest', 'true');
+          
+          // If we're already in standalone mode, prompt the user
+          if (isStandaloneMode()) {
+            if (confirm("Server connection unavailable. Your scores will be saved locally but not shared online. Continue in standalone mode?")) {
+              localStorage.setItem('force_standalone', 'true');
+              localStorage.setItem('standalone_confirmed_this_session', 'true');
+              window.location.href = "game.html?guest=true";
+            }
+            return;
+          }
+          
+          // Check server availability before proceeding
+          const serverAvailable = await checkServerAvailable();
+          
+          if (!serverAvailable) {
+            // Server is not available, offer standalone mode
+            if (confirm("Server connection unavailable. Your scores will be saved locally but not shared online. Continue in standalone mode?")) {
+              localStorage.setItem('force_standalone', 'true');
+              localStorage.setItem('standalone_confirmed_this_session', 'true');
+              window.location.href = "game.html?guest=true";
+            }
+            return;
+          }
+          
+          // Server is available, proceed to game
+          window.location.href = "game.html?guest=true";
+        });
+
+      // Event listener for showing login/signup forms
+      document
+        .getElementById("showLoginOptions")
+        .addEventListener("click", function () {
+          document.querySelector("#signUpForm").classList.add("active");
+          document.querySelector("#signInForm").classList.add("active");
+        });
+
+      // Event listener for login form
+      document
+        .getElementById("loginForm")
+        .addEventListener("submit", async function (e) {
+          e.preventDefault();
+          clearErrors();
+          
+          const username = document.getElementById('loginUsername').value.trim();
+          const password = document.getElementById('loginPassword').value;
+          
+          if (!username || !password) {
+            showError('loginError', 'Please enter both username and password');
+            return;
+          }
+          
+          try {
+            // Check if we're in standalone mode
+            if (isStandaloneMode()) {
+              // In standalone mode, prompt user to play in standalone mode
+              showError('loginError', 'Server is not available. Would you like to play in standalone mode?');
+              
+              // Create a temporary button for standalone mode
+              const standaloneBtn = document.createElement('button');
+              standaloneBtn.textContent = 'Play in Standalone Mode';
+              standaloneBtn.style.marginTop = '10px';
+              standaloneBtn.onclick = function() {
+                localStorage.setItem('acnh_username', username);
+                localStorage.setItem('acnh_guest', 'true');
+                localStorage.setItem('force_standalone', 'true');
+                window.location.href = "game.html?guest=true";
+              };
+              
+              // Add the button to the form
+              document.getElementById('loginForm').appendChild(standaloneBtn);
+              return;
+            }
+            
+            // Add a timeout to the fetch request
+            const controller = new AbortController();
+            const timeoutId = setTimeout(() => controller.abort(), 3000); // 3 second timeout
+            
+            const response = await fetch(`${API_URL}/login`, {
+              method: 'POST',
+              headers: {
+                'Content-Type': 'application/json'
+              },
+              body: JSON.stringify({ username, password }),
+              signal: controller.signal
+            });
+            
+            clearTimeout(timeoutId);
+            
+            const data = await response.json();
+            
+            if (!response.ok) {
+              showError('loginError', data.error || 'Login failed');
+              return;
+            }
+            
+            // Save auth token and redirect to game
+            saveAuthToken(data.token, data.username);
+            localStorage.removeItem('acnh_guest');
+            window.location.href = "game.html";
+          } catch (error) {
+            console.error('Login error:', error);
+            
+            // If connection failed, offer standalone mode
+            showError('loginError', 'Server is not available. Would you like to play in standalone mode?');
+            
+            // Create a temporary button for standalone mode
+            const standaloneBtn = document.createElement('button');
+            standaloneBtn.textContent = 'Play in Standalone Mode';
+            standaloneBtn.style.marginTop = '10px';
+            standaloneBtn.onclick = function() {
+              localStorage.setItem('acnh_username', username);
+              localStorage.setItem('acnh_guest', 'true');
+              localStorage.setItem('force_standalone', 'true');
+              window.location.href = "game.html?guest=true";
+            };
+            
+            // Add the button to the form
+            document.getElementById('loginForm').appendChild(standaloneBtn);
+          }
+        });
+
+      // Event listener for signup form
+      document
+        .getElementById("signupForm")
+        .addEventListener("submit", async function (e) {
+          e.preventDefault();
+          clearErrors();
+          
+          const username = document.getElementById('signupUsername').value.trim();
+          const email = document.getElementById('signupEmail').value.trim();
+          const password = document.getElementById('signupPassword').value;
+          
+          if (!username || !email || !password) {
+            showError('signupError', 'Please fill in all fields');
+            return;
+          }
+          
+          if (password.length < 6) {
+            showError('signupError', 'Password must be at least 6 characters');
+            return;
+          }
+          
+          try {
+            // Check if we're in standalone mode
+            if (isStandaloneMode()) {
+              // In standalone mode, prompt user to play in standalone mode
+              showError('signupError', 'Server is not available. Would you like to play in standalone mode?');
+              
+              // Create a temporary button for standalone mode
+              const standaloneBtn = document.createElement('button');
+              standaloneBtn.textContent = 'Play in Standalone Mode';
+              standaloneBtn.style.marginTop = '10px';
+              standaloneBtn.onclick = function() {
+                localStorage.setItem('acnh_username', username);
+                localStorage.setItem('acnh_guest', 'true');
+                localStorage.setItem('force_standalone', 'true');
+                window.location.href = "game.html?guest=true";
+              };
+              
+              // Add the button to the form
+              document.getElementById('signupForm').appendChild(standaloneBtn);
+              return;
+            }
+            
+            // Add a timeout to the fetch request
+            const controller = new AbortController();
+            const timeoutId = setTimeout(() => controller.abort(), 3000); // 3 second timeout
+            
+            const response = await fetch(`${API_URL}/register`, {
+              method: 'POST',
+              headers: {
+                'Content-Type': 'application/json'
+              },
+              body: JSON.stringify({ username, email, password }),
+              signal: controller.signal
+            });
+            
+            clearTimeout(timeoutId);
+            
+            const data = await response.json();
+            
+            if (!response.ok) {
+              showError('signupError', data.error || 'Registration failed');
+              return;
+            }
+            
+            // Save auth token and redirect to game
+            saveAuthToken(data.token, data.username);
+            localStorage.removeItem('acnh_guest');
+            window.location.href = "game.html";
+          } catch (error) {
+            console.error('Registration error:', error);
+            
+            // If connection failed, offer standalone mode
+            showError('signupError', 'Server is not available. Would you like to play in standalone mode?');
+            
+            // Create a temporary button for standalone mode
+            const standaloneBtn = document.createElement('button');
+            standaloneBtn.textContent = 'Play in Standalone Mode';
+            standaloneBtn.style.marginTop = '10px';
+            standaloneBtn.onclick = function() {
+              localStorage.setItem('acnh_username', username);
+              localStorage.setItem('acnh_guest', 'true');
+              localStorage.setItem('force_standalone', 'true');
+              window.location.href = "game.html?guest=true";
+            };
+            
+            // Add the button to the form
+            document.getElementById('signupForm').appendChild(standaloneBtn);
+          }
+        });
+    </script>
+  </body>
+</html>

@@ -1,0 +1,22 @@
+{
+    "fish": [
+        {
+            "name": {"name-en": "bitterling"},
+            "icon_uri": "https://acnhcdn.com/latest/FishIcon/Fish1.png"
+        },
+        {
+            "name": {"name-en": "pale chub"},
+            "icon_uri": "https://acnhcdn.com/latest/FishIcon/Fish2.png"
+        }
+    ],
+    "bugs": [
+        {
+            "name": {"name-en": "common butterfly"},
+            "icon_uri": "https://acnhcdn.com/latest/BugIcon/Bug1.png"
+        },
+        {
+            "name": {"name-en": "yellow butterfly"},
+            "icon_uri": "https://acnhcdn.com/latest/BugIcon/Bug2.png"
+        }
+    ]
+}

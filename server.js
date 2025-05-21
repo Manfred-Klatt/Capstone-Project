@@ -33,9 +33,18 @@ app.use((req, res, next) => {
   const origin = req.headers.origin;
   if (allowedOrigins.includes(origin)) {
     res.header('Access-Control-Allow-Origin', origin);
+    res.header('Access-Control-Allow-Credentials', 'true');
   }
+  
+  // Set CORS headers for all responses
   res.header('Access-Control-Allow-Methods', 'GET, POST, OPTIONS');
-  res.header('Access-Control-Allow-Headers', 'Content-Type, Authorization');
+  res.header('Access-Control-Allow-Headers', 'Content-Type, Authorization, X-Requested-With');
+  res.header('Access-Control-Expose-Headers', 'Content-Length, Content-Type');
+  
+  // Set cache control for static assets
+  if (req.path.match(/\.(js|css|png|jpg|jpeg|gif|ico|svg)$/)) {
+    res.set('Cache-Control', 'public, max-age=31536000');
+  }
   
   // Handle preflight requests
   if (req.method === 'OPTIONS') {
@@ -62,21 +71,43 @@ const staticOptions = {
   lastModified: true,
   maxAge: '1y',
   setHeaders: (res, path) => {
-    // Set longer cache for images
-    if (path.endsWith('.png') || path.endsWith('.jpg') || path.endsWith('.jpeg') || path.endsWith('.gif') || path.endsWith('.svg')) {
-      res.setHeader('Cache-Control', 'public, max-age=31536000');
+    // Set longer cache for static assets
+    if (path.match(/\.(js|css|png|jpg|jpeg|gif|ico|svg|woff|woff2|ttf|eot)$/)) {
+      res.setHeader('Cache-Control', 'public, max-age=31536000, immutable');
     }
   }
 };
 
-// Serve static files from the root directory
-app.use(express.static(path.join(__dirname), staticOptions));
+// Serve static files with proper security headers
+const serveStatic = (directory, options = {}) => {
+  return express.static(directory, {
+    ...staticOptions,
+    ...options,
+    setHeaders: (res, path) => {
+      // Set security headers
+      res.setHeader('X-Content-Type-Options', 'nosniff');
+      res.setHeader('X-Frame-Options', 'DENY');
+      res.setHeader('X-XSS-Protection', '1; mode=block');
+      
+      // Apply cache headers from staticOptions
+      if (staticOptions.setHeaders) {
+        staticOptions.setHeaders(res, path);
+      }
+    }
+  });
+};
+
+// Serve static files from the root directory (exclude specific files)
+app.use(serveStatic(path.join(__dirname), {
+  index: false, // Don't serve index.html for directories
+  extensions: ['html', 'htm', 'js', 'css', 'json', 'png', 'jpg', 'jpeg', 'gif', 'svg', 'ico', 'woff', 'woff2', 'ttf', 'eot']
+}));
 
 // Serve images from the images directory with higher priority
-app.use('/images', express.static(path.join(__dirname, 'images'), staticOptions));
+app.use('/images', serveStatic(path.join(__dirname, 'images')));
 
 // Serve static files from node_modules (if needed)
-app.use('/node_modules', express.static(path.join(__dirname, 'node_modules'), staticOptions));
+app.use('/node_modules', serveStatic(path.join(__dirname, 'node_modules')));
 
 // API health check endpoint
 app.get('/api/health', (req, res) => {
@@ -106,9 +137,30 @@ app.get('/test-image', (req, res) => {
   }
 });
 
-// Serve the main HTML file for all other GET requests
-app.get('*', (req, res) => {
+// Handle SPA routing - serve index.html for all other GET requests
+app.get('*', (req, res, next) => {
+  // List of file extensions that should be served as static files
+  const staticFileExtensions = ['.js', '.css', '.json', '.png', '.jpg', '.jpeg', '.gif', '.svg', '.ico', '.woff', '.woff2', '.ttf', '.eot'];
+  const isStaticFile = staticFileExtensions.some(ext => req.path.endsWith(ext));
+  
+  // If it's a static file, let the static middleware handle it
+  if (isStaticFile) {
+    return next();
+  }
+  
+  // For API routes, let them be handled by their specific routes
+  if (req.path.startsWith('/api/')) {
+    return next();
+  }
+  
+  // For all other routes, serve the game.html for SPA routing
   res.sendFile(path.join(__dirname, 'game.html'));
+});
+
+// Error handling middleware
+app.use((err, req, res, next) => {
+  console.error('Error:', err);
+  res.status(500).send('Internal Server Error');
 });
 
 // Create HTTP server

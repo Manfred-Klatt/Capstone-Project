@@ -1,17 +1,42 @@
+# Node
 node_modules
 npm-debug.log
-.DS_Store
+
+# Environment
 .env
+.env.*
+!.env.example
+
+# Version control
 .git
 .gitignore
+.github
+.gitattributes
+
+# Editor
 .vscode
-*.md
-.editorconfig
-.eslintrc
-.prettierrc
-.prettierignore
+.idea
+*.sublime-*
+*.code-workspace
+
+# Build files
+build
+dist
+*.tsbuildinfo
+
+# Logs
+logs
+*.log
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Fly.io
 fly.toml
 fly.toml.toml
+
+# SSL/TLS
 *.pem
 *.p12
 *.key
@@ -21,51 +46,20 @@ fly.toml.toml
 *.p7b
 *.p7s
 *.p7c
-*.p12
-*.pem
-*.key
-*.crt
 *.csr
-*.p7b
-*.p7s
-*.p7c
-*.pfx
-*.p12
-*.pem
-*.key
-*.crt
-*.csr
-*.p7b
-*.p7s
-*.p7c
-*.pfx
-*.p12
-*.pem
-*.key
-*.crt
-*.csr
-*.p7b
-*.p7s
-*.p7c
-*.pfx
-*.p12
-*.pem
-*.key
-*.crt
-*.csr
-*.p7b
-*.p7s
-*.p7c
-*.pfx
-*.p12
-*.pem
-*.key
-*.crt
-*.csr
-*.p7b
-*.p7s
-*.p7c
-*.pfx
+
+# Project specific
+images/
+!images/resetti.png  # Include only necessary images
+!images/admin.png
+!images/logo.png
+!images/favicon.ico
+
+# Documentation
+*.md
+LICENSE
+CHANGELOG.md
+CONTRIBUTING.md
 *.p12
 *.pem
 *.key

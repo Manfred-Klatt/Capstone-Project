@@ -1,21 +1,53 @@
+# Application name (must be unique across Fly.io)
 app = "animal-crossing-id-game"
-primary_region = "dfw"
+
+# Primary region for deployment
+primary_region = "dfw"  # Dallas, US
 
 [build]
-  builder = "dockerfile"
+  # Use the Dockerfile in the root directory
+  dockerfile = "Dockerfile"
 
-[build.args]
-  NODE_ENV = "production"
+[deploy]
+  # Strategy for deploying updates
+  strategy = "bluegreen"
+  # Wait for health checks before considering deployment successful
+  wait_timeout = 180
+  # Release command to run after build
+  release_command = "node scripts/healthcheck.js"
 
 [http_service]
+  # Internal port that the application listens on
   internal_port = 3000
+  # Force HTTPS for all requests
   force_https = true
+  # Auto-manage machines
   auto_stop_machines = true
   auto_start_machines = true
-  min_machines_running = 0
+  min_machines_running = 1
   processes = ["app"]
+  
+  # Health check configuration
+  [http_service.checks]
+    # Basic health check
+    interval = "30s"
+    timeout = "5s"
+    grace_period = "5s"
+    method = "GET"
+    path = "/health"
+    protocol = "http"
+    tls_skip_verify = false
+    
+    # Must pass 3/5 checks to be considered healthy
+    threshold = 5
+    window = 5
 
+# VM configuration
 [[vm]]
-  memory = "512mb"
+  # Resource allocation
+  memory = "1gb"  # Increased from 512mb for better performance
   cpu_kind = "shared"
   cpus = 1
+  
+  # Process name (must match the process in the processes list)
+  process_name = "app"

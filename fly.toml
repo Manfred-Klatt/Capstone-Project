@@ -6,26 +6,29 @@ primary_region = "dfw"
 
 [env]
   PORT = "3000"
+  NODE_ENV = "production"
 
-[[services]]
+[deploy]
+  strategy = "immediate"
+
+[[http_service]]
   internal_port = 3000
-  protocol = "tcp"
+  force_https = true
   auto_stop_machines = true
   auto_start_machines = true
   
-  [services.concurrency]
-    hard_limit = 25
-    soft_limit = 20
-  
-  [[services.ports]]
+  [[http_service.ports]]
     port = 80
     handlers = ["http"]
   
-  [[services.ports]]
+  [[http_service.ports]]
     port = 443
     handlers = ["http", "tls"]
   
-  [[services.tcp_checks]]
+  [[http_service.checks]]
     interval = "30s"
-    timeout = "2s"
+    timeout = "5s"
     grace_period = "5s"
+    method = "GET"
+    path = "/health"
+    protocol = "http"

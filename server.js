@@ -1,8 +1,13 @@
 const express = require('express');
 const path = require('path');
 const http = require('http');
+const fs = require('fs');
 const app = express();
 const PORT = process.env.PORT || 3000;
+
+// Add MIME type for SVG
+const mime = require('mime');
+mime.define({ 'image/svg+xml': ['svg'] }, true);
 
 // Basic request logging middleware
 app.use((req, res, next) => {
@@ -51,11 +56,27 @@ app.get('/health', (req, res) => {
   });
 });
 
-// Serve static files from the root directory
-app.use(express.static(path.join(__dirname)));
+// Configure static file serving with proper caching headers
+const staticOptions = {
+  etag: true,
+  lastModified: true,
+  maxAge: '1y',
+  setHeaders: (res, path) => {
+    // Set longer cache for images
+    if (path.endsWith('.png') || path.endsWith('.jpg') || path.endsWith('.jpeg') || path.endsWith('.gif') || path.endsWith('.svg')) {
+      res.setHeader('Cache-Control', 'public, max-age=31536000');
+    }
+  }
+};
 
-// Serve images from the images directory
-app.use('/images', express.static(path.join(__dirname, 'images')));
+// Serve static files from the root directory
+app.use(express.static(path.join(__dirname), staticOptions));
+
+// Serve images from the images directory with higher priority
+app.use('/images', express.static(path.join(__dirname, 'images'), staticOptions));
+
+// Serve static files from node_modules (if needed)
+app.use('/node_modules', express.static(path.join(__dirname, 'node_modules'), staticOptions));
 
 // API health check endpoint
 app.get('/api/health', (req, res) => {
@@ -63,8 +84,26 @@ app.get('/api/health', (req, res) => {
     status: 'ok',
     message: 'API is running',
     timestamp: new Date().toISOString(),
-    cors: 'Configured for allowed origins'
+    cors: 'Configured for allowed origins',
+    images: {
+      testImage: '/images/admin.png',
+      testSvg: '/images/bugs/placeholder.svg'
+    }
   });
+});
+
+// Test image endpoint
+app.get('/test-image', (req, res) => {
+  const imagePath = path.join(__dirname, 'images', 'admin.png');
+  if (fs.existsSync(imagePath)) {
+    res.sendFile(imagePath);
+  } else {
+    res.status(404).json({
+      status: 'error',
+      message: 'Test image not found',
+      path: imagePath
+    });
+  }
 });
 
 // Serve the main HTML file for all other GET requests

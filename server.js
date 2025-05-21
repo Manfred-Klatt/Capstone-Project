@@ -1,11 +1,22 @@
 const express = require('express');
 const app = express();
-const PORT = process.env.PORT || 8000;
+const PORT = process.env.PORT || 3000; // Changed to 3000 to match fly.toml
 
-// CORS middleware to allow requests from your CDN domain
+// Middleware
+app.use(express.json());
+app.use(express.urlencoded({ extended: true }));
+
+// CORS configuration
+const allowedOrigins = [
+  'https://acnhid.b-cdn.net',
+  'https://animal-crossing-id-game.fly.dev'
+];
+
 app.use((req, res, next) => {
-  // Set CORS headers
-  res.header('Access-Control-Allow-Origin', 'https://acnhid.b-cdn.net');
+  const origin = req.headers.origin;
+  if (allowedOrigins.includes(origin)) {
+    res.header('Access-Control-Allow-Origin', origin);
+  }
   res.header('Access-Control-Allow-Methods', 'GET, POST, OPTIONS');
   res.header('Access-Control-Allow-Headers', 'Content-Type, Authorization');
   
@@ -17,13 +28,23 @@ app.use((req, res, next) => {
   next();
 });
 
-// Health check endpoint
+// Health check endpoint (required by Fly.io)
+app.get('/health', (req, res) => {
+  res.status(200).json({
+    status: 'ok',
+    timestamp: new Date().toISOString(),
+    environment: process.env.NODE_ENV || 'development',
+    node: process.version
+  });
+});
+
+// API health check endpoint
 app.get('/api/health', (req, res) => {
   res.status(200).json({
     status: 'ok',
-    message: 'Server is running with CORS enabled',
+    message: 'API is running',
     timestamp: new Date().toISOString(),
-    cors: 'Configured for https://acnhid.b-cdn.net'
+    cors: 'Configured for allowed origins'
   });
 });
 

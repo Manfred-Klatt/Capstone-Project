@@ -1,5 +1,8 @@
+# Fly.io Application Configuration
+# Learn more: https://fly.io/docs/reference/configuration/
+
 app = "animal-crossing-id-game"
-primary_region = "dfw"
+primary_region = "dfw"  # Dallas, US
 
 [build]
   dockerfile = "Dockerfile"
@@ -10,25 +13,75 @@ primary_region = "dfw"
 
 [deploy]
   strategy = "immediate"
+  release_command = "node -v && npm -v"
 
-[[http_service]]
+[[services]]
+  protocol = "tcp"
   internal_port = 3000
-  force_https = true
   auto_stop_machines = true
   auto_start_machines = true
+  min_machines_running = 0
   
-  [[http_service.ports]]
+  [services.concurrency]
+    hard_limit = 25
+    soft_limit = 20
+  
+  # HTTP/HTTPS
+  [[services.ports]]
     port = 80
     handlers = ["http"]
   
-  [[http_service.ports]]
+  [[services.ports]]
     port = 443
     handlers = ["http", "tls"]
   
-  [[http_service.checks]]
+  # Health checks
+  [[services.tcp_checks]]
+    port = 3000
+    interval = "15s"
+    timeout = "2s"
+    grace_period = "5s"
+  
+  # HTTP Health Check
+  [[services.http_checks]]
     interval = "30s"
     timeout = "5s"
     grace_period = "5s"
     method = "GET"
     path = "/health"
     protocol = "http"
+    tls_skip_verify = true
+    
+    [services.http_checks.headers]
+      Host = "animal-crossing-id-game.fly.dev"
+      User-Agent = "Fly-Health-Check"
+
+# VM Configuration
+[mounts]
+  source = "animal_crossing_data"
+  destination = "/data"
+
+[checks]
+  # Liveness check
+  [checks.live]
+    port = 3000
+    type = "http"
+    interval = "30s"
+    timeout = "5s"
+    method = "GET"
+    path = "/health"
+    
+    [checks.live.http_headers]
+      Host = "animal-crossing-id-game.fly.dev"
+      
+  # Readiness check
+  [checks.ready]
+    port = 3000
+    type = "http"
+    interval = "10s"
+    timeout = "2s"
+    method = "GET"
+    path = "/health"
+    
+    [checks.ready.http_headers]
+      Host = "animal-crossing-id-game.fly.dev"

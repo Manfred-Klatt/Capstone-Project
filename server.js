@@ -1,6 +1,6 @@
 const express = require('express');
 const app = express();
-const PORT = 8000;
+const PORT = process.env.PORT || 8000;
 
 // CORS middleware to allow requests from your CDN domain
 app.use((req, res, next) => {

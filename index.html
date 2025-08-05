@@ -8,8 +8,8 @@
       href="https://fonts.googleapis.com/css2?family=Quicksand:wght@400;600&display=swap"
       rel="stylesheet"
     />
-    <script src="fontfaceobserver.js"></script>
-    <script src="fontInstaller.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/fontfaceobserver/2.3.0/fontfaceobserver.standalone.js"></script>
+    <script src="/js/fontInstaller.js"></script>
     <style>
       * {
         box-sizing: border-box;
@@ -25,7 +25,21 @@
         margin: 0;
         padding: 0;
         box-sizing: border-box;
-        font-family: 'ACfont', Arial, sans-serif;
+      }
+
+      /* Initial state - hide text while fonts load */
+      html.font-loading body {
+        visibility: hidden;
+      }
+      
+      /* Fallback font */
+      html.font-fallback * {
+        font-family: 'Quicksand', Arial, sans-serif;
+      }
+      
+      /* Custom font loaded */
+      html.font-loaded * {
+        font-family: 'ACfont', 'Quicksand', Arial, sans-serif;
       }
 
       body {
@@ -192,9 +206,10 @@
       <div class="form-container sign-up-container" id="signUpForm">
         <h2>Create Your Account</h2>
         <form id="signupForm">
-          <input type="text" id="signupUsername" name="username" placeholder="Username" maxlength="10" autocomplete="username" required />
+          <input type="text" id="signupUsername" name="username" placeholder="Username (max 10 chars)" maxlength="10" autocomplete="username" required />
           <input type="email" id="signupEmail" name="email" placeholder="Email" autocomplete="email" required />
-          <input type="password" id="signupPassword" name="password" placeholder="Password" autocomplete="new-password" required />
+          <input type="password" id="signupPassword" name="password" placeholder="Password (min 6 chars)" minlength="6" autocomplete="new-password" required />
+          <input type="password" id="signupPasswordConfirm" name="passwordConfirm" placeholder="Confirm Password" minlength="6" autocomplete="new-password" required />
           <div id="signupError" class="error-message"></div>
           <button type="submit">Sign Up</button>
         </form>
@@ -203,7 +218,7 @@
       <div class="form-container sign-in-container" id="signInForm">
         <h2>Log In</h2>
         <form id="loginForm">
-          <input type="text" id="loginUsername" name="username" placeholder="Username or Email" autocomplete="username" required />
+          <input type="email" id="loginEmail" name="email" placeholder="Email" autocomplete="email" required />
           <input type="password" id="loginPassword" name="password" placeholder="Password" autocomplete="current-password" required />
           <div id="loginError" class="error-message"></div>
           <button type="submit">Log In</button>
@@ -213,7 +228,7 @@
 
     <script>
       // API URL - change this to match your server
-      const API_URL = 'http://localhost:3002';
+      const API_URL = 'http://localhost:8000';
       
       // Check if we're running in standalone mode (file:// protocol)
       function isStandaloneMode() {
@@ -231,7 +246,7 @@
           
           // Try direct health check first
           try {
-            const response = await fetch(`${API_URL}/health`, {
+            const response = await fetch(`${API_URL}/api/v1/health`, {
               method: 'GET',
               signal: controller.signal,
               mode: 'cors',
@@ -269,11 +284,23 @@
         }
       }
       
-      // Function to show error messages
-      function showError(elementId, message) {
-        const errorElement = document.getElementById(elementId);
-        errorElement.textContent = message;
-        errorElement.style.display = 'block';
+      // Function to show error or success messages
+      function showError(elementId, message, type = 'error') {
+        const element = document.getElementById(elementId);
+        if (element) {
+          element.textContent = message;
+          element.style.display = 'block';
+          element.style.color = type === 'success' ? '#4CAF50' : '#f44336';
+          element.style.fontWeight = type === 'success' ? 'bold' : 'normal';
+          
+          // Auto-hide success messages after 5 seconds
+          if (type === 'success') {
+            setTimeout(() => {
+              element.textContent = '';
+              element.style.display = 'none';
+            }, 5000);
+          }
+        }
       }
       
       // Function to clear error messages
@@ -339,66 +366,17 @@
           e.preventDefault();
           clearErrors();
           
-          const username = document.getElementById('loginUsername').value.trim();
+          const email = document.getElementById('loginEmail').value.trim();
           const password = document.getElementById('loginPassword').value;
           
-          if (!username || !password) {
-            showError('loginError', 'Please enter both username and password');
+          if (!email || !password) {
+            showError('loginError', 'Please enter both email and password');
             return;
           }
           
-          try {
-            // Check if we're in standalone mode
-            if (isStandaloneMode()) {
-              // In standalone mode, prompt user to play in standalone mode
-              showError('loginError', 'Server is not available. Would you like to play in standalone mode?');
-              
-              // Create a temporary button for standalone mode
-              const standaloneBtn = document.createElement('button');
-              standaloneBtn.textContent = 'Play in Standalone Mode';
-              standaloneBtn.style.marginTop = '10px';
-              standaloneBtn.onclick = function() {
-                localStorage.setItem('acnh_username', username);
-                localStorage.setItem('acnh_guest', 'true');
-                localStorage.setItem('force_standalone', 'true');
-                window.location.href = "game.html?guest=true";
-              };
-              
-              // Add the button to the form
-              document.getElementById('loginForm').appendChild(standaloneBtn);
-              return;
-            }
-            
-            // Add a timeout to the fetch request
-            const controller = new AbortController();
-            const timeoutId = setTimeout(() => controller.abort(), 3000); // 3 second timeout
-            
-            const response = await fetch(`${API_URL}/login`, {
-              method: 'POST',
-              headers: {
-                'Content-Type': 'application/json'
-              },
-              body: JSON.stringify({ username, password }),
-              signal: controller.signal
-            });
-            
-            clearTimeout(timeoutId);
-            
-            const data = await response.json();
-            
-            if (!response.ok) {
-              showError('loginError', data.error || 'Login failed');
-              return;
-            }
-            
-            // Save auth token and redirect to game
-            saveAuthToken(data.token, data.username);
-            localStorage.removeItem('acnh_guest');
-            window.location.href = "game.html";
-          } catch (error) {
-            console.error('Login error:', error);
-            
-            // If connection failed, offer standalone mode
+          // Check if we're in standalone mode
+          if (isStandaloneMode()) {
+            // In standalone mode, prompt user to play in standalone mode
             showError('loginError', 'Server is not available. Would you like to play in standalone mode?');
             
             // Create a temporary button for standalone mode
@@ -414,6 +392,154 @@
             
             // Add the button to the form
             document.getElementById('loginForm').appendChild(standaloneBtn);
+            return;
+          }
+          
+          // Add a timeout to the fetch request
+          const controller = new AbortController();
+          const timeoutId = setTimeout(() => controller.abort(), 3000); // 3 second timeout
+          
+          console.log('Sending login request...', { email });
+          
+          try {
+            const response = await fetch(`${API_URL}/api/v1/auth/login`, {
+              method: 'POST',
+              headers: {
+                'Content-Type': 'application/json',
+                'Accept': 'application/json'
+              },
+              body: JSON.stringify({ 
+                email: email.trim(),
+                password: password 
+              }),
+              signal: controller.signal,
+              credentials: 'include' // Include cookies for session handling
+            });
+            
+            clearTimeout(timeoutId);
+            
+            console.log('Received response status:', response.status);
+            
+            let data;
+            const contentType = response.headers.get('content-type');
+            console.log('Response content type:', contentType);
+            
+            const responseText = await response.text();
+            console.log('Raw response text:', responseText);
+            
+            if (contentType && contentType.includes('application/json')) {
+              data = JSON.parse(responseText);
+            } else {
+              throw new Error(`Unexpected response format: ${responseText}`);
+            }
+            
+            console.log('Parsed response data:', data);
+            
+            if (!response.ok) {
+              const errorMessage = data?.message || 
+                                data?.error?.message || 
+                                data?.error || 
+                                response.statusText || 
+                                `Login failed (${response.status})`;
+              throw new Error(errorMessage);
+            }
+            
+            // Save auth token and redirect to game
+            saveAuthToken(data.token, data.username);
+            localStorage.removeItem('acnh_guest');
+            window.location.href = "game.html";
+            
+          } catch (error) {
+            console.error('Login error:', {
+              name: error.name,
+              message: error.message,
+              stack: error.stack,
+              ...(error.response && { response: error.response })
+            });
+            
+            // Show detailed error message to the user
+            let errorMessage = 'An error occurred during login. ';
+            const loginForm = document.getElementById('loginForm');
+            
+            if (error.name === 'AbortError') {
+              errorMessage += 'Request timed out. Please check your connection and try again.';
+            } else if (error.message.includes('Failed to fetch')) {
+              errorMessage += 'Unable to connect to the server. ';
+            } else {
+              errorMessage += error.message || 'Please try again later.';
+            }
+            
+            showError('loginError', errorMessage);
+            
+            // Clear any existing buttons
+            const existingButtons = loginForm.querySelectorAll('button[data-type="action"]');
+            existingButtons.forEach(btn => btn.remove());
+            
+            // Check if this is a deactivated account error
+            if (error.message && error.message.includes('deactivated')) {
+              // Add reactivate account button
+              const reactivateBtn = document.createElement('button');
+              reactivateBtn.textContent = 'Reactivate Account';
+              reactivateBtn.style.marginTop = '10px';
+              reactivateBtn.style.marginRight = '10px';
+              reactivateBtn.setAttribute('data-type', 'action');
+              reactivateBtn.onclick = async function(e) {
+                e.preventDefault();
+                reactivateBtn.disabled = true;
+                reactivateBtn.textContent = 'Reactivating...';
+                
+                try {
+                  console.log('Sending reactivation request for email:', email);
+                  const response = await fetch(`${API_URL}/api/v1/auth/reactivate-account`, {
+                    method: 'POST',
+                    headers: {
+                      'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({ email: email })
+                  });
+                  
+                  console.log('Reactivation response status:', response.status);
+                  const data = await response.json().catch(() => ({}));
+                  console.log('Reactivation response data:', data);
+                  
+                  if (response.ok) {
+                    showError('loginError', 'Account reactivated successfully! You can now log in.', 'success');
+                    reactivateBtn.remove();
+                  } else {
+                    const errorMsg = data.message || `Failed to reactivate account. Status: ${response.status}`;
+                    console.error('Reactivation failed:', errorMsg);
+                    showError('loginError', errorMsg);
+                    reactivateBtn.disabled = false;
+                    reactivateBtn.textContent = 'Try Again to Reactivate';
+                  }
+                } catch (err) {
+                  console.error('Error during reactivation:', err);
+                  showError('loginError', 'Network error. Please check your connection and try again.');
+                  reactivateBtn.disabled = false;
+                  reactivateBtn.textContent = 'Try Again to Reactivate';
+                }
+              };
+              
+              loginForm.appendChild(reactivateBtn);
+            }
+            
+            // Only show standalone mode option if it's a connection error
+            if (error.name === 'AbortError' || error.message.includes('Failed to fetch')) {
+              // Create a button for standalone mode
+              const standaloneBtn = document.createElement('button');
+              standaloneBtn.textContent = 'Play in Standalone Mode';
+              standaloneBtn.style.marginTop = '10px';
+              standaloneBtn.setAttribute('data-type', 'action');
+              standaloneBtn.onclick = function() {
+                localStorage.setItem('acnh_username', email || 'Guest');
+                localStorage.setItem('acnh_guest', 'true');
+                localStorage.setItem('force_standalone', 'true');
+                window.location.href = "game.html?guest=true";
+              };
+              
+              // Add the button to the form
+              loginForm.appendChild(standaloneBtn);
+            }
           }
         });
 
@@ -427,14 +553,21 @@
           const username = document.getElementById('signupUsername').value.trim();
           const email = document.getElementById('signupEmail').value.trim();
           const password = document.getElementById('signupPassword').value;
+          const passwordConfirm = document.getElementById('signupPasswordConfirm').value;
           
-          if (!username || !email || !password) {
+          // Validate fields
+          if (!username || !email || !password || !passwordConfirm) {
             showError('signupError', 'Please fill in all fields');
             return;
           }
           
           if (password.length < 6) {
             showError('signupError', 'Password must be at least 6 characters');
+            return;
+          }
+          
+          if (password !== passwordConfirm) {
+            showError('signupError', 'Passwords do not match');
             return;
           }
           
@@ -464,22 +597,56 @@
             const controller = new AbortController();
             const timeoutId = setTimeout(() => controller.abort(), 3000); // 3 second timeout
             
-            const response = await fetch(`${API_URL}/register`, {
+            console.log('Sending signup request...', { username, email });
+            
+            const response = await fetch(`${API_URL}/api/v1/auth/signup`, {
               method: 'POST',
               headers: {
-                'Content-Type': 'application/json'
+                'Content-Type': 'application/json',
+                'Accept': 'application/json'
               },
-              body: JSON.stringify({ username, email, password }),
-              signal: controller.signal
+              body: JSON.stringify({ 
+                username, 
+                email, 
+                password, 
+                passwordConfirm 
+              }),
+              signal: controller.signal,
+              credentials: 'include' // Include cookies in the request
             });
             
             clearTimeout(timeoutId);
             
-            const data = await response.json();
+            console.log('Received response status:', response.status);
+            
+            let data;
+            try {
+              const contentType = response.headers.get('content-type');
+              console.log('Response content type:', contentType);
+              
+              const responseText = await response.text();
+              console.log('Raw response text:', responseText);
+              
+              if (contentType && contentType.includes('application/json')) {
+                data = JSON.parse(responseText);
+              } else {
+                throw new Error(`Unexpected response format: ${responseText}`);
+              }
+            } catch (parseError) {
+              console.error('Error parsing response:', parseError);
+              throw new Error(`Invalid response from server: ${parseError.message}`);
+            }
+            
+            console.log('Parsed response data:', data);
             
             if (!response.ok) {
-              showError('signupError', data.error || 'Registration failed');
-              return;
+              console.error('Server error response:', data);
+              const errorMessage = data?.message || 
+                                data?.error?.message || 
+                                data?.error || 
+                                response.statusText || 
+                                `Registration failed (${response.status})`;
+              throw new Error(errorMessage);
             }
             
             // Save auth token and redirect to game
@@ -487,24 +654,42 @@
             localStorage.removeItem('acnh_guest');
             window.location.href = "game.html";
           } catch (error) {
-            console.error('Registration error:', error);
+            console.error('Registration error:', {
+              name: error.name,
+              message: error.message,
+              stack: error.stack,
+              ...(error.response && { response: error.response })
+            });
             
-            // If connection failed, offer standalone mode
-            showError('signupError', 'Server is not available. Would you like to play in standalone mode?');
+            // Show detailed error message to the user
+            let errorMessage = 'An error occurred during registration. ';
             
-            // Create a temporary button for standalone mode
-            const standaloneBtn = document.createElement('button');
-            standaloneBtn.textContent = 'Play in Standalone Mode';
-            standaloneBtn.style.marginTop = '10px';
-            standaloneBtn.onclick = function() {
-              localStorage.setItem('acnh_username', username);
-              localStorage.setItem('acnh_guest', 'true');
-              localStorage.setItem('force_standalone', 'true');
-              window.location.href = "game.html?guest=true";
-            };
+            if (error.name === 'AbortError') {
+              errorMessage += 'Request timed out. Please check your connection and try again.';
+            } else if (error.message.includes('Failed to fetch')) {
+              errorMessage += 'Unable to connect to the server. ';
+            } else {
+              errorMessage += error.message || 'Please try again later.';
+            }
             
-            // Add the button to the form
-            document.getElementById('signupForm').appendChild(standaloneBtn);
+            showError('signupError', errorMessage);
+            
+            // Only show standalone mode option if it's a connection error
+            if (error.name === 'AbortError' || error.message.includes('Failed to fetch')) {
+              // Create a temporary button for standalone mode
+              const standaloneBtn = document.createElement('button');
+              standaloneBtn.textContent = 'Play in Standalone Mode';
+              standaloneBtn.style.marginTop = '10px';
+              standaloneBtn.onclick = function() {
+                localStorage.setItem('acnh_username', username);
+                localStorage.setItem('acnh_guest', 'true');
+                localStorage.setItem('force_standalone', 'true');
+                window.location.href = "game.html?guest=true";
+              };
+              
+              // Add the button to the form
+              document.getElementById('signupForm').appendChild(standaloneBtn);
+            }
           }
         });
     </script>

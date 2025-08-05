@@ -4,8 +4,8 @@
  */
 
 // Enhanced error handling for API requests
-// Base API URL - make sure this matches your server port
-const BASE_API_URL = 'http://localhost:3001';
+// Base API URL - using relative path to avoid CORS issues
+const BASE_API_URL = '/api';
 
 function apiRequest(endpoint, method, data) {
     // Ensure endpoint starts with a slash

@@ -2,31 +2,54 @@
 <html lang="en">
   <head>
     <link rel="icon" href="favicon.ico" type="image/x-icon">
-    <script src="fontfaceobserver.js"></script>
-    <script src="fontInstaller.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/fontfaceobserver/2.3.0/fontfaceobserver.standalone.js"></script>
+    <script src="/js/fontInstaller.js"></script>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <!-- Preload sound effects -->
     <audio id="correct-sound" preload="auto">
-      <source src="sounds/correct.wav" type="audio/wav">
+      <source src="/sounds/correct.wav" type="audio/wav">
+      Your browser does not support the audio element.
     </audio>
     <audio id="game-over-sound" preload="auto">
-      <source src="sounds/game-over.wav" type="audio/wav">
+      <source src="/sounds/game-over.wav" type="audio/wav">
+      Your browser does not support the audio element.
     </audio>
     <audio id="start-game-sound" preload="auto">
-      <source src="sounds/start-game.wav" type="audio/wav">
+      <source src="/sounds/start-game.wav" type="audio/wav">
+      Your browser does not support the audio element.
     </audio>
     <audio id="high-score-sound" preload="auto">
-      <source src="sounds/high-score.wav" type="audio/wav">
+      <source src="/sounds/high-score.wav" type="audio/wav">
+      Your browser does not support the audio element.
     </audio>
     <title>AC:NH ID Game</title>
     <style>
       @font-face {
         font-family: 'ACfont';
         src: url('fonts/ACfont.otf') format('opentype');
-        font-weight: normal;
-        font-style: normal;
         font-display: swap;
+      }
+
+      * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+      }
+
+      /* Initial state - hide text while fonts load */
+      html.font-loading body {
+        visibility: hidden;
+      }
+      
+      /* Fallback font */
+      html.font-fallback * {
+        font-family: 'Quicksand', Arial, sans-serif;
+      }
+      
+      /* Custom font loaded */
+      html.font-loaded * {
+        font-family: 'ACfont', 'Quicksand', Arial, sans-serif;
       }
 
       :root {
@@ -1182,7 +1205,7 @@
       
       // Function to check if the server is available
       async function checkServerAvailable() {
-        const API_URL = 'http://localhost:3002';
+        const API_URL = 'http://localhost:8000';
         try {
           console.log('Checking server availability at:', API_URL);
           const controller = new AbortController();
@@ -1190,7 +1213,7 @@
           
           // Try direct health check first
           try {
-            const response = await fetch(`${API_URL}/health`, {
+            const response = await fetch(`${API_URL}/api/v1/health`, {
               method: 'GET',
               signal: controller.signal,
               mode: 'cors',

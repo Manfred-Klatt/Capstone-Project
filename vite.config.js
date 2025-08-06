@@ -2,28 +2,46 @@ const { defineConfig } = require('vite');
 const path = require('path');
 const fs = require('fs');
 
-// Function to copy the sounds directory to the dist folder
-function copySoundsFolder() {
+// Function to copy static assets to the dist folder
+function copyStaticAssets() {
   return {
-    name: 'copy-sounds-folder',
+    name: 'copy-static-assets',
     closeBundle: async () => {
-      const srcDir = path.resolve(__dirname, 'sounds');
-      const destDir = path.resolve(__dirname, 'dist/sounds');
+      // Copy sounds directory
+      const soundsSrc = path.resolve(__dirname, 'sounds');
+      const soundsDest = path.resolve(__dirname, 'dist/sounds');
       
-      // Create destination directory if it doesn't exist
-      if (!fs.existsSync(destDir)) {
-        fs.mkdirSync(destDir, { recursive: true });
+      if (fs.existsSync(soundsSrc)) {
+        if (!fs.existsSync(soundsDest)) {
+          fs.mkdirSync(soundsDest, { recursive: true });
+        }
+        
+        const soundFiles = fs.readdirSync(soundsSrc);
+        soundFiles.forEach(file => {
+          const srcPath = path.join(soundsSrc, file);
+          const destPath = path.join(soundsDest, file);
+          fs.copyFileSync(srcPath, destPath);
+        });
+        console.log('Copied sounds directory to dist folder');
       }
+
+      // Copy fonts directory
+      const fontsSrc = path.resolve(__dirname, 'fonts');
+      const fontsDest = path.resolve(__dirname, 'dist/fonts');
       
-      // Copy all files from source to destination
-      const files = fs.readdirSync(srcDir);
-      files.forEach(file => {
-        const srcPath = path.join(srcDir, file);
-        const destPath = path.join(destDir, file);
-        fs.copyFileSync(srcPath, destPath);
-      });
-      
-      console.log('Copied sounds directory to dist folder');
+      if (fs.existsSync(fontsSrc)) {
+        if (!fs.existsSync(fontsDest)) {
+          fs.mkdirSync(fontsDest, { recursive: true });
+        }
+        
+        const fontFiles = fs.readdirSync(fontsSrc);
+        fontFiles.forEach(file => {
+          const srcPath = path.join(fontsSrc, file);
+          const destPath = path.join(fontsDest, file);
+          fs.copyFileSync(srcPath, destPath);
+        });
+        console.log('Copied fonts directory to dist folder');
+      }
     }
   };
 }
@@ -43,7 +61,7 @@ module.exports = defineConfig({
     cors: true
   },
   plugins: [
-    copySoundsFolder()
+    copyStaticAssets()
   ],
   build: {
     outDir: 'dist',

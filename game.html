@@ -37,6 +37,28 @@
         box-sizing: border-box;
       }
 
+      /* Blathers character under scoreboards */
+      #blathers-character {
+        width: 60px;
+        height: auto;
+        margin: 20px auto 0;
+        display: block;
+        opacity: 0.9;
+        transition: transform 0.2s ease-in-out;
+        transform-origin: center bottom;
+        cursor: pointer;
+      }
+      
+      #blathers-character:hover {
+        transform: scale(1.1);
+      }
+      
+      /* Leaderboards container */
+      .leaderboards-container {
+        position: relative;
+        margin-bottom: 40px; /* Add space for Blathers */
+      }
+
       /* Initial state - hide text while fonts load */
       html.font-loading body {
         visibility: hidden;
@@ -1630,21 +1652,21 @@
         overflow: hidden;
         text-overflow: ellipsis;
         background: linear-gradient(90deg, 
-          #ff0000 0%,
-          #ff7e00 10%,
-          #ffff00 20%,
-          #00ff00 30%,
-          #00ffff 40%,
-          #0000ff 50%,
-          #8b00ff 60%,
-          #ff00ff 70%,
-          #ff0000 80%
+          #ff9aa2 0%,    /* Soft pink */
+          #ffb7b2 10%,   /* Light coral */
+          #ffdac1 20%,   /* Peach */
+          #e2f0cb 30%,   /* Soft green */
+          #b5ead7 40%,   /* Mint green */
+          #c7ceea 50%,   /* Periwinkle */
+          #b8d8d8 60%,   /* Powder blue */
+          #f8c8dc 70%,   /* Pink */
+          #ff9aa2 80%    /* Soft pink */
         );
         -webkit-background-clip: text;
         background-clip: text;
         color: transparent;
         animation: rainbow 2s linear infinite;
-      ">Animal Crossing: New Horizons<br>Identifier Game</h1>
+      ">Welcome to the Identifier Game!<br><br>Choose category/difficulty below.</h1>
       <div id="category-selector" class="category-container" style="display: flex; flex-direction: column; align-items: center; gap: 10px; margin: 10px 0; width: 100%;">
         <div style="display: flex; flex-direction: column; align-items: center; width: 100%; max-width: 200px;">
           <label for="category" style="margin-bottom: 5px; font-size: 0.9rem; width: 100%; text-align: center;">Category</label>
@@ -4247,5 +4269,9 @@
       });
       });
     </script>
+    <!-- Blathers Character -->
+    <div id="blathers-character">
+      <img src="images/Blathers_PG.png" alt="Blathers" style="width: 100%; height: auto;">
+    </div>
   </body>
 </html>

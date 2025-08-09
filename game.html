@@ -1081,25 +1081,22 @@
         background-color: #357abd;
       }
     </style>
+    <!-- Audio Elements -->
+    <audio id="correct-sound" src="sounds/correct.wav" preload="auto"></audio>
+    <audio id="game-over-sound" src="sounds/game-over.wav" preload="auto"></audio>
+    <audio id="start-game-sound" src="sounds/start-game.wav" preload="auto"></audio>
+    <audio id="high-score-sound" src="sounds/high-score.wav" preload="auto"></audio>
+    <audio id="toggle-on-sound" src="sounds/toggle-on.wav" preload="auto"></audio>
+    <audio id="toggle-off-sound" src="sounds/toggle-off.wav" preload="auto"></audio>
     <script>
       // Helper function to show notifications
       function showNotification(message) {
         const notification = document.createElement('div');
+        notification.className = 'notification';
         notification.textContent = message;
-        notification.style.position = 'fixed';
-        notification.style.top = '50px';
-        notification.style.left = '50%';
-        notification.style.transform = 'translateX(-50%)';
-        notification.style.backgroundColor = '#4a90e2';
-        notification.style.color = 'white';
-        notification.style.padding = '10px 20px';
-        notification.style.borderRadius = '5px';
-        notification.style.zIndex = '9999';
-        notification.style.opacity = '0';
-        notification.style.transition = 'opacity 0.3s ease';
         document.body.appendChild(notification);
-        
-        // Show and then fade out the notification
+
+        // Add the 'show' class to trigger the animation
         setTimeout(() => {
           notification.style.opacity = '1';
           setTimeout(() => {
@@ -1722,6 +1719,9 @@
     </div>
 
     </div>
+    
+    
+    
     <!-- Leaderboards-->
     <div class="leaderboards-container">
     <div class="category-leaderboard" id="fish-leaderboard">
@@ -1773,28 +1773,83 @@
       const adminToggleBtn = document.getElementById("admin-toggle-btn");
       const adminToolsContainer = document.getElementById("admin-tools-container");
       
-      // Sound elements
-      const correctSound = document.getElementById("correct-sound");
-      const wrongSound = document.getElementById("wrong-sound");
-      const gameOverSound = document.getElementById("game-over-sound");
-      const startGameSound = document.getElementById("start-game-sound");
-      const highScoreSound = document.getElementById("high-score-sound");
-      
       // Sound settings
       let soundEnabled = false; // Default sound is off
+      const soundToggle = document.getElementById('sound-toggle');
+      
+      // Get audio elements
+      const toggleOnSound = document.getElementById('toggle-on-sound');
+      const toggleOffSound = document.getElementById('toggle-off-sound');
+      const correctSound = document.getElementById('correct-sound');
+      const wrongSound = document.getElementById('wrong-sound');
+      const gameOverSound = document.getElementById('game-over-sound');
+      const startGameSound = document.getElementById('start-game-sound');
+      const highScoreSound = document.getElementById('high-score-sound');
       
       // Sound manager function
       function playSound(sound) {
-        if (soundEnabled && sound) {
-          // Reset the sound to the beginning if it's already playing
-          sound.pause();
-          sound.currentTime = 0;
-          // Play the sound
-          sound.play().catch(error => {
-            console.error('Error playing sound:', error);
-          });
+        if (sound && soundEnabled) {
+          try {
+            // Create a new audio context if one doesn't exist
+            const AudioContext = window.AudioContext || window.webkitAudioContext;
+            const audioContext = new AudioContext();
+            
+            // Create a clone of the audio element
+            const soundClone = sound.cloneNode();
+            
+            // Set volume and play
+            soundClone.volume = 0.5;
+            
+            // Play the sound
+            soundClone.play().catch(error => {
+              console.warn('Could not play sound:', error);
+            });
+            
+            // Clean up the audio context after playing
+            soundClone.onended = () => {
+              audioContext.close();
+            };
+            
+            return true;
+          } catch (error) {
+            console.error('Error initializing audio:', error);
+            return false;
+          }
         }
+        return false;
       }
+      
+      // Toggle sound and update button appearance
+      function toggleSound() {
+        soundEnabled = !soundEnabled;
+        // Update button appearance
+        const soundIcon = soundToggle.querySelector('img');
+        if (soundEnabled) {
+          soundIcon.src = 'images/speaker-on.png';
+          soundIcon.alt = 'Sound On';
+          // Play toggle on sound
+          playSound(toggleOnSound);
+        } else {
+          soundIcon.src = 'images/speaker-off.png';
+          soundIcon.alt = 'Sound Off';
+          // Play toggle off sound
+          playSound(toggleOffSound);
+        }
+        // Save the sound preference to localStorage
+        localStorage.setItem('soundEnabled', soundEnabled);
+      }
+      
+      // Initialize sound toggle state from localStorage
+      if (localStorage.getItem('soundEnabled') !== null) {
+        soundEnabled = localStorage.getItem('soundEnabled') === 'true';
+        // Update button appearance based on saved preference
+        const soundIcon = soundToggle.querySelector('img');
+        soundIcon.src = soundEnabled ? 'images/speaker-on.png' : 'images/speaker-off.png';
+        soundIcon.alt = soundEnabled ? 'Sound On' : 'Sound Off';
+      }
+      
+      // Add click event listener to sound toggle button
+      soundToggle.addEventListener('click', toggleSound);
 
     // Add event listener for admin tools toggle with secret activation pattern
     let clickCount = 0;
@@ -3655,7 +3710,7 @@
           stopTimer();
           
           // Play wrong answer sound
-          playSound(gameOverSound);
+          playSound(wrongSound);
           
           // Incorrect guess - game over
           feedbackElement.textContent = `Game Over! The answer was ${currentItem.name}. Final Score: ${score}`;

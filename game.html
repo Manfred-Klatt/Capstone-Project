@@ -1773,70 +1773,72 @@
       const adminToggleBtn = document.getElementById("admin-toggle-btn");
       const adminToolsContainer = document.getElementById("admin-tools-container");
       
-      // Sound settings
-      let soundEnabled = false; // Default sound is off
-      const soundToggle = document.getElementById('sound-toggle');
-      
-      // Get audio elements
-      const toggleOnSound = document.getElementById('toggle-on-sound');
-      const toggleOffSound = document.getElementById('toggle-off-sound');
-      const correctSound = document.getElementById('correct-sound');
-      const wrongSound = document.getElementById('wrong-sound');
-      const gameOverSound = document.getElementById('game-over-sound');
-      const startGameSound = document.getElementById('start-game-sound');
-      const highScoreSound = document.getElementById('high-score-sound');
-      
-      // Sound manager function
-      function playSound(sound) {
-        if (sound && soundEnabled) {
-          try {
-            // Create a new audio context if one doesn't exist
-            const AudioContext = window.AudioContext || window.webkitAudioContext;
-            const audioContext = new AudioContext();
-            
-            // Create a clone of the audio element
-            const soundClone = sound.cloneNode();
-            
-            // Set volume and play
-            soundClone.volume = 0.5;
-            
-            // Play the sound
-            soundClone.play().catch(error => {
-              console.warn('Could not play sound:', error);
-            });
-            
-            // Clean up the audio context after playing
-            soundClone.onended = () => {
-              audioContext.close();
-            };
-            
-            return true;
-          } catch (error) {
-            console.error('Error initializing audio:', error);
-            return false;
+      // Sound Manager
+      const SoundManager = {
+        enabled: localStorage.getItem('soundEnabled') === 'true' || false,
+        sounds: {},
+        
+        init: function() {
+          // Initialize all sound elements
+          const soundElements = document.querySelectorAll('audio[id$="-sound"]');
+          soundElements.forEach(el => {
+            const soundId = el.id.replace('-sound', '');
+            this.sounds[soundId] = el;
+          });
+          
+          // Update UI to match initial state
+          this.updateToggleUI();
+          
+          return this;
+        },
+        
+        play: function(soundName) {
+          if (!this.enabled) return;
+          
+          const sound = this.sounds[soundName];
+          if (sound) {
+            sound.currentTime = 0;
+            sound.volume = 0.5;
+            sound.play().catch(e => console.log(`Audio play failed for ${soundName}:`, e));
           }
+        },
+        
+        toggle: function() {
+          this.enabled = !this.enabled;
+          localStorage.setItem('soundEnabled', this.enabled);
+          this.updateToggleUI();
+          
+          // Play toggle sound
+          this.play(this.enabled ? 'toggle-on' : 'toggle-off');
+        },
+        
+        updateToggleUI: function() {
+          const soundToggle = document.getElementById('sound-toggle');
+          if (!soundToggle) return;
+          
+          const soundIcon = soundToggle.querySelector('img');
+          if (soundIcon) {
+            soundIcon.src = `images/speaker-${this.enabled ? 'on' : 'off'}.png`;
+            soundIcon.alt = `Sound ${this.enabled ? 'On' : 'Off'}`;
+          }
+          
+          soundToggle.title = `Click to turn sound ${this.enabled ? 'off' : 'on'}`;
         }
-        return false;
+      };
+      
+      // Initialize sound manager
+      const soundManager = SoundManager.init();
+      
+      // Simple sound player function (kept for backward compatibility)
+      function playSound(soundId) {
+        // Convert old sound IDs to new format if needed
+        const soundName = soundId.endsWith('-sound') ? soundId.replace('-sound', '') : soundId;
+        soundManager.play(soundName);
       }
       
-      // Toggle sound and update button appearance
+      // Toggle sound using the sound manager
       function toggleSound() {
-        soundEnabled = !soundEnabled;
-        // Update button appearance
-        const soundIcon = soundToggle.querySelector('img');
-        if (soundEnabled) {
-          soundIcon.src = 'images/speaker-on.png';
-          soundIcon.alt = 'Sound On';
-          // Play toggle on sound
-          playSound(toggleOnSound);
-        } else {
-          soundIcon.src = 'images/speaker-off.png';
-          soundIcon.alt = 'Sound Off';
-          // Play toggle off sound
-          playSound(toggleOffSound);
-        }
-        // Save the sound preference to localStorage
-        localStorage.setItem('soundEnabled', soundEnabled);
+        soundManager.toggle();
       }
       
       // Initialize sound toggle state from localStorage
@@ -3626,7 +3628,7 @@
 
         if (guess === correctAnswer) {
           // Play correct answer sound
-          playSound(correctSound);
+          playSound('correct-sound');
           
           // Get current difficulty
           const difficulty = document.getElementById('difficulty').value;
@@ -3710,7 +3712,7 @@
           stopTimer();
           
           // Play wrong answer sound
-          playSound(wrongSound);
+          playSound('game-over-sound');
           
           // Incorrect guess - game over
           feedbackElement.textContent = `Game Over! The answer was ${currentItem.name}. Final Score: ${score}`;

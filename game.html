@@ -6,21 +6,37 @@
     <script src="/js/fontInstaller.js"></script>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <!-- Preload sound effects -->
+    <!-- Preload essential sound effects with optimized OGG files -->
+    <!-- Critical sounds preloaded for immediate use -->
     <audio id="correct-sound" preload="auto">
-      <source src="sounds/correct.wav" type="audio/wav">
+      <source src="/sounds/correct.ogg" type="audio/ogg">
+      <source src="/sounds/correct.wav" type="audio/wav">
       Your browser does not support the audio element.
     </audio>
     <audio id="game-over-sound" preload="auto">
-      <source src="sounds/game-over.wav" type="audio/wav">
+      <source src="/sounds/game-over.ogg" type="audio/ogg">
+      <source src="/sounds/game-over.wav" type="audio/wav">
       Your browser does not support the audio element.
     </audio>
-    <audio id="start-game-sound" preload="auto">
-      <source src="sounds/start-game.wav" type="audio/wav">
+    <!-- Non-critical sounds loaded on demand -->
+    <audio id="start-game-sound" preload="none">
+      <source src="/sounds/start-game.ogg" type="audio/ogg">
+      <source src="/sounds/start-game.wav" type="audio/wav">
       Your browser does not support the audio element.
     </audio>
-    <audio id="high-score-sound" preload="auto">
-      <source src="sounds/high-score.wav" type="audio/wav">
+    <audio id="high-score-sound" preload="none">
+      <source src="/sounds/high-score.ogg" type="audio/ogg">
+      <source src="/sounds/high-score.wav" type="audio/wav">
+      Your browser does not support the audio element.
+    </audio>
+    <audio id="toggle-on-sound" preload="none">
+      <source src="/sounds/toggle-on.ogg" type="audio/ogg">
+      <source src="/sounds/toggle-on.wav" type="audio/wav">
+      Your browser does not support the audio element.
+    </audio>
+    <audio id="toggle-off-sound" preload="none">
+      <source src="/sounds/toggle-off.ogg" type="audio/ogg">
+      <source src="/sounds/toggle-off.wav" type="audio/wav">
       Your browser does not support the audio element.
     </audio>
     <title>AC:NH ID Game</title>
@@ -44,13 +60,6 @@
         margin: 20px auto 0;
         display: block;
         opacity: 0.9;
-        transition: transform 0.2s ease-in-out;
-        transform-origin: center bottom;
-        cursor: pointer;
-      }
-      
-      #blathers-character:hover {
-        transform: scale(1.1);
       }
       
       /* Leaderboards container */
@@ -1082,12 +1091,31 @@
       }
     </style>
     <!-- Audio Elements -->
-    <audio id="correct-sound" src="sounds/correct.wav" preload="auto"></audio>
-    <audio id="game-over-sound" src="sounds/game-over.wav" preload="auto"></audio>
-    <audio id="start-game-sound" src="sounds/start-game.wav" preload="auto"></audio>
-    <audio id="high-score-sound" src="sounds/high-score.wav" preload="auto"></audio>
-    <audio id="toggle-on-sound" src="sounds/toggle-on.wav" preload="auto"></audio>
-    <audio id="toggle-off-sound" src="sounds/toggle-off.wav" preload="auto"></audio>
+    <!-- Optimized OGG audio elements with WAV fallbacks -->
+    <audio id="correct-sound" preload="auto">
+      <source src="sounds/correct.ogg" type="audio/ogg">
+      <source src="sounds/correct.wav" type="audio/wav">
+    </audio>
+    <audio id="game-over-sound" preload="auto">
+      <source src="sounds/game-over.ogg" type="audio/ogg">
+      <source src="sounds/game-over.wav" type="audio/wav">
+    </audio>
+    <audio id="start-game-sound" preload="none">
+      <source src="sounds/start-game.ogg" type="audio/ogg">
+      <source src="sounds/start-game.wav" type="audio/wav">
+    </audio>
+    <audio id="high-score-sound" preload="none">
+      <source src="sounds/high-score.ogg" type="audio/ogg">
+      <source src="sounds/high-score.wav" type="audio/wav">
+    </audio>
+    <audio id="toggle-on-sound" preload="none">
+      <source src="sounds/toggle-on.ogg" type="audio/ogg">
+      <source src="sounds/toggle-on.wav" type="audio/wav">
+    </audio>
+    <audio id="toggle-off-sound" preload="none">
+      <source src="sounds/toggle-off.ogg" type="audio/ogg">
+      <source src="sounds/toggle-off.wav" type="audio/wav">
+    </audio>
     <script>
       // Helper function to show notifications
       function showNotification(message) {
@@ -1773,85 +1801,705 @@
       const adminToggleBtn = document.getElementById("admin-toggle-btn");
       const adminToolsContainer = document.getElementById("admin-tools-container");
       
-      // Sound Manager
+      // Sound Manager - Clean implementation with OGG support
       const SoundManager = {
-        enabled: localStorage.getItem('soundEnabled') === 'true' || false,
+        enabled: false,
+        hasUserInteracted: false,
         sounds: {},
         
+        // Sound file configurations - optimized OGG files with WAV fallbacks
+        soundConfigs: {
+          'correct': '/sounds/correct.ogg',
+          'game-over': '/sounds/game-over.ogg',
+          'start-game': '/sounds/start-game.ogg',
+          'high-score': '/sounds/high-score.ogg',
+          'toggle-on': '/sounds/toggle-on.ogg',
+          'toggle-off': '/sounds/toggle-off.ogg'
+        },
+        
+        // Initialize the sound manager
         init: function() {
-          // Initialize all sound elements
-          const soundElements = document.querySelectorAll('audio[id$="-sound"]');
-          soundElements.forEach(el => {
-            const soundId = el.id.replace('-sound', '');
-            this.sounds[soundId] = el;
-          });
-          
-          // Update UI to match initial state
-          this.updateToggleUI();
+          try {
+            // Load sound preference from localStorage
+            const savedPreference = localStorage.getItem('acnh_sound_enabled');
+            if (savedPreference !== null) {
+              this.enabled = savedPreference === 'true';
+            }
+            
+            // Initialize audio elements
+            this.initAudioElements();
+            
+            // Update UI
+            this.updateToggleUI();
+            
+            console.log('SoundManager initialized with OGG files:', {
+              enabled: this.enabled,
+              soundConfigs: this.soundConfigs
+            });
+            
+            return this;
+          } catch (error) {
+            console.error('Error initializing SoundManager:', error);
+            return this;
+          }
+        },
+        
+        // Initialize audio elements
+        initAudioElements: function() {
+          try {
+            for (const [soundId, src] of Object.entries(this.soundConfigs)) {
+              const audioElement = document.getElementById(`${soundId}-sound`);
+              if (audioElement) {
+                this.sounds[soundId] = audioElement;
+                console.log(`Initialized sound: ${soundId}`);
+              } else {
+                console.warn(`Audio element not found: ${soundId}-sound`);
+              }
+            }
+          } catch (error) {
+            console.error('Error initializing audio elements:', error);
+          }
+        },
+        
+        // Play a sound by ID
+        play: function(soundId) {
+          try {
+            // Check if sound is enabled and user has interacted
+            if (!this.enabled || !this.hasUserInteracted) {
+              const reason = !this.enabled ? 'sound is disabled' : 'no user interaction yet';
+              console.log(`Sound playback prevented: ${reason}`);
+              return Promise.resolve(false);
+            }
+            
+            // Get the sound element
+            const sound = this.sounds[soundId];
+            if (!sound) {
+              console.error(`Sound not found: ${soundId}. Available sounds:`, Object.keys(this.sounds));
+              return Promise.resolve(false);
+            }
+            
+            // Reset and prepare for playback
+            sound.currentTime = 0;
+            sound.volume = 0.5;
+            
+            // Try to play the sound
+            const playPromise = sound.play();
+            
+            if (playPromise !== undefined) {
+              return playPromise
+                .then(() => {
+                  console.log(`Sound playback started successfully: ${soundId}`);
+                  return true;
+                })
+                .catch(error => {
+                  console.error(`Error playing sound ${soundId}:`, error);
+                  return false;
+                });
+            }
+            
+            // For browsers that don't return a promise
+            console.log(`Playback started (legacy browser): ${soundId}`);
+            return Promise.resolve(true);
+            
+          } catch (error) {
+            console.error(`Unexpected error playing sound ${soundId}:`, error);
+            return Promise.resolve(false);
+          }
+        },
+        
+        // Toggle sound on/off
+        toggle: function(event) {
+          try {
+            if (event) event.preventDefault();
+            
+            // Mark that user has interacted with sound controls
+            this.hasUserInteracted = true;
+            
+            // Toggle the enabled state
+            this.enabled = !this.enabled;
+            
+            // Save preference to localStorage
+            localStorage.setItem('acnh_sound_enabled', this.enabled.toString());
+            
+            // Update the UI
+            this.updateToggleUI();
+            
+            // Play appropriate toggle sound
+            const soundToPlay = this.enabled ? 'toggle-on' : 'toggle-off';
+            this.play(soundToPlay);
+            
+            console.log('Sound toggled:', {
+              enabled: this.enabled,
+              soundPlayed: soundToPlay
+            });
+            
+          } catch (error) {
+            console.error('Error in sound toggle:', error);
+            this.updateToggleUI();
+          }
+        },
+        
+        // Update toggle UI
+        updateToggleUI: function() {
+          try {
+            const soundToggle = document.getElementById('sound-toggle');
+            if (soundToggle) {
+              let icon = soundToggle.querySelector('img, span');
+              if (!icon) {
+                icon = document.createElement('span');
+                soundToggle.appendChild(icon);
+              }
+              
+              if (icon.tagName === 'SPAN') {
+                icon.textContent = this.enabled ? '🔊' : '🔇';
+              }
+              
+              soundToggle.title = this.enabled ? 'Mute sound' : 'Unmute sound';
+            }
+            
+            // Update mobile toggle as well
+            const soundToggleMobile = document.getElementById('sound-toggle-mobile');
+            if (soundToggleMobile) {
+              const img = soundToggleMobile.querySelector('img');
+              if (img) {
+                img.src = this.enabled ? 'images/speaker.png' : 'images/speaker-mute.png';
+                img.alt = this.enabled ? 'Sound On' : 'Sound Off';
+              }
+            }
+            
+          } catch (error) {
+            console.error('Error updating sound toggle UI:', error);
+          }
+        },
+        
+        // Create audio elements dynamically if they don't exist
+        createAudioElements: function() {
+          try {
+            console.log('Creating audio elements dynamically...');
+            const head = document.head || document.getElementsByTagName('head')[0];
+            
+            for (const [id, src] of Object.entries(this.soundConfigs)) {
+              // Check if element already exists
+              if (document.getElementById(`${id}-sound`)) {
+                console.log(`Audio element ${id} already exists`);
+                continue;
+              }
+              
+              // Create audio element
+              const audio = document.createElement('audio');
+              audio.id = `${id}-sound`;
+              audio.preload = 'auto';
+              
+              // Create source element
+              const source = document.createElement('source');
+              source.src = src;
+              source.type = 'audio/wav';
+              
+              // Add fallback text
+              const fallback = document.createTextNode('Your browser does not support the audio element.');
+              
+              // Assemble the audio element
+              audio.appendChild(source);
+              audio.appendChild(fallback);
+              
+              // Add to document
+              document.body.appendChild(audio);
+              
+              // Initialize the audio element
+              this.initAudioElement(audio);
+              
+              console.log(`Created audio element: ${id}-sound`);
+            }
+            
+          } catch (error) {
+            console.error('Error creating audio elements:', error);
+          }
+        },
+        
+        init: function() {
+          try {
+            console.log('=== SOUND MANAGER INIT ===');
+            
+            // Check for existing interaction
+            const savedSoundState = localStorage.getItem('soundEnabled');
+            console.log('Saved sound state from localStorage:', savedSoundState);
+            
+            this.hasUserInteracted = savedSoundState !== null;
+            this.enabled = this.hasUserInteracted ? (savedSoundState === 'true') : false;
+            
+            console.log('Initialized with - enabled:', this.enabled, 'hasUserInteracted:', this.hasUserInteracted);
+            
+            // Create audio elements if they don't exist
+            this.createAudioElements();
+            
+            // Initialize all sound elements
+            this.initAudioElements();
+            
+            // Make soundManager globally available for debugging
+            window.soundManager = this;
+            
+            // Update the UI to reflect current state
+            this.updateToggleUI();
+            
+            console.log('SoundManager initialization complete');
+            
+          } catch (error) {
+            console.error('Error initializing SoundManager:', error);
+          }
           
           return this;
         },
         
-        play: function(soundName) {
-          if (!this.enabled) return;
-          
-          const sound = this.sounds[soundName];
-          if (sound) {
-            sound.currentTime = 0;
-            sound.volume = 0.5;
-            sound.play().catch(e => console.log(`Audio play failed for ${soundName}:`, e));
-          }
+        // Lazy load audio on first play attempt
+        lazyLoadAudio: function(soundId) {
+          return new Promise((resolve) => {
+            const audioElement = document.getElementById(`${soundId}-sound`);
+            if (!audioElement) {
+              console.warn(`Audio element not found: ${soundId}-sound`);
+              resolve(false);
+              return;
+            }
+            
+            // If already loaded or loading, resolve immediately
+            if (audioElement.readyState >= 2 || audioElement.preload === 'auto') {
+              resolve(true);
+              return;
+            }
+            
+            // Load the audio
+            console.log(`Lazy loading audio: ${soundId}`);
+            audioElement.preload = 'auto';
+            audioElement.load();
+            
+            // Wait for it to be ready
+            const onCanPlay = () => {
+              audioElement.removeEventListener('canplay', onCanPlay);
+              audioElement.removeEventListener('error', onError);
+              resolve(true);
+            };
+            
+            const onError = () => {
+              audioElement.removeEventListener('canplay', onCanPlay);
+              audioElement.removeEventListener('error', onError);
+              console.error(`Failed to lazy load audio: ${soundId}`);
+              resolve(false);
+            };
+            
+            audioElement.addEventListener('canplay', onCanPlay);
+            audioElement.addEventListener('error', onError);
+            
+            // Timeout after 3 seconds
+            setTimeout(() => {
+              audioElement.removeEventListener('canplay', onCanPlay);
+              audioElement.removeEventListener('error', onError);
+              resolve(audioElement.readyState >= 2);
+            }, 3000);
+          });
         },
         
-        toggle: function() {
-          this.enabled = !this.enabled;
-          localStorage.setItem('soundEnabled', this.enabled);
-          this.updateToggleUI();
-          
-          // Play toggle sound
-          this.play(this.enabled ? 'toggle-on' : 'toggle-off');
+        // Helper to resume AudioContext if suspended
+        resumeAudioContext: function() {
+          if (window.AudioContext || window.webkitAudioContext) {
+            const AudioContext = window.AudioContext || window.webkitAudioContext;
+            if (this.audioContext) {
+              if (this.audioContext.state === 'suspended') {
+                console.log('Resuming suspended AudioContext...');
+                return this.audioContext.resume()
+                  .then(() => {
+                    console.log('AudioContext resumed successfully');
+                    return true;
+                  });
+              }
+              return Promise.resolve(true);
+            } else {
+              // Create a new AudioContext if none exists
+              this.audioContext = new AudioContext();
+              return Promise.resolve(true);
+            }
+          }
+          return Promise.resolve(false);
+        },
+        
+        toggle: function(event) {
+          try {
+            // Prevent default to avoid any default button behavior
+            if (event) event.preventDefault();
+            
+            console.log('=== SOUND TOGGLE REQUESTED ===');
+            console.log('Current sound state:', {
+              enabled: this.enabled,
+              hasUserInteracted: this.hasUserInteracted,
+              availableSounds: Object.keys(this.sounds)
+            });
+            
+            // Mark that user has interacted with sound controls
+            this.hasUserInteracted = true;
+            
+            // Toggle the enabled state
+            const wasEnabled = this.enabled;
+            this.enabled = !wasEnabled;
+            
+            // Save preference to localStorage
+            localStorage.setItem('acnh_sound_enabled', this.enabled);
+            console.log(`Sound ${this.enabled ? 'enabled' : 'disabled'}`);
+            
+            // Determine which sound to play
+            const soundToPlay = this.enabled ? 'toggle-on' : 'toggle-off';
+            console.log(`Will play sound: ${soundToPlay}`);
+            
+            // Force play the toggle sound (bypassing the enabled check)
+            const currentState = this.enabled;
+            this.enabled = true; // Temporarily enable for the toggle sound
+            
+            // Play the sound with error handling
+            this.play(soundToPlay)
+              .then(success => {
+                if (!success) {
+                  console.warn(`Failed to play ${soundToPlay} sound`);
+                }
+              })
+              .catch(e => {
+                console.error(`Error playing ${soundToPlay} sound:`, e);
+              })
+              .finally(() => {
+                // Restore the original state
+                this.enabled = currentState;
+                
+                // Update the UI to reflect the new state
+                this.updateToggleUI();
+                
+                console.log('Toggle completed. New state:', {
+                  enabled: this.enabled,
+                  soundPlayed: soundToPlay
+                });
+              });
+            
+          } catch (error) {
+            console.error('Error in sound toggle:', error);
+            // Ensure UI is updated even if there's an error
+            this.updateToggleUI();
+          }
         },
         
         updateToggleUI: function() {
-          const soundToggle = document.getElementById('sound-toggle');
-          if (!soundToggle) return;
-          
-          const soundIcon = soundToggle.querySelector('img');
-          if (soundIcon) {
-            soundIcon.src = `images/speaker-${this.enabled ? 'on' : 'off'}.png`;
-            soundIcon.alt = `Sound ${this.enabled ? 'On' : 'Off'}`;
+          try {
+            const soundToggle = document.getElementById('sound-toggle');
+            if (!soundToggle) {
+              console.error('Sound toggle button not found');
+              return;
+            }
+            
+            let icon = soundToggle.querySelector('img, span');
+            
+            // If no icon exists, create one
+            if (!icon) {
+              icon = document.createElement('span');
+              soundToggle.appendChild(icon);
+            }
+            
+            // Always use emoji for consistency
+            if (icon.tagName === 'IMG') {
+              const emoji = document.createElement('span');
+              emoji.textContent = this.enabled ? '🔊' : '🔇';
+              soundToggle.replaceChild(emoji, icon);
+            } else if (icon.tagName === 'SPAN') {
+              icon.textContent = this.enabled ? '🔊' : '🔇';
+            }
+            
+            // Update title for accessibility
+            soundToggle.title = this.enabled ? 'Mute sound' : 'Unmute sound';
+            soundToggle.setAttribute('aria-pressed', !this.enabled);
+            
+          } catch (error) {
+            console.error('Error updating sound toggle UI:', error);
           }
+        },
+        
+        addTestButton: function() {
+          try {
+            // Check if test button already exists
+            if (document.getElementById('sound-test-button')) {
+              return;
+            }
+            
+            // Create test button
+            const testButton = document.createElement('button');
+            testButton.id = 'sound-test-button';
+            testButton.textContent = '🔊 Test Sound';
+            testButton.style.position = 'fixed';
+            testButton.style.bottom = '10px';
+            testButton.style.right = '10px';
+            testButton.style.padding = '8px 16px';
+            testButton.style.borderRadius = '20px';
+            testButton.style.border = '2px solid #4CAF50';
+            testButton.style.backgroundColor = '#4CAF50';
+            testButton.style.color = 'white';
+            testButton.style.fontWeight = 'bold';
+            testButton.style.cursor = 'pointer';
+            
+            document.body.appendChild(testButton);
+            
+          } catch (error) {
+            console.error('Error adding test button:', error);
+          }
+        },
+        
+        testAllSounds: function() {
+          console.log('=== TESTING ALL SOUNDS ===');
           
-          soundToggle.title = `Click to turn sound ${this.enabled ? 'off' : 'on'}`;
+          // First, ensure we have user interaction
+          this.hasUserInteracted = true;
+          
+          // Temporarily enable sound for testing
+          const wasEnabled = this.enabled;
+          this.enabled = true;
+          
+          // Test each sound with a delay between them
+          const sounds = Object.keys(this.sounds);
+          let delay = 0;
+          
+          sounds.forEach((soundId, index) => {
+            setTimeout(() => {
+              console.log(`\n--- Testing sound: ${soundId} (${index + 1}/${sounds.length}) ---`);
+              this.play(soundId)
+                .then(success => {
+                  console.log(`Sound test ${success ? 'succeeded' : 'failed'}: ${soundId}`);
+                })
+                .catch(e => {
+                  console.error(`Error testing sound ${soundId}:`, e);
+                });
+            }, delay);
+            
+            // Add 1.5 seconds between sounds
+            delay += 1500;
+          });
+          
+          // Restore original state after all sounds have played
+          setTimeout(() => {
+            this.enabled = wasEnabled;
+            console.log('=== SOUND TESTING COMPLETE ===');
+          }, delay + 1000);
+        },
+        
+        // Test sound functionality  
+        testSound: function(soundId) {
+          console.log(`Testing sound: ${soundId}`);
+          this.hasUserInteracted = true;
+          const wasEnabled = this.enabled;
+          this.enabled = true;
+          
+          this.play(soundId)
+            .then(success => {
+              console.log(`Sound test ${success ? 'succeeded' : 'failed'}: ${soundId}`);
+            })
+            .catch(e => {
+              console.error(`Error testing sound ${soundId}:`, e);
+            })
+            .finally(() => {
+              this.enabled = wasEnabled;
+            });
         }
       };
       
       // Initialize sound manager
       const soundManager = SoundManager.init();
       
+      // Add Start Game button event handler
+      document.addEventListener('DOMContentLoaded', function() {
+        const startGameButton = document.getElementById('start-game-btn');
+        if (startGameButton) {
+          startGameButton.addEventListener('click', function() {
+            console.log('Start Game button clicked');
+            
+            // Play start game sound
+            if (soundManager) {
+              soundManager.play('start-game');
+            }
+            
+            // Hide the start game button
+            startGameButton.style.display = 'none';
+            
+            // Start the game by initializing
+            initGame();
+            
+            // Start the timer
+            startTimer();
+            
+            // Update feedback
+            const feedbackElement = document.getElementById('feedback');
+            if (feedbackElement) {
+              feedbackElement.textContent = 'Game started! Good luck!';
+              feedbackElement.className = 'correct';
+              setTimeout(() => {
+                feedbackElement.textContent = '';
+                feedbackElement.className = '';
+              }, 2000);
+            }
+          });
+        }
+      });
+      
+      // Function to test direct audio playback
+      function testDirectAudioPlayback() {
+        console.log('=== TESTING DIRECT AUDIO PLAYBACK ===');
+        
+        // Create a new audio context
+        const AudioContext = window.AudioContext || window.webkitAudioContext;
+        const audioContext = new AudioContext();
+        
+        console.log('AudioContext state:', audioContext.state);
+        
+        // Try to play a simple oscillator sound
+        try {
+          const oscillator = audioContext.createOscillator();
+          const gainNode = audioContext.createGain();
+          
+          oscillator.type = 'sine';
+          oscillator.frequency.setValueAtTime(440, audioContext.currentTime);
+          gainNode.gain.setValueAtTime(0.5, audioContext.currentTime);
+          
+          oscillator.connect(gainNode);
+          gainNode.connect(audioContext.destination);
+          
+          console.log('Starting oscillator...');
+          oscillator.start();
+          
+          // Stop after 1 second
+          setTimeout(() => {
+            oscillator.stop();
+            console.log('Oscillator stopped');
+          }, 1000);
+          
+        } catch (e) {
+          console.error('Error with Web Audio API:', e);
+        }
+      }
+      
+      // Direct sound test function
+      function testSoundPlayback() {
+        console.log('=== SOUND PLAYBACK TEST ===');
+        
+        // Create a new audio element for testing
+        const testAudio = new Audio('/sounds/toggle-on.wav');
+        testAudio.volume = 0.5;
+        
+        // Log audio element state
+        console.log('Test audio element created:', testAudio);
+        
+        // Add event listeners for debugging
+        const events = ['canplay', 'canplaythrough', 'play', 'playing', 'pause', 'error', 'stalled', 'suspend', 'abort'];
+        events.forEach(event => {
+          testAudio.addEventListener(event, (e) => {
+            console.log(`Audio ${event} event fired:`, e);
+            if (event === 'error') {
+              console.error('Audio error details:', {
+                error: testAudio.error,
+                readyState: testAudio.readyState,
+                networkState: testAudio.networkState,
+                src: testAudio.src
+              });
+            }
+          });
+        });
+        
+        // Try to play the sound
+        console.log('Attempting to play test sound...');
+        testAudio.play()
+          .then(() => console.log('Test sound playback started successfully'))
+          .catch(e => console.error('Test sound playback failed:', e));
+      }
+      
+      // Add test sound button handler
+      document.getElementById('test-sound')?.addEventListener('click', (e) => {
+        e.preventDefault();
+        console.clear(); // Clear console for better visibility
+        console.log('=== SOUND TEST BUTTON CLICKED ===');
+        
+        // Run all available sound tests
+        testDirectAudioPlayback();
+        testSoundPlayback();
+        
+        // Also test the sound manager directly
+        if (window.soundManager) {
+          console.log('=== TESTING SOUND MANAGER ===');
+          console.log('Sound manager state:', {
+            enabled: soundManager.enabled,
+            hasUserInteracted: soundManager.hasUserInteracted,
+            availableSounds: Object.keys(soundManager.sounds)
+          });
+          
+          // If sound is disabled, enable it first
+          if (!soundManager.enabled) {
+            console.log('Sound is disabled, enabling...');
+            soundManager.enabled = true;
+            soundManager.hasUserInteracted = true;
+            soundManager.updateToggleUI();
+          }
+          
+          console.log('Playing toggle-on sound through SoundManager...');
+          soundManager.play('toggle-on');
+        }
+        
+        // Test direct audio element access
+        const toggleOnSound = document.getElementById('toggle-on-sound');
+        if (toggleOnSound) {
+          console.log('Direct audio element state:', {
+            readyState: toggleOnSound.readyState,
+            error: toggleOnSound.error,
+            src: toggleOnSound.src || toggleOnSound.currentSrc
+          });
+          
+          console.log('Attempting to play directly...');
+          toggleOnSound.currentTime = 0;
+          toggleOnSound.volume = 0.5;
+          toggleOnSound.play().then(() => {
+            console.log('Direct play successful!');
+          }).catch(e => {
+            console.error('Direct play failed:', e);
+          });
+        } else {
+          console.error('toggle-on-sound element not found!');
+        }
+      });
+      
       // Simple sound player function (kept for backward compatibility)
       function playSound(soundId) {
-        // Convert old sound IDs to new format if needed
-        const soundName = soundId.endsWith('-sound') ? soundId.replace('-sound', '') : soundId;
-        soundManager.play(soundName);
+        try {
+          // Convert old sound IDs to new format if needed
+          const soundName = soundId.endsWith('-sound') ? soundId.replace('-sound', '') : soundId;
+          soundManager.play(soundName);
+        } catch (error) {
+          console.error('Error in playSound:', error);
+        }
       }
       
       // Toggle sound using the sound manager
-      function toggleSound() {
+      function toggleSound(event) {
+        if (event) event.preventDefault();
         soundManager.toggle();
       }
       
-      // Initialize sound toggle state from localStorage
-      if (localStorage.getItem('soundEnabled') !== null) {
-        soundEnabled = localStorage.getItem('soundEnabled') === 'true';
-        // Update button appearance based on saved preference
-        const soundIcon = soundToggle.querySelector('img');
-        soundIcon.src = soundEnabled ? 'images/speaker-on.png' : 'images/speaker-off.png';
-        soundIcon.alt = soundEnabled ? 'Sound On' : 'Sound Off';
-      }
-      
       // Add click event listener to sound toggle button
-      soundToggle.addEventListener('click', toggleSound);
+      document.addEventListener('DOMContentLoaded', function() {
+        const soundToggle = document.getElementById('sound-toggle');
+        if (soundToggle) {
+          soundToggle.addEventListener('click', function(event) {
+            soundManager.toggle(event);
+          });
+          console.log('Sound toggle event listener added');
+        } else {
+          console.warn('Sound toggle button not found during initialization');
+        }
+        
+        // Also add event listener for mobile sound toggle
+        const soundToggleMobile = document.getElementById('sound-toggle-mobile');
+        if (soundToggleMobile) {
+          soundToggleMobile.addEventListener('click', function(event) {
+            soundManager.toggle(event);
+          });
+          console.log('Mobile sound toggle event listener added');
+        }
+      });
 
     // Add event listener for admin tools toggle with secret activation pattern
     let clickCount = 0;
@@ -3089,7 +3737,7 @@
                 showHighScoreModal(score, category);
               } else {
                 // Play game over sound if not a high score
-                playSound(gameOverSound);
+                soundManager.play('game-over');
               }
             });
             
@@ -4031,21 +4679,17 @@
             // Start the game round - the timer will be started after the image loads
             setupNewRound();
             
-            // Play new round sound
-            playSound(startGameSound);
+            // Play new round sound using the sound manager
+            soundManager.play('start-game');
           });
         }
         
         // Add event listener for the sound toggle button
         const soundToggleBtn = document.getElementById('sound-toggle');
         if (soundToggleBtn) {
-          soundToggleBtn.addEventListener('click', function() {
-            soundEnabled = !soundEnabled;
-            localStorage.setItem('acnh_sound_enabled', soundEnabled);
-            
-            // Update button text
-            soundToggleBtn.innerHTML = soundEnabled ? '🔊 Sound: ON' : '🔇 Sound: OFF';
-            
+          soundToggleBtn.addEventListener('click', function(e) {
+            e.preventDefault();
+            soundManager.toggle();
             // Add a small animation effect on click
             soundToggleBtn.style.transform = 'scale(0.9)';
             setTimeout(() => {
@@ -4139,8 +4783,8 @@
           // Show the submit button
           submitButton.style.display = 'inline-block';
           
-          // Play new round sound
-          playSound(startGameSound);
+          // Play new round sound using sound manager
+          soundManager.play('start-game');
           
           // Use our improved resetGame function to properly reset everything
           await resetGame();
@@ -4222,8 +4866,8 @@
             feedbackElement.textContent = '';
             feedbackElement.className = '';
             
-            // Play new round sound
-            playSound(startGameSound);
+            // Play new round sound using the sound manager
+            soundManager.play('start-game');
             
             // Start the timer after a short delay to ensure UI is ready
             setTimeout(() => {

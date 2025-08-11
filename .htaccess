@@ -1,0 +1,29 @@
+# Audio file caching for optimal web performance
+# Cache audio files for 1 year (31536000 seconds)
+<IfModule mod_expires.c>
+    ExpiresActive On
+    ExpiresByType audio/ogg "access plus 1 year"
+    ExpiresByType audio/wav "access plus 1 year"
+    ExpiresByType audio/mpeg "access plus 1 year"
+</IfModule>
+
+# Set cache headers for audio files
+<IfModule mod_headers.c>
+    <FilesMatch "\.(ogg|wav|mp3)$">
+        Header set Cache-Control "public, max-age=31536000, immutable"
+        Header set Vary "Accept-Encoding"
+    </FilesMatch>
+</IfModule>
+
+# Enable compression for uncompressed audio files
+<IfModule mod_deflate.c>
+    <FilesMatch "\.(wav)$">
+        SetOutputFilter DEFLATE
+    </FilesMatch>
+</IfModule>
+
+# Security headers for audio files
+<FilesMatch "\.(ogg|wav|mp3)$">
+    Header always set X-Content-Type-Options nosniff
+    Header always set Referrer-Policy "strict-origin-when-cross-origin"
+</FilesMatch>

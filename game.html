@@ -1240,7 +1240,22 @@
       
       // Function to check if the server is available
       async function checkServerAvailable() {
-        const API_URL = 'http://localhost:8000';
+        const API_URL = (() => {
+          const hostname = window.location.hostname;
+          
+          // Production environment (blathers.app) - use relative path
+          if (hostname === 'blathers.app' || hostname.includes('blathers')) {
+            return '/api/v1'; // Relative path for same-domain deployment
+          }
+          
+          // Local development
+          if (hostname === 'localhost' || hostname === '127.0.0.1') {
+            return 'http://localhost:8000/api/v1';
+          }
+          
+          // Default fallback
+          return 'http://localhost:8000/api/v1';
+        })();
         try {
           console.log('Checking server availability at:', API_URL);
           const controller = new AbortController();

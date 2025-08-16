@@ -227,8 +227,23 @@
     </main>
 
     <script>
-      // API URL - change this to match your server
-      const API_URL = 'http://localhost:8000';
+      // API URL - automatically detect environment
+      const API_URL = (() => {
+        const hostname = window.location.hostname;
+        
+        // Production environment (blathers.app) - use relative path
+        if (hostname === 'blathers.app' || hostname.includes('blathers')) {
+          return '/api/v1'; // Relative path for same-domain deployment
+        }
+        
+        // Local development
+        if (hostname === 'localhost' || hostname === '127.0.0.1') {
+          return 'http://localhost:8000/api/v1';
+        }
+        
+        // Default fallback
+        return 'http://localhost:8000/api/v1';
+      })();
       
       // Check if we're running in standalone mode (file:// protocol)
       function isStandaloneMode() {

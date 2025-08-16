@@ -1,14 +1,30 @@
-# Audio file caching for optimal web performance
-# Cache audio files for 1 year (31536000 seconds)
+# Font and Audio file caching for optimal web performance
+# Cache fonts and audio files for 1 year (31536000 seconds)
 <IfModule mod_expires.c>
     ExpiresActive On
+    # Font files
+    ExpiresByType font/otf "access plus 1 year"
+    ExpiresByType font/ttf "access plus 1 year"
+    ExpiresByType font/woff "access plus 1 year"
+    ExpiresByType font/woff2 "access plus 1 year"
+    ExpiresByType application/font-otf "access plus 1 year"
+    ExpiresByType application/font-ttf "access plus 1 year"
+    # Audio files
     ExpiresByType audio/ogg "access plus 1 year"
     ExpiresByType audio/wav "access plus 1 year"
     ExpiresByType audio/mpeg "access plus 1 year"
 </IfModule>
 
-# Set cache headers for audio files
+# Set cache headers for fonts and audio files
 <IfModule mod_headers.c>
+    # Font files - aggressive caching
+    <FilesMatch "\.(otf|ttf|woff|woff2)$">
+        Header set Cache-Control "public, max-age=31536000, immutable"
+        Header set Vary "Accept-Encoding"
+        Header always set Access-Control-Allow-Origin "*"
+        Header always set Access-Control-Allow-Methods "GET, HEAD, OPTIONS"
+    </FilesMatch>
+    # Audio files
     <FilesMatch "\.(ogg|wav|mp3)$">
         Header set Cache-Control "public, max-age=31536000, immutable"
         Header set Vary "Accept-Encoding"

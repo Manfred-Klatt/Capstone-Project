@@ -2952,7 +2952,7 @@
           const controller = new AbortController();
           const timeoutId = setTimeout(() => controller.abort(), 2000); // 2 second timeout
           
-          const response = await fetch('/api/save-score', {
+          const response = await fetch(`${API_URL}/api/v1/games/end-game`, {
             method: 'POST',
             headers: headers,
             body: JSON.stringify({
@@ -2978,7 +2978,7 @@
           const leaderboardController = new AbortController();
           const leaderboardTimeoutId = setTimeout(() => leaderboardController.abort(), 2000);
           
-          const leaderboardResponse = await fetch(`/api/leaderboard/${category}`, {
+          const leaderboardResponse = await fetch(`${API_URL}/api/v1/games/leaderboard?category=${category}`, {
             signal: leaderboardController.signal
           }).catch(error => {
             window.apiUnavailable = true;

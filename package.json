@@ -4,6 +4,10 @@
   "description": "Animal Crossing New Horizons Guessing Game with Enhanced Security",
   "main": "src/app.js",
   "type": "commonjs",
+  "engines": {
+    "node": ">=16.0.0",
+    "npm": ">=8.0.0"
+  },
   "scripts": {
     "start": "node src/app.js",
     "dev:client": "vite --host",

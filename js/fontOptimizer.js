@@ -6,7 +6,7 @@
     
     // Configuration
     const FONT_TIMEOUT = 2000; // 2 seconds max wait time
-    const FONT_NAME = 'ACfont';
+    const FONT_NAME = 'customfont';
     const FONT_URL = '/fonts/customfont.woff2';
     
     let fontLoadAttempted = false;

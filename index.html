@@ -308,8 +308,8 @@
           return 'http://localhost:8000/api/v1';
         }
         
-        // Default fallback
-        return 'http://localhost:8000/api/v1';
+        // Production backend on Railway
+        return 'https://capstone-project-production-3cce.up.railway.app/api/v1';
       })();
       
       // Check if we're running in standalone mode (file:// protocol)

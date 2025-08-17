@@ -328,7 +328,7 @@
           
           // Try direct health check first
           try {
-            const response = await fetch(`${API_URL}/api/v1/health`, {
+            const response = await fetch(`${API_URL}/health`, {
               method: 'GET',
               signal: controller.signal,
               mode: 'cors',

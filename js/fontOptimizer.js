@@ -1,4 +1,4 @@
-// Ultra-fast font loading optimization for ACfont.otf
+// Ultra-fast font loading optimization for customfont.otf
 // Addresses 3.7MB font file performance issue
 
 (function() {
@@ -7,7 +7,7 @@
     // Configuration
     const FONT_TIMEOUT = 2000; // 2 seconds max wait time
     const FONT_NAME = 'ACfont';
-    const FONT_URL = '/fonts/ACfont.woff2?v=2';
+    const FONT_URL = '/fonts/customfont.woff2';
     
     let fontLoadAttempted = false;
     let fontLoaded = false;

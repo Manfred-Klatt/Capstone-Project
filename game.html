@@ -42,37 +42,31 @@
         /* WOFF2 loads first (smallest), OTF as fallback */
       }
       
-      /* Optimized font loading strategy */
-      html.font-loading body {
-        /* Show content immediately with fallback font */
-        font-family: 'Quicksand', Arial, sans-serif;
+      /* Custom font as primary font for all elements */
+      * {
+        font-family: 'ACfont', 'Quicksand', Arial, sans-serif;
       }
       
-      /* Fallback font - always visible */
-      html.font-fallback * {
-        font-family: 'Quicksand', Arial, sans-serif;
+      /* Ensure custom font is used for all major UI elements */
+      h1, h2, h3, h4, h5, h6,
+      .title, .subtitle,
+      button, .button,
+      input, textarea, select,
+      .content, .text,
+      p, span, div,
+      label, .label,
+      #feedback, #score, #timer,
+      .modal-content {
+        font-family: 'ACfont', 'Quicksand', Arial, sans-serif;
       }
       
-      /* Custom font loaded - progressive enhancement */
+      /* Fallback classes for compatibility (if needed) */
       html.font-loaded * {
         font-family: 'ACfont', 'Quicksand', Arial, sans-serif;
-        /* Smooth transition when font loads */
-        transition: font-family 0.3s ease;
       }
       
-      /* Apply custom font to most elements for better visual consistency */
-      html.font-loaded h1, 
-      html.font-loaded h2, 
-      html.font-loaded h3,
-      html.font-loaded .title,
-      html.font-loaded button,
-      html.font-loaded select,
-      html.font-loaded label,
-      html.font-loaded #feedback,
-      html.font-loaded #score,
-      html.font-loaded #timer,
-      html.font-loaded .modal-content {
-        font-family: 'ACfont', 'Quicksand', Arial, sans-serif;
+      html.font-fallback * {
+        font-family: 'Quicksand', Arial, sans-serif;
       }
       
       /* Keep input fields and body text with web-safe fonts for readability */

@@ -16,47 +16,35 @@
     document.documentElement.classList.remove('font-loading');
     document.documentElement.classList.add('font-fallback');
     
-    // Performance optimization: Only load font on user interaction
-    function loadFontOnInteraction() {
+    // Load font immediately when page loads
+    function loadFontImmediately() {
         if (fontLoadAttempted) return;
         fontLoadAttempted = true;
         
-        console.log('Loading custom font on user interaction...');
+        console.log('Loading custom font immediately...');
         
-        // Use modern font loading API if available
-        if ('fonts' in document) {
-            // Try WOFF2 first (fastest), then fallback to OTF
-            const fontFace = new FontFace(FONT_NAME, `url(${FONT_URL}), url(/fonts/ACfont.otf)`, {
-                display: 'swap',
-                weight: 'normal',
-                style: 'normal'
-            });
+        // Use FontFaceObserver for better compatibility
+        if (typeof FontFaceObserver !== 'undefined') {
+            const font = new FontFaceObserver(FONT_NAME);
             
-            // Set a timeout to prevent blocking
-            const timeoutId = setTimeout(() => {
-                console.log('Font loading timeout - continuing with system fonts');
-            }, FONT_TIMEOUT);
-            
-            fontFace.load()
-                .then(loadedFont => {
-                    clearTimeout(timeoutId);
-                    if (!fontLoaded) {
-                        document.fonts.add(loadedFont);
-                        fontLoaded = true;
-                        
-                        // Apply font only to headers for performance
-                        document.documentElement.classList.remove('font-fallback');
-                        document.documentElement.classList.add('font-loaded');
-                        console.log('Custom font loaded and applied to UI elements');
-                    }
+            font.load(null, FONT_TIMEOUT)
+                .then(() => {
+                    fontLoaded = true;
+                    document.documentElement.classList.remove('font-fallback');
+                    document.documentElement.classList.add('font-loaded');
+                    console.log('Custom font loaded and applied to UI elements');
                 })
-                .catch(error => {
-                    clearTimeout(timeoutId);
-                    console.log('Custom font failed to load, using system fonts:', error.message);
+                .catch(() => {
+                    console.log('Custom font failed to load, using fallback fonts');
                 });
         } else {
-            // Fallback for older browsers
-            console.log('FontFace API not supported, using system fonts');
+            // Simple fallback - just mark as loaded since CSS @font-face will handle it
+            setTimeout(() => {
+                fontLoaded = true;
+                document.documentElement.classList.remove('font-fallback');
+                document.documentElement.classList.add('font-loaded');
+                console.log('Custom font applied via CSS @font-face');
+            }, 100);
         }
     }
     
@@ -85,29 +73,8 @@
             return;
         }
         
-        // Load font on first user interaction (click, touch, scroll)
-        const interactionEvents = ['click', 'touchstart', 'scroll', 'keydown'];
-        
-        function handleInteraction() {
-            loadFontOnInteraction();
-            // Remove event listeners after first interaction
-            interactionEvents.forEach(event => {
-                document.removeEventListener(event, handleInteraction, { passive: true });
-            });
-        }
-        
-        // Add event listeners for user interaction
-        interactionEvents.forEach(event => {
-            document.addEventListener(event, handleInteraction, { passive: true });
-        });
-        
-        // Fallback: Load font after 3 seconds if no interaction
-        setTimeout(() => {
-            if (!fontLoadAttempted) {
-                console.log('Loading font after timeout (no user interaction)');
-                loadFontOnInteraction();
-            }
-        }, 3000);
+        // Load font immediately when page loads
+        loadFontImmediately();
     }
     
     // Start when DOM is ready
@@ -120,7 +87,7 @@
     // Expose font loading status for debugging
     window.FontOptimizer = {
         isLoaded: () => fontLoaded,
-        forceLoad: loadFontOnInteraction,
+        forceLoad: loadFontImmediately,
         status: () => ({
             attempted: fontLoadAttempted,
             loaded: fontLoaded,

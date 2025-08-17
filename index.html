@@ -8,8 +8,7 @@
       href="https://fonts.googleapis.com/css2?family=Quicksand:wght@400;600&display=swap"
       rel="stylesheet"
     />
-    <!-- Preload critical font with low priority to avoid blocking -->
-    <link rel="preload" href="fonts/ACfont.woff2" as="font" type="font/woff2" crossorigin="anonymous">
+    <!-- Font will be loaded via JavaScript for better control -->
     <!-- Background image loads progressively via JavaScript -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/fontfaceobserver/2.3.0/fontfaceobserver.standalone.js"></script>
     <script src="/js/fontOptimizer.js"></script>
@@ -35,36 +34,38 @@
         box-sizing: border-box;
       }
 
-      /* Optimized font loading strategy */
-      html.font-loading body {
-        /* Show content immediately with fallback font */
-        font-family: 'Quicksand', Arial, sans-serif;
+      /* @font-face declaration for ACfont */
+      @font-face {
+        font-family: 'ACfont';
+        src: url('/fonts/ACfont.woff2') format('woff2'),
+             url('/fonts/ACfont.otf') format('opentype');
+        font-display: swap;
+        font-weight: normal;
+        font-style: normal;
       }
       
-      /* Fallback font - always visible */
-      html.font-fallback * {
-        font-family: 'Quicksand', Arial, sans-serif;
+      /* Custom font as primary font for all elements */
+      * {
+        font-family: 'ACfont', 'Quicksand', Arial, sans-serif;
       }
       
-      /* Custom font loaded - progressive enhancement */
+      /* Ensure custom font is used for all major UI elements */
+      h1, h2, h3, h4, h5, h6,
+      .title, .subtitle,
+      button, .button,
+      input, textarea, select,
+      .content, .text,
+      p, span, div,
+      label, .label {
+        font-family: 'ACfont', 'Quicksand', Arial, sans-serif;
+      }
+      
+      /* Fallback classes for compatibility (if needed) */
       html.font-loaded * {
         font-family: 'ACfont', 'Quicksand', Arial, sans-serif;
-        /* Smooth transition when font loads */
-        transition: font-family 0.3s ease;
       }
       
-      /* Critical performance: limit font usage to headers only */
-      html.font-loaded h1, 
-      html.font-loaded h2, 
-      html.font-loaded .title {
-        font-family: 'ACfont', 'Quicksand', Arial, sans-serif;
-      }
-      
-      /* Keep body text with web-safe fonts for performance */
-      html.font-loaded p,
-      html.font-loaded button,
-      html.font-loaded input,
-      html.font-loaded .content {
+      html.font-fallback * {
         font-family: 'Quicksand', Arial, sans-serif;
       }
 

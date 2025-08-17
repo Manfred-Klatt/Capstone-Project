@@ -47,7 +47,7 @@
                         // Apply font only to headers for performance
                         document.documentElement.classList.remove('font-fallback');
                         document.documentElement.classList.add('font-loaded');
-                        console.log('Custom font loaded and applied to headers only');
+                        console.log('Custom font loaded and applied to UI elements');
                     }
                 })
                 .catch(error => {

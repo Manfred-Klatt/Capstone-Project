@@ -61,18 +61,25 @@
         transition: font-family 0.3s ease;
       }
       
-      /* Critical performance: limit font usage to headers only */
+      /* Apply custom font to most elements for better visual consistency */
       html.font-loaded h1, 
       html.font-loaded h2, 
-      html.font-loaded .title {
+      html.font-loaded h3,
+      html.font-loaded .title,
+      html.font-loaded button,
+      html.font-loaded select,
+      html.font-loaded label,
+      html.font-loaded #feedback,
+      html.font-loaded #score,
+      html.font-loaded #timer,
+      html.font-loaded .modal-content {
         font-family: 'ACfont', 'Quicksand', Arial, sans-serif;
       }
       
-      /* Keep body text with web-safe fonts for performance */
-      html.font-loaded p,
-      html.font-loaded button,
-      html.font-loaded input,
-      html.font-loaded .content {
+      /* Keep input fields and body text with web-safe fonts for readability */
+      html.font-loaded input[type="text"],
+      html.font-loaded textarea,
+      html.font-loaded p {
         font-family: 'Quicksand', Arial, sans-serif;
       }
 

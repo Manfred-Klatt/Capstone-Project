@@ -6,7 +6,7 @@ const mongoose = require('mongoose');
 
 const app = express();
 const PORT = process.env.PORT || 8000;
-const JWT_SECRET = process.env.JWT_SECRET || 'your_jwt_secret_key_here';
+const JWT_SECRET = process.env.JWT_SECRET || (() => { throw new Error('JWT_SECRET environment variable is required for security') })();
 const MONGODB_URI = 'mongodb+srv://manfredjklatt:ZLjT2en0MjBgjnkF@cluster0.vswiduv.mongodb.net/acnh-quiz?retryWrites=true&w=majority&appName=Cluster0';
 
 // User Schema

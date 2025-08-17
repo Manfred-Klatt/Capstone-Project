@@ -19,7 +19,7 @@ const config = {
 
   // JWT
   jwt: {
-    secret: process.env.JWT_SECRET || 'your_jwt_secret_key',
+    secret: process.env.JWT_SECRET || (() => { throw new Error('JWT_SECRET environment variable is required for security') })(),
     expiresIn: process.env.JWT_EXPIRES_IN || '90d',
     cookieExpiresIn: process.env.JWT_COOKIE_EXPIRES_IN || 90,
   },

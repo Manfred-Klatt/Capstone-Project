@@ -13,6 +13,7 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/fontfaceobserver/2.3.0/fontfaceobserver.standalone.js"></script>
     <script src="/js/fontOptimizer.js"></script>
     <script src="/js/backgroundLoader.js"></script>
+    <script src="/js/secureTokenManager.js"></script>
     <style>
       * {
         box-sizing: border-box;
@@ -392,10 +393,9 @@
         document.getElementById('signupError').textContent = '';
       }
       
-      // Function to save auth token to localStorage
+      // Function to save auth token securely
       function saveAuthToken(token, username) {
-        localStorage.setItem('acnh_auth_token', token);
-        localStorage.setItem('acnh_username', username);
+        window.secureTokenManager.storeToken(token, username);
       }
       
       // Event listener for guest play button
@@ -403,8 +403,7 @@
         .getElementById("playAsGuest")
         .addEventListener("click", async function () {
           // Clear any existing auth data
-          localStorage.removeItem('acnh_auth_token');
-          localStorage.removeItem('acnh_username');
+          window.secureTokenManager.clearToken();
           localStorage.setItem('acnh_guest', 'true');
           
           // If we're already in standalone mode, prompt the user

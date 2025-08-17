@@ -25,7 +25,7 @@ function apiRequest(endpoint, method, data) {
         };
         
         // Add authorization header if token exists
-        const token = localStorage.getItem('acnh_token');
+        const token = window.secureTokenManager ? window.secureTokenManager.getToken() : localStorage.getItem('acnh_token');
         if (token) {
             options.headers['Authorization'] = `Bearer ${token}`;
         }
@@ -58,7 +58,11 @@ function apiRequest(endpoint, method, data) {
                 // Handle authentication errors
                 if (response.status === 401 || response.status === 403) {
                     // Clear token and redirect to login if unauthorized
-                    localStorage.removeItem('acnh_token');
+                    if (window.secureTokenManager) {
+                        window.secureTokenManager.clearToken();
+                    } else {
+                        localStorage.removeItem('acnh_token');
+                    }
                     if (!window.location.pathname.includes('index.html')) {
                         window.location.href = 'index.html?session_expired=true';
                         throw new Error('Your session has expired. Please log in again.');
@@ -144,7 +148,7 @@ function isHighScore(category, score) {
         }
         
         // Check with server
-        const token = localStorage.getItem('acnh_token');
+        const token = window.secureTokenManager ? window.secureTokenManager.getToken() : localStorage.getItem('acnh_token');
         if (!token) {
             // Not logged in, check against local storage
             const categoryKey = `acnh_high_score_${category}`;
@@ -185,7 +189,7 @@ function submitHighScore(category, score) {
         }
         
         // Check if user is logged in
-        const token = localStorage.getItem('acnh_token');
+        const token = window.secureTokenManager ? window.secureTokenManager.getToken() : localStorage.getItem('acnh_token');
         if (!token) {
             // Not logged in, save to local storage
             saveLocalHighScore(category, score);

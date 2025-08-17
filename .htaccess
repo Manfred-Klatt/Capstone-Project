@@ -23,19 +23,24 @@
 
 # Set cache headers for fonts and audio files
 <IfModule mod_headers.c>
-    # Font files - aggressive caching
-    <FilesMatch "\.(otf|ttf|woff|woff2)$">
+    # Font caching with aggressive 1-year cache and CORS headers
+    <FilesMatch "\.(woff2|woff|otf|ttf|eot)$">
         Header set Cache-Control "public, max-age=31536000, immutable"
-        Header set Vary "Accept-Encoding"
-        Header always set Access-Control-Allow-Origin "*"
-        Header always set Access-Control-Allow-Methods "GET, HEAD, OPTIONS"
+        Header set Access-Control-Allow-Origin "*"
+        Header set Access-Control-Allow-Methods "GET"
+        Header set Access-Control-Allow-Headers "Content-Type"
     </FilesMatch>
-    # Image files - aggressive caching
-    <FilesMatch "\.(jpg|jpeg|png|webp|avif)$">
+
+    # Image caching with aggressive 1-year cache (including WebP)
+    <FilesMatch "\.(jpg|jpeg|png|gif|svg|ico|webp|avif)$">
         Header set Cache-Control "public, max-age=31536000, immutable"
-        Header set Vary "Accept-Encoding"
-        Header always set Access-Control-Allow-Origin "*"
     </FilesMatch>
+
+    # WebP image serving with proper MIME type
+    <FilesMatch "\.webp$">
+        Header set Content-Type "image/webp"
+    </FilesMatch>
+
     # Audio files
     <FilesMatch "\.(ogg|wav|mp3)$">
         Header set Cache-Control "public, max-age=31536000, immutable"

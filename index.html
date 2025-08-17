@@ -68,6 +68,11 @@
         font-family: 'Quicksand', Arial, sans-serif;
       }
 
+      /* CSS custom properties for dynamic background image selection */
+      :root {
+        --background-image: url('images/background.jpg'); /* Default fallback */
+      }
+      
       body {
         margin: 0;
         padding: 20px;
@@ -92,22 +97,22 @@
       }
       
       body.bg-loaded {
-        background-image: url("images/background.jpg");
+        background-image: var(--background-image);
       }
       
       /* Responsive background images for better performance */
       @media (max-width: 768px) {
         body.bg-loaded {
-          /* Use smaller image for mobile if available */
-          background-image: url("images/background.jpg");
+          /* Dynamic image selection handled by JavaScript */
+          background-image: var(--background-image);
           background-size: cover;
         }
       }
       
       @media (min-width: 769px) and (max-width: 1200px) {
         body.bg-loaded {
-          /* Use medium image for tablet if available */
-          background-image: url("images/background.jpg");
+          /* Dynamic image selection handled by JavaScript */
+          background-image: var(--background-image);
         }
       }
       

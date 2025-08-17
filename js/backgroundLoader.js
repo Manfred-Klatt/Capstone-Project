@@ -6,7 +6,10 @@
     
     // Configuration
     const BACKGROUND_TIMEOUT = 3000; // 3 seconds max wait time
-    const BACKGROUND_URL = 'images/background.jpg';
+    const BACKGROUND_WEBP = 'images/background.webp';
+    const BACKGROUND_JPG = 'images/background.jpg';
+    
+    let webpSupported = false;
     
     let backgroundLoaded = false;
     
@@ -17,8 +20,22 @@
         }
     }
     
-    // Function to load background image progressively
+    // Function to detect WebP support
+    function detectWebPSupport() {
+        return new Promise((resolve) => {
+            const webp = new Image();
+            webp.onload = webp.onerror = function () {
+                webpSupported = (webp.height === 2);
+                resolve(webpSupported);
+            };
+            webp.src = 'data:image/webp;base64,UklGRjoAAABXRUJQVlA4IC4AAACyAgCdASoCAAIALmk0mk0iIiIiIgBoSygABc6WWgAA/veff/0PP8bA//LwYAAA';
+        });
+    }
+    
+    // Function to load background image progressively with WebP/JPG fallback
     function loadBackgroundImage() {
+        const backgroundUrl = webpSupported ? BACKGROUND_WEBP : BACKGROUND_JPG;
+        
         // Create a new image to preload
         const img = new Image();
         
@@ -33,29 +50,42 @@
             if (!backgroundLoaded && document.body) {
                 backgroundLoaded = true;
                 
+                // Update CSS custom property with the loaded image
+                document.documentElement.style.setProperty('--background-image', `url('${backgroundUrl}')`);
+                
                 // Smooth transition to background image
                 document.body.classList.remove('bg-loading');
                 document.body.classList.add('bg-loaded');
-                console.log('Background image loaded successfully');
+                console.log(`Background image loaded successfully: ${backgroundUrl}`);
             }
         };
         
         img.onerror = function() {
             clearTimeout(timeoutId);
-            console.log('Background image failed to load, keeping gradient');
-            // Keep the gradient background as fallback
+            // If WebP fails, try JPG fallback
+            if (webpSupported && backgroundUrl === BACKGROUND_WEBP) {
+                console.log('WebP failed, trying JPG fallback');
+                webpSupported = false;
+                loadBackgroundImage(); // Retry with JPG
+            } else {
+                console.log('Background image failed to load, keeping gradient');
+                // Keep the gradient background as fallback
+            }
         };
         
         // Start loading the image
-        img.src = BACKGROUND_URL;
+        img.src = backgroundUrl;
     }
     
-    // Function to check if image is already cached
+    // Function to check if background is already cached
     function checkCachedBackground() {
+        const backgroundUrl = webpSupported ? BACKGROUND_WEBP : BACKGROUND_JPG;
         const img = new Image();
+        
         img.onload = function() {
             if (img.complete && img.naturalWidth > 0 && document.body) {
                 backgroundLoaded = true;
+                document.documentElement.style.setProperty('--background-image', `url('${backgroundUrl}')`);
                 document.body.classList.remove('bg-loading');
                 document.body.classList.add('bg-loaded');
                 console.log('Background image found in cache');
@@ -63,7 +93,11 @@
             }
             return false;
         };
-        img.src = BACKGROUND_URL;
+        
+        img.src = backgroundUrl;
+        
+        // If image loads immediately (cached), the onload will fire
+        return img.complete && img.naturalWidth > 0;
     }
     
     // Initialize background loading strategy
@@ -119,8 +153,6 @@
     
     // Initialize when DOM is ready
     function init() {
-        detectImageSupport();
-        
         if (document.readyState === 'loading') {
             document.addEventListener('DOMContentLoaded', function() {
                 initLoadingState();

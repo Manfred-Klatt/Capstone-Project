@@ -62,3 +62,12 @@ __tests__/
 optimize-*.js
 analyze-*.js
 benchmark-*.js
+
+# Documentation and guide files
+*-guide.md
+*-instructions.md
+*-readme.md
+GUIDE.md
+INSTRUCTIONS.md
+convert-*.md
+setup-*.md

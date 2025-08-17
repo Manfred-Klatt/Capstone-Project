@@ -45,9 +45,6 @@ Thumbs.db
 
 # Development and optimization scripts
 scripts/
-test-server.js
-server-working.js
-server-mongodb.js
 
 # Test files and temporary files
 *.test.js
@@ -71,5 +68,6 @@ GUIDE.md
 INSTRUCTIONS.md
 convert-*.md
 setup-*.md
-*.md
 font-test.html
+DEPLOY.md
+RAILWAY-DEPLOY.md

@@ -42,3 +42,23 @@ npm-debug.log*
 # Local development
 .DS_Store
 Thumbs.db
+
+# Development and optimization scripts
+scripts/
+test-server.js
+server-working.js
+server-mongodb.js
+
+# Test files and temporary files
+*.test.js
+*.spec.js
+test/
+tests/
+__tests__/
+*.tmp
+*.temp
+
+# Optimization and analysis files
+optimize-*.js
+analyze-*.js
+benchmark-*.js

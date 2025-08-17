@@ -10,8 +10,10 @@
     />
     <!-- Preload critical font with low priority to avoid blocking -->
     <link rel="preload" href="fonts/ACfont.woff2" as="font" type="font/woff2" crossorigin="anonymous">
+    <!-- Background image loads progressively via JavaScript -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/fontfaceobserver/2.3.0/fontfaceobserver.standalone.js"></script>
     <script src="/js/fontOptimizer.js"></script>
+    <script src="/js/backgroundLoader.js"></script>
     <style>
       * {
         box-sizing: border-box;
@@ -71,13 +73,49 @@
         padding: 20px;
         background-color: #f0f8ff;
         color: #5a3d2b;
-        background-image: url("images/background.jpg");
+        /* Optimized background loading strategy */
         background-size: cover;
         background-position: center;
+        background-repeat: no-repeat;
+        background-attachment: scroll; /* Better performance than fixed */
         display: flex;
         justify-content: center;
         align-items: center;
         min-height: 100vh;
+        /* Smooth transition when background loads */
+        transition: background-image 0.3s ease;
+      }
+      
+      /* Progressive background loading */
+      body.bg-loading {
+        background-image: linear-gradient(135deg, #f0f8ff 0%, #e6f3ff 50%, #ddeeff 100%);
+      }
+      
+      body.bg-loaded {
+        background-image: url("images/background.jpg");
+      }
+      
+      /* Responsive background images for better performance */
+      @media (max-width: 768px) {
+        body.bg-loaded {
+          /* Use smaller image for mobile if available */
+          background-image: url("images/background.jpg");
+          background-size: cover;
+        }
+      }
+      
+      @media (min-width: 769px) and (max-width: 1200px) {
+        body.bg-loaded {
+          /* Use medium image for tablet if available */
+          background-image: url("images/background.jpg");
+        }
+      }
+      
+      @media (min-width: 1201px) {
+        body.bg-loaded {
+          /* Use full size for desktop */
+          background-image: url("images/background.jpg");
+        }
       }
 
       .container {

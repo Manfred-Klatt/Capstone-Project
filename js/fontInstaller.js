@@ -19,7 +19,7 @@
         }
         
         // Define and load the font face
-        const fontFace = new FontFace('ACfont', 'url(/fonts/ACfont.otf)', {
+        const fontFace = new FontFace('ACfont', 'url(./fonts/ACfont.otf)', {
             display: 'swap' // Use font-display: swap for faster rendering
         });
         

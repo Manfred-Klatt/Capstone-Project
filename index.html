@@ -11,18 +11,14 @@
     <!-- Font will be loaded via JavaScript for better control -->
     <!-- Background image loads progressively via JavaScript -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/fontfaceobserver/2.3.0/fontfaceobserver.standalone.js"></script>
-    <script src="/js/fontOptimizer.js"></script>
-    <script src="/js/backgroundLoader.js"></script>
-    <script src="/js/secureTokenManager.js"></script>
+    <script src="./js/fontOptimizer.js"></script>
+    <script src="./js/backgroundLoader.js"></script>
+    <script src="./js/secureTokenManager.js"></script>
     <style>
-      * {
-        box-sizing: border-box;
-      }
-
       @font-face {
         font-family: 'customfont';
-        src: url('fonts/customfont.woff2') format('woff2'),
-             url('fonts/customfont.otf') format('opentype');
+        src: url('./fonts/customfont.woff2') format('woff2'),
+             url('./fonts/customfont.otf') format('opentype');
         font-display: swap;
         font-weight: normal;
         font-style: normal;
@@ -33,20 +29,6 @@
         margin: 0;
         padding: 0;
         box-sizing: border-box;
-      }
-
-      /* @font-face declaration for customfont */
-      @font-face {
-        font-family: 'customfont';
-        src: url('/fonts/customfont.woff2') format('woff2'),
-             url('/fonts/customfont.otf') format('opentype');
-        font-display: swap;
-        font-weight: normal;
-        font-style: normal;
-      }
-      
-      /* Custom font as primary font for all elements */
-      * {
         font-family: 'customfont', 'Quicksand', Arial, sans-serif;
       }
       

@@ -1,9 +1,8 @@
-# Use specific version of Node.js LTS for better security and stability
-FROM node:20.13.1-alpine3.19 AS builder
+# Use latest LTS Node.js Alpine image to address security vulnerabilities
+FROM node:20-alpine AS builder
 
-# Install security updates and build dependencies
-RUN apk --no-cache upgrade && \
-    apk add --no-cache python3 make g++
+# Install build dependencies without upgrade to avoid timeout
+RUN apk add --no-cache python3 make g++
 
 WORKDIR /app
 
@@ -17,10 +16,9 @@ RUN npm ci --no-audit --prefer-offline
 COPY . .
 
 # Production stage
-FROM node:20.13.1-alpine3.19
+FROM node:20-alpine
 
-# Install security updates
-RUN apk --no-cache upgrade
+# Skip upgrade to avoid timeout issues during deployment
 
 WORKDIR /app
 

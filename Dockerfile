@@ -1,24 +1,5 @@
-# Use latest LTS Node.js Alpine image to address security vulnerabilities
-FROM node:20-alpine AS builder
-
-# Install build dependencies without upgrade to avoid timeout
-RUN apk add --no-cache python3 make g++
-
-WORKDIR /app
-
-# Copy package files first for better layer caching
-COPY package*.json ./
-
-# Install all dependencies including devDependencies
-RUN npm ci --no-audit --prefer-offline
-
-# Copy source code
-COPY . .
-
-# Production stage
+# Simplified single-stage build to avoid timeout issues
 FROM node:20-alpine
-
-# Skip upgrade to avoid timeout issues during deployment
 
 WORKDIR /app
 
@@ -29,16 +10,17 @@ RUN addgroup -S appgroup -g 1001 && \
 # Copy package files first for better layer caching
 COPY package*.json ./
 
-# Install only production dependencies with security audit
-RUN npm ci --only=production --no-audit --prefer-offline && \
-    npm cache clean --force && \
-    rm -rf /tmp/*
+# Install only production dependencies without build tools
+RUN npm ci --only=production --no-audit --no-optional && \
+    npm cache clean --force
 
-# Copy built application from builder
-COPY --from=builder /app .
+# Copy source code
+COPY . .
 
-# Set proper permissions
-RUN chown -R appuser:appgroup /app
+# Install wget for health check and create uploads directory
+RUN apk add --no-cache wget && \
+    mkdir -p /app/uploads && \
+    chown -R appuser:appgroup /app
 
 # Switch to non-root user
 USER appuser
@@ -53,7 +35,7 @@ EXPOSE 3000
 
 # Health check with proper path
 HEALTHCHECK --interval=30s --timeout=5s --start-period=5s --retries=3 \
-  CMD wget --no-verbose --tries=1 --spider http://localhost:3000/health || exit 1
+  CMD wget --no-verbose --tries=1 --spider http://localhost:3000/api/v1/health || exit 1
 
 # Use exec form for better signal handling
-CMD ["node", "--trace-warnings", "server.js"]
+CMD ["node", "src/app.js"]

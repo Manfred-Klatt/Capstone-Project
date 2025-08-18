@@ -2,7 +2,6 @@ const http = require('http');
 const config = require('./config');
 const connectDB = require('./loaders/mongodb');
 const createApp = require('./loaders/express');
-const { setupSocketIO } = require('./loaders/socketio');
 const logger = require('./utils/logger');
 
 // Create Express app
@@ -11,8 +10,6 @@ const app = createApp();
 // Create HTTP server
 const server = http.createServer(app);
 
-// Setup Socket.IO
-setupSocketIO(server);
 
 // Handle unhandled promise rejections
 process.on('unhandledRejection', (reason) => {

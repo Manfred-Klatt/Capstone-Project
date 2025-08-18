@@ -32,9 +32,6 @@ logs
 .DS_Store
 Thumbs.db
 
-# Fly.io
-fly.toml
-fly.toml.toml
 
 # SSL/TLS
 *.pem

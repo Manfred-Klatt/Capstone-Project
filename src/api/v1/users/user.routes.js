@@ -2,7 +2,6 @@ const express = require('express');
 const userController = require('./user.controller');
 const authMiddleware = require('../../../middleware/auth');
 const { catchAsync } = require('../../../utils');
-const { upload } = require('../../../config/multer');
 
 const router = express.Router();
 

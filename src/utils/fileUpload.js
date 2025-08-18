@@ -4,25 +4,41 @@ const fs = require('fs').promises;
 const AppError = require('./appError');
 
 // Configure multer for file uploads
-const storage = multer.memoryStorage();
+const storage = multer.diskStorage({
+  destination: async (req, file, cb) => {
+    const uploadDir = path.join(process.cwd(), 'uploads');
+    try {
+      await fs.mkdir(uploadDir, { recursive: true });
+      cb(null, uploadDir);
+    } catch (error) {
+      cb(error);
+    }
+  },
+  filename: (req, file, cb) => {
+    // Generate unique filename
+    const uniqueSuffix = Date.now() + '-' + Math.round(Math.random() * 1E9);
+    const filename = file.fieldname + '-' + uniqueSuffix + path.extname(file.originalname);
+    cb(null, filename);
+  }
+});
 
 const fileFilter = (req, file, cb) => {
-  // Allow common image formats
-  const allowedTypes = /jpeg|jpg|png|gif|webp/;
+  // Allow common image formats and documents
+  const allowedTypes = /jpeg|jpg|png|gif|webp|pdf|doc|docx|txt/;
   const extname = allowedTypes.test(path.extname(file.originalname).toLowerCase());
-  const mimetype = allowedTypes.test(file.mimetype);
+  const mimetype = /image\/|application\/pdf|application\/msword|application\/vnd\.openxmlformats-officedocument\.wordprocessingml\.document|text\/plain/.test(file.mimetype);
 
   if (mimetype && extname) {
     return cb(null, true);
   } else {
-    cb(new AppError('Only image files are allowed', 400));
+    cb(new AppError('Only image files, PDFs, and documents are allowed', 400));
   }
 };
 
 const upload = multer({
   storage,
   limits: {
-    fileSize: 5 * 1024 * 1024, // 5MB limit
+    fileSize: 10 * 1024 * 1024, // 10MB limit
   },
   fileFilter,
 });
@@ -30,7 +46,7 @@ const upload = multer({
 /**
  * Upload a file to the server
  * @param {Object} file - The file object from multer
- * @param {string} destination - Destination folder
+ * @param {string} destination - Destination folder (optional, defaults to uploads)
  * @returns {Promise<string>} - File path
  */
 const uploadFile = async (file, destination = 'uploads') => {
@@ -39,19 +55,25 @@ const uploadFile = async (file, destination = 'uploads') => {
       throw new AppError('No file provided', 400);
     }
 
-    // Create destination directory if it doesn't exist
-    const uploadDir = path.join(process.cwd(), destination);
-    await fs.mkdir(uploadDir, { recursive: true });
+    // If file is already saved by multer, return the path
+    if (file.path) {
+      return file.path.replace(process.cwd(), '').replace(/\\/g, '/');
+    }
 
-    // Generate unique filename
-    const uniqueSuffix = Date.now() + '-' + Math.round(Math.random() * 1E9);
-    const filename = file.fieldname + '-' + uniqueSuffix + path.extname(file.originalname);
-    const filepath = path.join(uploadDir, filename);
+    // Handle buffer uploads (memory storage)
+    if (file.buffer) {
+      const uploadDir = path.join(process.cwd(), destination);
+      await fs.mkdir(uploadDir, { recursive: true });
 
-    // Write file to disk
-    await fs.writeFile(filepath, file.buffer);
+      const uniqueSuffix = Date.now() + '-' + Math.round(Math.random() * 1E9);
+      const filename = file.fieldname + '-' + uniqueSuffix + path.extname(file.originalname);
+      const filepath = path.join(uploadDir, filename);
 
-    return path.join(destination, filename);
+      await fs.writeFile(filepath, file.buffer);
+      return path.join(destination, filename).replace(/\\/g, '/');
+    }
+
+    throw new AppError('Invalid file object', 400);
   } catch (error) {
     throw new AppError(`File upload failed: ${error.message}`, 500);
   }
@@ -68,7 +90,7 @@ const deleteFile = async (filepath) => {
       return false;
     }
 
-    const fullPath = path.join(process.cwd(), filepath);
+    const fullPath = path.isAbsolute(filepath) ? filepath : path.join(process.cwd(), filepath);
     await fs.unlink(fullPath);
     return true;
   } catch (error) {
@@ -87,9 +109,9 @@ const getFileUrl = (filepath) => {
     return null;
   }
 
-  // For local development, return relative path
-  // In production, you might want to use a CDN or cloud storage URL
-  return `/${filepath.replace(/\\/g, '/')}`;
+  // Normalize path separators and ensure it starts with /
+  const normalizedPath = filepath.replace(/\\/g, '/');
+  return normalizedPath.startsWith('/') ? normalizedPath : `/${normalizedPath}`;
 };
 
 module.exports = {

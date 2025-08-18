@@ -2,6 +2,7 @@ const express = require('express');
 const authRoutes = require('./auth/auth.routes');
 const userRoutes = require('./users/user.routes');
 const gameRoutes = require('./game/game.routes');
+const uploadRoutes = require('./upload/upload.routes');
 
 const router = express.Router();
 
@@ -22,6 +23,7 @@ router.get('/', (req, res) => {
       },
       users: '/api/v1/users',
       games: '/api/v1/games',
+      upload: '/api/v1/upload',
       health: '/api/v1/health'
     },
     documentation: 'https://github.com/yourusername/animal-crossing-quiz#api-documentation'
@@ -41,5 +43,6 @@ router.get('/health', (req, res) => {
 router.use('/auth', authRoutes);
 router.use('/users', userRoutes);
 router.use('/games', gameRoutes);
+router.use('/upload', uploadRoutes);
 
 module.exports = router;

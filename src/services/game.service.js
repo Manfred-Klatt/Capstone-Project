@@ -21,7 +21,7 @@ const generateQuestions = (category, difficulty, count = 10) => {
 // Get game categories
 const getCategories = () => {
   return {
-    categories: ['villagers', 'fish', 'bugs', 'fossils', 'art'],
+    categories: ['villagers', 'fish', 'bugs', 'fossils', 'art', 'mixed'],
     difficulties: ['easy', 'medium', 'hard'],
   };
 };
@@ -113,6 +113,32 @@ const getGameResults = async (gameId) => {
   }
 };
 
+// Create a new game record (for end-game API)
+const createGame = async (gameData) => {
+  try {
+    const game = await Game.create(gameData);
+    
+    // Update user stats if user is logged in
+    if (gameData.user) {
+      await User.findByIdAndUpdate(
+        gameData.user,
+        {
+          $inc: {
+            gamesPlayed: 1,
+            totalPoints: gameData.score,
+          },
+          $max: { highScore: gameData.score },
+        },
+        { new: true, runValidators: true }
+      );
+    }
+    
+    return game;
+  } catch (error) {
+    throw error;
+  }
+};
+
 // Get leaderboard
 const getLeaderboard = async (category, difficulty, limit = 10) => {
   try {
@@ -168,6 +194,7 @@ const gameServiceGenerateQuestions = async (category, difficulty, count = 10) =>
 module.exports = {
   getCategories,
   startGame,
+  createGame,
   submitGame,
   getGameResults,
   getLeaderboard,

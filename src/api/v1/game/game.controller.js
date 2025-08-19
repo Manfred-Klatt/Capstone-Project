@@ -1,5 +1,6 @@
 const gameService = require('../../../services/game.service');
-const { catchAsync } = require('../../../utils');
+const userService = require('../../../services/user.service');
+const { catchAsync, AppError } = require('../../../utils');
 
 // Get game categories
 exports.getCategories = catchAsync(async (req, res, next) => {
@@ -28,6 +29,44 @@ exports.startGame = catchAsync(async (req, res, next) => {
       game,
       questions,
     },
+  });
+});
+
+// End game and submit score (matches frontend API call)
+exports.endGame = catchAsync(async (req, res, next) => {
+  const { score, category, difficulty, timeSpent, answers } = req.body;
+  const userId = req.user ? req.user.id : null;
+
+  // Create game record for leaderboard
+  const gameData = {
+    user: userId,
+    category: category || 'mixed',
+    difficulty: difficulty || 'medium',
+    score: parseInt(score) || 0,
+    timeSpent: parseInt(timeSpent) || 0,
+    totalQuestions: answers ? answers.length : 10,
+    correctAnswers: parseInt(score) || 0,
+    completedAt: new Date(),
+    answers: answers || []
+  };
+
+  const game = await gameService.createGame(gameData);
+  
+  // Get updated leaderboard for this category
+  const leaderboard = await gameService.getLeaderboard(category, difficulty, 10);
+  
+  // Check if this is a high score
+  const isHighScore = leaderboard.length < 10 || 
+    score > leaderboard[leaderboard.length - 1].score;
+
+  res.status(200).json({
+    status: 'success',
+    data: {
+      game,
+      leaderboard,
+      isHighScore,
+      rank: leaderboard.findIndex(entry => entry._id.toString() === game._id.toString()) + 1
+    }
   });
 });
 

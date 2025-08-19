@@ -17,6 +17,9 @@ RUN npm ci --only=production --no-audit --no-optional && \
 # Copy source code
 COPY . .
 
+# Copy production environment file
+COPY .env.production .env
+
 # Install wget for health check and create uploads directory
 RUN apk add --no-cache wget && \
     mkdir -p /app/uploads && \

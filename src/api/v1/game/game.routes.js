@@ -16,6 +16,7 @@ router.use(authMiddleware.protect);
 
 // Game management
 router.post('/start', catchAsync(gameController.startGame));
+router.post('/end-game', catchAsync(gameController.endGame));
 router.post('/:gameId/submit', catchAsync(gameController.submitGame));
 router.get('/:gameId/results', catchAsync(gameController.getGameResults));
 

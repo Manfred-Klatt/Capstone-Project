@@ -5,12 +5,12 @@ const gameSchema = new mongoose.Schema(
     user: {
       type: mongoose.Schema.ObjectId,
       ref: 'User',
-      required: [true, 'Game must belong to a user'],
+      required: false, // Allow guest players
     },
     category: {
       type: String,
       required: [true, 'Please provide a category'],
-      enum: ['villagers', 'fish', 'bugs', 'fossils', 'art'],
+      enum: ['villagers', 'fish', 'bugs', 'fossils', 'art', 'mixed'],
     },
     difficulty: {
       type: String,
@@ -59,7 +59,7 @@ const gameSchema = new mongoose.Schema(
 gameSchema.index({ user: 1, completedAt: -1 });
 gameSchema.index({ category: 1, difficulty: 1, score: -1 });
 
-// Populate user data when querying games
+// Populate user data when querying games (only if user exists)
 gameSchema.pre(/^find/, function (next) {
   this.populate({
     path: 'user',
@@ -92,7 +92,10 @@ gameSchema.statics.getLeaderboard = async function (category, difficulty, limit 
       },
     },
     {
-      $unwind: '$user',
+      $unwind: {
+        path: '$user',
+        preserveNullAndEmptyArrays: true, // Allow games without users (guest players)
+      },
     },
     {
       $project: {

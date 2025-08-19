@@ -23,19 +23,27 @@
         
         console.log('Loading custom font immediately...');
         
-        // Try multiple loading strategies
+        // Try multiple loading strategies with Firefox CORS handling
         Promise.race([
             // Strategy 1: Use FontFaceObserver if available
             new Promise((resolve, reject) => {
                 if (typeof FontFaceObserver !== 'undefined') {
                     const font = new FontFaceObserver(FONT_NAME);
-                    font.load(null, FONT_TIMEOUT).then(resolve).catch(reject);
+                    font.load(null, FONT_TIMEOUT).then(resolve).catch((error) => {
+                        // Firefox CORS error handling
+                        if (error.message && error.message.includes('NetworkError')) {
+                            console.warn('Firefox CORS font loading issue detected, using fallback');
+                            resolve(); // Continue with fallback fonts
+                        } else {
+                            reject(error);
+                        }
+                    });
                 } else {
                     reject(new Error('FontFaceObserver not available'));
                 }
             }),
             
-            // Strategy 2: Use document.fonts API
+            // Strategy 2: Use document.fonts API with Firefox error handling
             new Promise((resolve, reject) => {
                 if (document.fonts && document.fonts.load) {
                     document.fonts.load(`16px ${FONT_NAME}`)
@@ -46,7 +54,15 @@
                                 reject(new Error('Font not available after load'));
                             }
                         })
-                        .catch(reject);
+                        .catch((error) => {
+                            // Handle Firefox CORS errors gracefully
+                            if (error.name === 'NetworkError' || error.message.includes('2152398850')) {
+                                console.warn('Firefox font CORS error detected, continuing with fallback fonts');
+                                resolve(); // Don't fail, just use fallback
+                            } else {
+                                reject(error);
+                            }
+                        });
                 } else {
                     reject(new Error('document.fonts API not available'));
                 }

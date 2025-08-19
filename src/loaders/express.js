@@ -102,8 +102,8 @@ const setupRoutes = (app) => {
 
   // Serve static files in production
   if (process.env.NODE_ENV === 'production') {
-    // Set static folder
-    app.use(express.static(path.join(__dirname, '../../client/build')));
+    // Set static folder - serve from project root where HTML files are located
+    app.use(express.static(path.join(__dirname, '../..')));
 
     // Log static file serving in production
     app.use((req, res, next) => {
@@ -111,10 +111,14 @@ const setupRoutes = (app) => {
       next();
     });
 
-    // Handle SPA
-    app.get('*', (req, res) => {
+    // Handle SPA - serve index.html for non-API routes
+    app.get('*', (req, res, next) => {
+      // Skip API routes
+      if (req.path.startsWith('/api/') || req.path.startsWith('/health')) {
+        return next();
+      }
       logger.debug(`SPA route accessed: ${req.path}`, { requestId: req.id });
-      res.sendFile(path.resolve(__dirname, '../../client/build', 'index.html'));
+      res.sendFile(path.resolve(__dirname, '../..', 'index.html'));
     });
   }
 

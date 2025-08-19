@@ -4,7 +4,7 @@ const { catchAsync } = require('../middleware/error');
 const logger = require('./logger');
 const { validate, validateRequest } = require('./validation');
 const { successResponse, errorResponse, getPaginationMetadata } = require('./response');
-const { uploadFile, deleteFile, getFileUrl } = require('./fileUpload');
+const { upload, uploadFile, deleteFile, getFileUrl } = require('./fileUpload');
 const {
   formatDate,
   getDateDiff,
@@ -33,6 +33,7 @@ module.exports = {
   getPaginationMetadata,
   
   // File handling
+  upload,
   uploadFile,
   deleteFile,
   getFileUrl,

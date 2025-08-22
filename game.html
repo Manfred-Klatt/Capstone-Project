@@ -1400,9 +1400,9 @@
         const API_URL = (() => {
           const hostname = window.location.hostname;
           
-          // Production environment (blathers.app) - use relative path
+          // Production environment (blathers.app) - use Netlify redirects to Railway
           if (hostname === 'blathers.app' || hostname.includes('blathers')) {
-            return '/api/v1'; // Relative path for same-domain deployment
+            return '/api/v1'; // Will be redirected to Railway via netlify.toml
           }
           
           // Local development
@@ -1410,7 +1410,7 @@
             return 'http://localhost:8000/api/v1';
           }
           
-          // Production backend on Railway
+          // Production backend on Railway (fallback)
           return 'https://capstone-project-production-3cce.up.railway.app/api/v1';
         })();
         try {

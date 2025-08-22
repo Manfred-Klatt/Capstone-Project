@@ -163,6 +163,12 @@
         opacity: 1;
       }
       
+      /* Villagers category - reduce image size by 75% */
+      .villagers-category #imageDisplay {
+        max-width: 75%;
+        max-height: 100px;
+      }
+      
       .image-placeholder {
         width: 100%;
         max-width: 400px;
@@ -424,7 +430,7 @@
         text-align: center;
         font-size: 1.2em;
         font-weight: bold;
-        margin-bottom: 60px;
+        margin-bottom: 20px;
       }
 
       .score-container {
@@ -606,19 +612,129 @@
         display: none;
       }
       
-      /* Leaderboard Styles */
+      /* Leaderboard Stack Styles */
       .leaderboards-container {
-        width: 100%;
-        max-width: 800px;
-        margin: 0 auto;
-        padding: 0 20px;
+        width: 75%;
+        max-width: 825px; /* 75% of 1100px */
+        padding: 20px;
         box-sizing: border-box;
+        display: flex;
+        justify-content: center;
+      }
+      
+      .leaderboard-stack {
+        width: 60%;
+        background: rgba(255, 255, 255, 0.95);
+        border-radius: 15px;
+        box-shadow: 0 0 15px rgba(0, 0, 0, 0.1);
+        overflow: hidden;
+        transition: all 0.3s ease;
+      }
+      
+      .leaderboard-stack[data-category="fish"] {
+        background: linear-gradient(135deg, rgba(173, 216, 230, 0.95), rgba(135, 206, 235, 0.95));
+      }
+      
+      .leaderboard-stack[data-category="bugs"] {
+        background: linear-gradient(135deg, rgba(144, 238, 144, 0.95), rgba(152, 251, 152, 0.95));
+      }
+      
+      .leaderboard-stack[data-category="sea"] {
+        background: linear-gradient(135deg, rgba(64, 224, 208, 0.95), rgba(72, 209, 204, 0.95));
+      }
+      
+      .leaderboard-stack[data-category="villagers"] {
+        background: linear-gradient(135deg, rgba(255, 182, 193, 0.95), rgba(255, 192, 203, 0.95));
+      }
+      
+      .leaderboard-header {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        padding: 15px 20px;
+        background: linear-gradient(to bottom, #f0f8ff, #e6f3ff);
+        border-bottom: 2px solid #8b4513;
+      }
+      
+      .leaderboard-nav {
+        background: #4a90e2;
+        color: white;
+        border: none;
+        border-radius: 50%;
+        width: 40px;
+        height: 40px;
+        font-size: 20px;
+        cursor: pointer;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        transition: background-color 0.3s ease;
+      }
+      
+      .leaderboard-nav:hover {
+        background: #357abd;
+      }
+      
+      .leaderboard-nav:disabled {
+        background: #cccccc;
+        cursor: not-allowed;
+      }
+      
+      #leaderboard-title {
+        margin: 0;
+        font-size: 1.2em;
+        color: #8b4513;
+        text-align: center;
+        flex: 1;
+      }
+      
+      .leaderboard-content {
+        position: relative;
+        min-height: 380px;
+        overflow: hidden;
       }
       
       .category-leaderboard {
+        position: absolute;
+        top: 0;
+        left: 0;
         width: 100%;
-        margin-bottom: 20px;
+        padding: 20px;
         box-sizing: border-box;
+        opacity: 0;
+        transform: translateX(100%);
+        transition: all 0.3s ease-in-out;
+      }
+      
+      .category-leaderboard.active {
+        opacity: 1;
+        transform: translateX(0);
+      }
+      
+      .leaderboard-indicators {
+        display: flex;
+        justify-content: center;
+        padding: 15px;
+        gap: 10px;
+        background: linear-gradient(to top, #f0f8ff, #e6f3ff);
+        border-top: 1px solid #ddd;
+      }
+      
+      .indicator {
+        width: 12px;
+        height: 12px;
+        border-radius: 50%;
+        background: #cccccc;
+        cursor: pointer;
+        transition: background-color 0.3s ease;
+      }
+      
+      .indicator.active {
+        background: #4a90e2;
+      }
+      
+      .indicator:hover {
+        background: #357abd;
       }
       
       #fish-scores,
@@ -1759,15 +1875,15 @@
       <div class="high-score-container">
         <div id="high-score">Personal Best: 0</div>
         <button id="start-game-btn" style="background-color: #4CAF50;">Start Game</button>
+        <div class="timer-container" id="game-timer-container" style="display: none; margin-top: 10px;">
+          <div id="game-timer" class="timer">Time: 15</div>
+        </div>
       </div>
       
       <div class="sound-settings" style="margin-top: 10px; display: flex; justify-content: center; align-items: center;">
       </div>
       <div class="score-container">
         <div class="mobile-timer-wrapper">
-          <div class="timer-container">
-            <div id="timer" class="timer">Time: 15</div>
-          </div>
           <div id="score">Score: 0</div>
         </div>
       </div>
@@ -1776,42 +1892,55 @@
 
       <div id="feedback" aria-live="polite"></div>
 
-      <input
-        type="text"
-        id="guess-input"
-        placeholder="Enter your guess..."
-        autocomplete="off"
-        disabled
-        style="display: none"
-      />
-      <button id="submit-guess" style="display: none">Submit</button>
-      <button id="next-btn" style="display: none">Next Item</button>
-      <button id="try-again-btn" style="display: none">Try Again</button>
+      <div class="input-container" style="display: flex; align-items: center; gap: 10px; justify-content: center; flex-wrap: wrap;">
+        <input
+          type="text"
+          id="guess-input"
+          placeholder="Enter your guess..."
+          autocomplete="off"
+          disabled
+          style="display: none; flex: 1; min-width: 200px; max-width: 300px;"
+        />
+        <button id="submit-guess" style="display: none">Submit</button>
+        <button id="try-again-btn" style="display: none">Try Again</button>
+      </div>
+      <div class="button-container" style="margin-top: 10px;">
+        <button id="next-btn" style="display: none">Next Item</button>
+      </div>
       <button id="end-game-btn" style="background-color: #ff6b6b; margin-top: 20px; display: none">End Game</button>
     </div>
 
+      <!-- Combined Leaderboard Stack -->
+      <div class="leaderboards-container">
+      <div class="leaderboard-stack">
+        <div class="leaderboard-header">
+          <button class="leaderboard-nav prev" id="leaderboard-prev">‹</button>
+          <h3 id="leaderboard-title">Fish</h3>
+          <button class="leaderboard-nav next" id="leaderboard-next">›</button>
+        </div>
+        <div class="leaderboard-content">
+          <div class="category-leaderboard active" id="fish-leaderboard" data-category="fish">
+            <div id="fish-scores"></div>
+          </div>
+          <div class="category-leaderboard" id="bugs-leaderboard" data-category="bugs">
+            <div id="bugs-scores"></div>
+          </div>
+          <div class="category-leaderboard" id="sea-leaderboard" data-category="sea">
+            <div id="sea-scores"></div>
+          </div>
+          <div class="category-leaderboard" id="villagers-leaderboard" data-category="villagers">
+            <div id="villagers-scores"></div>
+          </div>
+        </div>
+        <div class="leaderboard-indicators">
+          <span class="indicator active" data-category="fish"></span>
+          <span class="indicator" data-category="bugs"></span>
+          <span class="indicator" data-category="sea"></span>
+          <span class="indicator" data-category="villagers"></span>
+        </div>
+      </div>
     </div>
-    
-    
-    
-    <!-- Leaderboards-->
-    <div class="leaderboards-container">
-    <div class="category-leaderboard" id="fish-leaderboard">
-      <h3>Fish</h3>
-      <div id="fish-scores"></div>
-    </div>
-    <div class="category-leaderboard" id="bugs-leaderboard">
-      <h3>Bugs</h3>
-      <div id="bugs-scores"></div>
-    </div>
-    <div class="category-leaderboard" id="sea-leaderboard">
-      <h3>Sea Creatures</h3>
-      <div id="sea-scores"></div>
-    </div>
-    <div class="category-leaderboard" id="villagers-leaderboard">
-      <h3>Villagers</h3>
-      <div id="villagers-scores"></div>
-    </div>
+
     </div>
     <!-- High Score Modal -->
     <div id="highScoreModal" class="modal">
@@ -2351,6 +2480,12 @@
             // Hide the start game button
             startGameButton.style.display = 'none';
             
+            // Show the timer in the high-score container
+            const gameTimerContainer = document.getElementById('game-timer-container');
+            if (gameTimerContainer) {
+              gameTimerContainer.style.display = 'block';
+            }
+            
             // Start the game by initializing
             initGame();
             
@@ -2660,7 +2795,7 @@
       let gameOver = false; // Flag to track if the game is over
       let currentlyDisplayingItem = null; // Track which item is being displayed
       let isTryingFallback = false; // Flag to prevent recursive fallback calls
-      const timerDisplay = document.getElementById('timer');
+      const timerDisplay = document.getElementById('game-timer');
 
       async function loadCategoryItems(category) {
         // If we've already loaded this category and have items, use them
@@ -3041,17 +3176,10 @@
           // Show placement message
           showPlacementMessage(placement);
           
-          // Close the modal
-          closeHighScoreModal();
-          
-          // Update the displayed leaderboard
-          updateLeaderboard();
-          
         } catch (error) {
-          console.log('Error with server, falling back to local storage');
-          
-          // Fall back to local storage if server request fails
-          saveScoreToLocalStorage(playerName, finalScore, category);
+          console.error('Error submitting score to server:', error);
+          // Fall back to local storage if server submission fails
+          saveScoreToLocalStorage(username, finalScore, category);
         }
       }
       
@@ -3776,9 +3904,10 @@
             feedbackElement.className = 'wrong';
             scoreElement.textContent = `Score: ${score}`;
             
-            // Disable input and show try again button
+            // Disable input and replace submit button with try again button
             guessInput.disabled = true;
             submitButton.disabled = true;
+            submitButton.style.display = 'none';
             document.getElementById('try-again-btn').style.display = 'inline-block';
             
             // Update personal best scores in localStorage
@@ -4279,6 +4408,11 @@
         submitButton.disabled = false;
         guessInput.value = "";
         
+        // Show Submit button and hide Try Again button
+        submitButton.style.display = 'inline-block';
+        const tryAgainButton = document.getElementById("try-again-btn");
+        tryAgainButton.style.display = 'none';
+        
         // Load a new item
         try {
           // Initialize the game with a new item
@@ -4575,6 +4709,12 @@
             if (startGameButton) {
               startGameButton.style.display = 'inline-block';
             }
+            
+            // Hide the timer container
+            const gameTimerContainer = document.getElementById('game-timer-container');
+            if (gameTimerContainer) {
+              gameTimerContainer.style.display = 'none';
+            }
           });
         }
 
@@ -4587,6 +4727,12 @@
           
           isHandlingCategoryChange = true;
           const category = e.target.value;
+          
+          // Update body class for category-specific styling
+          document.body.className = document.body.className.replace(/\b\w+-category\b/g, '');
+          if (category === 'villagers') {
+            document.body.classList.add('villagers-category');
+          }
           
           try {
             // Don't reset the game state with resetGame() as it loads images
@@ -4642,6 +4788,12 @@
             const startGameButton = document.getElementById('start-game-btn');
             if (startGameButton) {
               startGameButton.style.display = 'inline-block';
+            }
+            
+            // Hide the timer container
+            const gameTimerContainer = document.getElementById('game-timer-container');
+            if (gameTimerContainer) {
+              gameTimerContainer.style.display = 'none';
             }
           } catch (error) {
             console.error('Error changing category:', error);
@@ -4840,9 +4992,10 @@
           feedbackElement.textContent = `Game Over! Final Score: ${score}`;
           feedbackElement.className = "";
           
-          // Show the Try Again button
+          // Show the Try Again button and hide Submit button
           const tryAgainButton = document.getElementById("try-again-btn");
           tryAgainButton.style.display = 'inline-block';
+          submitButton.style.display = 'none';
           
           // Hide the End Game button
           endGameButton.style.display = 'none';
@@ -4946,6 +5099,12 @@
       categorySelector.addEventListener("change", async (e) => {
         const category = e.target.value;
         
+        // Update body class for category-specific styling
+        document.body.className = document.body.className.replace(/\b\w+-category\b/g, '');
+        if (category === 'villagers') {
+          document.body.classList.add('villagers-category');
+        }
+        
         // If we're already changing categories, wait for that to complete
         if (isCategoryLoading) {
           console.log('Category change already in progress, waiting...');
@@ -4982,6 +5141,12 @@
             if (startGameButton) {
               startGameButton.style.display = 'inline-block';
             }
+            
+            // Hide the timer container
+            const gameTimerContainer = document.getElementById('game-timer-container');
+            if (gameTimerContainer) {
+              gameTimerContainer.style.display = 'none';
+            }
           }
           
           // Update high score when category changes
@@ -4998,6 +5163,95 @@
           feedbackElement.textContent = '';
         }
       });
+      
+      // Initialize leaderboard stack functionality
+      initLeaderboardStack();
+      
+      // Leaderboard Stack Navigation
+      function initLeaderboardStack() {
+        const categories = ['fish', 'bugs', 'sea', 'villagers'];
+        const categoryTitles = {
+          'fish': 'Fish',
+          'bugs': 'Bugs', 
+          'sea': 'Sea Creatures',
+          'villagers': 'Villagers'
+        };
+        let currentCategoryIndex = 0;
+        
+        const prevBtn = document.getElementById('leaderboard-prev');
+        const nextBtn = document.getElementById('leaderboard-next');
+        const titleElement = document.getElementById('leaderboard-title');
+        const indicators = document.querySelectorAll('.indicator');
+        const leaderboards = document.querySelectorAll('.category-leaderboard');
+        
+        function updateLeaderboardDisplay(index) {
+          const category = categories[index];
+          
+          // Update title
+          titleElement.textContent = categoryTitles[category];
+          
+          // Update leaderboard stack background color
+          const leaderboardStack = document.querySelector('.leaderboard-stack');
+          if (leaderboardStack) {
+            leaderboardStack.setAttribute('data-category', category);
+          }
+          
+          // Update active leaderboard
+          leaderboards.forEach((board, i) => {
+            board.classList.toggle('active', i === index);
+          });
+          
+          // Update indicators
+          indicators.forEach((indicator, i) => {
+            indicator.classList.toggle('active', i === index);
+          });
+          
+          // Navigation buttons are never disabled for looping
+          prevBtn.disabled = false;
+          nextBtn.disabled = false;
+        }
+        
+        function navigateToCategory(index) {
+          // Handle looping: wrap around to beginning/end
+          if (index < 0) {
+            index = categories.length - 1; // Go to last category
+          } else if (index >= categories.length) {
+            index = 0; // Go to first category
+          }
+          
+          currentCategoryIndex = index;
+          updateLeaderboardDisplay(index);
+        }
+        
+        // Previous button click
+        prevBtn.addEventListener('click', () => {
+          navigateToCategory(currentCategoryIndex - 1);
+        });
+        
+        // Next button click
+        nextBtn.addEventListener('click', () => {
+          navigateToCategory(currentCategoryIndex + 1);
+        });
+        
+        // Indicator clicks
+        indicators.forEach((indicator, index) => {
+          indicator.addEventListener('click', () => {
+            navigateToCategory(index);
+          });
+        });
+        
+        // Keyboard navigation
+        document.addEventListener('keydown', (e) => {
+          if (e.key === 'ArrowLeft') {
+            navigateToCategory(currentCategoryIndex - 1);
+          } else if (e.key === 'ArrowRight') {
+            navigateToCategory(currentCategoryIndex + 1);
+          }
+        });
+        
+        // Initialize display
+        updateLeaderboardDisplay(0);
+      }
       });
     </script>
     <!-- Blathers Character -->

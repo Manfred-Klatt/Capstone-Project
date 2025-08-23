@@ -243,9 +243,85 @@
           font-size: 0.95rem;
         }
       }
+
+      /* Server Status Icon */
+      .server-status {
+        position: fixed;
+        top: 20px;
+        right: 20px;
+        z-index: 1000;
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        background: rgba(255, 255, 255, 0.9);
+        padding: 8px 12px;
+        border-radius: 20px;
+        box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+        font-size: 0.85rem;
+        font-weight: 600;
+        transition: all 0.3s ease;
+      }
+
+      .server-status:hover {
+        background: rgba(255, 255, 255, 1);
+        box-shadow: 0 4px 15px rgba(0, 0, 0, 0.15);
+      }
+
+      .status-indicator {
+        width: 12px;
+        height: 12px;
+        border-radius: 50%;
+        transition: all 0.3s ease;
+      }
+
+      .status-indicator.online {
+        background: #4CAF50;
+        box-shadow: 0 0 8px rgba(76, 175, 80, 0.5);
+      }
+
+      .status-indicator.offline {
+        background: #f44336;
+        box-shadow: 0 0 8px rgba(244, 67, 54, 0.5);
+      }
+
+      .status-indicator.checking {
+        background: #ff9800;
+        box-shadow: 0 0 8px rgba(255, 152, 0, 0.5);
+        animation: pulse 1.5s infinite;
+      }
+
+      @keyframes pulse {
+        0%, 100% { opacity: 1; }
+        50% { opacity: 0.5; }
+      }
+
+      .status-text {
+        color: #333;
+        font-family: 'customfont', 'Quicksand', Arial, sans-serif;
+      }
+
+      @media (max-width: 768px) {
+        .server-status {
+          top: 10px;
+          right: 10px;
+          padding: 6px 10px;
+          font-size: 0.8rem;
+        }
+        
+        .status-indicator {
+          width: 10px;
+          height: 10px;
+        }
+      }
     </style>
   </head>
   <body>
+    <!-- Server Status Indicator -->
+    <div class="server-status" id="serverStatus">
+      <div class="status-indicator checking" id="statusIndicator"></div>
+      <span class="status-text" id="statusText">Checking...</span>
+    </div>
+
     <main class="container" id="container">
       <h1>🌿 Welcome to the Blathers App Portal! 🌿</h1>
       <p>Play as a guest or sign in to track your progress</p>
@@ -295,6 +371,81 @@
         // Production backend on Railway
         return 'https://capstone-project-production-3cce.up.railway.app/api/v1';
       })();
+
+      // Server Status Manager
+      class ServerStatusManager {
+        constructor() {
+          this.indicator = document.getElementById('statusIndicator');
+          this.text = document.getElementById('statusText');
+          this.isOnline = false;
+          this.checkInterval = null;
+          this.lastCheckTime = 0;
+          this.checkFrequency = 30000; // Check every 30 seconds
+        }
+
+        updateStatus(status, text) {
+          this.indicator.className = `status-indicator ${status}`;
+          this.text.textContent = text;
+          this.isOnline = status === 'online';
+        }
+
+        async checkServerStatus() {
+          const now = Date.now();
+          
+          // Avoid too frequent checks
+          if (now - this.lastCheckTime < 5000) {
+            return this.isOnline;
+          }
+          
+          this.lastCheckTime = now;
+          this.updateStatus('checking', 'Checking...');
+
+          try {
+            const controller = new AbortController();
+            const timeoutId = setTimeout(() => controller.abort(), 3000);
+            
+            const response = await fetch(`${API_URL}/health`, {
+              method: 'GET',
+              signal: controller.signal,
+              mode: 'cors',
+              headers: { 'Accept': 'application/json' }
+            });
+            
+            clearTimeout(timeoutId);
+            
+            if (response.ok) {
+              this.updateStatus('online', 'Server Online');
+              return true;
+            } else {
+              this.updateStatus('offline', 'Server Offline');
+              return false;
+            }
+          } catch (error) {
+            this.updateStatus('offline', 'Server Offline');
+            return false;
+          }
+        }
+
+        startMonitoring() {
+          // Initial check
+          this.checkServerStatus();
+          
+          // Set up periodic checks
+          this.checkInterval = setInterval(() => {
+            this.checkServerStatus();
+          }, this.checkFrequency);
+        }
+
+        stopMonitoring() {
+          if (this.checkInterval) {
+            clearInterval(this.checkInterval);
+            this.checkInterval = null;
+          }
+        }
+      }
+
+      // Initialize server status manager
+      const serverStatus = new ServerStatusManager();
       
       // Check if we're running in standalone mode (file:// protocol)
       function isStandaloneMode() {
@@ -398,8 +549,8 @@
             return;
           }
           
-          // Check server availability before proceeding
-          const serverAvailable = await checkServerAvailable();
+          // Use server status manager to check availability
+          const serverAvailable = await serverStatus.checkServerStatus();
           
           if (!serverAvailable) {
             // Server is not available, offer standalone mode
@@ -756,6 +907,16 @@
             }
           }
         });
+
+      // Start server status monitoring when page loads
+      document.addEventListener('DOMContentLoaded', function() {
+        serverStatus.startMonitoring();
+      });
+
+      // Clean up when page unloads
+      window.addEventListener('beforeunload', function() {
+        serverStatus.stopMonitoring();
+      });
     </script>
   </body>
 </html>

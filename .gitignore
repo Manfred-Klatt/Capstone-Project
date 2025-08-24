@@ -97,3 +97,4 @@ local-health-check.js
 minimal-test.js
 ping-mongodb.js
 simple-server.js
+js/serverCheck.js

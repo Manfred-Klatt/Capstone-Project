@@ -1,5 +1,10 @@
-// Server availability check module
-const API_URL = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1' 
+/**
+ * Server availability check module
+ * Handles server connection checks and API URL management
+ */
+
+// Define the API URL based on the current hostname
+window.API_URL = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1' 
   ? 'http://localhost:3000' 
   : 'https://blathers.app';
 
@@ -10,7 +15,8 @@ async function checkServerAvailability() {
     const controller = new AbortController();
     const timeoutId = setTimeout(() => controller.abort(), 3000); // 3 second timeout
     
-    const response = await fetch(`${API_URL}/api/v1/health`, {
+    // Use the correct health endpoint path
+    const response = await fetch(`${window.API_URL}/health`, {
       signal: controller.signal
     });
     
@@ -19,8 +25,7 @@ async function checkServerAvailability() {
     if (response.ok) {
       console.log('Server is available!');
       // Clear any standalone mode flags since server is available
-      localStorage.removeItem('force_standalone');
-      localStorage.removeItem('standalone_confirmed_this_session');
+      resetStandaloneFlags();
       window.apiUnavailable = false;
       return true;
     } else {
@@ -44,11 +49,27 @@ function resetStandaloneFlags() {
   }
 }
 
-// Export the functions
+// Function to determine if we're in standalone mode
+function isStandaloneMode() {
+  // Check if running via file:// protocol
+  const isFileProtocol = window.location.protocol === 'file:';
+  
+  // Check if API has been marked as unavailable
+  const apiUnavailable = window.apiUnavailable === true;
+  
+  // Check if force_standalone is set in localStorage
+  const forceStandalone = localStorage.getItem('force_standalone') === 'true';
+  
+  // Guest users are NOT standalone mode users if the server is available
+  return isFileProtocol || apiUnavailable || forceStandalone;
+}
+
+// Export the functions to the global scope
 window.checkServerAvailability = checkServerAvailability;
 window.resetStandaloneFlags = resetStandaloneFlags;
+window.isStandaloneMode = isStandaloneMode;
 
-// Run the check when the script loads
+// Run the check when the document is fully loaded
 document.addEventListener('DOMContentLoaded', async () => {
   // Reset standalone flags first
   resetStandaloneFlags();

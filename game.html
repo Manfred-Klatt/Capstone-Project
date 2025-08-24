@@ -1458,10 +1458,7 @@
     <div style="width:100%; height:85px;"></div> <!-- Spacer for buttons -->
     
     <script>
-      // Function to check if we're in standalone mode
-      function isStandaloneMode() {
-        return window.location.protocol === 'file:' || localStorage.getItem('force_standalone') === 'true' || localStorage.getItem('standalone_confirmed_this_session') === 'true';
-      }
+      // Using isStandaloneMode from serverCheck.js
       
       // Function to check if the server is available
       async function checkServerAvailable() {
@@ -1592,7 +1589,10 @@
             // Fallback if checkServerAvailable isn't available
             updateStandaloneModeIndicator();
           }
-        });
+        } catch (error) {
+          console.error('Error checking server availability:', error);
+          updateStandaloneModeIndicator();
+        }
         
         // Admin toggle button for mobile with secret activation pattern
         const adminToggleBtnMobile = document.getElementById('admin-toggle-btn-mobile');
@@ -1749,9 +1749,7 @@
             }
           });
         }
-        
-
-      });
+      
     </script>
     
     <!-- Desktop Buttons (hidden on mobile) -->
@@ -2011,7 +2009,6 @@
       </div>
     </div>
 
-    </div>
     <!-- High Score Modal -->
     <div id="highScoreModal" class="modal">
       <div class="modal-content">
@@ -3225,7 +3222,7 @@
             console.log('Submitting guest score with username:', playerName);
           }
           
-          const response = await fetch(`${API_URL}/api/v1/leaderboard/submit`, {
+          const response = await fetch(`${API_URL}/api/leaderboard/submit`, {
             method: 'POST',
             headers: headers,
             body: JSON.stringify(requestBody),
@@ -3248,7 +3245,7 @@
           const leaderboardController = new AbortController();
           const leaderboardTimeoutId = setTimeout(() => leaderboardController.abort(), 2000);
           
-          const leaderboardResponse = await fetch(`${API_URL}/api/v1/leaderboard/${category}`, {
+          const leaderboardResponse = await fetch(`${API_URL}/api/leaderboard/${category}`, {
             signal: leaderboardController.signal
           }).catch(error => {
             window.apiUnavailable = true;
@@ -3391,7 +3388,7 @@
           const controller = new AbortController();
           const timeoutId = setTimeout(() => controller.abort(), 2000); // 2 second timeout
           
-          const response = await fetch(`/api/leaderboard/${category}`, {
+          const response = await fetch(`${API_URL}/api/leaderboard/${category}`, {
             signal: controller.signal
           }).catch(error => {
             // Mark API as unavailable for future calls
@@ -3608,20 +3605,7 @@
         ]
       };
 
-      // Function to detect if we're running in standalone mode (without a server)
-      function isStandaloneMode() {
-        // Check if running via file:// protocol
-        const isFileProtocol = window.location.protocol === 'file:';
-        
-        // Check if API has been marked as unavailable
-        const apiUnavailable = window.apiUnavailable === true;
-        
-        // Check if force_standalone is set in localStorage
-        const forceStandalone = localStorage.getItem('force_standalone') === 'true';
-        
-        // Guest users are NOT standalone mode users if the server is available
-        return isFileProtocol || apiUnavailable || forceStandalone;
-      }
+      // Using isStandaloneMode from serverCheck.js
       
       let leaderboardInitialized = false;
       
@@ -3662,7 +3646,7 @@
           const controller = new AbortController();
           const timeoutId = setTimeout(() => controller.abort(), 2000); // 2 second timeout
           
-          const response = await fetch(`/api/leaderboard/${category}`, {
+          const response = await fetch(`${API_URL}/api/leaderboard/${category}`, {
             signal: controller.signal
           }).catch(error => {
             // Mark API as unavailable for future calls
@@ -5353,7 +5337,7 @@
         // Initialize display
         updateLeaderboardDisplay(0);
       }
-      });
+    });
     </script>
     <!-- Blathers Character -->
     <div id="blathers-character">

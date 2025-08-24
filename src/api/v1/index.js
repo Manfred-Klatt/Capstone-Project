@@ -27,10 +27,37 @@ router.get('/', (req, res) => {
 
 // API health check
 router.get('/health', (req, res) => {
+  // Get mongoose connection state
+  const mongoose = require('mongoose');
+  const connectionState = mongoose.connection.readyState;
+  
+  // Map mongoose connection state to readable status
+  const dbStatus = {
+    0: 'disconnected',
+    1: 'connected',
+    2: 'connecting',
+    3: 'disconnecting',
+    99: 'uninitialized'
+  };
+  
+  // Calculate uptime
+  const uptimeSeconds = process.uptime();
+  const days = Math.floor(uptimeSeconds / 86400);
+  const hours = Math.floor((uptimeSeconds % 86400) / 3600);
+  const minutes = Math.floor((uptimeSeconds % 3600) / 60);
+  const seconds = Math.floor(uptimeSeconds % 60);
+  const uptime = `${days}d ${hours}h ${minutes}m ${seconds}s`;
+  
   res.status(200).json({
     status: 'success',
     message: 'API is running',
     timestamp: new Date().toISOString(),
+    database: {
+      status: dbStatus[connectionState] || 'unknown',
+      state: connectionState
+    },
+    uptime: uptime,
+    environment: process.env.NODE_ENV || 'development'
   });
 });
 
@@ -39,5 +66,6 @@ router.use('/auth', authRoutes);
 router.use('/users', userRoutes);
 router.use('/games', gameRoutes);
 router.use('/upload', uploadRoutes);
+router.use('/leaderboard', leaderboardRoutes);
 
 module.exports = router;

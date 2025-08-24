@@ -415,8 +415,8 @@
           this.updateStatus('checking', 'Checking...');
 
           try {
-            // Use the /api/health endpoint that exists in Netlify redirects
-            const response = await fetch('/api/health', {
+            // Use direct backend health endpoint to avoid Netlify redirect issues
+            const response = await fetch('https://capstone-project-production-3cce.up.railway.app/health', {
               method: 'GET',
               mode: 'cors',
               headers: { 'Accept': 'application/json' },
@@ -480,7 +480,7 @@
           
           // Try direct health check first
           try {
-            const response = await fetch('/api/health', {
+            const response = await fetch('https://capstone-project-production-3cce.up.railway.app/health', {
               method: 'GET',
               signal: controller.signal,
               mode: 'cors',

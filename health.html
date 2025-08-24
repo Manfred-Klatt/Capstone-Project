@@ -311,45 +311,62 @@
             const startTime = Date.now();
             
             try {
-                addLog('Checking API health endpoint...', 'info');
+                addLog('Checking API health endpoint...');
                 
                 const response = await fetch(API_ENDPOINTS.health, {
                     method: 'GET',
-                    headers: { 'Accept': 'application/json' },
+                    headers: {
+                        'Accept': 'application/json',
+                        'Content-Type': 'application/json'
+                    },
                     cache: 'no-cache'
                 });
                 
-                const responseTime = Date.now() - startTime;
+                addLog(`Response status: ${response.status} ${response.statusText}`);
+                addLog(`Response headers: ${JSON.stringify(Object.fromEntries(response.headers))}`);
                 
-                if (response.ok) {
-                    const data = await response.json();
-                    
-                    updateStatus('apiValue', 'apiIndicator', '✅ Online', 'success');
-                    updateStatus('responseValue', 'responseIndicator', `${responseTime}ms`, 
-                        responseTime < 1000 ? 'success' : responseTime < 3000 ? 'warning' : 'error');
-                    
-                    // Display JSON response
-                    document.getElementById('jsonContent').textContent = JSON.stringify(data, null, 2);
-                    document.getElementById('jsonResponse').style.display = 'block';
-                    
-                    addLog(`API health check successful (${responseTime}ms)`, 'info');
-                    
-                    // Check database status from response
-                    if (data.database) {
-                        updateStatus('dbValue', 'dbIndicator', 
-                            data.database.status === 'connected' ? '✅ Connected' : '❌ Disconnected',
-                            data.database.status === 'connected' ? 'success' : 'error');
-                    }
-                    
-                    // Check uptime
-                    if (data.uptime) {
-                        updateStatus('uptimeValue', 'uptimeIndicator', data.uptime, 'success');
-                    }
-                    
-                    return true;
-                } else {
+                if (!response.ok) {
+                    // Get the actual response text to see what's being returned
+                    const responseText = await response.text();
+                    addLog(`Response body: ${responseText.substring(0, 200)}...`, 'error');
                     throw new Error(`HTTP ${response.status}: ${response.statusText}`);
                 }
+                
+                // Check content type before parsing as JSON
+                const contentType = response.headers.get('content-type');
+                if (!contentType || !contentType.includes('application/json')) {
+                    const responseText = await response.text();
+                    addLog(`Expected JSON but got: ${contentType}`, 'error');
+                    addLog(`Response body: ${responseText.substring(0, 200)}...`, 'error');
+                    throw new Error(`Server returned ${contentType} instead of JSON`);
+                }
+                
+                const data = await response.json();
+                addLog('API health check completed', 'success');
+                
+                const responseTime = Date.now() - startTime;
+                
+                // Update API status
+                updateStatus('apiValue', 'apiIndicator', '✅ Online', 'success');
+                updateStatus('responseValue', 'responseIndicator', `${responseTime}ms`, 'success');
+                
+                // Check database status
+                if (data.database) {
+                    updateStatus('dbValue', 'dbIndicator', 
+                        data.database.status === 'connected' ? '✅ Connected' : '❌ Disconnected',
+                        data.database.status === 'connected' ? 'success' : 'error');
+                }
+                
+                // Check uptime
+                if (data.uptime) {
+                    updateStatus('uptimeValue', 'uptimeIndicator', data.uptime, 'success');
+                }
+                
+                // Display JSON response
+                document.getElementById('jsonResponse').style.display = 'block';
+                document.getElementById('jsonContent').textContent = JSON.stringify(data, null, 2);
+                
+                return true;
                 
             } catch (error) {
                 const responseTime = Date.now() - startTime;

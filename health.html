@@ -327,7 +327,11 @@
             const startTime = Date.now();
             
             try {
-                addLog('Checking API health endpoint...');
+                addLog('🔍 Starting API health check...');
+                addLog(`📡 Attempting connection to: ${window.location.origin}${API_ENDPOINTS.health}`);
+                
+                const controller = new AbortController();
+                const timeoutId = setTimeout(() => controller.abort(), 15000);
                 
                 const response = await fetch(`${API_ENDPOINTS.health}?t=${Date.now()}`, {
                     method: 'GET',
@@ -338,69 +342,136 @@
                         'Pragma': 'no-cache',
                         'Expires': '0'
                     },
-                    cache: 'no-cache'
+                    cache: 'no-cache',
+                    signal: controller.signal
                 });
                 
-                addLog(`Response status: ${response.status} ${response.statusText}`);
-                addLog(`Response headers: ${JSON.stringify(Object.fromEntries(response.headers))}`);
+                clearTimeout(timeoutId);
+                const responseTime = Date.now() - startTime;
+                
+                addLog(`📊 Response received in ${responseTime}ms`);
+                addLog(`📋 Status: ${response.status} ${response.statusText}`);
+                addLog(`🏷️ Content-Type: ${response.headers.get('content-type') || 'not specified'}`);
+                addLog(`🌐 Server: ${response.headers.get('server') || 'not specified'}`);
+                addLog(`📅 Date: ${response.headers.get('date') || 'not specified'}`);
                 
                 if (!response.ok) {
-                    // Get the actual response text to see what's being returned
                     const responseText = await response.text();
-                    addLog(`Response body: ${responseText.substring(0, 200)}...`, 'error');
+                    addLog(`❌ HTTP Error Response Body (first 500 chars):`, 'error');
+                    addLog(`${responseText.substring(0, 500)}${responseText.length > 500 ? '...' : ''}`, 'error');
+                    
+                    if (response.status === 404) {
+                        addLog('🔍 Trying alternative health endpoints...', 'warning');
+                        return await tryAlternativeEndpoints();
+                    }
+                    
                     throw new Error(`HTTP ${response.status}: ${response.statusText}`);
                 }
                 
-                // Check content type before parsing as JSON
                 const contentType = response.headers.get('content-type');
                 if (!contentType || !contentType.includes('application/json')) {
                     const responseText = await response.text();
-                    addLog(`Expected JSON but got: ${contentType}`, 'error');
-                    addLog(`Response body: ${responseText.substring(0, 200)}...`, 'error');
+                    addLog(`⚠️ Expected JSON but received: ${contentType}`, 'warning');
+                    addLog(`📄 Response body: ${responseText.substring(0, 500)}...`, 'warning');
+                    
+                    // Try to parse anyway if it looks like JSON
+                    if (responseText.trim().startsWith('{') || responseText.trim().startsWith('[')) {
+                        try {
+                            const data = JSON.parse(responseText);
+                            addLog('✅ Successfully parsed response as JSON despite wrong content-type');
+                            return processHealthData(data, responseTime);
+                        } catch (parseError) {
+                            addLog(`❌ JSON parse failed: ${parseError.message}`, 'error');
+                        }
+                    }
+                    
                     throw new Error(`Server returned ${contentType} instead of JSON`);
                 }
                 
                 const data = await response.json();
-                addLog('API health check completed', 'success');
+                addLog('✅ API health check completed successfully');
+                addLog(`📦 Response data keys: ${Object.keys(data).join(', ')}`);
                 
-                const responseTime = Date.now() - startTime;
-                
-                // Update API status
-                updateStatus('apiValue', 'apiIndicator', '✅ Online', 'success');
-                updateStatus('responseValue', 'responseIndicator', `${responseTime}ms`, 'success');
-                
-                // Check database status
-                if (data.database) {
-                    updateStatus('dbValue', 'dbIndicator', 
-                        data.database.status === 'connected' ? '✅ Connected' : '❌ Disconnected',
-                        data.database.status === 'connected' ? 'success' : 'error');
-                }
-                
-                // Check uptime
-                if (data.uptime) {
-                    updateStatus('uptimeValue', 'uptimeIndicator', data.uptime, 'success');
-                }
-                
-                // Display JSON response
-                document.getElementById('jsonResponse').style.display = 'block';
-                document.getElementById('jsonContent').textContent = JSON.stringify(data, null, 2);
-                
-                return true;
+                return processHealthData(data, responseTime);
                 
             } catch (error) {
                 const responseTime = Date.now() - startTime;
                 
+                if (error.name === 'AbortError') {
+                    addLog('⏰ Request timed out after 15 seconds', 'error');
+                } else if (error.message.includes('fetch')) {
+                    addLog('🌐 Network error - server may be unreachable', 'error');
+                    addLog(`🔧 Error details: ${error.message}`, 'error');
+                } else {
+                    addLog(`❌ API health check failed: ${error.message}`, 'error');
+                }
+                
                 updateStatus('apiValue', 'apiIndicator', '❌ Offline', 'error');
-                updateStatus('responseValue', 'responseIndicator', `${responseTime}ms (timeout)`, 'error');
+                updateStatus('responseValue', 'responseIndicator', `${responseTime}ms (failed)`, 'error');
                 updateStatus('dbValue', 'dbIndicator', '❌ Unknown', 'error');
                 updateStatus('uptimeValue', 'uptimeIndicator', '❌ Unknown', 'error');
-                
-                addLog(`API health check failed: ${error.message}`, 'error');
                 
                 document.getElementById('jsonResponse').style.display = 'none';
                 
                 return false;
             }
+        }
+
+        async function tryAlternativeEndpoints() {
+            const alternatives = ['/api/v1/health', '/health', '/status', '/api/status'];
+            
+            for (const endpoint of alternatives) {
+                try {
+                    addLog(`🔄 Trying ${endpoint}...`);
+                    const response = await fetch(endpoint);
+                    if (response.ok) {
+                        addLog(`✅ Found working endpoint: ${endpoint}`);
+                        const data = await response.json();
+                        return processHealthData(data, 0);
+                    }
+                } catch (e) {
+                    addLog(`❌ ${endpoint} failed: ${e.message}`, 'warning');
+                }
+            }
+            
+            addLog('❌ All alternative endpoints failed', 'error');
+            return false;
+        }
+
+        function processHealthData(data, responseTime) {
+            updateStatus('apiValue', 'apiIndicator', '✅ Online', 'success');
+            updateStatus('responseValue', 'responseIndicator', `${responseTime}ms`, 'success');
+            
+            // Enhanced database status logging
+            if (data.database) {
+                const dbStatus = data.database.status || data.database;
+                addLog(`🗄️ Database status: ${JSON.stringify(data.database)}`);
+                updateStatus('dbValue', 'dbIndicator', 
+                    dbStatus === 'connected' ? '✅ Connected' : '❌ Disconnected',
+                    dbStatus === 'connected' ? 'success' : 'error');
+            } else {
+                addLog('⚠️ No database status in response', 'warning');
+                updateStatus('dbValue', 'dbIndicator', '❓ Not reported', 'warning');
+            }
+            
+            // Enhanced uptime logging
+            if (data.uptime) {
+                addLog(`⏱️ Server uptime: ${data.uptime}`);
+                updateStatus('uptimeValue', 'uptimeIndicator', data.uptime, 'success');
+            } else {
+                addLog('⚠️ No uptime information in response', 'warning');
+                updateStatus('uptimeValue', 'uptimeIndicator', '❓ Not reported', 'warning');
+            }
+            
+            // Log additional server info
+            if (data.version) addLog(`🏷️ Server version: ${data.version}`);
+            if (data.environment) addLog(`🌍 Environment: ${data.environment}`);
+            if (data.timestamp) addLog(`🕐 Server timestamp: ${data.timestamp}`);
+            
+            document.getElementById('jsonResponse').style.display = 'block';
+            document.getElementById('jsonContent').textContent = JSON.stringify(data, null, 2);
+            
+            return true;
         }
 
         async function performHealthCheck() {

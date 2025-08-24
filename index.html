@@ -287,12 +287,26 @@
       .status-indicator.checking {
         background: #ff9800;
         box-shadow: 0 0 8px rgba(255, 152, 0, 0.5);
-        animation: pulse 1.5s infinite;
+        animation: spin 1s linear infinite;
       }
 
       @keyframes pulse {
         0%, 100% { opacity: 1; }
         50% { opacity: 0.5; }
+      }
+
+      @keyframes spin {
+        0% { transform: rotate(0deg); }
+        100% { transform: rotate(360deg); }
+      }
+
+      .server-status {
+        cursor: pointer;
+        user-select: none;
+      }
+
+      .server-status:active {
+        transform: scale(0.95);
       }
 
       .status-text {
@@ -424,13 +438,19 @@
         }
 
         startMonitoring() {
-          // Disable health checks to prevent 404 spam
-          this.updateStatus('offline', 'Server Offline');
+          // Initial check
+          this.checkServerStatus();
           
-          // Don't set up periodic checks until health endpoint is fixed
-          // this.checkInterval = setInterval(() => {
-          //   this.checkServerStatus();
-          // }, this.checkFrequency);
+          // Set up periodic checks
+          this.checkInterval = setInterval(() => {
+            this.checkServerStatus();
+          }, this.checkFrequency);
+        }
+
+        // Manual refresh when clicked
+        async forceRefresh() {
+          this.lastCheckTime = 0; // Reset throttle
+          return await this.checkServerStatus();
         }
 
         stopMonitoring() {
@@ -908,6 +928,17 @@
       // Start server status monitoring when page loads
       document.addEventListener('DOMContentLoaded', function() {
         serverStatus.startMonitoring();
+        
+        // Add click handler for manual refresh
+        const statusElement = document.getElementById('serverStatus');
+        if (statusElement) {
+          statusElement.addEventListener('click', async function() {
+            await serverStatus.forceRefresh();
+          });
+          
+          // Add title for accessibility
+          statusElement.title = 'Click to refresh server status';
+        }
       });
 
       // Clean up when page unloads

@@ -244,12 +244,19 @@
         }
       }
 
-      /* Server Status Icon */
-      .server-status {
+      /* Server Status Container */
+      .server-status-container {
         position: fixed;
         top: 20px;
         right: 20px;
         z-index: 1000;
+        display: flex;
+        flex-direction: column;
+        gap: 8px;
+      }
+      
+      /* Server Status Icon */
+      .server-status {
         display: flex;
         align-items: center;
         gap: 8px;
@@ -315,9 +322,12 @@
       }
 
       @media (max-width: 768px) {
-        .server-status {
+        .server-status-container {
           top: 10px;
           right: 10px;
+        }
+        
+        .server-status {
           padding: 6px 10px;
           font-size: 0.8rem;
         }
@@ -330,10 +340,19 @@
     </style>
   </head>
   <body>
-    <!-- Server Status Indicator -->
-    <div class="server-status" id="serverStatus">
-      <div class="status-indicator checking" id="statusIndicator"></div>
-      <span class="status-text" id="statusText">Checking...</span>
+    <!-- Server Status Indicators -->
+    <div class="server-status-container">
+      <!-- API Server Status Indicator -->
+      <div class="server-status" id="apiServerStatus">
+        <div class="status-indicator checking" id="apiStatusIndicator"></div>
+        <span class="status-text" id="apiStatusText">API: Checking...</span>
+      </div>
+      
+      <!-- Database Server Status Indicator -->
+      <div class="server-status" id="dbServerStatus">
+        <div class="status-indicator checking" id="dbStatusIndicator"></div>
+        <span class="status-text" id="dbStatusText">DB: Checking...</span>
+      </div>
     </div>
 
     <main class="container" id="container">
@@ -388,19 +407,29 @@
 
       // Server Status Manager
       class ServerStatusManager {
-        constructor() {
-          this.indicator = document.getElementById('statusIndicator');
-          this.text = document.getElementById('statusText');
-          this.isOnline = false;
+        constructor(apiIndicatorId, apiTextId, dbIndicatorId, dbTextId) {
+          this.apiIndicator = document.getElementById(apiIndicatorId);
+          this.apiText = document.getElementById(apiTextId);
+          this.dbIndicator = document.getElementById(dbIndicatorId);
+          this.dbText = document.getElementById(dbTextId);
+          
+          this.isApiOnline = false;
+          this.isDbOnline = false;
           this.checkInterval = null;
           this.lastCheckTime = 0;
           this.checkFrequency = 30000; // Check every 30 seconds
         }
 
-        updateStatus(status, text) {
-          this.indicator.className = `status-indicator ${status}`;
-          this.text.textContent = text;
-          this.isOnline = status === 'online';
+        updateApiStatus(status, text) {
+          this.apiIndicator.className = `status-indicator ${status}`;
+          this.apiText.textContent = `API: ${text}`;
+          this.isApiOnline = status === 'online';
+        }
+        
+        updateDbStatus(status, text) {
+          this.dbIndicator.className = `status-indicator ${status}`;
+          this.dbText.textContent = `DB: ${text}`;
+          this.isDbOnline = status === 'online';
         }
 
         async checkServerStatus() {
@@ -408,11 +437,12 @@
           
           // Avoid too frequent checks
           if (now - this.lastCheckTime < 5000) {
-            return this.isOnline;
+            return { api: this.isApiOnline, db: this.isDbOnline };
           }
           
           this.lastCheckTime = now;
-          this.updateStatus('checking', 'Checking...');
+          this.updateApiStatus('checking', 'Checking...');
+          this.updateDbStatus('checking', 'Checking...');
 
           try {
             // Use the correct health endpoint with versioning
@@ -423,17 +453,30 @@
               cache: 'no-cache'
             });
             
+            // API is online if we get any response
+            this.updateApiStatus('online', 'Online');
+            
             if (response.ok) {
-              this.updateStatus('online', 'Server Online');
-              return true;
+              // Parse the response to check database status
+              const data = await response.json();
+              
+              if (data.database && data.database.status === 'connected') {
+                this.updateDbStatus('online', 'Online');
+                return { api: true, db: true };
+              } else {
+                this.updateDbStatus('offline', 'Offline');
+                return { api: true, db: false };
+              }
             } else {
-              this.updateStatus('offline', 'Server Offline');
-              return false;
+              // API responded but with an error
+              this.updateDbStatus('offline', 'Offline');
+              return { api: true, db: false };
             }
           } catch (error) {
-            // Silently handle errors in production
-            this.updateStatus('offline', 'Server Offline');
-            return false;
+            // Network error - both API and DB are unreachable
+            this.updateApiStatus('offline', 'Offline');
+            this.updateDbStatus('offline', 'Offline');
+            return { api: false, db: false };
           }
         }
 
@@ -462,7 +505,7 @@
       }
 
       // Initialize server status manager
-      const serverStatus = new ServerStatusManager();
+      const serverStatus = new ServerStatusManager('apiStatusIndicator', 'apiStatusText', 'dbStatusIndicator', 'dbStatusText');
       
       // Check if we're running in standalone mode (file:// protocol)
       function isStandaloneMode() {
@@ -930,15 +973,26 @@
       document.addEventListener('DOMContentLoaded', function() {
         serverStatus.startMonitoring();
         
-        // Add click handler for manual refresh
-        const statusElement = document.getElementById('serverStatus');
-        if (statusElement) {
-          statusElement.addEventListener('click', async function() {
+        // Add click handler for manual refresh for API status
+        const apiStatusElement = document.getElementById('apiServerStatus');
+        if (apiStatusElement) {
+          apiStatusElement.addEventListener('click', async function() {
             await serverStatus.forceRefresh();
           });
           
           // Add title for accessibility
-          statusElement.title = 'Click to refresh server status';
+          apiStatusElement.title = 'Click to refresh server status';
+        }
+        
+        // Add click handler for manual refresh for DB status
+        const dbStatusElement = document.getElementById('dbServerStatus');
+        if (dbStatusElement) {
+          dbStatusElement.addEventListener('click', async function() {
+            await serverStatus.forceRefresh();
+          });
+          
+          // Add title for accessibility
+          dbStatusElement.title = 'Click to refresh server status';
         }
       });
 

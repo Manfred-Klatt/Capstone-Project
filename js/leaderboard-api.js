@@ -105,6 +105,7 @@ class LeaderboardAPI {
             return await response.json();
         } catch (error) {
             console.error('Error fetching leaderboards:', error);
+            console.log('Backend may still be deploying or experiencing issues. Using fallback data.');
             // Return fallback data from static file
             return this.getFallbackLeaderboards();
         }

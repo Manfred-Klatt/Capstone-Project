@@ -3621,7 +3621,15 @@
         return guestParam === 'true' || isFileProtocol || apiUnavailable || forceStandalone;
       }
       
+      let leaderboardInitialized = false;
+      
       async function initializeLeaderboard() {
+        // Prevent multiple initializations
+        if (leaderboardInitialized) {
+          return;
+        }
+        leaderboardInitialized = true;
+        
         // Always try to update with server data first, then fall back to local
         await updateLeaderboard();
       }
@@ -4952,8 +4960,10 @@
           highScoreElement.textContent = `Personal Best: ${currentHighScore}`;
         }
 
-        // Only update leaderboard if we have stored data or can reach the server
-        initializeLeaderboard();
+        // Initialize leaderboard only once to prevent duplicate styling
+        setTimeout(() => {
+          initializeLeaderboard();
+        }, 100);
         
         // Don't load any images until the game starts
         

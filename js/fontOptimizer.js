@@ -21,7 +21,6 @@
         if (fontLoadAttempted) return;
         fontLoadAttempted = true;
         
-        console.log('Loading custom font immediately...');
         
         // Try multiple loading strategies with Firefox CORS handling
         Promise.race([
@@ -100,10 +99,8 @@
             fontLoaded = true;
             document.documentElement.classList.remove('font-fallback');
             document.documentElement.classList.add('font-loaded');
-            console.log('Custom font loaded and applied to UI elements');
         })
         .catch((error) => {
-            console.log('Custom font failed to load:', error.message, '- using fallback fonts');
             // Still show content with fallback fonts
             document.documentElement.classList.add('font-fallback-final');
         });

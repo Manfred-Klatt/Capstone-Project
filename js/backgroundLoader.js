@@ -41,8 +41,7 @@
         
         // Set up timeout to prevent blocking
         const timeoutId = setTimeout(() => {
-            console.log('Background image loading timeout - keeping gradient');
-            // Keep the gradient background if image takes too long
+            // Silently keep gradient background if image takes too long
         }, BACKGROUND_TIMEOUT);
         
         img.onload = function() {
@@ -88,7 +87,7 @@
                 document.documentElement.style.setProperty('--background-image', `url('${backgroundUrl}')`);
                 document.body.classList.remove('bg-loading');
                 document.body.classList.add('bg-loaded');
-                console.log('Background image found in cache');
+                // Background image found in cache
                 return true;
             }
             return false;
@@ -126,7 +125,6 @@
         // Fallback: Load background after 1 second if no interaction
         setTimeout(() => {
             if (!backgroundLoaded) {
-                console.log('Loading background image after timeout');
                 loadBackgroundImage();
             }
         }, 1000);

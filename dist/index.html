@@ -1,0 +1,761 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Animal Crossing Game Portal</title>
+    <link
+      href="https://fonts.googleapis.com/css2?family=Quicksand:wght@400;600&display=swap"
+      rel="stylesheet"
+    />
+    <!-- Font will be loaded via JavaScript for better control -->
+    <!-- Background image loads progressively via JavaScript -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/fontfaceobserver/2.3.0/fontfaceobserver.standalone.js"></script>
+    <script src="./js/fontOptimizer.js"></script>
+    <script src="./js/backgroundLoader.js"></script>
+    <script src="./js/secureTokenManager.js"></script>
+    <style>
+      @font-face {
+        font-family: 'customfont';
+        src: url('/assets/customfont.XoGy1vfz.woff2') format('woff2'),
+             url('/assets/customfont.CGpJlWti.otf') format('opentype');
+        font-display: swap;
+        font-weight: normal;
+        font-style: normal;
+        /* WOFF2 loads first (smallest), OTF as fallback */
+      }
+
+      * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+        font-family: 'customfont', 'Quicksand', Arial, sans-serif;
+      }
+      
+      /* Ensure custom font is used for all major UI elements */
+      h1, h2, h3, h4, h5, h6,
+      .title, .subtitle,
+      button, .button,
+      input, textarea, select,
+      .content, .text,
+      p, span, div,
+      label, .label {
+        font-family: 'customfont', 'Quicksand', Arial, sans-serif;
+      }
+      
+      /* Fallback classes for compatibility (if needed) */
+      html.font-loaded * {
+        font-family: 'customfont', 'Quicksand', Arial, sans-serif;
+      }
+      
+      html.font-fallback * {
+        font-family: 'Quicksand', Arial, sans-serif;
+      }
+
+      /* CSS custom properties for dynamic background image selection */
+      :root {
+        --background-image: url('/assets/background.BY6cdzcP.jpg'); /* Default fallback */
+      }
+      
+      body {
+        margin: 0;
+        padding: 20px;
+        background-color: #f0f8ff;
+        color: #5a3d2b;
+        /* Optimized background loading strategy */
+        background-size: cover;
+        background-position: center;
+        background-repeat: no-repeat;
+        background-attachment: scroll; /* Better performance than fixed */
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        min-height: 100vh;
+        /* Smooth transition when background loads */
+        transition: background-image 0.3s ease;
+      }
+      
+      /* Progressive background loading */
+      body.bg-loading {
+        background-image: linear-gradient(135deg, #f0f8ff 0%, #e6f3ff 50%, #ddeeff 100%);
+      }
+      
+      body.bg-loaded {
+        background-image: var(--background-image);
+      }
+      
+      /* Responsive background images for better performance */
+      @media (max-width: 768px) {
+        body.bg-loaded {
+          /* Dynamic image selection handled by JavaScript */
+          background-image: var(--background-image);
+          background-size: cover;
+        }
+      }
+      
+      @media (min-width: 769px) and (max-width: 1200px) {
+        body.bg-loaded {
+          /* Dynamic image selection handled by JavaScript */
+          background-image: var(--background-image);
+        }
+      }
+      
+      @media (min-width: 1201px) {
+        body.bg-loaded {
+          /* Use full size for desktop */
+          background-image: url("/assets/background.BY6cdzcP.jpg");
+        }
+      }
+
+      .container {
+        position: relative;
+        width: 95%;
+        max-width: 1200px;
+        height: auto;
+        background: #fefae0;
+        border-radius: 25px;
+        box-shadow: 0 10px 25px rgba(0, 0, 0, 0.2);
+        overflow: hidden;
+        padding: 40px 20px;
+        text-align: center;
+        border: 6px solid #8c644d;
+        box-sizing: border-box;
+      }
+
+      h1 {
+        color: #4b6043;
+        font-size: 2rem;
+        margin-bottom: 10px;
+      }
+
+      p {
+        color: #5b7553;
+        font-size: 1.1rem;
+        margin-bottom: 20px;
+      }
+
+      button {
+        padding: 12px 24px;
+        margin: 10px;
+        border-radius: 30px;
+        border: 2px solid #4b6043;
+        background-color: #b5e48c;
+        color: #4b6043;
+        font-family: "customfont", "Arial", sans-serif;
+        font-weight: bold;
+        font-size: 1rem;
+        cursor: pointer;
+        transition: background 0.3s ease, transform 0.2s ease;
+      }
+
+      button:hover {
+        background-color: #99d98c;
+        transform: scale(1.05);
+      }
+
+      input {
+        padding: 12px;
+        margin-bottom: 15px;
+        border: 2px solid #ccd5ae;
+        border-radius: 10px;
+        width: 90%;
+        max-width: 350px;
+        box-sizing: border-box;
+        font-size: 1rem;
+      }
+      
+      .error-message {
+        color: #d32f2f;
+        font-size: 0.85rem;
+        margin-bottom: 10px;
+        text-align: center;
+        min-height: 20px;
+        width: 100%;
+      }
+
+      .form-container {
+        display: none;
+        flex-direction: column;
+        align-items: center;
+        margin-top: 20px;
+      }
+
+      .form-container.active {
+        display: flex;
+      }
+
+      form {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+      }
+
+      @media (max-width: 768px) {
+        body {
+          padding: 10px;
+        }
+        
+        .container {
+          padding: 20px 10px;
+          width: 95%;
+        }
+
+        h1 {
+          font-size: 1.7rem;
+        }
+        
+        p {
+          font-size: 1rem;
+        }
+        
+        button {
+          padding: 10px 20px;
+          margin: 8px;
+          font-size: 0.9rem;
+        }
+      }
+      
+      @media (max-width: 480px) {
+        .container {
+          padding: 15px 10px;
+          border-width: 4px;
+        }
+        
+        h1 {
+          font-size: 1.4rem;
+          margin-bottom: 8px;
+        }
+        
+        p {
+          font-size: 0.9rem;
+          margin-bottom: 15px;
+        }
+        
+        button {
+          padding: 8px 16px;
+          margin: 5px;
+          font-size: 0.85rem;
+        }
+        
+        input {
+          width: 95%;
+          padding: 10px;
+          font-size: 0.95rem;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <main class="container" id="container">
+      <h1>🌿 Welcome to the Blathers App Portal! 🌿</h1>
+      <p>Play as a guest or sign in to track your progress</p>
+      <button id="playAsGuest" aria-label="Play as Guest">Play as Guest</button>
+      <button id="showLoginOptions" aria-label="Sign In or Register">
+        Sign In / Register
+      </button>
+
+      <div class="form-container sign-up-container" id="signUpForm">
+        <h2>Create Your Account</h2>
+        <form id="signupForm">
+          <input type="text" id="signupUsername" name="username" placeholder="Username (max 10 chars)" maxlength="10" autocomplete="username" required />
+          <input type="email" id="signupEmail" name="email" placeholder="Email" autocomplete="email" required />
+          <input type="password" id="signupPassword" name="password" placeholder="Password (min 6 chars)" minlength="6" autocomplete="new-password" required />
+          <input type="password" id="signupPasswordConfirm" name="passwordConfirm" placeholder="Confirm Password" minlength="6" autocomplete="new-password" required />
+          <div id="signupError" class="error-message"></div>
+          <button type="submit">Sign Up</button>
+        </form>
+      </div>
+
+      <div class="form-container sign-in-container" id="signInForm">
+        <h2>Log In</h2>
+        <form id="loginForm">
+          <input type="email" id="loginEmail" name="email" placeholder="Email" autocomplete="email" required />
+          <input type="password" id="loginPassword" name="password" placeholder="Password" autocomplete="current-password" required />
+          <div id="loginError" class="error-message"></div>
+          <button type="submit">Log In</button>
+        </form>
+      </div>
+    </main>
+
+    <script>
+      // API URL - automatically detect environment
+      const API_URL = (() => {
+        const hostname = window.location.hostname;
+        
+        // Production environment (blathers.app) - use relative path
+        if (hostname === 'blathers.app' || hostname.includes('blathers')) {
+          return '/api/v1'; // Relative path for same-domain deployment
+        }
+        
+        // Local development
+        if (hostname === 'localhost' || hostname === '127.0.0.1') {
+          return 'http://localhost:8000/api/v1';
+        }
+        
+        // Production backend on Railway
+        return 'https://capstone-project-production-3cce.up.railway.app/api/v1';
+      })();
+      
+      // Check if we're running in standalone mode (file:// protocol)
+      function isStandaloneMode() {
+        return window.location.protocol === 'file:' || 
+               localStorage.getItem('force_standalone') === 'true' || 
+               localStorage.getItem('standalone_confirmed_this_session') === 'true';
+      }
+      
+      // Function to check if the server is available
+      async function checkServerAvailable() {
+        try {
+          console.log('Checking server availability at:', API_URL);
+          const controller = new AbortController();
+          const timeoutId = setTimeout(() => controller.abort(), 5000); // 5 second timeout
+          
+          // Try direct health check first
+          try {
+            const response = await fetch(`${API_URL}/health`, {
+              method: 'GET',
+              signal: controller.signal,
+              mode: 'cors',
+              headers: {
+                'Accept': 'application/json'
+              }
+            });
+            
+            clearTimeout(timeoutId);
+            if (response.ok) {
+              console.log('Server is available');
+              return true;
+            }
+          } catch (healthError) {
+            console.log('Health check failed, trying root endpoint');
+          }
+          
+          // If health check fails, try root endpoint
+          const baseUrl = API_URL.split('/api')[0];
+          const rootResponse = await fetch(baseUrl, {
+            method: 'GET',
+            signal: controller.signal,
+            mode: 'cors',
+            headers: {
+              'Accept': 'application/json'
+            }
+          });
+          
+          clearTimeout(timeoutId);
+          console.log('Root endpoint check result:', rootResponse.ok);
+          return rootResponse.ok;
+        } catch (error) {
+          console.error('Server availability check failed:', error);
+          return false;
+        }
+      }
+      
+      // Function to show error or success messages
+      function showError(elementId, message, type = 'error') {
+        const element = document.getElementById(elementId);
+        if (element) {
+          element.textContent = message;
+          element.style.display = 'block';
+          element.style.color = type === 'success' ? '#4CAF50' : '#f44336';
+          element.style.fontWeight = type === 'success' ? 'bold' : 'normal';
+          
+          // Auto-hide success messages after 5 seconds
+          if (type === 'success') {
+            setTimeout(() => {
+              element.textContent = '';
+              element.style.display = 'none';
+            }, 5000);
+          }
+        }
+      }
+      
+      // Function to clear error messages
+      function clearErrors() {
+        document.getElementById('loginError').textContent = '';
+        document.getElementById('signupError').textContent = '';
+      }
+      
+      // Function to save auth token securely
+      function saveAuthToken(token, username) {
+        window.secureTokenManager.storeToken(token, username);
+      }
+      
+      // Event listener for guest play button
+      document
+        .getElementById("playAsGuest")
+        .addEventListener("click", async function () {
+          // Clear any existing auth data
+          window.secureTokenManager.clearToken();
+          localStorage.setItem('acnh_guest', 'true');
+          
+          // If we're already in standalone mode, prompt the user
+          if (isStandaloneMode()) {
+            if (confirm("Server connection unavailable. Your scores will be saved locally but not shared online. Continue in standalone mode?")) {
+              localStorage.setItem('force_standalone', 'true');
+              localStorage.setItem('standalone_confirmed_this_session', 'true');
+              window.location.href = "game.html?guest=true";
+            }
+            return;
+          }
+          
+          // Check server availability before proceeding
+          const serverAvailable = await checkServerAvailable();
+          
+          if (!serverAvailable) {
+            // Server is not available, offer standalone mode
+            if (confirm("Server connection unavailable. Your scores will be saved locally but not shared online. Continue in standalone mode?")) {
+              localStorage.setItem('force_standalone', 'true');
+              localStorage.setItem('standalone_confirmed_this_session', 'true');
+              window.location.href = "game.html?guest=true";
+            }
+            return;
+          }
+          
+          // Server is available, proceed to game
+          window.location.href = "game.html?guest=true";
+        });
+
+      // Event listener for showing login/signup forms
+      document
+        .getElementById("showLoginOptions")
+        .addEventListener("click", function () {
+          document.querySelector("#signUpForm").classList.add("active");
+          document.querySelector("#signInForm").classList.add("active");
+        });
+
+      // Event listener for login form
+      document
+        .getElementById("loginForm")
+        .addEventListener("submit", async function (e) {
+          e.preventDefault();
+          clearErrors();
+          
+          const email = document.getElementById('loginEmail').value.trim();
+          const password = document.getElementById('loginPassword').value;
+          
+          if (!email || !password) {
+            showError('loginError', 'Please enter both email and password');
+            return;
+          }
+          
+          // Check if we're in standalone mode
+          if (isStandaloneMode()) {
+            // In standalone mode, prompt user to play in standalone mode
+            showError('loginError', 'Server is not available. Would you like to play in standalone mode?');
+            
+            // Create a temporary button for standalone mode
+            const standaloneBtn = document.createElement('button');
+            standaloneBtn.textContent = 'Play in Standalone Mode';
+            standaloneBtn.style.marginTop = '10px';
+            standaloneBtn.onclick = function() {
+              localStorage.setItem('acnh_username', username);
+              localStorage.setItem('acnh_guest', 'true');
+              localStorage.setItem('force_standalone', 'true');
+              window.location.href = "game.html?guest=true";
+            };
+            
+            // Add the button to the form
+            document.getElementById('loginForm').appendChild(standaloneBtn);
+            return;
+          }
+          
+          // Add a timeout to the fetch request
+          const controller = new AbortController();
+          const timeoutId = setTimeout(() => controller.abort(), 3000); // 3 second timeout
+          
+          console.log('Sending login request...', { email });
+          
+          try {
+            const response = await fetch(`${API_URL}/api/v1/auth/login`, {
+              method: 'POST',
+              headers: {
+                'Content-Type': 'application/json',
+                'Accept': 'application/json'
+              },
+              body: JSON.stringify({ 
+                email: email.trim(),
+                password: password 
+              }),
+              signal: controller.signal,
+              credentials: 'include' // Include cookies for session handling
+            });
+            
+            clearTimeout(timeoutId);
+            
+            console.log('Received response status:', response.status);
+            
+            let data;
+            const contentType = response.headers.get('content-type');
+            console.log('Response content type:', contentType);
+            
+            const responseText = await response.text();
+            console.log('Raw response text:', responseText);
+            
+            if (contentType && contentType.includes('application/json')) {
+              data = JSON.parse(responseText);
+            } else {
+              throw new Error(`Unexpected response format: ${responseText}`);
+            }
+            
+            console.log('Parsed response data:', data);
+            
+            if (!response.ok) {
+              const errorMessage = data?.message || 
+                                data?.error?.message || 
+                                data?.error || 
+                                response.statusText || 
+                                `Login failed (${response.status})`;
+              throw new Error(errorMessage);
+            }
+            
+            // Save auth token and redirect to game
+            saveAuthToken(data.token, data.username);
+            localStorage.removeItem('acnh_guest');
+            window.location.href = "game.html";
+            
+          } catch (error) {
+            console.error('Login error:', {
+              name: error.name,
+              message: error.message,
+              stack: error.stack,
+              ...(error.response && { response: error.response })
+            });
+            
+            // Show detailed error message to the user
+            let errorMessage = 'An error occurred during login. ';
+            const loginForm = document.getElementById('loginForm');
+            
+            if (error.name === 'AbortError') {
+              errorMessage += 'Request timed out. Please check your connection and try again.';
+            } else if (error.message.includes('Failed to fetch')) {
+              errorMessage += 'Unable to connect to the server. ';
+            } else {
+              errorMessage += error.message || 'Please try again later.';
+            }
+            
+            showError('loginError', errorMessage);
+            
+            // Clear any existing buttons
+            const existingButtons = loginForm.querySelectorAll('button[data-type="action"]');
+            existingButtons.forEach(btn => btn.remove());
+            
+            // Check if this is a deactivated account error
+            if (error.message && error.message.includes('deactivated')) {
+              // Add reactivate account button
+              const reactivateBtn = document.createElement('button');
+              reactivateBtn.textContent = 'Reactivate Account';
+              reactivateBtn.style.marginTop = '10px';
+              reactivateBtn.style.marginRight = '10px';
+              reactivateBtn.setAttribute('data-type', 'action');
+              reactivateBtn.onclick = async function(e) {
+                e.preventDefault();
+                reactivateBtn.disabled = true;
+                reactivateBtn.textContent = 'Reactivating...';
+                
+                try {
+                  console.log('Sending reactivation request for email:', email);
+                  const response = await fetch(`${API_URL}/api/v1/auth/reactivate-account`, {
+                    method: 'POST',
+                    headers: {
+                      'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({ email: email })
+                  });
+                  
+                  console.log('Reactivation response status:', response.status);
+                  const data = await response.json().catch(() => ({}));
+                  console.log('Reactivation response data:', data);
+                  
+                  if (response.ok) {
+                    showError('loginError', 'Account reactivated successfully! You can now log in.', 'success');
+                    reactivateBtn.remove();
+                  } else {
+                    const errorMsg = data.message || `Failed to reactivate account. Status: ${response.status}`;
+                    console.error('Reactivation failed:', errorMsg);
+                    showError('loginError', errorMsg);
+                    reactivateBtn.disabled = false;
+                    reactivateBtn.textContent = 'Try Again to Reactivate';
+                  }
+                } catch (err) {
+                  console.error('Error during reactivation:', err);
+                  showError('loginError', 'Network error. Please check your connection and try again.');
+                  reactivateBtn.disabled = false;
+                  reactivateBtn.textContent = 'Try Again to Reactivate';
+                }
+              };
+              
+              loginForm.appendChild(reactivateBtn);
+            }
+            
+            // Only show standalone mode option if it's a connection error
+            if (error.name === 'AbortError' || error.message.includes('Failed to fetch')) {
+              // Create a button for standalone mode
+              const standaloneBtn = document.createElement('button');
+              standaloneBtn.textContent = 'Play in Standalone Mode';
+              standaloneBtn.style.marginTop = '10px';
+              standaloneBtn.setAttribute('data-type', 'action');
+              standaloneBtn.onclick = function() {
+                localStorage.setItem('acnh_username', email || 'Guest');
+                localStorage.setItem('acnh_guest', 'true');
+                localStorage.setItem('force_standalone', 'true');
+                window.location.href = "game.html?guest=true";
+              };
+              
+              // Add the button to the form
+              loginForm.appendChild(standaloneBtn);
+            }
+          }
+        });
+
+      // Event listener for signup form
+      document
+        .getElementById("signupForm")
+        .addEventListener("submit", async function (e) {
+          e.preventDefault();
+          clearErrors();
+          
+          const username = document.getElementById('signupUsername').value.trim();
+          const email = document.getElementById('signupEmail').value.trim();
+          const password = document.getElementById('signupPassword').value;
+          const passwordConfirm = document.getElementById('signupPasswordConfirm').value;
+          
+          // Validate fields
+          if (!username || !email || !password || !passwordConfirm) {
+            showError('signupError', 'Please fill in all fields');
+            return;
+          }
+          
+          if (password.length < 6) {
+            showError('signupError', 'Password must be at least 6 characters');
+            return;
+          }
+          
+          if (password !== passwordConfirm) {
+            showError('signupError', 'Passwords do not match');
+            return;
+          }
+          
+          try {
+            // Check if we're in standalone mode
+            if (isStandaloneMode()) {
+              // In standalone mode, prompt user to play in standalone mode
+              showError('signupError', 'Server is not available. Would you like to play in standalone mode?');
+              
+              // Create a temporary button for standalone mode
+              const standaloneBtn = document.createElement('button');
+              standaloneBtn.textContent = 'Play in Standalone Mode';
+              standaloneBtn.style.marginTop = '10px';
+              standaloneBtn.onclick = function() {
+                localStorage.setItem('acnh_username', username);
+                localStorage.setItem('acnh_guest', 'true');
+                localStorage.setItem('force_standalone', 'true');
+                window.location.href = "game.html?guest=true";
+              };
+              
+              // Add the button to the form
+              document.getElementById('signupForm').appendChild(standaloneBtn);
+              return;
+            }
+            
+            // Add a timeout to the fetch request
+            const controller = new AbortController();
+            const timeoutId = setTimeout(() => controller.abort(), 3000); // 3 second timeout
+            
+            console.log('Sending signup request...', { username, email });
+            
+            const response = await fetch(`${API_URL}/api/v1/auth/signup`, {
+              method: 'POST',
+              headers: {
+                'Content-Type': 'application/json',
+                'Accept': 'application/json'
+              },
+              body: JSON.stringify({ 
+                username, 
+                email, 
+                password, 
+                passwordConfirm 
+              }),
+              signal: controller.signal,
+              credentials: 'include' // Include cookies in the request
+            });
+            
+            clearTimeout(timeoutId);
+            
+            console.log('Received response status:', response.status);
+            
+            let data;
+            try {
+              const contentType = response.headers.get('content-type');
+              console.log('Response content type:', contentType);
+              
+              const responseText = await response.text();
+              console.log('Raw response text:', responseText);
+              
+              if (contentType && contentType.includes('application/json')) {
+                data = JSON.parse(responseText);
+              } else {
+                throw new Error(`Unexpected response format: ${responseText}`);
+              }
+            } catch (parseError) {
+              console.error('Error parsing response:', parseError);
+              throw new Error(`Invalid response from server: ${parseError.message}`);
+            }
+            
+            console.log('Parsed response data:', data);
+            
+            if (!response.ok) {
+              console.error('Server error response:', data);
+              const errorMessage = data?.message || 
+                                data?.error?.message || 
+                                data?.error || 
+                                response.statusText || 
+                                `Registration failed (${response.status})`;
+              throw new Error(errorMessage);
+            }
+            
+            // Save auth token and redirect to game
+            saveAuthToken(data.token, data.username);
+            localStorage.removeItem('acnh_guest');
+            window.location.href = "game.html";
+          } catch (error) {
+            console.error('Registration error:', {
+              name: error.name,
+              message: error.message,
+              stack: error.stack,
+              ...(error.response && { response: error.response })
+            });
+            
+            // Show detailed error message to the user
+            let errorMessage = 'An error occurred during registration. ';
+            
+            if (error.name === 'AbortError') {
+              errorMessage += 'Request timed out. Please check your connection and try again.';
+            } else if (error.message.includes('Failed to fetch')) {
+              errorMessage += 'Unable to connect to the server. ';
+            } else {
+              errorMessage += error.message || 'Please try again later.';
+            }
+            
+            showError('signupError', errorMessage);
+            
+            // Only show standalone mode option if it's a connection error
+            if (error.name === 'AbortError' || error.message.includes('Failed to fetch')) {
+              // Create a temporary button for standalone mode
+              const standaloneBtn = document.createElement('button');
+              standaloneBtn.textContent = 'Play in Standalone Mode';
+              standaloneBtn.style.marginTop = '10px';
+              standaloneBtn.onclick = function() {
+                localStorage.setItem('acnh_username', username);
+                localStorage.setItem('acnh_guest', 'true');
+                localStorage.setItem('force_standalone', 'true');
+                window.location.href = "game.html?guest=true";
+              };
+              
+              // Add the button to the form
+              document.getElementById('signupForm').appendChild(standaloneBtn);
+            }
+          }
+        });
+    </script>
+  </body>
+</html>

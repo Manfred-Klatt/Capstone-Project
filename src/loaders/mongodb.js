@@ -43,7 +43,6 @@ process.on('unhandledRejection', (reason, promise) => {
  * @param {number} retryCount - Current retry attempt number
  * @returns {Promise<mongoose.Connection>} Mongoose connection instance
  */
-require('dotenv').config({ path: '.env.railway' });
 
 const connectDB = async (retryCount = 0) => {
   if (isConnected && mongoose.connection.readyState === 1) {
@@ -96,12 +95,15 @@ const connectDB = async (retryCount = 0) => {
     const connectionOptions = {
       useNewUrlParser: true,
       useUnifiedTopology: true,
-      serverSelectionTimeoutMS: 10000,
-      socketTimeoutMS: 45000,
-      connectTimeoutMS: 10000,
+      serverSelectionTimeoutMS: 30000, // Increased from 10000
+      socketTimeoutMS: 60000, // Increased from 45000
+      connectTimeoutMS: 30000, // Increased from 10000
       maxPoolSize: 10,
       retryWrites: true,
       w: 'majority',
+      ssl: true, // Explicitly enable SSL for MongoDB Atlas
+      tls: true, // Explicitly enable TLS for MongoDB Atlas
+      tlsAllowInvalidCertificates: false,
       ...(config.database?.options || {})
     };
 

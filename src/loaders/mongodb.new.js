@@ -2,14 +2,10 @@ const mongoose = require('mongoose');
 const config = require('../config');
 const logger = require('../utils/logger');
 
-// Load environment variables from .env.railway
-require('dotenv').config({ path: '.env.railway' });
-
 // Constants
 const MAX_RETRIES = 3;
-const RETRY_DELAY_MS = 3000; // 3 seconds
+const RETRY_DELAY_MS = 3000;
 
-// Connection state tracking
 let isConnected = false;
 let connectionRetryCount = 0;
 
@@ -43,16 +39,13 @@ process.on('unhandledRejection', (reason, promise) => {
  * @param {number} retryCount - Current retry attempt number
  * @returns {Promise<mongoose.Connection>} Mongoose connection instance
  */
-require('dotenv').config({ path: '.env.railway' });
-
 const connectDB = async (retryCount = 0) => {
   if (isConnected && mongoose.connection.readyState === 1) {
     logger.info('Using existing database connection');
     return mongoose.connection;
   }
 
-  // Get connection URL from environment variables
-  const connectionUrl = process.env.MONGODB_URI;
+  const connectionUrl = process.env.MONGODB_URI || config.database?.url;
   
   // Sanitize URL for logging
   const logUrl = connectionUrl ? 
@@ -61,8 +54,8 @@ const connectDB = async (retryCount = 0) => {
     
   logger.info(`🔌 MongoDB Connection Attempt ${retryCount + 1}/${MAX_RETRIES}`, {
     url: logUrl,
-    nodeEnv: process.env.NODE_ENV || 'development',
-    appEnv: config.env || 'development'
+    nodeEnv: process.env.NODE_ENV,
+    appEnv: config.env
   });
   
   if (!connectionUrl) {

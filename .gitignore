@@ -5,7 +5,6 @@ node_modules/
 dist/
 
 # Environment variables
-.env
 .env.local
 .env.development.local
 .env.test.local
@@ -74,3 +73,34 @@ setup-*.md
 font-test.html
 DEPLOY.md
 RAILWAY-DEPLOY.md
+node_modules/.package-lock.json
+node_modules/dotenv/CHANGELOG.md
+node_modules/dotenv/lib/cli-options.js
+node_modules/dotenv/lib/env-options.js
+node_modules/dotenv/lib/main.d.ts
+node_modules/dotenv/lib/main.js
+node_modules/dotenv/package.json
+node_modules/dotenv/README-es.md
+node_modules/dotenv/README.md
+test-mongodb.js
+test-db-connection.js
+node_modules/.package-lock.json
+node_modules/dotenv/CHANGELOG.md
+node_modules/dotenv/lib/cli-options.js
+node_modules/dotenv/lib/env-options.js
+node_modules/dotenv/lib/main.d.ts
+node_modules/dotenv/lib/main.js
+node_modules/dotenv/package.json
+node_modules/dotenv/README-es.md
+node_modules/dotenv/README.md
+test-tcp.js
+test-simple.js
+test-dns.js
+test-internet.js
+test-node.js
+test-with-env.js
+check-node.js
+test-ping.js
+direct-test.js
+test-mongodb-native.js
+minimal-test.js

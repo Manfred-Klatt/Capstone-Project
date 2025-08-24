@@ -5,32 +5,33 @@
 
     <!-- Font loads progressively via fontOptimizer.js -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/fontfaceobserver/2.3.0/fontfaceobserver.standalone.js"></script>
-    <script src="/js/fontOptimizer.js"></script>
-    <script src="/js/backgroundLoader.js"></script>
-    <script src="/js/leaderboard-api.js"></script>
+    <script src="js/fontOptimizer.js"></script>
+    <script src="js/backgroundLoader.js"></script>
+    <script src="js/serverCheck.js"></script>
+    <script src="js/leaderboard-api.js"></script>
     <!-- <script src="/js/leaderboard-manager.js"></script> Disabled to prevent conflicts -->
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <!-- Preload essential sound effects with optimized OGG files -->
     <!-- Critical sounds preloaded for immediate use -->
     <audio id="correct-sound" preload="auto">
-      <source src="/sounds/correct.ogg" type="audio/ogg">
+      <source src="sounds/correct.ogg" type="audio/ogg">
     </audio>
     <audio id="game-over-sound" preload="auto">
-      <source src="/sounds/game-over.ogg" type="audio/ogg">
+      <source src="sounds/game-over.ogg" type="audio/ogg">
     </audio>
     <!-- Non-critical sounds loaded on demand -->
-    <audio id="start-game-sound" preload="none">
-      <source src="/sounds/start-game.ogg" type="audio/ogg">
-    </audio>
     <audio id="high-score-sound" preload="none">
-      <source src="/sounds/high-score.ogg" type="audio/ogg">
+      <source src="sounds/high-score.ogg" type="audio/ogg">
     </audio>
     <audio id="toggle-on-sound" preload="none">
-      <source src="/sounds/toggle-on.ogg" type="audio/ogg">
+      <source src="sounds/toggle-on.ogg" type="audio/ogg">
     </audio>
     <audio id="toggle-off-sound" preload="none">
-      <source src="/sounds/toggle-off.ogg" type="audio/ogg">
+      <source src="sounds/toggle-off.ogg" type="audio/ogg">
+    </audio>
+    <audio id="new-round-sound" preload="auto">
+      <source src="sounds/new-round.ogg" type="audio/ogg">
     </audio>
     <title>AC:NH ID Game</title>
     <style>
@@ -1551,18 +1552,18 @@
         }
       }
       
-      // Mobile navigation buttons event listeners
-      document.addEventListener('DOMContentLoaded', function() {
-        // Initialize standalone mode status
-        window.standaloneMode = isStandaloneMode();
-        
-        // Check server connection when the page loads
-        document.addEventListener('DOMContentLoaded', async function() {
-          // Update welcome message
-          updateWelcomeMessage();
+      // Function to check if the server is available
+      async function checkServerAvailability() {
+        try {
+          console.log('Checking server availability...');
+          const controller = new AbortController();
+          const timeoutId = setTimeout(() => controller.abort(), 3000); // 3 second timeout
           
-          // Status indicator removed
+          const response = await fetch(`${API_URL}/api/v1/health`, {
+            signal: controller.signal
+          });
           
+          clearTimeout(timeoutId);
           // Check if we're already in standalone mode
           if (window.standaloneMode) {
             updateStandaloneModeIndicator();
@@ -3158,8 +3159,20 @@
           return;
         }
         
-        // Get the current username from localStorage or sessionStorage
-        const username = localStorage.getItem('username') || sessionStorage.getItem('username') || playerName;
+        // Check if this is a guest user
+        const urlParams = new URLSearchParams(window.location.search);
+        const isGuest = urlParams.get("guest") === "true";
+        
+        // For guest users, store their name temporarily
+        if (isGuest) {
+          // Store the guest name in sessionStorage so it persists during the session
+          sessionStorage.setItem('guestUsername', playerName);
+          console.log('Guest user name saved:', playerName);
+        }
+        
+        // Get the current username from localStorage, sessionStorage, or the entered name
+        const username = localStorage.getItem('username') || sessionStorage.getItem('username') || 
+                        (isGuest ? sessionStorage.getItem('guestUsername') : null) || playerName;
         
         // Check if we're in standalone mode
         if (isStandaloneMode()) {
@@ -3198,13 +3211,24 @@
           const controller = new AbortController();
           const timeoutId = setTimeout(() => controller.abort(), 2000); // 2 second timeout
           
-          const response = await fetch(`${API_URL}/api/v1/games/end-game`, {
+          // Prepare the request body
+          const requestBody = {
+            category: category,
+            score: finalScore
+          };
+          
+          // For guest users, explicitly include the username in the request
+          const urlParams = new URLSearchParams(window.location.search);
+          const isGuest = urlParams.get("guest") === "true";
+          if (isGuest) {
+            requestBody.username = playerName;
+            console.log('Submitting guest score with username:', playerName);
+          }
+          
+          const response = await fetch(`${API_URL}/api/v1/leaderboard/submit`, {
             method: 'POST',
             headers: headers,
-            body: JSON.stringify({
-              category: category,
-              score: finalScore
-            }),
+            body: JSON.stringify(requestBody),
             signal: controller.signal
           }).catch(error => {
             // Mark API as unavailable for future calls
@@ -3224,7 +3248,7 @@
           const leaderboardController = new AbortController();
           const leaderboardTimeoutId = setTimeout(() => leaderboardController.abort(), 2000);
           
-          const leaderboardResponse = await fetch(`${API_URL}/api/v1/games/leaderboard?category=${category}`, {
+          const leaderboardResponse = await fetch(`${API_URL}/api/v1/leaderboard/${category}`, {
             signal: leaderboardController.signal
           }).catch(error => {
             window.apiUnavailable = true;
@@ -3334,6 +3358,16 @@
       
       // Check if a score is high enough to be on the leaderboard
       async function isHighScore(score, category) {
+        // Check if this is a guest user - always prompt guests for name
+        const urlParams = new URLSearchParams(window.location.search);
+        const isGuest = urlParams.get("guest") === "true";
+        
+        // For guest users, always consider it a high score to prompt for name
+        if (isGuest) {
+          console.log('Guest user detected, will prompt for name');
+          return true;
+        }
+        
         try {
           // Check if we're in standalone mode
           if (isStandaloneMode()) {
@@ -3576,10 +3610,6 @@
 
       // Function to detect if we're running in standalone mode (without a server)
       function isStandaloneMode() {
-        // Check URL parameters
-        const urlParams = new URLSearchParams(window.location.search);
-        const guestParam = urlParams.get('guest');
-        
         // Check if running via file:// protocol
         const isFileProtocol = window.location.protocol === 'file:';
         
@@ -3589,7 +3619,8 @@
         // Check if force_standalone is set in localStorage
         const forceStandalone = localStorage.getItem('force_standalone') === 'true';
         
-        return guestParam === 'true' || isFileProtocol || apiUnavailable || forceStandalone;
+        // Guest users are NOT standalone mode users if the server is available
+        return isFileProtocol || apiUnavailable || forceStandalone;
       }
       
       let leaderboardInitialized = false;

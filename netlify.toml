@@ -7,7 +7,7 @@
 
 [[redirects]]
   from = "/api/health"
-  to = "https://capstone-project-production-3cce.up.railway.app/api/v1/health"
+  to = "https://capstone-project-production-3cce.up.railway.app/health"
   status = 200
   force = true
 

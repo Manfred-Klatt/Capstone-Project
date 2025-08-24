@@ -8,7 +8,7 @@
     <script src="/js/fontOptimizer.js"></script>
     <script src="/js/backgroundLoader.js"></script>
     <script src="/js/leaderboard-api.js"></script>
-    <script src="/js/leaderboard-manager.js"></script>
+    <!-- <script src="/js/leaderboard-manager.js"></script> Disabled to prevent conflicts -->
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <!-- Preload essential sound effects with optimized OGG files -->
@@ -118,7 +118,7 @@
         --background-color: #f0f8ff;
         --text-color: #5a3d2b;
         --container-bg: #fff9f0;
-        --border-color: #8b4513;
+        --border-color: #5a3d2b;
         --shadow-color: rgba(0, 0, 0, 0.1);
       }
 
@@ -249,7 +249,7 @@
       #score {
         font-weight: bold;
         font-size: 18px;
-        color: #8b4513;
+        color: #5a3d2b;
       }
       #category-selector {
         margin: 15px 0;
@@ -287,11 +287,11 @@
         padding: 15px;
         border-radius: 10px;
         box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
-        border: 2px solid #8b4513;
+        border: 2px solid #5a3d2b;
       }
       #leaderboard-section h2 {
         margin-bottom: 10px;
-        border-bottom: 2px solid #8b4513;
+        border-bottom: 2px solid #5a3d2b;
         padding-bottom: 5px;
       }
       #admin-tools-container {
@@ -304,13 +304,13 @@
         border-radius: 10px;
         box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
         z-index: 100;
-        border: 2px solid #8b4513;
+        border: 2px solid #5a3d2b;
         z-index: 100;
       }
       
       #admin-tools-container h2 {
         margin-bottom: 10px;
-        border-bottom: 2px solid #8b4513;
+        border-bottom: 2px solid #5a3d2b;
         padding-bottom: 5px;
         color: #5a3d2b;
       }
@@ -335,10 +335,10 @@
         width: 95%;
         max-width: 1100px;
         margin: 0 auto 30px;
-        padding: 15px;
+        padding: 20px 15px;
         background-color: #fff9e6; /* Warm yellow that complements the Animal Crossing theme */
         border-radius: 10px;
-        border: 2px solid var(--border-color, #8b4513);
+        border: 2px solid var(--border-color, #5a3d2b);
         box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
         box-sizing: border-box;
         text-align: center;
@@ -346,6 +346,7 @@
         flex-direction: column;
         align-items: center;
         justify-content: center;
+        line-height: 1.3;
       }
 
       #leaderboard {
@@ -367,25 +368,12 @@
         justify-content: center;
       }
 
-      .category-leaderboard {
-        background-color: #fff9f0;
-        padding: 15px;
-        border-radius: 12px;
-        box-shadow: 0 0 12px rgba(0, 0, 0, 0.1);
-        border: 2px solid #8b4513;
-        width: 100%;
-        box-sizing: border-box;
-        display: flex;
-        flex-direction: column;
-        align-items: center;
-        height: auto; /* Let content determine height */
-        margin: 0 auto;
-      }
+      /* Removed duplicate - consolidated below */
 
       .category-leaderboard h3 {
         margin: 0 0 12px 0;
         padding-bottom: 8px;
-        border-bottom: 1px solid #8b4513;
+        border-bottom: 1px solid #5a3d2b;
         text-align: center;
         white-space: nowrap;
       }
@@ -420,12 +408,12 @@
         background-color: #fff9f0;
         border-radius: 12px;
         box-shadow: 0 0 12px rgba(0, 0, 0, 0.1);
-        border: 2px solid #8b4513;
+        border: 2px solid #5a3d2b;
         box-sizing: border-box;
       }
       .category-leaderboard h3 {
         margin-bottom: 5px;
-        border-bottom: 2px solid #8b4513;
+        border-bottom: 2px solid #5a3d2b;
         padding-bottom: 2.5px;
       }
       .high-score-container {
@@ -625,37 +613,41 @@
       }
       
       .leaderboard-stack {
-        width: 60%;
-        background: rgba(255, 255, 255, 0.95);
-        border-radius: 15px;
-        box-shadow: 0 0 15px rgba(0, 0, 0, 0.1);
-        overflow: hidden;
+        width: 320px;
+        height: 544px;
+        background: #2C3E50;
+        border-radius: 25px;
+        box-shadow: 0 8px 25px rgba(0, 0, 0, 0.3);
+        border: 8px solid #34495E;
+        position: relative;
         transition: all 0.3s ease;
       }
       
       .leaderboard-stack[data-category="fish"] {
-        background: linear-gradient(135deg, rgba(173, 216, 230, 0.95), rgba(135, 206, 235, 0.95));
+        background: linear-gradient(135deg, #4A90E2, #357ABD);
       }
       
       .leaderboard-stack[data-category="bugs"] {
-        background: linear-gradient(135deg, rgba(144, 238, 144, 0.95), rgba(152, 251, 152, 0.95));
+        background: linear-gradient(135deg, #7ED321, #5BA517);
       }
       
       .leaderboard-stack[data-category="sea"] {
-        background: linear-gradient(135deg, rgba(64, 224, 208, 0.95), rgba(72, 209, 204, 0.95));
+        background: linear-gradient(135deg, #50E3C2, #4ECDC4);
       }
       
       .leaderboard-stack[data-category="villagers"] {
-        background: linear-gradient(135deg, rgba(255, 182, 193, 0.95), rgba(255, 192, 203, 0.95));
+        background: linear-gradient(135deg, #F5A623, #E09900);
       }
       
       .leaderboard-header {
         display: flex;
         align-items: center;
         justify-content: space-between;
-        padding: 15px 20px;
-        background: linear-gradient(to bottom, #f0f8ff, #e6f3ff);
-        border-bottom: 2px solid #8b4513;
+        padding: 10px 15px;
+        background: rgba(0, 0, 0, 0.2);
+        border-bottom: 1px solid rgba(255, 255, 255, 0.2);
+        margin: 10px 10px 0 10px;
+        border-radius: 10px 10px 0 0;
       }
       
       .leaderboard-nav {
@@ -685,15 +677,21 @@
       #leaderboard-title {
         margin: 0;
         font-size: 1.2em;
-        color: #8b4513;
+        color: white;
         text-align: center;
         flex: 1;
+        transition: color 0.3s ease;
+        font-weight: bold;
+        text-shadow: 0 1px 2px rgba(0, 0, 0, 0.5);
       }
       
       .leaderboard-content {
         position: relative;
-        min-height: 380px;
+        height: 400px;
         overflow: hidden;
+        margin: 0 10px 10px 10px;
+        background: rgba(0, 0, 0, 0.1);
+        border-radius: 0 0 10px 10px;
       }
       
       .category-leaderboard {
@@ -701,11 +699,19 @@
         top: 0;
         left: 0;
         width: 100%;
-        padding: 20px;
+        padding: 15px;
         box-sizing: border-box;
         opacity: 0;
         transform: translateX(100%);
         transition: all 0.3s ease-in-out;
+        border-radius: 12px;
+        box-shadow: 0 0 12px rgba(0, 0, 0, 0.1);
+        border: 2px solid #5a3d2b;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        height: auto;
+        margin: 0 auto;
       }
       
       .category-leaderboard.active {
@@ -716,27 +722,57 @@
       .leaderboard-indicators {
         display: flex;
         justify-content: center;
-        padding: 15px;
-        gap: 10px;
-        background: linear-gradient(to top, #f0f8ff, #e6f3ff);
-        border-top: 1px solid #ddd;
+        align-items: center;
+        gap: 8px;
+        padding: 10px;
+        background: rgba(0, 0, 0, 0.2);
+        margin: 0 10px 10px 10px;
+        border-radius: 10px;
       }
       
       .indicator {
         width: 12px;
         height: 12px;
         border-radius: 50%;
-        background: #cccccc;
+        background: #ccc;
         cursor: pointer;
         transition: background-color 0.3s ease;
       }
       
-      .indicator.active {
-        background: #4a90e2;
+      .indicator[data-category="fish"] {
+        background: #87CEEB;
+      }
+      
+      .indicator[data-category="bugs"] {
+        background: #32CD32;
+      }
+      
+      .indicator[data-category="sea"] {
+        background: #00BFFF;
+      }
+      
+      .indicator[data-category="villagers"] {
+        background: #FFD700;
+      }
+      
+      .indicator.active[data-category="fish"] {
+        background: #4682B4;
+      }
+      
+      .indicator.active[data-category="bugs"] {
+        background: #228B22;
+      }
+      
+      .indicator.active[data-category="sea"] {
+        background: #0080FF;
+      }
+      
+      .indicator.active[data-category="villagers"] {
+        background: #DAA520;
       }
       
       .indicator:hover {
-        background: #357abd;
+        opacity: 0.8;
       }
       
       #fish-scores,
@@ -759,12 +795,7 @@
         gap: 15px;
       }
       
-      .category-leaderboard {
-        border-radius: 10px;
-        border: 2px solid var(--border-color);
-        padding: 15px;
-        margin-bottom: 20px;
-      }
+      /* Removed duplicate - consolidated above */
 
       /* Unique background colors for each category */
       #fish-leaderboard {
@@ -1331,13 +1362,7 @@
         <div class="speech-bubble-tail" style="position: absolute; left: 79px; top: 50%; transform: translateY(-50%); width: 0; height: 0; border: 8px solid transparent; border-right-color: #ffffff; border-left: 0; border-bottom: 0; z-index: 1001;"></div>
       </div>
       
-      <!-- Center: Leaderboard Status Indicator -->
-      <div id="leaderboard-status-container" style="position: absolute; left: 50%; transform: translateX(-50%); top: 15px;">
-        <div class="status-indicator" style="display: flex; align-items: center; gap: 8px; background: rgba(255,255,255,0.9); padding: 8px 16px; border-radius: 20px; box-shadow: 0 2px 8px rgba(0,0,0,0.1); font-family: 'customfont', sans-serif; font-size: 0.85rem;">
-          <div class="status-dot" id="leaderboard-status-dot" style="width: 8px; height: 8px; border-radius: 50%; background: #ffa500; animation: pulse 2s infinite;"></div>
-          <span class="status-text" id="leaderboard-status-text">Checking...</span>
-        </div>
-      </div>
+      <!-- Status indicator removed -->
       
       <!-- Speech Bubble Styles -->
       <style>
@@ -1519,72 +1544,6 @@
         }
       }
       
-      // Function to initialize and manage leaderboard status indicator
-      function initializeLeaderboardStatus() {
-        const statusDot = document.getElementById('leaderboard-status-dot');
-        const statusText = document.getElementById('leaderboard-status-text');
-        
-        if (!statusDot || !statusText) return;
-        
-        // Set initial checking state
-        updateLeaderboardStatus('checking', 'Checking...');
-        
-        // Check server connection status
-        checkLeaderboardConnection();
-        
-        // Set up periodic status checks every 30 seconds
-        setInterval(checkLeaderboardConnection, 30000);
-      }
-      
-      // Function to update leaderboard status indicator
-      function updateLeaderboardStatus(status, message) {
-        const statusDot = document.getElementById('leaderboard-status-dot');
-        const statusText = document.getElementById('leaderboard-status-text');
-        
-        if (!statusDot || !statusText) return;
-        
-        // Remove all status classes
-        statusDot.classList.remove('online', 'offline', 'checking');
-        
-        // Add the current status class
-        statusDot.classList.add(status);
-        
-        // Update status text
-        statusText.textContent = message;
-      }
-      
-      // Function to check leaderboard connection
-      async function checkLeaderboardConnection() {
-        try {
-          // Use the LeaderboardAPI if available
-          if (typeof LeaderboardAPI !== 'undefined') {
-            const api = new LeaderboardAPI();
-            const isOnline = await api.checkConnection();
-            
-            if (isOnline) {
-              updateLeaderboardStatus('online', 'Global Leaderboard');
-            } else {
-              updateLeaderboardStatus('offline', 'Local Only');
-            }
-          } else {
-            // Fallback to basic health check
-            const response = await fetch('/api/health', {
-              method: 'GET',
-              cache: 'no-cache',
-              timeout: 5000
-            });
-            
-            if (response.ok) {
-              updateLeaderboardStatus('online', 'Global Leaderboard');
-            } else {
-              updateLeaderboardStatus('offline', 'Local Only');
-            }
-          }
-        } catch (error) {
-          updateLeaderboardStatus('offline', 'Local Only');
-        }
-      }
-      
       // Mobile navigation buttons event listeners
       document.addEventListener('DOMContentLoaded', function() {
         // Initialize standalone mode status
@@ -1595,8 +1554,7 @@
           // Update welcome message
           updateWelcomeMessage();
           
-          // Initialize leaderboard status indicator
-          initializeLeaderboardStatus();
+          // Status indicator removed
           
           // Check if we're already in standalone mode
           if (window.standaloneMode) {
@@ -1955,11 +1913,11 @@
         background-clip: text;
         color: transparent;
         animation: rainbow 2s linear infinite;
-      ">Welcome to the Identifier Game!<br><br>Choose category/difficulty below.</h1>
+      ">Welcome to the Identifier Game!<br>Choose a category & difficulty below.</h1>
       <div id="category-selector" class="category-container" style="display: flex; flex-direction: column; align-items: center; gap: 10px; margin: 10px 0; width: 100%;">
         <div style="display: flex; flex-direction: column; align-items: center; width: 100%; max-width: 200px;">
           <label for="category" style="margin-bottom: 5px; font-size: 0.9rem; width: 100%; text-align: center;">Category</label>
-          <select id="category" style="width: 100%; padding: 6px; border-radius: 4px; border: 1px solid #8b4513; font-size: 0.9rem; min-width: 0;">
+          <select id="category" style="width: 100%; padding: 6px; border-radius: 4px; border: 1px solid #5a3d2b; font-size: 0.9rem; min-width: 0;">
             <option value="fish">Fish</option>
             <option value="bugs">Bugs</option>
             <option value="sea">Sea Creatures</option>
@@ -1969,7 +1927,7 @@
         
         <div style="display: flex; flex-direction: column; align-items: center; width: 100%; max-width: 200px;">
           <label for="difficulty" style="margin-bottom: 5px; font-size: 0.9rem; width: 100%; text-align: center;">Difficulty</label>
-          <select id="difficulty" style="width: 100%; padding: 6px; border-radius: 4px; border: 1px solid #8b4513; font-size: 0.9rem; min-width: 0;">
+          <select id="difficulty" style="width: 100%; padding: 6px; border-radius: 4px; border: 1px solid #5a3d2b; font-size: 0.9rem; min-width: 0;">
             <option value="15000">Easy (15s)</option>
             <option value="10000">Medium (10s)</option>
             <option value="5000">Hard (5s)</option>
@@ -1977,7 +1935,7 @@
         </div>
       </div>
       <div class="high-score-container">
-        <div id="high-score">Personal Best: 0</div>
+        <div id="high-score" style="margin-bottom: 5px; font-size: 0.9rem; width: 100%; text-align: center;">Personal Best: 0</div>
         <button id="start-game-btn" style="background-color: #4CAF50;">Start Game</button>
         <div class="timer-container" id="game-timer-container" style="display: none; margin-top: 10px;">
           <div id="game-timer" class="timer">Time: 15</div>
@@ -1988,7 +1946,7 @@
       </div>
       <div class="score-container">
         <div class="mobile-timer-wrapper">
-          <div id="score">Score: 0</div>
+          <div id="score" style="margin-bottom: 5px; font-size: 0.9rem; width: 100%; text-align: center;">Score: 0</div>
         </div>
       </div>
       <div class="loading-leaf"></div>
@@ -3465,10 +3423,13 @@
               scoreDiv.style.display = 'flex';
               scoreDiv.style.alignItems = 'center';
               scoreDiv.style.justifyContent = 'space-between';
-              scoreDiv.style.padding = '8px 16px';
-              scoreDiv.style.margin = '2px 0';
-              scoreDiv.style.fontSize = '16px';
+              scoreDiv.style.padding = '3px 12px';
+              scoreDiv.style.margin = '0';
+              scoreDiv.style.fontSize = '15px';
+              scoreDiv.style.lineHeight = '1.2';
               scoreDiv.style.fontWeight = 'bold';
+              scoreDiv.style.whiteSpace = 'nowrap';
+              scoreDiv.style.overflow = 'hidden';
               
               // Determine if this is a newly added score (could be marked in the data)
               const isNewScore = score.isNew;
@@ -3478,6 +3439,7 @@
               leftSpan.textContent = `${index + 1}. ${score.name}`;
               leftSpan.style.flex = '1';
               leftSpan.style.textAlign = 'left';
+              leftSpan.style.whiteSpace = 'nowrap';
               
               // Add medal colors for top 3
               if (index === 0) {
@@ -3492,16 +3454,18 @@
               
               // Create divider line
               const divider = document.createElement('span');
-              divider.style.flex = '2';
-              divider.style.borderBottom = '2px solid #333333';
-              divider.style.margin = '0 12px';
+              divider.style.flex = '3';
+              divider.style.borderBottom = '1px solid #333333';
+              divider.style.margin = '0 6px';
               divider.style.height = '1px';
+              divider.style.minWidth = '30px';
               
               // Create score span
               const scoreSpan = document.createElement('span');
               scoreSpan.textContent = score.score;
-              scoreSpan.style.minWidth = '30px';
+              scoreSpan.style.minWidth = '25px';
               scoreSpan.style.textAlign = 'right';
+              scoreSpan.style.flexShrink = '0';
               
               // Apply same color to score as name
               if (index === 0) {
@@ -5188,36 +5152,7 @@
           });  
         }
         
-        function resetLeaderboardCategory(category) {
-          if (!confirm(`Are you sure you want to reset the ${category} leaderboard?`)) {
-            return; // User canceled
-          }
-          // Get current leaderboard data
-          const savedLeaderboard = localStorage.getItem('acnh_leaderboard');
-          let leaderboardData = {};
-          
-          if (savedLeaderboard) {
-            try {
-              leaderboardData = JSON.parse(savedLeaderboard);
-              // Reset the specified category
-              leaderboardData[category] = [];
-              // Save the updated leaderboard
-              localStorage.setItem('acnh_leaderboard', JSON.stringify(leaderboardData));
-              // Update the UI
-              updateLeaderboardUI(leaderboardData);
-              alert(`${category.charAt(0).toUpperCase() + category.slice(1)} leaderboard has been reset.`);
-            } catch (e) {
-              console.error('Error resetting leaderboard category:', e);
-              alert('An error occurred while resetting the leaderboard.');
-            }
-          } else {
-            // If no leaderboard exists yet, create an empty one
-            leaderboardData = { fish: [], bugs: [], sea: [], villagers: [] };
-            localStorage.setItem('acnh_leaderboard', JSON.stringify(leaderboardData));
-            updateLeaderboardUI(leaderboardData);
-            alert(`${category.charAt(0).toUpperCase() + category.slice(1)} leaderboard has been reset.`);
-          }
-        }
+        // Removed duplicate function - using the one defined earlier
         
         // Store the current category change promise to prevent race conditions
       let categoryChangePromise = null;
@@ -5316,6 +5251,7 @@
           
           // Update title
           titleElement.textContent = categoryTitles[category];
+          titleElement.setAttribute('data-category', category);
           
           // Update leaderboard stack background color
           const leaderboardStack = document.querySelector('.leaderboard-stack');

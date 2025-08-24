@@ -1528,6 +1528,12 @@
         const standaloneContainer = document.getElementById('standalone-indicator-container');
         const standaloneBtn = document.getElementById('standalone-mode-btn');
         
+        // Check if elements exist before accessing their properties
+        if (!standaloneContainer || !standaloneBtn) {
+          console.log('Standalone mode indicator elements not found in DOM');
+          return;
+        }
+        
         if (isStandaloneMode()) {
           standaloneContainer.style.display = 'block';
           
@@ -1549,8 +1555,19 @@
         }
       }
       
+      // Flag to prevent multiple simultaneous server checks
+      let isCheckingServer = false;
+      
       // Function to check if the server is available
       async function checkServerAvailability() {
+        // Prevent duplicate calls
+        if (isCheckingServer) {
+          console.log('Server check already in progress, skipping...');
+          return;
+        }
+        
+        isCheckingServer = true;
+        
         try {
           console.log('Checking server availability...');
           const controller = new AbortController();
@@ -1592,6 +1609,9 @@
         } catch (error) {
           console.error('Error checking server availability:', error);
           updateStandaloneModeIndicator();
+        } finally {
+          // Reset the flag to allow future server checks
+          isCheckingServer = false;
         }
         
         // Admin toggle button for mobile with secret activation pattern
@@ -1749,6 +1769,13 @@
             }
           });
         }
+      }
+      
+      // Initialize when DOM is loaded
+      document.addEventListener('DOMContentLoaded', function() {
+        updateWelcomeMessage();
+        checkServerAvailability();
+      });
       
     </script>
     

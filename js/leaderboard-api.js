@@ -5,7 +5,8 @@
 
 class LeaderboardAPI {
     constructor() {
-        this.baseURL = '/api/v1/leaderboard';
+        // Use direct Railway backend URL to avoid Netlify redirect issues
+        this.baseURL = 'https://capstone-project-production-3cce.up.railway.app/api/v1/leaderboard';
         this.token = localStorage.getItem('authToken');
     }
 
@@ -15,6 +16,7 @@ class LeaderboardAPI {
     getHeaders() {
         const headers = {
             'Content-Type': 'application/json',
+            'Accept': 'application/json'
         };
         
         if (this.token) {
@@ -68,7 +70,8 @@ class LeaderboardAPI {
         try {
             const response = await fetch(`${this.baseURL}/${category}?limit=${limit}`, {
                 method: 'GET',
-                headers: { 'Content-Type': 'application/json' }
+                headers: this.getHeaders(),
+                mode: 'cors'
             });
 
             if (!response.ok) {
@@ -91,7 +94,8 @@ class LeaderboardAPI {
         try {
             const response = await fetch(`${this.baseURL}/all?limit=${limit}`, {
                 method: 'GET',
-                headers: { 'Content-Type': 'application/json' }
+                headers: this.getHeaders(),
+                mode: 'cors'
             });
 
             if (!response.ok) {

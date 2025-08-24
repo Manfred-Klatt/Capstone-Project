@@ -401,8 +401,8 @@
           this.updateStatus('checking', 'Checking...');
 
           try {
-            // Try API health endpoint that exists in Netlify redirects
-            const response = await fetch('/api/v1/health', {
+            // Use the /health endpoint that exists in Netlify redirects
+            const response = await fetch('/health', {
               method: 'GET',
               mode: 'cors',
               headers: { 'Accept': 'application/json' },
@@ -424,13 +424,13 @@
         }
 
         startMonitoring() {
-          // Initial check
-          this.checkServerStatus();
+          // Disable health checks to prevent 404 spam
+          this.updateStatus('offline', 'Server Offline');
           
-          // Set up periodic checks
-          this.checkInterval = setInterval(() => {
-            this.checkServerStatus();
-          }, this.checkFrequency);
+          // Don't set up periodic checks until health endpoint is fixed
+          // this.checkInterval = setInterval(() => {
+          //   this.checkServerStatus();
+          // }, this.checkFrequency);
         }
 
         stopMonitoring() {

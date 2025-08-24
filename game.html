@@ -3614,6 +3614,22 @@
         return guestParam === 'true' || isFileProtocol || apiUnavailable || forceStandalone;
       }
       
+      async function initializeLeaderboard() {
+        // Check if leaderboards already have content (from static HTML)
+        const fishScores = document.getElementById('fish-scores');
+        const hasExistingContent = fishScores && fishScores.children.length > 0;
+        
+        // If we have existing content and no stored data, preserve the static content
+        const savedLeaderboard = localStorage.getItem('acnh_leaderboard');
+        if (hasExistingContent && !savedLeaderboard) {
+          console.log('Preserving existing leaderboard content');
+          return;
+        }
+        
+        // Otherwise, try to update with stored or server data
+        await updateLeaderboard();
+      }
+
       async function updateLeaderboard() {
         try {
           // Get the current category
@@ -3676,11 +3692,18 @@
               updateLeaderboardUI(data);
             } catch (e) {
               console.error('Error parsing saved leaderboard:', e);
-              // If all else fails, use default data
-              updateLeaderboardUI(DEFAULT_LEADERBOARD);
+              // Don't overwrite existing content with default data
+              const fishScores = document.getElementById('fish-scores');
+              if (!fishScores || fishScores.children.length === 0) {
+                updateLeaderboardUI(DEFAULT_LEADERBOARD);
+              }
             }
           } else {
-            updateLeaderboardUI(DEFAULT_LEADERBOARD);
+            // Don't overwrite existing content with default data
+            const fishScores = document.getElementById('fish-scores');
+            if (!fishScores || fishScores.children.length === 0) {
+              updateLeaderboardUI(DEFAULT_LEADERBOARD);
+            }
           }
         }
       }
@@ -4940,7 +4963,8 @@
           highScoreElement.textContent = `Personal Best: ${currentHighScore}`;
         }
 
-        updateLeaderboard();
+        // Only update leaderboard if we have stored data or can reach the server
+        initializeLeaderboard();
         
         // Don't load any images until the game starts
         

@@ -415,8 +415,8 @@
           this.updateStatus('checking', 'Checking...');
 
           try {
-            // Use direct backend health endpoint to avoid Netlify redirect issues
-            const response = await fetch('https://capstone-project-production-3cce.up.railway.app/health', {
+            // Use the correct health endpoint with versioning
+            const response = await fetch('https://capstone-project-production-3cce.up.railway.app/api/v1/health', {
               method: 'GET',
               mode: 'cors',
               headers: { 'Accept': 'application/json' },
@@ -478,9 +478,9 @@
           const controller = new AbortController();
           const timeoutId = setTimeout(() => controller.abort(), 5000); // 5 second timeout
           
-          // Try direct health check first
+          // Try versioned health endpoint first
           try {
-            const response = await fetch('https://capstone-project-production-3cce.up.railway.app/health', {
+            const response = await fetch('https://capstone-project-production-3cce.up.railway.app/api/v1/health', {
               method: 'GET',
               signal: controller.signal,
               mode: 'cors',
@@ -491,11 +491,12 @@
             
             clearTimeout(timeoutId);
             if (response.ok) {
-              console.log('Server is available');
+              console.log('Server is available at /api/v1/health');
               return true;
             }
+            console.log(`Health check failed with status: ${response.status}`);
           } catch (healthError) {
-            console.log('Health check failed, trying root endpoint');
+            console.log('Health check failed:', healthError.message);
           }
           
           // If health check fails, try root endpoint

@@ -6,10 +6,18 @@
   NODE_VERSION = "18"
 
 [[redirects]]
-  from = "/api/health"
+  from = "/api/v1/health"
   to = "https://capstone-project-production-3cce.up.railway.app/api/v1/health"
   status = 200
   force = true
+  headers = { Access-Control-Allow-Origin = "*" }
+
+[[redirects]]
+  from = "/health"
+  to = "https://capstone-project-production-3cce.up.railway.app/api/v1/health"
+  status = 200
+  force = true
+  headers = { Access-Control-Allow-Origin = "*" }
 
 [[redirects]]
   from = "/api/*"

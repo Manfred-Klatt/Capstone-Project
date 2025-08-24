@@ -281,8 +281,13 @@
 
         // Configuration
         const API_ENDPOINTS = {
-            health: '/api/health',
-            status: '/api/v1/status'
+            health: 'https://capstone-project-production-3cce.up.railway.app/api/v1/health',
+            fallbacks: [
+                '/api/v1/health',
+                '/health',
+                '/status',
+                '/api/status'
+            ]
         };
 
         function addLog(message, type = 'info') {
@@ -418,19 +423,25 @@
         }
 
         async function tryAlternativeEndpoints() {
-            const alternatives = ['/api/v1/health', '/health', '/status', '/api/status'];
+            const baseUrl = window.location.origin;
             
-            for (const endpoint of alternatives) {
+            for (const endpoint of API_ENDPOINTS.fallbacks) {
+                const fullUrl = endpoint.startsWith('http') ? endpoint : `${baseUrl}${endpoint}`;
                 try {
-                    addLog(`🔄 Trying ${endpoint}...`);
-                    const response = await fetch(endpoint);
+                    addLog(`🔄 Trying ${fullUrl}...`);
+                    const response = await fetch(fullUrl, {
+                        headers: { 'Accept': 'application/json' }
+                    });
+                    
                     if (response.ok) {
-                        addLog(`✅ Found working endpoint: ${endpoint}`);
+                        addLog(`✅ Found working endpoint: ${fullUrl}`);
                         const data = await response.json();
                         return processHealthData(data, 0);
+                    } else {
+                        addLog(`⚠️ Endpoint ${fullUrl} returned ${response.status}`, 'warning');
                     }
                 } catch (e) {
-                    addLog(`❌ ${endpoint} failed: ${e.message}`, 'warning');
+                    addLog(`❌ ${fullUrl} failed: ${e.message}`, 'warning');
                 }
             }
             

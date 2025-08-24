@@ -402,14 +402,26 @@
 
           try {
             const controller = new AbortController();
-            const timeoutId = setTimeout(() => controller.abort(), 3000);
+            const timeoutId = setTimeout(() => controller.abort(), 5000); // Increased timeout
             
-            const response = await fetch(`${API_URL}/health`, {
-              method: 'GET',
-              signal: controller.signal,
-              mode: 'cors',
-              headers: { 'Accept': 'application/json' }
-            });
+            // Try the health endpoint first
+            let response;
+            try {
+              response = await fetch('/health', {
+                method: 'GET',
+                signal: controller.signal,
+                mode: 'cors',
+                headers: { 'Accept': 'application/json' }
+              });
+            } catch (healthError) {
+              // If health endpoint fails, try a simple API endpoint
+              response = await fetch('/api/v1/health', {
+                method: 'GET',
+                signal: controller.signal,
+                mode: 'cors',
+                headers: { 'Accept': 'application/json' }
+              });
+            }
             
             clearTimeout(timeoutId);
             
@@ -421,6 +433,7 @@
               return false;
             }
           } catch (error) {
+            console.log('Health check failed:', error.message);
             this.updateStatus('offline', 'Server Offline');
             return false;
           }

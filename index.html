@@ -54,7 +54,7 @@
 
       /* CSS custom properties for dynamic background image selection */
       :root {
-        --background-image: url('images/background.jpg'); /* Default fallback */
+        --background-image: url('images/background.svg'); /* SVG background */
       }
       
       body {
@@ -63,9 +63,10 @@
         background-color: #f0f8ff;
         color: #5a3d2b;
         /* Optimized background loading strategy */
-        background-size: cover;
-        background-position: center;
-        background-repeat: no-repeat;
+        background-color: #f0f8ff;
+        background-image: url('images/background.svg');
+        background-size: 100px 100px; /* Smaller repeating pattern */
+        background-repeat: repeat;
         background-attachment: scroll; /* Better performance than fixed */
         display: flex;
         justify-content: center;
@@ -74,6 +75,7 @@
         /* Smooth transition when background loads */
         transition: background-image 0.3s ease;
       }
+      
       
       /* Progressive background loading */
       body.bg-loading {
@@ -103,7 +105,7 @@
       @media (min-width: 1201px) {
         body.bg-loaded {
           /* Use full size for desktop */
-          background-image: url("images/background.jpg");
+          background-image: url("images/background.svg");
         }
       }
 

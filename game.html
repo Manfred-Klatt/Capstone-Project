@@ -121,6 +121,8 @@
         --border-color: #5a3d2b;
         --shadow-color: rgba(0, 0, 0, 0.1);
       }
+      
+      /* Background styling */
 
       body {
         font-family: "customfont", "Arial", sans-serif;
@@ -130,9 +132,10 @@
         text-align: center;
         background-color: var(--background-color);
         color: var(--text-color);
-        background-image: url("images/background.jpg");
-        background-size: cover;
-        background-position: center;
+        background-image: url("images/background.svg");
+        background-size: 100px 100px; /* Smaller repeating pattern */
+        background-repeat: repeat;
+        background-color: #f0f8ff;
         box-sizing: border-box;
       }
       #game-container {
@@ -192,7 +195,7 @@
         height: 80px;
         margin: 10px auto;
         display: none;
-        background-image: url('images/leaf.png');
+        background-image: url('images/Leaf.svg');
         background-size: contain;
         background-repeat: no-repeat;
         animation: spin 2s linear infinite;
@@ -448,7 +451,7 @@
       .loading-leaf {
         width: 40px;
         height: 40px;
-        background: url('images/loading.png') no-repeat center;
+        background: url('images/Leaf.svg') no-repeat center;
         background-size: contain;
         animation: spin 1s linear infinite;
         margin: 20px auto;
@@ -1284,6 +1287,8 @@
         background-color: #357abd;
       }
     </style>
+    <!-- Rotated Background Pattern -->
+    <div id="background-pattern"></div>
     <!-- Audio Elements -->
     <!-- Optimized OGG audio elements with WAV fallbacks -->
     <audio id="correct-sound" preload="auto">
@@ -1332,6 +1337,8 @@
     </script>
   </head>
   <body>
+    <!-- Game content -->
+    
     <!-- Passcode Modal -->
     <div id="passcode-modal">
       <div id="passcode-container">

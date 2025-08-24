@@ -6,10 +6,9 @@
     
     // Configuration
     const BACKGROUND_TIMEOUT = 3000; // 3 seconds max wait time
-    const BACKGROUND_WEBP = 'images/background.webp';
-    const BACKGROUND_JPG = 'images/background.jpg';
+    const BACKGROUND_SVG = 'images/background.svg';
     
-    let webpSupported = false;
+    // No format detection needed since we're only using SVG
     
     let backgroundLoaded = false;
     
@@ -20,21 +19,11 @@
         }
     }
     
-    // Function to detect WebP support
-    function detectWebPSupport() {
-        return new Promise((resolve) => {
-            const webp = new Image();
-            webp.onload = webp.onerror = function () {
-                webpSupported = (webp.height === 2);
-                resolve(webpSupported);
-            };
-            webp.src = 'data:image/webp;base64,UklGRjoAAABXRUJQVlA4IC4AAACyAgCdASoCAAIALmk0mk0iIiIiIgBoSygABc6WWgAA/veff/0PP8bA//LwYAAA';
-        });
-    }
+    // No WebP detection needed since we're only using SVG
     
-    // Function to load background image progressively with WebP/JPG fallback
+    // Function to load background image progressively
     function loadBackgroundImage() {
-        const backgroundUrl = webpSupported ? BACKGROUND_WEBP : BACKGROUND_JPG;
+        const backgroundUrl = BACKGROUND_SVG;
         
         // Create a new image to preload
         const img = new Image();
@@ -61,15 +50,8 @@
         
         img.onerror = function() {
             clearTimeout(timeoutId);
-            // If WebP fails, try JPG fallback
-            if (webpSupported && backgroundUrl === BACKGROUND_WEBP) {
-                console.log('WebP failed, trying JPG fallback');
-                webpSupported = false;
-                loadBackgroundImage(); // Retry with JPG
-            } else {
-                console.log('Background image failed to load, keeping gradient');
-                // Keep the gradient background as fallback
-            }
+            console.log('SVG background failed to load, keeping gradient');
+            // Keep the gradient background as fallback
         };
         
         // Start loading the image
@@ -78,7 +60,7 @@
     
     // Function to check if background is already cached
     function checkCachedBackground() {
-        const backgroundUrl = webpSupported ? BACKGROUND_WEBP : BACKGROUND_JPG;
+        const backgroundUrl = BACKGROUND_SVG;
         const img = new Image();
         
         img.onload = function() {
@@ -130,24 +112,7 @@
         }, 1000);
     }
     
-    // Support for modern image formats (WebP, AVIF)
-    function detectImageSupport() {
-        const canvas = document.createElement('canvas');
-        canvas.width = 1;
-        canvas.height = 1;
-        
-        // Check WebP support
-        const webpSupport = canvas.toDataURL('image/webp').indexOf('webp') > -1;
-        
-        if (webpSupport) {
-            console.log('WebP support detected - could use background.webp for better compression');
-        }
-        
-        return {
-            webp: webpSupport,
-            avif: false // AVIF detection is more complex, would need feature detection
-        };
-    }
+    // No need to detect image format support since we're only using SVG
     
     // Initialize when DOM is ready
     function init() {

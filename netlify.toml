@@ -6,14 +6,14 @@
   NODE_VERSION = "18"
 
 [[redirects]]
-  from = "/api/*"
-  to = "https://capstone-project-production-3cce.up.railway.app/api/:splat"
+  from = "/health"
+  to = "https://capstone-project-production-3cce.up.railway.app/api/v1/health"
   status = 200
   force = true
 
 [[redirects]]
-  from = "/health"
-  to = "https://capstone-project-production-3cce.up.railway.app/api/v1/health"
+  from = "/api/*"
+  to = "https://capstone-project-production-3cce.up.railway.app/api/:splat"
   status = 200
   force = true
 

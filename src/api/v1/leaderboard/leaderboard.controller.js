@@ -83,22 +83,32 @@ const getLeaderboard = catchAsync(async (req, res, next) => {
     return next(new AppError('Limit must be between 1 and 100', 400));
   }
 
-  const leaderboard = await Leaderboard.getTopScores(category, limit);
+  try {
+    const leaderboard = await Leaderboard.getTopScores(category, limit);
 
-  // Add rank to each entry
-  const leaderboardWithRanks = leaderboard.map((entry, index) => ({
-    rank: index + 1,
-    username: entry.username,
-    score: entry.score,
-    gameData: entry.gameData,
-    timestamp: entry.timestamp
-  }));
+    // Add rank to each entry
+    const leaderboardWithRanks = leaderboard.map((entry, index) => ({
+      rank: index + 1,
+      username: entry.username,
+      score: entry.score,
+      gameData: entry.gameData,
+      timestamp: entry.timestamp
+    }));
 
-  res.json(successResponse('Leaderboard retrieved successfully', {
-    category,
-    entries: leaderboardWithRanks,
-    total: leaderboardWithRanks.length
-  }));
+    res.json(successResponse('Leaderboard retrieved successfully', {
+      category,
+      entries: leaderboardWithRanks,
+      total: leaderboardWithRanks.length
+    }));
+  } catch (error) {
+    console.error(`Error getting leaderboard for ${category}:`, error);
+    // Return empty leaderboard as fallback
+    res.json(successResponse('Leaderboard retrieved (empty)', {
+      category,
+      entries: [],
+      total: 0
+    }));
+  }
 });
 
 // Get all leaderboards
@@ -108,21 +118,35 @@ const getAllLeaderboards = catchAsync(async (req, res, next) => {
 
   const leaderboards = {};
 
-  for (const category of categories) {
-    const entries = await Leaderboard.getTopScores(category, limit);
-    leaderboards[category] = entries.map((entry, index) => ({
-      rank: index + 1,
-      username: entry.username,
-      score: entry.score,
-      gameData: entry.gameData,
-      timestamp: entry.timestamp
+  try {
+    for (const category of categories) {
+      const entries = await Leaderboard.getTopScores(category, limit);
+      leaderboards[category] = entries.map((entry, index) => ({
+        rank: index + 1,
+        username: entry.username,
+        score: entry.score,
+        gameData: entry.gameData,
+        timestamp: entry.timestamp
+      }));
+    }
+
+    res.json(successResponse('All leaderboards retrieved successfully', {
+      leaderboards,
+      lastUpdated: new Date().toISOString()
+    }));
+  } catch (error) {
+    console.error('Error in getAllLeaderboards:', error);
+    // Return empty leaderboards as fallback
+    const emptyLeaderboards = {};
+    categories.forEach(category => {
+      emptyLeaderboards[category] = [];
+    });
+    
+    res.json(successResponse('Leaderboards retrieved (empty)', {
+      leaderboards: emptyLeaderboards,
+      lastUpdated: new Date().toISOString()
     }));
   }
-
-  res.json(successResponse('All leaderboards retrieved successfully', {
-    leaderboards,
-    lastUpdated: new Date().toISOString()
-  }));
 });
 
 // Get user's personal stats

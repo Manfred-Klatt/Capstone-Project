@@ -3450,97 +3450,145 @@
         categories.forEach(category => {
           const scores = data[category] || [];
           const scoresElement = document.getElementById(`${category}-scores`);
-          if (scoresElement) {
-            // Clear existing content
-            scoresElement.innerHTML = '';
+          if (!scoresElement) return;
+          
+          // Check if element already has content (preserve existing layout)
+          const hasExistingContent = scoresElement.children.length > 0;
+          
+          if (hasExistingContent) {
+            // Update existing entries without changing layout
+            updateExistingScores(scoresElement, scores);
+          } else {
+            // Build new leaderboard structure
+            buildNewLeaderboard(scoresElement, scores);
+          }
+        });
+      }
+      
+      function updateExistingScores(scoresElement, scores) {
+        // Get all existing score entries
+        const existingEntries = Array.from(scoresElement.children);
+        
+        // Update existing entries with new data
+        scores.forEach((score, index) => {
+          if (index < existingEntries.length) {
+            const entry = existingEntries[index];
             
-            if (scores.length === 0) {
-              scoresElement.innerHTML = '<div>No scores yet</div>';
-              return;
+            // Find and update the name and score elements
+            const nameElement = entry.querySelector('.leaderboard-name') || entry.firstChild;
+            const scoreElement = entry.querySelector('.leaderboard-score') || entry.lastChild;
+            
+            if (nameElement && nameElement.nodeType === Node.TEXT_NODE) {
+              nameElement.textContent = `${index + 1}. ${score.name}`;
+            } else if (nameElement) {
+              nameElement.textContent = `${index + 1}. ${score.name}`;
             }
             
-            // Add each score to the leaderboard with animation for new scores
-            scores.forEach((score, index) => {
-              const scoreDiv = document.createElement('div');
-              scoreDiv.style.display = 'flex';
-              scoreDiv.style.alignItems = 'center';
-              
-              // Determine if this is a newly added score (could be marked in the data)
-              const isNewScore = score.isNew;
-              
-              // Create name span with appropriate styling
-              const nameSpan = document.createElement('span');
-              nameSpan.textContent = `${index + 1}. ${score.name}`;
-              
-              // Add medal colors for top 3
-              if (index === 0) {
-                nameSpan.style.color = '#ff00ff'; // 1st place
-                nameSpan.style.textShadow = '1px 1px 2px black';
-              } else if (index === 1) {
-                nameSpan.style.color = '#ffff00'; // 2nd place
-                nameSpan.style.textShadow = '1px 1px 2px black';
-              } else if (index === 2) {
-                nameSpan.style.color = '#00ffff'; // 3rd place
-                nameSpan.style.textShadow = '1px 1px 2px black';
-              }
-              
-              // Create divider - positioned higher to align with text
-              const divider = document.createElement('span');
-              divider.style.flexGrow = '1';
-              divider.style.borderBottom = '1px solid black';
-              divider.style.margin = '0 10px';
-              divider.style.transform = 'translateY(-4px)'; // Move it up to center with text
-              
-              // Create score span
-              const scoreSpan = document.createElement('span');
-              scoreSpan.textContent = score.score;
-              
-              // Apply same color to score as name
-              if (index === 0) {
-                scoreSpan.style.color = '#ff00ff';
-                scoreSpan.style.textShadow = '1px 1px 2px black';
-              } else if (index === 1) {
-                scoreSpan.style.color = '#ffff00';
-                scoreSpan.style.textShadow = '1px 1px 2px black';
-              } else if (index === 2) {
-                scoreSpan.style.color = '#00ffff';
-                scoreSpan.style.textShadow = '1px 1px 2px black';
-              }
-              
-              // Add highlight animation for new scores
-              if (isNewScore) {
-                scoreDiv.style.animation = 'highlight 2s ease-in-out';
-                scoreDiv.style.backgroundColor = 'rgba(76, 175, 80, 0.3)';
-                
-                // Add keyframes for highlight animation if not already added
-                if (!document.getElementById('highlight-animation')) {
-                  const style = document.createElement('style');
-                  style.id = 'highlight-animation';
-                  style.textContent = `
-                    @keyframes highlight {
-                      0% { background-color: rgba(76, 175, 80, 0.3); }
-                      50% { background-color: rgba(76, 175, 80, 0.6); }
-                      100% { background-color: transparent; }
-                    }
-                  `;
-                  document.head.appendChild(style);
-                }
-                
-                // Remove highlight after animation
-                setTimeout(() => {
-                  scoreDiv.style.backgroundColor = 'transparent';
-                }, 2000);
-              }
-              
-              // Assemble the score entry
-              scoreDiv.appendChild(nameSpan);
-              scoreDiv.appendChild(divider);
-              scoreDiv.appendChild(scoreSpan);
-              
-              // Add to leaderboard
-              scoresElement.appendChild(scoreDiv);
-            });
+            if (scoreElement && scoreElement.nodeType === Node.TEXT_NODE) {
+              scoreElement.textContent = score.score;
+            } else if (scoreElement) {
+              scoreElement.textContent = score.score;
+            }
           }
+        });
+        
+        // Hide extra entries if we have fewer scores than before
+        for (let i = scores.length; i < existingEntries.length; i++) {
+          existingEntries[i].style.display = 'none';
+        }
+      }
+      
+      function buildNewLeaderboard(scoresElement, scores) {
+        // Clear existing content only if building new
+        scoresElement.innerHTML = '';
+        
+        if (scores.length === 0) {
+          scoresElement.innerHTML = '<div>No scores yet</div>';
+          return;
+        }
+        
+        // Add each score to the leaderboard with animation for new scores
+        scores.forEach((score, index) => {
+          const scoreDiv = document.createElement('div');
+          scoreDiv.style.display = 'flex';
+          scoreDiv.style.alignItems = 'center';
+          
+          // Determine if this is a newly added score (could be marked in the data)
+          const isNewScore = score.isNew;
+          
+          // Create name span with appropriate styling
+          const nameSpan = document.createElement('span');
+          nameSpan.className = 'leaderboard-name';
+          nameSpan.textContent = `${index + 1}. ${score.name}`;
+          
+          // Add medal colors for top 3
+          if (index === 0) {
+            nameSpan.style.color = '#ff00ff'; // 1st place
+            nameSpan.style.textShadow = '1px 1px 2px black';
+          } else if (index === 1) {
+            nameSpan.style.color = '#ffff00'; // 2nd place
+            nameSpan.style.textShadow = '1px 1px 2px black';
+          } else if (index === 2) {
+            nameSpan.style.color = '#00ffff'; // 3rd place
+            nameSpan.style.textShadow = '1px 1px 2px black';
+          }
+          
+          // Create divider - positioned higher to align with text
+          const divider = document.createElement('span');
+          divider.style.flexGrow = '1';
+          divider.style.borderBottom = '1px solid black';
+          divider.style.margin = '0 10px';
+          divider.style.transform = 'translateY(-4px)'; // Move it up to center with text
+          
+          // Create score span
+          const scoreSpan = document.createElement('span');
+          scoreSpan.className = 'leaderboard-score';
+          scoreSpan.textContent = score.score;
+          
+          // Apply same color to score as name
+          if (index === 0) {
+            scoreSpan.style.color = '#ff00ff';
+            scoreSpan.style.textShadow = '1px 1px 2px black';
+          } else if (index === 1) {
+            scoreSpan.style.color = '#ffff00';
+            scoreSpan.style.textShadow = '1px 1px 2px black';
+          } else if (index === 2) {
+            scoreSpan.style.color = '#00ffff';
+            scoreSpan.style.textShadow = '1px 1px 2px black';
+          }
+          
+          // Add highlight animation for new scores
+          if (isNewScore) {
+            scoreDiv.style.animation = 'highlight 2s ease-in-out';
+            scoreDiv.style.backgroundColor = 'rgba(76, 175, 80, 0.3)';
+            
+            // Add keyframes for highlight animation if not already added
+            if (!document.getElementById('highlight-animation')) {
+              const style = document.createElement('style');
+              style.id = 'highlight-animation';
+              style.textContent = `
+                @keyframes highlight {
+                  0% { background-color: rgba(76, 175, 80, 0.3); }
+                  50% { background-color: rgba(76, 175, 80, 0.6); }
+                  100% { background-color: transparent; }
+                }
+              `;
+              document.head.appendChild(style);
+            }
+            
+            // Remove highlight after animation
+            setTimeout(() => {
+              scoreDiv.style.backgroundColor = 'transparent';
+            }, 2000);
+          }
+          
+          // Assemble the score entry
+          scoreDiv.appendChild(nameSpan);
+          scoreDiv.appendChild(divider);
+          scoreDiv.appendChild(scoreSpan);
+          
+          // Add to leaderboard
+          scoresElement.appendChild(scoreDiv);
         });
       }
       

@@ -416,7 +416,7 @@
 
           try {
             // Use the /api/health endpoint that exists in Netlify redirects
-            const response = await fetch(`${API_URL}/health`, {
+            const response = await fetch('/api/health', {
               method: 'GET',
               mode: 'cors',
               headers: { 'Accept': 'application/json' },
@@ -480,7 +480,7 @@
           
           // Try direct health check first
           try {
-            const response = await fetch(`${API_URL}/health`, {
+            const response = await fetch('/api/health', {
               method: 'GET',
               signal: controller.signal,
               mode: 'cors',

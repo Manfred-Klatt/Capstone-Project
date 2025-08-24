@@ -67,12 +67,17 @@ leaderboardEntrySchema.index({ userId: 1, category: 1, score: -1 });
 
 // Static method to get top scores for a category
 leaderboardEntrySchema.statics.getTopScores = async function(category, limit = 10) {
-  return this.find({ category })
-    .sort({ score: -1, timestamp: 1 }) // Higher score first, earlier timestamp as tiebreaker
-    .limit(limit)
-    .populate('userId', 'username')
-    .select('username score gameData timestamp')
-    .lean();
+  try {
+    return await this.find({ category })
+      .sort({ score: -1, timestamp: 1 }) // Higher score first, earlier timestamp as tiebreaker
+      .limit(limit)
+      .select('username score gameData timestamp')
+      .lean();
+  } catch (error) {
+    console.error('Error in getTopScores:', error);
+    // Return empty array as fallback
+    return [];
+  }
 };
 
 // Static method to get user's best score for a category

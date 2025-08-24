@@ -5,19 +5,32 @@
 [build.environment]
   NODE_VERSION = "18"
 
+# Handle CORS preflight for health endpoint
+[[headers]]
+  for = "/api/v1/health"
+  [headers.values]
+    Access-Control-Allow-Origin = "*"
+    Access-Control-Allow-Methods = "GET, OPTIONS"
+    Access-Control-Allow-Headers = "Accept, Content-Type"
+    Access-Control-Max-Age = "3600"
+
 [[redirects]]
   from = "/api/v1/health"
   to = "https://capstone-project-production-3cce.up.railway.app/api/v1/health"
   status = 200
   force = true
-  headers = { Access-Control-Allow-Origin = "*" }
+  headers = { 
+    Access-Control-Allow-Origin = "*"
+  }
 
 [[redirects]]
   from = "/health"
   to = "https://capstone-project-production-3cce.up.railway.app/api/v1/health"
   status = 200
   force = true
-  headers = { Access-Control-Allow-Origin = "*" }
+  headers = { 
+    Access-Control-Allow-Origin = "*"
+  }
 
 [[redirects]]
   from = "/api/*"

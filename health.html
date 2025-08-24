@@ -289,6 +289,9 @@
                 '/api/status'
             ]
         };
+        
+        // Add timestamp to URL to prevent caching
+        const cacheBuster = () => `t=${Date.now()}`;
 
         function addLog(message, type = 'info') {
             const timestamp = new Date().toLocaleString();
@@ -341,13 +344,10 @@
                 const response = await fetch(`${API_ENDPOINTS.health}?t=${Date.now()}`, {
                     method: 'GET',
                     headers: {
-                        'Accept': 'application/json',
-                        'Content-Type': 'application/json',
-                        'Cache-Control': 'no-cache, no-store, must-revalidate',
-                        'Pragma': 'no-cache',
-                        'Expires': '0'
+                        'Accept': 'application/json'
                     },
-                    cache: 'no-cache',
+                    mode: 'cors',
+                    credentials: 'omit',
                     signal: controller.signal
                 });
                 

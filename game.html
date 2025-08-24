@@ -3459,52 +3459,59 @@
               return;
             }
             
-            // Add each score to the leaderboard with animation for new scores
+            // Add each score to the leaderboard with clean numbered format
             scores.forEach((score, index) => {
               const scoreDiv = document.createElement('div');
               scoreDiv.style.display = 'flex';
               scoreDiv.style.alignItems = 'center';
+              scoreDiv.style.justifyContent = 'space-between';
+              scoreDiv.style.padding = '8px 16px';
+              scoreDiv.style.margin = '2px 0';
+              scoreDiv.style.fontSize = '16px';
+              scoreDiv.style.fontWeight = 'bold';
               
               // Determine if this is a newly added score (could be marked in the data)
               const isNewScore = score.isNew;
               
-              // Create name span with appropriate styling
-              const nameSpan = document.createElement('span');
-              nameSpan.textContent = `${index + 1}. ${score.name}`;
+              // Create left side with number and name
+              const leftSpan = document.createElement('span');
+              leftSpan.textContent = `${index + 1}. ${score.name}`;
+              leftSpan.style.flex = '1';
+              leftSpan.style.textAlign = 'left';
               
               // Add medal colors for top 3
               if (index === 0) {
-                nameSpan.style.color = '#ff00ff'; // 1st place
-                nameSpan.style.textShadow = '1px 1px 2px black';
+                leftSpan.style.color = '#ff00ff'; // 1st place - magenta
               } else if (index === 1) {
-                nameSpan.style.color = '#ffff00'; // 2nd place
-                nameSpan.style.textShadow = '1px 1px 2px black';
+                leftSpan.style.color = '#ffff00'; // 2nd place - yellow
               } else if (index === 2) {
-                nameSpan.style.color = '#00ffff'; // 3rd place
-                nameSpan.style.textShadow = '1px 1px 2px black';
+                leftSpan.style.color = '#00ffff'; // 3rd place - cyan
+              } else {
+                leftSpan.style.color = '#333333'; // Default dark color
               }
               
-              // Create divider - positioned higher to align with text
+              // Create divider line
               const divider = document.createElement('span');
-              divider.style.flexGrow = '1';
-              divider.style.borderBottom = '1px solid black';
-              divider.style.margin = '0 10px';
-              divider.style.transform = 'translateY(-4px)'; // Move it up to center with text
+              divider.style.flex = '2';
+              divider.style.borderBottom = '2px solid #333333';
+              divider.style.margin = '0 12px';
+              divider.style.height = '1px';
               
               // Create score span
               const scoreSpan = document.createElement('span');
               scoreSpan.textContent = score.score;
+              scoreSpan.style.minWidth = '30px';
+              scoreSpan.style.textAlign = 'right';
               
               // Apply same color to score as name
               if (index === 0) {
                 scoreSpan.style.color = '#ff00ff';
-                scoreSpan.style.textShadow = '1px 1px 2px black';
               } else if (index === 1) {
                 scoreSpan.style.color = '#ffff00';
-                scoreSpan.style.textShadow = '1px 1px 2px black';
               } else if (index === 2) {
                 scoreSpan.style.color = '#00ffff';
-                scoreSpan.style.textShadow = '1px 1px 2px black';
+              } else {
+                scoreSpan.style.color = '#333333';
               }
               
               // Add highlight animation for new scores
@@ -3533,7 +3540,7 @@
               }
               
               // Assemble the score entry
-              scoreDiv.appendChild(nameSpan);
+              scoreDiv.appendChild(leftSpan);
               scoreDiv.appendChild(divider);
               scoreDiv.appendChild(scoreSpan);
               

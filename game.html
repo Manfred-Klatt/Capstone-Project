@@ -1465,9 +1465,10 @@
         const API_URL = (() => {
           const hostname = window.location.hostname;
           
-          // Production environment (blathers.app) - use Netlify redirects to Railway
+          // Production environment (blathers.app) - no backend API available
           if (hostname === 'blathers.app' || hostname.includes('blathers')) {
-            return '/api/v1'; // Will be redirected to Railway via netlify.toml
+            // Force standalone mode for production deployment
+            return null;
           }
           
           // Local development
@@ -1478,6 +1479,12 @@
           // Production backend on Railway (fallback)
           return 'https://capstone-project-production-3cce.up.railway.app/api/v1';
         })();
+        
+        // If no API URL (production), return false immediately
+        if (!API_URL) {
+          console.log('Production environment detected - no backend API available');
+          return false;
+        }
         try {
           console.log('Checking server availability at:', API_URL);
           const controller = new AbortController();
@@ -1570,10 +1577,19 @@
         
         try {
           console.log('Checking server availability...');
+          
+          // If no API URL (production), skip server check
+          if (!API_URL) {
+            console.log('No API available - using standalone mode');
+            window.standaloneMode = true;
+            updateStandaloneModeIndicator();
+            return;
+          }
+          
           const controller = new AbortController();
           const timeoutId = setTimeout(() => controller.abort(), 3000); // 3 second timeout
           
-          const response = await fetch(`${API_URL}/api/v1/health`, {
+          const response = await fetch(`${API_URL}/health`, {
             signal: controller.signal
           });
           
@@ -2055,6 +2071,28 @@
       const NOOKIPEDIA_API_KEY = "8a10f688-39d6-40b8-8426-744f30542e94"; // API key
       const apiEndpoint = "https://api.nookipedia.com";
       const apiVersion = "1.0.0";
+      
+      // Configure API URL based on environment
+      const API_URL = (() => {
+        const hostname = window.location.hostname;
+        
+        // Production environment (blathers.app) - no backend API available
+        if (hostname === 'blathers.app' || hostname.includes('blathers')) {
+          console.log('Production environment detected - forcing standalone mode');
+          // Set global flags to force standalone mode
+          window.standaloneMode = true;
+          localStorage.setItem('force_standalone', 'true');
+          return null; // No API available
+        }
+        
+        // Local development
+        if (hostname === 'localhost' || hostname === '127.0.0.1') {
+          return 'http://localhost:8000/api/v1';
+        }
+        
+        // Production backend on Railway (fallback)
+        return 'https://capstone-project-production-3cce.up.railway.app/api/v1';
+      })();
       const imageDisplay = document.getElementById("imageDisplay");
       const guessInput = document.getElementById("guess-input");
       const submitButton = document.getElementById("submit-guess");
@@ -3249,7 +3287,12 @@
             console.log('Submitting guest score with username:', playerName);
           }
           
-          const response = await fetch(`${API_URL}/api/leaderboard/submit`, {
+          // Check if API is available
+          if (!API_URL) {
+            throw new Error('API not available in production environment');
+          }
+          
+          const response = await fetch(`${API_URL}/leaderboard/submit`, {
             method: 'POST',
             headers: headers,
             body: JSON.stringify(requestBody),
@@ -3272,7 +3315,12 @@
           const leaderboardController = new AbortController();
           const leaderboardTimeoutId = setTimeout(() => leaderboardController.abort(), 2000);
           
-          const leaderboardResponse = await fetch(`${API_URL}/api/leaderboard/${category}`, {
+          // Check if API is available
+          if (!API_URL) {
+            throw new Error('API not available in production environment');
+          }
+          
+          const leaderboardResponse = await fetch(`${API_URL}/leaderboard/${category}`, {
             signal: leaderboardController.signal
           }).catch(error => {
             window.apiUnavailable = true;
@@ -3415,7 +3463,12 @@
           const controller = new AbortController();
           const timeoutId = setTimeout(() => controller.abort(), 2000); // 2 second timeout
           
-          const response = await fetch(`${API_URL}/api/leaderboard/${category}`, {
+          // Check if API is available
+          if (!API_URL) {
+            throw new Error('API not available in production environment');
+          }
+          
+          const response = await fetch(`${API_URL}/leaderboard/${category}`, {
             signal: controller.signal
           }).catch(error => {
             // Mark API as unavailable for future calls
@@ -3673,7 +3726,12 @@
           const controller = new AbortController();
           const timeoutId = setTimeout(() => controller.abort(), 2000); // 2 second timeout
           
-          const response = await fetch(`${API_URL}/api/leaderboard/${category}`, {
+          // Check if API is available
+          if (!API_URL) {
+            throw new Error('API not available in production environment');
+          }
+          
+          const response = await fetch(`${API_URL}/leaderboard/${category}`, {
             signal: controller.signal
           }).catch(error => {
             // Mark API as unavailable for future calls

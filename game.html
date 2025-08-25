@@ -1630,22 +1630,34 @@
           isCheckingServer = false;
         }
         
+        // Navigation bar button handlers moved to main DOMContentLoaded handler to prevent duplicates
+      }
+      
+      // Initialize when DOM is loaded
+      document.addEventListener('DOMContentLoaded', function() {
+        updateWelcomeMessage();
+        checkServerAvailability();
+        
         // Admin toggle button for mobile with secret activation pattern
         const adminToggleBtnMobile = document.getElementById('admin-toggle-btn-mobile');
         if (adminToggleBtnMobile) {
+          // Remove any existing event listeners to prevent duplicates
+          adminToggleBtnMobile.replaceWith(adminToggleBtnMobile.cloneNode(true));
+          const newAdminToggleBtnMobile = document.getElementById('admin-toggle-btn-mobile');
+          
           let mobileClickCount = 0;
           let mobileClickTimer = null;
           const mobileRequiredClicks = 5;
           const mobileTimeWindow = 3000; // 3 seconds in milliseconds
           
-          adminToggleBtnMobile.addEventListener('click', function() {
+          newAdminToggleBtnMobile.addEventListener('click', function() {
             // Increment click counter
             mobileClickCount++;
             
             // Add a small animation effect on click
-            adminToggleBtnMobile.style.transform = 'scale(0.9)';
+            newAdminToggleBtnMobile.style.transform = 'scale(0.9)';
             setTimeout(() => {
-              adminToggleBtnMobile.style.transform = 'scale(1)';
+              newAdminToggleBtnMobile.style.transform = 'scale(1)';
             }, 100);
             
             // Clear existing timer if it exists
@@ -1675,72 +1687,47 @@
                 
                 // Show the modal
                 passcodeModal.style.display = 'flex';
-                setTimeout(() => passcodeInput.focus(), 100); // Delay focus to ensure modal is visible
+                setTimeout(() => passcodeInput.focus(), 100);
                 
-                // Handle passcode submission with debounce to prevent multiple rapid submissions
-                let isProcessing = false;
-                const checkPasscode = () => {
-                  if (isProcessing) return; // Prevent multiple submissions
-                  isProcessing = true;
-                  
-                  // Get the stored passcode or use default
-                  const storedPasscode = localStorage.getItem('adminPasscode') || 'T0mN00k'; // Default passcode
+                // Handle passcode submission
+                const handlePasscodeSubmit = () => {
                   const enteredPasscode = passcodeInput.value;
+                  const correctPasscode = 'blathers';
                   
-                  // Simple validation
-                  if (!enteredPasscode) {
-                    isProcessing = false;
-                    return;
-                  }
-                  
-                  // Check passcode
-                  if (enteredPasscode === storedPasscode) {
+                  if (enteredPasscode === correctPasscode) {
                     adminToolsContainer.style.display = 'block';
                     passcodeModal.style.display = 'none';
-                    passcodeInput.value = ''; // Clear the input
+                    passcodeInput.value = '';
                     showNotification('Admin Mode Activated');
                   } else {
-                    alert('Incorrect passcode');
-                    passcodeInput.value = ''; // Clear the input
-                    setTimeout(() => passcodeInput.focus(), 100);
+                    passcodeInput.style.borderColor = '#ff4444';
+                    passcodeInput.style.backgroundColor = '#ffe6e6';
+                    setTimeout(() => {
+                      passcodeInput.style.borderColor = '';
+                      passcodeInput.style.backgroundColor = '';
+                      passcodeInput.value = '';
+                      passcodeInput.focus();
+                    }, 1000);
                   }
-                  
-                  // Reset processing flag after a short delay
-                  setTimeout(() => {
-                    isProcessing = false;
-                  }, 300);
                 };
                 
-                // Handle Enter key
-                passcodeInput.onkeydown = (e) => {
+                passcodeSubmit.onclick = handlePasscodeSubmit;
+                passcodeInput.onkeypress = (e) => {
                   if (e.key === 'Enter') {
-                    e.preventDefault(); // Prevent form submission
-                    checkPasscode();
-                  } else if (e.key === 'Escape') {
-                    passcodeModal.style.display = 'none';
-                    passcodeInput.value = '';
+                    handlePasscodeSubmit();
                   }
                 };
                 
-                // Handle button click
-                passcodeSubmit.onclick = checkPasscode;
-                
-                // Handle clicking outside the modal to close
                 passcodeModal.onclick = (e) => {
                   if (e.target === passcodeModal) {
                     passcodeModal.style.display = 'none';
                     passcodeInput.value = '';
                   }
                 };
-                
-                return; // Don't proceed with the rest of the click handler
               } else {
-                // Deactivating admin mode - no passcode needed
                 adminToolsContainer.style.display = 'none';
+                showNotification('Admin Mode Deactivated');
               }
-              
-              // Show notification for admin mode activation
-              showNotification('Admin Mode Deactivated');
             }
           });
         }
@@ -1748,7 +1735,11 @@
         // Home button for mobile
         const logoutBtnMobile = document.getElementById('logoutBtn-mobile');
         if (logoutBtnMobile) {
-          logoutBtnMobile.addEventListener('click', function() {
+          // Remove any existing event listeners to prevent duplicates
+          logoutBtnMobile.replaceWith(logoutBtnMobile.cloneNode(true));
+          const newLogoutBtnMobile = document.getElementById('logoutBtn-mobile');
+          
+          newLogoutBtnMobile.addEventListener('click', function() {
             localStorage.removeItem('acnh_current_score');
             localStorage.removeItem('acnh_last_category');
             window.location.href = 'index.html';
@@ -1758,24 +1749,28 @@
         // Sound toggle button for mobile
         const soundToggleBtnMobile = document.getElementById('sound-toggle-mobile');
         if (soundToggleBtnMobile) {
-          // Initialize sound state (off by default)
-          soundEnabled = false;
+          // Remove any existing event listeners to prevent duplicates
+          soundToggleBtnMobile.replaceWith(soundToggleBtnMobile.cloneNode(true));
+          const newSoundToggleBtnMobile = document.getElementById('sound-toggle-mobile');
           
-          // Set initial image to muted
-          const soundImg = soundToggleBtnMobile.querySelector('img');
+          // Initialize sound state from localStorage or default to false
+          soundEnabled = localStorage.getItem('acnh_sound_enabled') === 'true';
+          
+          // Set initial image based on sound state
+          const soundImg = newSoundToggleBtnMobile.querySelector('img');
           if (soundImg) {
-            soundImg.src = 'images/speaker-mute.png';
-            soundImg.alt = 'Sound Off';
+            soundImg.src = soundEnabled ? 'images/speaker.png' : 'images/speaker-mute.png';
+            soundImg.alt = soundEnabled ? 'Sound On' : 'Sound Off';
           }
           
-          soundToggleBtnMobile.addEventListener('click', function() {
+          newSoundToggleBtnMobile.addEventListener('click', function() {
             soundEnabled = !soundEnabled;
             localStorage.setItem('acnh_sound_enabled', soundEnabled);
             
             // Add a small animation effect on click
-            soundToggleBtnMobile.style.transform = 'scale(0.9)';
+            newSoundToggleBtnMobile.style.transform = 'scale(0.9)';
             setTimeout(() => {
-              soundToggleBtnMobile.style.transform = 'scale(1)';
+              newSoundToggleBtnMobile.style.transform = 'scale(1)';
             }, 100);
             
             // Update the image based on sound state
@@ -1785,12 +1780,6 @@
             }
           });
         }
-      }
-      
-      // Initialize when DOM is loaded
-      document.addEventListener('DOMContentLoaded', function() {
-        updateWelcomeMessage();
-        checkServerAvailability();
       });
       
     </script>
@@ -2246,14 +2235,19 @@
           try {
             const soundToggle = document.getElementById('sound-toggle');
             if (soundToggle) {
-              let icon = soundToggle.querySelector('img, span');
-              if (!icon) {
-                icon = document.createElement('span');
-                soundToggle.appendChild(icon);
-              }
-              
-              if (icon.tagName === 'SPAN') {
-                icon.textContent = this.enabled ? '🔊' : '🔇';
+              let icon = soundToggle.querySelector('img');
+              if (icon) {
+                // Update desktop button image
+                icon.src = this.enabled ? 'images/speaker.png' : 'images/speaker-mute.png';
+                icon.alt = this.enabled ? 'Sound On' : 'Sound Off';
+              } else {
+                // Fallback to text if no image
+                let textIcon = soundToggle.querySelector('span');
+                if (!textIcon) {
+                  textIcon = document.createElement('span');
+                  soundToggle.appendChild(textIcon);
+                }
+                textIcon.textContent = this.enabled ? '🔊' : '🔇';
               }
               
               soundToggle.title = this.enabled ? 'Mute sound' : 'Unmute sound';
@@ -2469,48 +2463,6 @@
             
           } catch (error) {
             console.error('Error in sound toggle:', error);
-            // Ensure UI is updated even if there's an error
-            this.updateToggleUI();
-          }
-        },
-        
-        updateToggleUI: function() {
-          try {
-            const soundToggle = document.getElementById('sound-toggle');
-            if (!soundToggle) {
-              console.error('Sound toggle button not found');
-              return;
-            }
-            
-            let icon = soundToggle.querySelector('img, span');
-            
-            // If no icon exists, create one
-            if (!icon) {
-              icon = document.createElement('span');
-              soundToggle.appendChild(icon);
-            }
-            
-            // Always use emoji for consistency
-            if (icon.tagName === 'IMG') {
-              const emoji = document.createElement('span');
-              emoji.textContent = this.enabled ? '🔊' : '🔇';
-              soundToggle.replaceChild(emoji, icon);
-            } else if (icon.tagName === 'SPAN') {
-              icon.textContent = this.enabled ? '🔊' : '🔇';
-            }
-            
-            // Update title for accessibility
-            soundToggle.title = this.enabled ? 'Mute sound' : 'Unmute sound';
-            soundToggle.setAttribute('aria-pressed', !this.enabled);
-            
-          } catch (error) {
-            console.error('Error updating sound toggle UI:', error);
-          }
-        },
-        
-        addTestButton: function() {
-          try {
-            // Check if test button already exists
             if (document.getElementById('sound-test-button')) {
               return;
             }
@@ -2531,9 +2483,6 @@
             testButton.style.cursor = 'pointer';
             
             document.body.appendChild(testButton);
-            
-          } catch (error) {
-            console.error('Error adding test button:', error);
           }
         },
         
@@ -5027,6 +4976,16 @@
           // Remove any existing event listeners to prevent duplicates
           soundToggleBtn.replaceWith(soundToggleBtn.cloneNode(true));
           const newSoundToggleBtn = document.getElementById('sound-toggle');
+          
+          // Initialize sound state from localStorage or default to false
+          const soundEnabled = localStorage.getItem('acnh_sound_enabled') === 'true';
+          
+          // Set initial image based on sound state
+          const soundImg = newSoundToggleBtn.querySelector('img');
+          if (soundImg) {
+            soundImg.src = soundEnabled ? 'images/speaker.png' : 'images/speaker-mute.png';
+            soundImg.alt = soundEnabled ? 'Sound On' : 'Sound Off';
+          }
           
           newSoundToggleBtn.addEventListener('click', function(e) {
             e.preventDefault();

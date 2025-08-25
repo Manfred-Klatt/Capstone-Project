@@ -6,7 +6,9 @@ const router = express.Router();
 
 // Public routes
 router.get('/leaderboard', gameController.getLeaderboard);
+router.get('/leaderboard/:category', gameController.getLeaderboard);
 router.get('/categories', gameController.getCategories);
+router.post('/submit-guest-score', gameController.submitGuestScore);
 
 // Protected routes
 router.use(authMiddleware.protect);

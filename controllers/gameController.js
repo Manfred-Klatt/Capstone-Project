@@ -4,38 +4,47 @@ const catchAsync = require('../utils/catchAsync');
 
 // Helper function to get leaderboard data
 const getLeaderboardData = async (category) => {
-  const pipeline = [
-    {
-      $match: {
-        active: { $ne: false },
-        [`highScores.${category}`]: { $gt: 0 }
-      }
-    },
-    {
-      $project: {
-        username: 1,
-        score: `$highScores.${category}`,
-        lastPlayed: 1
-      }
-    },
-    { $sort: { score: -1, lastPlayed: 1 } },
-    { $limit: 10 }
-  ];
+  try {
+    // Validate category to prevent injection
+    const validCategories = ['fish', 'bugs', 'sea', 'villagers'];
+    if (!validCategories.includes(category)) {
+      category = 'fish'; // Default to fish if invalid category
+    }
+    
+    const pipeline = [
+      {
+        $match: {
+          active: { $ne: false }
+          // Removed the highScores filter to ensure we get results even if no scores
+        }
+      },
+      {
+        $project: {
+          username: 1,
+          score: { $ifNull: [`$highScores.${category}`, 0] },
+          date: { $ifNull: ["$lastPlayed", "$createdAt"] }
+        }
+      },
+      { $sort: { score: -1, date: -1 } },
+      { $limit: 10 }
+    ];
 
-  return await User.aggregate(pipeline);
+    const result = await User.aggregate(pipeline);
+    return result || [];
+  } catch (error) {
+    console.error(`Error in getLeaderboardData for category ${category}:`, error);
+    // Return empty array instead of throwing to prevent 500 errors
+    return [];
+  }
 };
 
 exports.getLeaderboard = catchAsync(async (req, res, next) => {
-  const { category = 'fish' } = req.query;
+  // Get category from params or query, default to 'fish'
+  const category = req.params.category || req.query.category || 'fish';
   const leaderboard = await getLeaderboardData(category);
 
-  res.status(200).json({
-    status: 'success',
-    data: {
-      category,
-      leaderboard
-    }
-  });
+  // Return just the leaderboard array for direct consumption by the frontend
+  res.status(200).json(leaderboard);
 });
 
 exports.getCategories = catchAsync(async (req, res, next) => {
@@ -123,6 +132,38 @@ exports.getUserHighscores = catchAsync(async (req, res, next) => {
       highscores: user.highScores,
       gamesPlayed: user.gamesPlayed,
       lastPlayed: user.lastPlayed
+    }
+  });
+});
+
+// Handle guest high score submissions
+exports.submitGuestScore = catchAsync(async (req, res, next) => {
+  const { username, category, score } = req.body;
+  
+  if (!username || !category || typeof score === 'undefined') {
+    return next(new AppError('Please provide username, category, and score', 400));
+  }
+  
+  // Create a temporary user for the guest score
+  const guestUser = await User.create({
+    username: username,
+    email: `guest_${Date.now()}@example.com`,
+    password: 'guestpassword123',
+    passwordConfirm: 'guestpassword123',
+    role: 'user',
+    highScores: { [category]: score },
+    lastPlayed: Date.now(),
+    gamesPlayed: 1
+  });
+  
+  // Return the updated leaderboard
+  const leaderboard = await getLeaderboardData(category);
+  
+  res.status(201).json({
+    status: 'success',
+    data: {
+      message: 'Guest score submitted successfully',
+      leaderboard
     }
   });
 });

@@ -1600,8 +1600,11 @@
           const timeoutId = setTimeout(() => controller.abort(), 5000); // 5 second timeout
           
           try {
+            // Use the correct health endpoint path
             const response = await fetch(`${API_URL}/health`, {
-              signal: controller.signal
+              signal: controller.signal,
+              mode: 'cors',
+              credentials: 'include'
             });
             
             clearTimeout(timeoutId);
@@ -1664,6 +1667,21 @@
       
       // Initialize when DOM is loaded
       document.addEventListener('DOMContentLoaded', function() {
+        // Initialize sound manager
+        const soundManager = SoundManager.init();
+        
+        // Mark that user has interacted with the page
+        soundManager.hasUserInteracted = true;
+        
+        // Initialize leaderboard
+        initializeLeaderboard();
+        
+        // Simulate high score button click handler
+        document.getElementById('simulate-high-score-btn').addEventListener('click', function() {
+          console.log('Simulating high score');
+          simulateHighScore();
+        });
+        
         updateWelcomeMessage();
         checkServerAvailability();
         
@@ -2037,6 +2055,7 @@
         <button id="next-btn" style="display: none">Next Item</button>
       </div>
       <button id="end-game-btn" style="background-color: #ff6b6b; margin-top: 20px; display: none">End Game</button>
+      <button id="simulate-high-score-btn" style="background-color: #9c27b0; margin-top: 10px;">Simulate High Score</button>
     </div>
 
       <!-- Combined Leaderboard Stack -->
@@ -3092,6 +3111,131 @@
         }
       }
 
+// Function to simulate achieving a high score
+async function simulateHighScore() {
+  try {
+    // Get the current category
+    const category = document.getElementById('category').value;
+    
+    // Generate a random high score between 80-100
+    const simulatedScore = Math.floor(Math.random() * 15) + 150;
+    
+    // Show the high score modal
+    const modal = document.getElementById('highScoreModal');
+    const finalScoreElement = document.getElementById('finalScore');
+    const placementMessageElement = document.getElementById('placementMessage');
+    
+    finalScoreElement.textContent = simulatedScore;
+    placementMessageElement.textContent = 'This score might place you on the leaderboard!';
+    modal.style.display = 'flex';
+    
+    // Set up the submit button handler
+    const submitButton = document.getElementById('submitScore');
+    const skipButton = document.getElementById('skipSubmit');
+    const playerNameInput = document.getElementById('playerName');
+    
+    // Remove any existing event listeners
+    const newSubmitButton = submitButton.cloneNode(true);
+    submitButton.parentNode.replaceChild(newSubmitButton, submitButton);
+    
+    const newSkipButton = skipButton.cloneNode(true);
+    skipButton.parentNode.replaceChild(newSkipButton, skipButton);
+    
+    // Add new event listeners
+    newSubmitButton.addEventListener('click', async function() {
+      const playerName = playerNameInput.value.trim();
+      
+      if (!playerName) {
+        alert('Please enter your name');
+        return;
+      }
+      
+      try {
+        // Submit the score to the server
+        if (!isStandaloneMode() && API_URL) {
+          const response = await fetch(`${API_URL}/submit-guest-score`, {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({
+              username: playerName,
+              category: category,
+              score: simulatedScore
+            })
+          });
+          
+          if (response.ok) {
+            const data = await response.json();
+            console.log('Score submitted successfully:', data);
+            
+            // Play high score sound
+            soundManager.play('high-score');
+            
+            // Mark the new score for highlighting
+            localStorage.setItem('highlight_score', JSON.stringify({
+              category: category,
+              username: playerName,
+              score: simulatedScore
+            }));
+            
+            // Update the leaderboard
+            await updateLeaderboard();
+            
+            // Close the modal
+            modal.style.display = 'none';
+          } else {
+            console.error('Failed to submit score:', response.status);
+            alert('Failed to submit score. Please try again.');
+          }
+        } else {
+          // Standalone mode - save locally
+          const localLeaderboard = JSON.parse(localStorage.getItem(`leaderboard_${category}`) || '[]');
+          
+          // Create new score entry with isNew flag
+          const newScore = {
+            name: playerName,
+            score: simulatedScore,
+            date: new Date().toISOString().split('T')[0],
+            isNew: true
+          };
+          
+          localLeaderboard.push(newScore);
+          
+          // Sort by score (descending)
+          localLeaderboard.sort((a, b) => b.score - a.score);
+          
+          // Keep only top 10
+          const topScores = localLeaderboard.slice(0, 10);
+          
+          // Save back to localStorage
+          localStorage.setItem(`leaderboard_${category}`, JSON.stringify(topScores));
+          
+          // Play high score sound
+          soundManager.play('high-score');
+          
+          // Update the leaderboard display
+          await updateLeaderboard();
+          
+          // Close the modal
+          modal.style.display = 'none';
+        }
+      } catch (error) {
+        console.error('Error submitting score:', error);
+        alert('Error submitting score: ' + error.message);
+      }
+    });
+    
+    newSkipButton.addEventListener('click', function() {
+      modal.style.display = 'none';
+    });
+    
+  } catch (error) {
+    console.error('Error simulating high score:', error);
+    alert('Error simulating high score: ' + error.message);
+  }
+}
+
 // Function to provide fallback data when API fails
 function getFallbackData(category) {
   console.log(`Using fallback data for ${category}`);
@@ -3646,21 +3790,20 @@ function getAvailableItems(category) {
         ]
       };
 
-      // Using isStandaloneMode from serverCheck.js
-      
-      let leaderboardInitialized = false;
-      
-      async function initializeLeaderboard() {
-        // Prevent multiple initializations
-        if (leaderboardInitialized) {
-          return;
-        }
-        leaderboardInitialized = true;
+      // Initialize leaderboard with default data and set up event listeners
+      function initializeLeaderboard() {
+        // Initialize with default data first
+        updateLeaderboardUI(DEFAULT_LEADERBOARD);
         
-        // Always try to update with server data first, then fall back to local
-        await updateLeaderboard();
+        // Then try to fetch from server
+        updateLeaderboard();
+        
+        // Set up category selector event listener
+        if (categorySelector) {
+          categorySelector.addEventListener('change', updateLeaderboard);
+        }
       }
-
+      
       async function updateLeaderboard() {
         try {
           // Get the current category
@@ -3710,10 +3853,38 @@ function getAvailableItems(category) {
           
           // Format the data for the UI
           const formattedData = {};
+          
+          // Check if we have a highlighted score to mark
+          let highlightedScore = null;
+          try {
+            const highlightData = localStorage.getItem('highlight_score');
+            if (highlightData) {
+              highlightedScore = JSON.parse(highlightData);
+              // Only use it if it matches the current category
+              if (highlightedScore.category !== category) {
+                highlightedScore = null;
+              } else {
+                // Clear it after use
+                localStorage.removeItem('highlight_score');
+              }
+            }
+          } catch (e) {
+            console.error('Error parsing highlighted score:', e);
+          }
+          
+          // Make sure leaderboardData is an array
+          if (!Array.isArray(leaderboardData)) {
+            console.error('Leaderboard data is not an array:', leaderboardData);
+            leaderboardData = [];
+          }
+          
           formattedData[category] = leaderboardData.map(entry => ({
-            name: entry.username,
-            score: entry.score,
-            date: new Date(entry.date).toISOString().split('T')[0]
+            name: entry.username || 'Anonymous',
+            score: entry.score || 0,
+            date: entry.date ? new Date(entry.date).toISOString().split('T')[0] : 'Unknown',
+            isNew: highlightedScore && 
+                  entry.username === highlightedScore.username && 
+                  entry.score === highlightedScore.score
           }));
           
           // Update the UI with the fetched data

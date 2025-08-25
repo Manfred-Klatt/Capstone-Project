@@ -3092,16 +3092,59 @@
         }
       }
 
-      function showHighScoreModal(finalScore, category) {
-        // Play high score sound
-        playSound(highScoreSound);
-        
-        // Set the final score in the modal
-        document.getElementById('finalScore').textContent = finalScore;
-        
-        // Show the modal
-        const modal = document.getElementById('highScoreModal');
-        modal.style.display = 'block';
+// Function to provide fallback data when API fails
+function getFallbackData(category) {
+  console.log(`Using fallback data for ${category}`);
+  // Store the fallback data in our global object so we don't try to fetch again
+  if (!allItems[category]) {
+    // Fallback to local data if API fails
+    const mockData = {
+      fish: [
+        { name: "Sea Bass", image_url: "https://dodo.ac/np/images/d/d5/Sea_Bass_NH_Icon.png", fallback_image_url: "images/fish/placeholder.svg" },
+        { name: "Koi", image_url: "https://dodo.ac/np/images/7/7c/Koi_NH_Icon.png", fallback_image_url: "images/fish/placeholder.svg" },
+        { name: "Goldfish", image_url: "https://dodo.ac/np/images/a/a5/Goldfish_NH_Icon.png", fallback_image_url: "images/fish/placeholder.svg" },
+        { name: "Tuna", image_url: "https://dodo.ac/np/images/8/8c/Tuna_NH_Icon.png", fallback_image_url: "images/fish/placeholder.svg" },
+        { name: "Coelacanth", image_url: "https://dodo.ac/np/images/4/45/Coelacanth_NH_Icon.png", fallback_image_url: "images/fish/placeholder.svg" }
+      ],
+      bugs: [
+        { name: "Common Butterfly", image_url: "https://dodo.ac/np/images/8/8f/Common_Butterfly_NH_Icon.png", fallback_image_url: "images/bugs/placeholder.svg" },
+        { name: "Monarch Butterfly", image_url: "https://dodo.ac/np/images/a/a9/Monarch_Butterfly_NH_Icon.png", fallback_image_url: "images/bugs/placeholder.svg" },
+        { name: "Scorpion", image_url: "https://dodo.ac/np/images/6/6f/Scorpion_NH_Icon.png", fallback_image_url: "images/bugs/placeholder.svg" },
+        { name: "Tarantula", image_url: "https://dodo.ac/np/images/0/0e/Tarantula_NH_Icon.png", fallback_image_url: "images/bugs/placeholder.svg" },
+        { name: "Stinkbug", image_url: "https://dodo.ac/np/images/b/b4/Stinkbug_NH_Icon.png", fallback_image_url: "images/bugs/placeholder.svg" }
+      ],
+      sea: [
+        { name: "Sea Star", image_url: "https://dodo.ac/np/images/1/1d/Sea_Star_NH_Icon.png", fallback_image_url: "images/sea/placeholder.svg" },
+        { name: "Sea Urchin", image_url: "https://dodo.ac/np/images/b/b9/Sea_Urchin_NH_Icon.png", fallback_image_url: "images/sea/placeholder.svg" },
+        { name: "Seaweed", image_url: "https://dodo.ac/np/images/5/53/Seaweed_NH_Icon.png", fallback_image_url: "images/sea/placeholder.svg" },
+        { name: "Pearl Oyster", image_url: "https://dodo.ac/np/images/1/11/Pearl_Oyster_NH_Icon.png", fallback_image_url: "images/sea/placeholder.svg" },
+        { name: "Scallop", image_url: "https://dodo.ac/np/images/d/d5/Scallop_NH_Icon.png", fallback_image_url: "images/sea/placeholder.svg" }
+      ],
+      villagers: [
+        { name: "Tom Nook", image_url: "https://dodo.ac/np/images/4/4f/Tom_Nook_NH.png", fallback_image_url: "images/villagers/placeholder.svg" },
+        { name: "Isabelle", image_url: "https://dodo.ac/np/images/8/8e/Isabelle_NH.png", fallback_image_url: "images/villagers/placeholder.svg" },
+        { name: "K.K. Slider", image_url: "https://dodo.ac/np/images/e/e0/K.K._NH.png", fallback_image_url: "images/villagers/placeholder.svg" },
+        { name: "Blathers", image_url: "https://dodo.ac/np/images/b/b3/Blathers_NH.png", fallback_image_url: "images/villagers/placeholder.svg" },
+        { name: "Celeste", image_url: "https://dodo.ac/np/images/9/93/Celeste_NH.png", fallback_image_url: "images/villagers/placeholder.svg" }
+      ]
+    };
+            
+    // Store the mock data for the selected category
+    allItems[category] = mockData[category] || [];
+            
+    // Initialize shown items for this category if it doesn't exist
+    if (!shownItems[category]) {
+      shownItems[category] = [];
+    }
+            
+    return allItems[category];
+  }
+}
+
+function getAvailableItems(category) {
+  if (!allItems[category]) {
+    return [];
+  }
         
         // Focus on the name input
         const playerNameInput = document.getElementById('playerName');
@@ -4004,7 +4047,7 @@
             isHighScore(score, category).then(isHighEnough => {
               if (isHighEnough) {
                 // Play high score sound first
-                playSound(highScoreSound);
+                soundManager.play('high-score');
                 showHighScoreModal(score, category);
               } else {
                 // Play game over sound if not a high score

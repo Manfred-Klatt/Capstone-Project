@@ -1908,7 +1908,10 @@
     <div id="admin-tools-container" style="display: none;">
       <h2>Admin Tools</h2>
       <button id="initialize-leaderboard-btn" style="background-color: #4CAF50;">Load Data</button>
-      <button id="simulate-high-score-btn" style="background-color: #9c27b0; margin-top: 15px;">Simulate High Score</button>
+      <button id="reset-fish-btn">Reset Fish</button>
+      <button id="reset-bugs-btn">Reset Bugs</button>
+      <button id="reset-sea-btn">Reset Sea</button>
+      <button id="reset-villagers-btn">Reset Villagers</button>
       <button id="reset-to-defaults-btn" style="background-color: #4a90e2; margin-top: 15px;">Reset All</button>
       <button id="reset-all-btn" style="background-color: #ff6b6b;">Clear All</button>
       <button id="reset-high-score" style="background-color: #ffa500; margin-top: 15px;">Reset PB</button>
@@ -2053,6 +2056,7 @@
         <button id="next-btn" style="display: none">Next Item</button>
       </div>
       <button id="end-game-btn" style="background-color: #ff6b6b; margin-top: 20px; display: none">End Game</button>
+      <button id="simulate-high-score-btn" style="background-color: #9c27b0; margin-top: 10px;">Simulate High Score</button>
     </div>
 
       <!-- Combined Leaderboard Stack -->
@@ -2668,7 +2672,7 @@
             showNotification('Initializing leaderboard data...');
             
             // Call the API endpoint to initialize leaderboard data
-            const response = await fetch(`${API_URL}/api/v1/initialize-leaderboard`, {
+            const response = await fetch(`${API_URL}/initialize-leaderboard`, {
               method: 'POST',
               headers: {
                 'Content-Type': 'application/json'
@@ -2679,26 +2683,22 @@
               credentials: 'include'
             });
             
-            if (!response.ok) {
-              let errorMessage = `Failed to initialize leaderboard data: ${response.status}`;
-              try {
-                const errorData = await response.json();
-                errorMessage += ` ${JSON.stringify(errorData)}`;
-              } catch (parseError) {
-                console.error('Error parsing error response:', parseError);
-              }
-              throw new Error(errorMessage);
+            if (response.ok) {
+              const data = await response.json();
+              console.log('Leaderboard data initialized:', data);
+              showNotification('Leaderboard data initialized successfully!');
+              
+              // Update the leaderboard display
+              await updateLeaderboard();
+            } else {
+              const errorData = await response.json().catch(() => ({}));
+              console.error('Failed to initialize leaderboard data:', response.status, errorData);
+              showNotification(`Error: ${errorData.message || 'Failed to initialize leaderboard data'}`);
             }
-            
-            const data = await response.json();
-            showNotification(`Leaderboard data initialized: ${data.message}`, 'success');
-            
-            // Refresh leaderboard display
-            initializeLeaderboard();
           }
         } catch (error) {
           console.error('Error initializing leaderboard data:', error);
-          showNotification(`Error: ${error.message}`, 'error');
+          showNotification(`Error: ${error.message}`);
         }
       });
       
@@ -3196,7 +3196,7 @@ async function simulateHighScore() {
       try {
         // Submit the score to the server
         if (!isStandaloneMode() && API_URL) {
-          const response = await fetch(`${API_URL}/api/v1/submit-guest-score`, {
+          const response = await fetch(`${API_URL}/submit-guest-score`, {
             method: 'POST',
             headers: {
               'Content-Type': 'application/json'
@@ -3440,7 +3440,7 @@ function getAvailableItems(category) {
             throw new Error('API not available in production environment');
           }
           
-          const response = await fetch(`${API_URL}/api/v1/leaderboard/submit`, {
+          const response = await fetch(`${API_URL}/leaderboard/submit`, {
             method: 'POST',
             headers: headers,
             body: JSON.stringify(requestBody),
@@ -3468,7 +3468,7 @@ function getAvailableItems(category) {
             throw new Error('API not available in production environment');
           }
           
-          const leaderboardResponse = await fetch(`${API_URL}/api/v1/leaderboard/${category}`, {
+          const leaderboardResponse = await fetch(`${API_URL}/leaderboard/${category}`, {
             signal: leaderboardController.signal
           }).catch(error => {
             window.apiUnavailable = true;
@@ -3616,7 +3616,7 @@ function getAvailableItems(category) {
             throw new Error('API not available in production environment');
           }
           
-          const response = await fetch(`${API_URL}/api/v1/leaderboard/${category}`, {
+          const response = await fetch(`${API_URL}/leaderboard/${category}`, {
             signal: controller.signal
           }).catch(error => {
             // Mark API as unavailable for future calls
@@ -3878,7 +3878,7 @@ function getAvailableItems(category) {
             throw new Error('API not available in production environment');
           }
           
-          const response = await fetch(`${API_URL}/api/v1/leaderboard/${category}`, {
+          const response = await fetch(`${API_URL}/leaderboard/${category}`, {
             signal: controller.signal
           }).catch(error => {
             // Mark API as unavailable for future calls

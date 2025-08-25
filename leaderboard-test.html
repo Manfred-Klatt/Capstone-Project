@@ -67,11 +67,11 @@
             
             // Local development
             if (hostname === 'localhost' || hostname === '127.0.0.1') {
-                return 'http://localhost:8000/api/v1';
+                return 'http://localhost:8000/api/v1/game';
             }
             
             // Production environment - use Railway backend
-            return 'https://capstone-project-production-3cce.up.railway.app/api/v1';
+            return 'https://capstone-project-production-3cce.up.railway.app/api/v1/game';
         })();
         
         // Display the API URL
@@ -82,7 +82,7 @@
             const apiStatus = document.getElementById('api-status');
             try {
                 // Try to connect to the health endpoint
-                const baseUrl = API_BASE_URL.split('/api')[0];
+                const baseUrl = API_BASE_URL.split('/game')[0];
                 const response = await fetch(`${baseUrl}/health`, {
                     method: 'GET',
                     mode: 'cors',

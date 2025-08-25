@@ -242,37 +242,9 @@ A standalone test page is available to verify the leaderboard API functionality:
 ### Troubleshooting Leaderboard Issues
 
 - If the leaderboard shows "No scores yet" after initialization, check the browser console for API errors
-- Verify that the MongoDB connection string in `.env` is correct (should match the format below)
+- Verify that the MongoDB connection string in `.env` is correct
 - Ensure the server is running and accessible at the expected URL
 - The game will fall back to local storage if the server is unavailable
-
-### MongoDB Connection
-
-The application uses MongoDB Atlas for persistent storage. The connection string in `.env` should follow this format:
-
-```env
-MONGODB_URI=mongodb+srv://username:password@cluster0.vswiduv.mongodb.net/?retryWrites=true&w=majority&appName=Cluster0
-```
-
-If you encounter 500 Internal Server Error responses from the API, check that:
-
-1. The MongoDB connection string is correct (username and password)
-2. The MongoDB Atlas cluster is running and accessible
-3. The API endpoints are correctly formatted with `/api/v1/` prefix
-
-### API Endpoints
-
-The game uses the following API endpoints:
-
-- `GET /api/v1/leaderboard/{category}` - Get leaderboard data for a specific category
-- `POST /api/v1/submit-guest-score` - Submit a guest high score
-- `POST /api/v1/initialize-leaderboard` - Initialize the leaderboard with sample data
-
-You can test these endpoints using the included `test-api.js` script:
-
-```bash
-node test-api.js
-```
 
 ## Acknowledgments
 

@@ -1578,22 +1578,51 @@
         try {
           console.log('Checking server availability...');
           
-          // If no API URL (production), skip server check
-          if (!API_URL) {
-            console.log('No API available - using standalone mode');
+          // If user has explicitly chosen standalone mode, respect that choice
+          if (localStorage.getItem('force_standalone') === 'true') {
+            console.log('User has chosen standalone mode');
             window.standaloneMode = true;
             updateStandaloneModeIndicator();
             return;
           }
           
+          // If no API URL is configured, fallback to standalone mode
+          if (!API_URL) {
+            console.log('No API URL configured - falling back to standalone mode');
+            window.standaloneMode = true;
+            updateStandaloneModeIndicator();
+            return;
+          }
+          
+          // Try to connect to the API with a timeout
+          console.log('Attempting to connect to API:', API_URL);
           const controller = new AbortController();
-          const timeoutId = setTimeout(() => controller.abort(), 3000); // 3 second timeout
+          const timeoutId = setTimeout(() => controller.abort(), 5000); // 5 second timeout
           
-          const response = await fetch(`${API_URL}/health`, {
-            signal: controller.signal
-          });
+          try {
+            const response = await fetch(`${API_URL}/health`, {
+              signal: controller.signal
+            });
+            
+            clearTimeout(timeoutId);
+            
+            if (response.ok) {
+              console.log('API connection successful - using online mode');
+              window.standaloneMode = false;
+              updateStandaloneModeIndicator();
+              return;
+            } else {
+              console.warn('API returned error status:', response.status);
+              // Will fall through to standalone mode
+            }
+          } catch (fetchError) {
+            console.warn('API connection failed:', fetchError.message);
+            // Will fall through to standalone mode
+          }
           
-          clearTimeout(timeoutId);
+          // If we reach here, the API is unavailable - offer standalone mode
+          console.log('API unavailable - offering standalone mode');
+          
           // Check if we're already in standalone mode
           if (window.standaloneMode) {
             updateStandaloneModeIndicator();
@@ -2065,21 +2094,18 @@
       const API_URL = (() => {
         const hostname = window.location.hostname;
         
-        // Production environment (blathers.app) - no backend API available
-        if (hostname === 'blathers.app' || hostname.includes('blathers')) {
-          console.log('Production environment detected - forcing standalone mode');
-          // Set global flags to force standalone mode
-          window.standaloneMode = true;
-          localStorage.setItem('force_standalone', 'true');
-          return null; // No API available
-        }
-        
         // Local development
         if (hostname === 'localhost' || hostname === '127.0.0.1') {
           return 'http://localhost:8000/api/v1';
         }
         
-        // Production backend on Railway (fallback)
+        // Production environment (blathers.app) - try to use Railway backend
+        if (hostname === 'blathers.app' || hostname.includes('blathers')) {
+          console.log('Production environment detected - using Railway API with fallback to standalone mode');
+          return 'https://capstone-project-production-3cce.up.railway.app/api/v1';
+        }
+        
+        // Other environments - use Railway backend
         return 'https://capstone-project-production-3cce.up.railway.app/api/v1';
       })();
       const imageDisplay = document.getElementById("imageDisplay");

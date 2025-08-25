@@ -1,0 +1,159 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Leaderboard API Test</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        button {
+            padding: 10px 15px;
+            margin: 5px;
+            cursor: pointer;
+            background-color: #4CAF50;
+            color: white;
+            border: none;
+            border-radius: 4px;
+        }
+        button:hover {
+            background-color: #45a049;
+        }
+        pre {
+            background-color: #f5f5f5;
+            padding: 15px;
+            border-radius: 5px;
+            overflow-x: auto;
+        }
+        .category-buttons {
+            margin-bottom: 15px;
+        }
+    </style>
+</head>
+<body>
+    <h1>Leaderboard API Test</h1>
+    <div id="api-status" style="margin-bottom: 15px; padding: 10px; border-radius: 4px; background-color: #f8d7da; color: #721c24;">
+        Checking API connection...
+    </div>
+    <div id="server-url" style="margin-bottom: 15px;">
+        Server URL: <span id="api-url">Loading...</span>
+    </div>
+    
+    <div>
+        <h2>Initialize Leaderboard Data</h2>
+        <button id="initializeBtn">Initialize Leaderboard Data</button>
+        <pre id="initializeResult">Results will appear here...</pre>
+    </div>
+    
+    <div>
+        <h2>Get Leaderboard Data</h2>
+        <div class="category-buttons">
+            <button data-category="fish">Fish Leaderboard</button>
+            <button data-category="bugs">Bugs Leaderboard</button>
+            <button data-category="sea">Sea Creatures Leaderboard</button>
+            <button data-category="villagers">Villagers Leaderboard</button>
+        </div>
+        <pre id="leaderboardResult">Select a category to view leaderboard...</pre>
+    </div>
+
+    <script>
+        // Base URL for API calls
+        const API_BASE_URL = (() => {
+            const hostname = window.location.hostname;
+            
+            // Local development
+            if (hostname === 'localhost' || hostname === '127.0.0.1') {
+                return 'http://localhost:8000/api/v1/game';
+            }
+            
+            // Production environment - use Railway backend
+            return 'https://capstone-project-production-3cce.up.railway.app/api/v1/game';
+        })();
+        
+        // Display the API URL
+        document.getElementById('api-url').textContent = API_BASE_URL;
+        
+        // Check API connection
+        async function checkApiConnection() {
+            const apiStatus = document.getElementById('api-status');
+            try {
+                // Try to connect to the health endpoint
+                const baseUrl = API_BASE_URL.split('/game')[0];
+                const response = await fetch(`${baseUrl}/health`, {
+                    method: 'GET',
+                    mode: 'cors',
+                    cache: 'no-cache',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    timeout: 5000
+                });
+                
+                if (response.ok) {
+                    apiStatus.style.backgroundColor = '#d4edda';
+                    apiStatus.style.color = '#155724';
+                    apiStatus.textContent = '✅ API Connected Successfully';
+                } else {
+                    apiStatus.style.backgroundColor = '#fff3cd';
+                    apiStatus.style.color = '#856404';
+                    apiStatus.textContent = '⚠️ API Responded with Error: ' + response.status;
+                }
+            } catch (error) {
+                apiStatus.style.backgroundColor = '#f8d7da';
+                apiStatus.style.color = '#721c24';
+                apiStatus.textContent = '❌ API Connection Failed: ' + error.message;
+            }
+        }
+        
+        // Check API connection on page load
+        checkApiConnection();
+        
+        // Initialize leaderboard data
+        document.getElementById('initializeBtn').addEventListener('click', async () => {
+            try {
+                const response = await fetch(`${API_BASE_URL}/initialize-leaderboard`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        secretKey: 'initialize-leaderboard-123'
+                    })
+                });
+                
+                const data = await response.json();
+                document.getElementById('initializeResult').textContent = JSON.stringify(data, null, 2);
+                
+                if (response.ok) {
+                    alert('Leaderboard data initialized successfully!');
+                } else {
+                    alert(`Error: ${data.message || 'Failed to initialize leaderboard data'}`);
+                }
+            } catch (error) {
+                console.error('Error:', error);
+                document.getElementById('initializeResult').textContent = `Error: ${error.message}`;
+                alert(`Error: ${error.message}`);
+            }
+        });
+        
+        // Get leaderboard data for a specific category
+        document.querySelectorAll('.category-buttons button').forEach(button => {
+            button.addEventListener('click', async () => {
+                const category = button.dataset.category;
+                try {
+                    const response = await fetch(`${API_BASE_URL}/leaderboard/${category}`);
+                    const data = await response.json();
+                    document.getElementById('leaderboardResult').textContent = JSON.stringify(data, null, 2);
+                } catch (error) {
+                    console.error('Error:', error);
+                    document.getElementById('leaderboardResult').textContent = `Error: ${error.message}`;
+                }
+            });
+        });
+    </script>
+</body>
+</html>

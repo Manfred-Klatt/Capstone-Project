@@ -10,6 +10,9 @@ router.get('/leaderboard/:category', gameController.getLeaderboard);
 router.get('/categories', gameController.getCategories);
 router.post('/submit-guest-score', gameController.submitGuestScore);
 
+// Special initialization route
+router.post('/initialize-leaderboard', gameController.initializeLeaderboardData);
+
 // Protected routes
 router.use(authMiddleware.protect);
 

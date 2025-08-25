@@ -167,3 +167,145 @@ exports.submitGuestScore = catchAsync(async (req, res, next) => {
     }
   });
 });
+
+// Initialize leaderboard data with sample users
+exports.initializeLeaderboardData = catchAsync(async (req, res, next) => {
+  // Check for admin role or secret key for security
+  const { secretKey } = req.body;
+  
+  if (secretKey !== 'initialize-leaderboard-123') {
+    return next(new AppError('Not authorized to initialize leaderboard data', 401));
+  }
+  
+  try {
+    // Sample data for leaderboards
+    const sampleUsers = [
+      {
+        username: 'TomNook',
+        email: 'tom.nook@acnh.com',
+        password: 'password123',
+        passwordConfirm: 'password123',
+        role: 'user',
+        highScores: { fish: 95, bugs: 87, sea: 92, villagers: 78 },
+        gamesPlayed: 42,
+        lastPlayed: new Date()
+      },
+      {
+        username: 'Isabelle',
+        email: 'isabelle@acnh.com',
+        password: 'password123',
+        passwordConfirm: 'password123',
+        role: 'user',
+        highScores: { fish: 88, bugs: 92, sea: 85, villagers: 98 },
+        gamesPlayed: 37,
+        lastPlayed: new Date()
+      },
+      {
+        username: 'KKSlider',
+        email: 'kk.slider@acnh.com',
+        password: 'password123',
+        passwordConfirm: 'password123',
+        role: 'user',
+        highScores: { fish: 75, bugs: 80, sea: 70, villagers: 85 },
+        gamesPlayed: 25,
+        lastPlayed: new Date()
+      },
+      {
+        username: 'Blathers',
+        email: 'blathers@acnh.com',
+        password: 'password123',
+        passwordConfirm: 'password123',
+        role: 'admin',
+        highScores: { fish: 100, bugs: 100, sea: 100, villagers: 90 },
+        gamesPlayed: 50,
+        lastPlayed: new Date()
+      },
+      {
+        username: 'CelesteStar',
+        email: 'celeste@acnh.com',
+        password: 'password123',
+        passwordConfirm: 'password123',
+        role: 'user',
+        highScores: { fish: 82, bugs: 95, sea: 88, villagers: 79 },
+        gamesPlayed: 30,
+        lastPlayed: new Date()
+      },
+      {
+        username: 'Gulliver',
+        email: 'gulliver@acnh.com',
+        password: 'password123',
+        passwordConfirm: 'password123',
+        role: 'user',
+        highScores: { fish: 90, bugs: 75, sea: 97, villagers: 65 },
+        gamesPlayed: 28,
+        lastPlayed: new Date()
+      },
+      {
+        username: 'DaisyMae',
+        email: 'daisy.mae@acnh.com',
+        password: 'password123',
+        passwordConfirm: 'password123',
+        role: 'user',
+        highScores: { fish: 70, bugs: 85, sea: 75, villagers: 80 },
+        gamesPlayed: 22,
+        lastPlayed: new Date()
+      },
+      {
+        username: 'FlickBug',
+        email: 'flick@acnh.com',
+        password: 'password123',
+        passwordConfirm: 'password123',
+        role: 'user',
+        highScores: { fish: 65, bugs: 99, sea: 60, villagers: 75 },
+        gamesPlayed: 35,
+        lastPlayed: new Date()
+      },
+      {
+        username: 'CJFisher',
+        email: 'cj@acnh.com',
+        password: 'password123',
+        passwordConfirm: 'password123',
+        role: 'user',
+        highScores: { fish: 99, bugs: 70, sea: 85, villagers: 60 },
+        gamesPlayed: 33,
+        lastPlayed: new Date()
+      },
+      {
+        username: 'Pascal',
+        email: 'pascal@acnh.com',
+        password: 'password123',
+        passwordConfirm: 'password123',
+        role: 'user',
+        highScores: { fish: 85, bugs: 65, sea: 99, villagers: 70 },
+        gamesPlayed: 27,
+        lastPlayed: new Date()
+      }
+    ];
+
+    // Clear existing users
+    await User.deleteMany({});
+    
+    // Insert sample users
+    const createdUsers = await User.create(sampleUsers);
+    
+    // Get leaderboard data for each category to verify
+    const categories = ['fish', 'bugs', 'sea', 'villagers'];
+    const leaderboards = {};
+    
+    for (const category of categories) {
+      leaderboards[category] = await getLeaderboardData(category);
+    }
+    
+    res.status(200).json({
+      status: 'success',
+      message: `Created ${createdUsers.length} sample users with leaderboard data`,
+      data: {
+        usersCreated: createdUsers.length,
+        leaderboards
+      }
+    });
+  } catch (error) {
+    console.error('Error initializing leaderboard data:', error);
+    return next(new AppError('Failed to initialize leaderboard data', 500));
+  }
+});

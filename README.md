@@ -211,6 +211,41 @@ src/
 
 This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
 
+## Admin Tools and Leaderboard Management
+
+### Accessing Admin Tools
+
+The game includes admin tools for managing leaderboard data. To access these tools:
+
+1. Click on the Nook icon in the top-left corner of the game screen 5 times within 3 seconds
+2. Enter the passcode: `blathers`
+3. The admin tools panel will appear with various options
+
+### Initializing Leaderboard Data
+
+If you encounter a 500 Internal Server Error when accessing leaderboard data, you may need to initialize the MongoDB database with sample data:
+
+1. Access the admin tools as described above
+2. Click the "Initialize Leaderboard Data" button (green button at the top)
+3. Confirm the initialization when prompted
+4. Wait for the confirmation message that data has been initialized
+
+### Testing Leaderboard API
+
+A standalone test page is available to verify the leaderboard API functionality:
+
+1. Open `leaderboard-test.html` in your browser
+2. The page will automatically check API connectivity
+3. Use the "Initialize Leaderboard Data" button to populate the database
+4. Test different category leaderboards using the category buttons
+
+### Troubleshooting Leaderboard Issues
+
+- If the leaderboard shows "No scores yet" after initialization, check the browser console for API errors
+- Verify that the MongoDB connection string in `.env` is correct
+- Ensure the server is running and accessible at the expected URL
+- The game will fall back to local storage if the server is unavailable
+
 ## Acknowledgments
 
 - Animal Crossing and its assets are property of Nintendo.

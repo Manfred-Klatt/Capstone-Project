@@ -301,7 +301,7 @@
       #admin-tools-container {
         width: 200px;
         position: absolute;
-        top: 50px;
+        top: 95px;
         left: 10px;
         background-color: #fff9f0;
         padding: 15px;
@@ -909,7 +909,7 @@
         /* Fix admin container overlap on mobile */
         #admin-tools-container {
           position: absolute;
-          top: 50px;
+          top: 95px;
           left: 0;
           right: 0;
           background-color: var(--container-bg);
@@ -1907,13 +1907,14 @@
     <!-- Admin Tools Container -->
     <div id="admin-tools-container" style="display: none;">
       <h2>Admin Tools</h2>
-      <button id="reset-fish-btn">Reset Fish Scores</button>
-      <button id="reset-bugs-btn">Reset Bugs Scores</button>
-      <button id="reset-sea-btn">Reset Sea Scores</button>
-      <button id="reset-villagers-btn">Reset Villagers Scores</button>
-      <button id="reset-to-defaults-btn" style="background-color: #4a90e2; margin-top: 15px;">Reset All Leaderboards</button>
-      <button id="reset-all-btn" style="background-color: #ff6b6b;">Clear All Leaderboards</button>
-      <button id="reset-high-score" style="background-color: #ffa500; margin-top: 15px;">Reset Personal Best</button>
+      <button id="initialize-leaderboard-btn" style="background-color: #4CAF50;">Load Data</button>
+      <button id="reset-fish-btn">Reset Fish</button>
+      <button id="reset-bugs-btn">Reset Bugs</button>
+      <button id="reset-sea-btn">Reset Sea</button>
+      <button id="reset-villagers-btn">Reset Villagers</button>
+      <button id="reset-to-defaults-btn" style="background-color: #4a90e2; margin-top: 15px;">Reset All</button>
+      <button id="reset-all-btn" style="background-color: #ff6b6b;">Clear All</button>
+      <button id="reset-high-score" style="background-color: #ffa500; margin-top: 15px;">Reset PB</button>
     </div>
     <!-- Main Content Wrapper -->
     <div style="width: 100%; display: flex; flex-direction: column; align-items: center;">
@@ -2663,6 +2664,48 @@
           .catch(e => console.error('Test sound playback failed:', e));
       }
       
+      // Admin tool button handlers
+      document.getElementById('initialize-leaderboard-btn').addEventListener('click', async function() {
+        try {
+          if (confirm('This will initialize the MongoDB database with sample leaderboard data. Continue?')) {
+            // Show loading indicator
+            showNotification('Initializing leaderboard data...');
+            
+            // Call the API endpoint to initialize leaderboard data
+            const response = await fetch(`${API_URL}/initialize-leaderboard`, {
+              method: 'POST',
+              headers: {
+                'Content-Type': 'application/json'
+              },
+              body: JSON.stringify({
+                secretKey: 'initialize-leaderboard-123'
+              }),
+              credentials: 'include'
+            });
+            
+            if (response.ok) {
+              const data = await response.json();
+              console.log('Leaderboard data initialized:', data);
+              showNotification('Leaderboard data initialized successfully!');
+              
+              // Update the leaderboard display
+              await updateLeaderboard();
+            } else {
+              const errorData = await response.json().catch(() => ({}));
+              console.error('Failed to initialize leaderboard data:', response.status, errorData);
+              showNotification(`Error: ${errorData.message || 'Failed to initialize leaderboard data'}`);
+            }
+          }
+        } catch (error) {
+          console.error('Error initializing leaderboard data:', error);
+          showNotification(`Error: ${error.message}`);
+        }
+      });
+      
+      document.getElementById('reset-fish-btn').addEventListener('click', function() {
+        resetLeaderboardCategory('fish');
+      });  
+
       // Add test sound button handler
       document.getElementById('test-sound')?.addEventListener('click', (e) => {
         e.preventDefault();

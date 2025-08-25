@@ -2597,46 +2597,7 @@
       // Initialize sound manager
       const soundManager = SoundManager.init();
       
-      // Add Start Game button event handler
-      document.addEventListener('DOMContentLoaded', function() {
-        const startGameButton = document.getElementById('start-game-btn');
-        if (startGameButton) {
-          startGameButton.addEventListener('click', function() {
-            console.log('Start Game button clicked');
-            
-            // Play start game sound
-            if (soundManager) {
-              soundManager.play('start-game');
-            }
-            
-            // Hide the start game button
-            startGameButton.style.display = 'none';
-            
-            // Show the timer in the high-score container
-            const gameTimerContainer = document.getElementById('game-timer-container');
-            if (gameTimerContainer) {
-              gameTimerContainer.style.display = 'block';
-            }
-            
-            // Start the game by initializing
-            initGame();
-            
-            // Start the timer
-            startTimer();
-            
-            // Update feedback
-            const feedbackElement = document.getElementById('feedback');
-            if (feedbackElement) {
-              feedbackElement.textContent = 'Game started! Good luck!';
-              feedbackElement.className = 'correct';
-              setTimeout(() => {
-                feedbackElement.textContent = '';
-                feedbackElement.className = '';
-              }, 2000);
-            }
-          });
-        }
-      });
+      // Start Game button handler will be consolidated in main DOMContentLoaded event
       
       // Function to test direct audio playback
       function testDirectAudioPlayback() {
@@ -2778,25 +2739,7 @@
         soundManager.toggle();
       }
       
-      // Add click event listener to sound toggle button
-      document.addEventListener('DOMContentLoaded', function() {
-        const soundToggle = document.getElementById('sound-toggle');
-        if (soundToggle) {
-          soundToggle.addEventListener('click', function(event) {
-            soundManager.toggle(event);
-          });
-        } else {
-          console.warn('Sound toggle button not found during initialization');
-        }
-        
-        // Also add event listener for mobile sound toggle
-        const soundToggleMobile = document.getElementById('sound-toggle-mobile');
-        if (soundToggleMobile) {
-          soundToggleMobile.addEventListener('click', function(event) {
-            soundManager.toggle(event);
-          });
-        }
-      });
+      // Sound toggle handlers will be consolidated in main DOMContentLoaded event
 
     // Add event listener for admin tools toggle with secret activation pattern
     let clickCount = 0;
@@ -5041,9 +4984,21 @@
         // Add event listener for the Start Game button
         const startGameButton = document.getElementById('start-game-btn');
         if (startGameButton) {
-          startGameButton.addEventListener('click', function() {
+          // Remove any existing event listeners to prevent duplicates
+          startGameButton.replaceWith(startGameButton.cloneNode(true));
+          const newStartGameButton = document.getElementById('start-game-btn');
+          
+          newStartGameButton.addEventListener('click', function() {
+            console.log('Start Game button clicked');
+            
             // Hide the start game button
-            startGameButton.style.display = 'none';
+            newStartGameButton.style.display = 'none';
+            
+            // Show the timer in the high-score container
+            const gameTimerContainer = document.getElementById('game-timer-container');
+            if (gameTimerContainer) {
+              gameTimerContainer.style.display = 'block';
+            }
             
             // Enable the input field and focus it
             guessInput.disabled = false;
@@ -5053,27 +5008,51 @@
             // Show the submit button
             submitButton.style.display = 'inline-block';
             
+            // Play start game sound
+            soundManager.play('start-game');
+            
             // Initialize the game (this will load the first image)
             initGame(true);
             
             // Start the game round - the timer will be started after the image loads
-            setupNewRound();
-            
-            // Play new round sound using the sound manager
-            soundManager.play('start-game');
+            setTimeout(() => {
+              setupNewRound();
+            }, 100);
           });
         }
         
         // Add event listener for the sound toggle button
         const soundToggleBtn = document.getElementById('sound-toggle');
         if (soundToggleBtn) {
-          soundToggleBtn.addEventListener('click', function(e) {
+          // Remove any existing event listeners to prevent duplicates
+          soundToggleBtn.replaceWith(soundToggleBtn.cloneNode(true));
+          const newSoundToggleBtn = document.getElementById('sound-toggle');
+          
+          newSoundToggleBtn.addEventListener('click', function(e) {
             e.preventDefault();
             soundManager.toggle();
             // Add a small animation effect on click
-            soundToggleBtn.style.transform = 'scale(0.9)';
+            newSoundToggleBtn.style.transform = 'scale(0.9)';
             setTimeout(() => {
-              soundToggleBtn.style.transform = 'scale(1)';
+              newSoundToggleBtn.style.transform = 'scale(1)';
+            }, 100);
+          });
+        }
+        
+        // Add event listener for mobile sound toggle button
+        const soundToggleMobile = document.getElementById('sound-toggle-mobile');
+        if (soundToggleMobile) {
+          // Remove any existing event listeners to prevent duplicates
+          soundToggleMobile.replaceWith(soundToggleMobile.cloneNode(true));
+          const newSoundToggleMobile = document.getElementById('sound-toggle-mobile');
+          
+          newSoundToggleMobile.addEventListener('click', function(e) {
+            e.preventDefault();
+            soundManager.toggle();
+            // Add a small animation effect on click
+            newSoundToggleMobile.style.transform = 'scale(0.9)';
+            setTimeout(() => {
+              newSoundToggleMobile.style.transform = 'scale(1)';
             }, 100);
           });
         }
@@ -5213,53 +5192,6 @@
             }
           });
         });
-        
-        function startGame() {
-         
-          // Add event listener for sound toggle
-          soundToggleBtn.addEventListener('click', () => {
-            soundEnabled = !soundEnabled;
-            soundToggleBtn.style.backgroundColor = soundEnabled ? '#4a90e2' : '#cccccc';
-          });
-          
-          const startGameBtn = document.getElementById('start-game-btn');
-          startGameBtn.addEventListener('click', () => {
-            // Hide the start button
-            startGameBtn.style.display = 'none';
-            
-            // Show the end game button
-            document.getElementById('end-game-btn').style.display = 'inline-block';
-            
-            // Enable the guess input and submit button
-            guessInput.disabled = false;
-            guessInput.style.display = 'inline-block';
-            submitButton.style.display = 'inline-block';
-            submitButton.disabled = false;
-            
-            // Focus on the input
-            guessInput.focus();
-            
-            // Reset score
-            score = 0;
-            scoreElement.textContent = `Score: ${score}`;
-            
-            // Clear any feedback
-            feedbackElement.textContent = '';
-            feedbackElement.className = '';
-            
-            // Play new round sound using the sound manager
-            soundManager.play('start-game');
-            
-            // Start the timer after a short delay to ensure UI is ready
-            setTimeout(() => {
-              stopTimer(); // Clear any existing timer first
-              startTimer();
-              setupNewRound();
-            }, 100);
-          });  
-        }
-        
-        // Removed duplicate function - using the one defined earlier
         
         // Store the current category change promise to prevent race conditions
       let categoryChangePromise = null;

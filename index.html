@@ -393,18 +393,18 @@
       const API_URL = (() => {
         const hostname = window.location.hostname;
         
-        // Production environment (blathers.app) - use relative path
+        // Production environment (blathers.app) - use relative path with /v1
         if (hostname === 'blathers.app' || hostname.includes('blathers')) {
-          return '/api'; // Changed from '/api/v1' to '/api' to match backend routing
+          return '/api/v1'; // Using /v1 to match backend routing
         }
         
         // Local development
         if (hostname === 'localhost' || hostname === '127.0.0.1') {
-          return 'http://localhost:8000/api'; // Changed from '/api/v1' to '/api'
+          return 'http://localhost:8000/api/v1'; // Using /v1 to match backend routing
         }
         
         // Production backend on Railway
-        return 'https://capstone-project-production-3cce.up.railway.app/api'; // Changed from '/api/v1' to '/api'
+        return 'https://capstone-project-production-3cce.up.railway.app/api/v1'; // Using /v1 to match backend routing
       })();
 
       // Server Status Manager
@@ -447,8 +447,8 @@
           this.updateDbStatus('checking', 'Checking...');
 
           try {
-            // Use the correct health endpoint (note: no /api prefix as it's already in API_URL)
-            const response = await fetch(`/health`, {
+            // Use the correct health endpoint (using full path to be explicit)
+            const response = await fetch(`/api/v1/health`, {
               method: 'GET',
               mode: 'cors',
               headers: { 'Accept': 'application/json' },
@@ -523,9 +523,9 @@
           const controller = new AbortController();
           const timeoutId = setTimeout(() => controller.abort(), 5000); // 5 second timeout
           
-          // Try health endpoint (note: no /api prefix as it's already in API_URL)
+          // Try health endpoint (using full path to be explicit)
           try {
-            const response = await fetch(`/health`, {
+            const response = await fetch(`/api/v1/health`, {
               method: 'GET',
               signal: controller.signal,
               mode: 'cors',
@@ -536,7 +536,7 @@
             
             clearTimeout(timeoutId);
             if (response.ok) {
-              console.log('Server is available at /health');
+              console.log('Server is available at /api/v1/health');
               return true;
             }
             console.log(`Health check failed with status: ${response.status}`);

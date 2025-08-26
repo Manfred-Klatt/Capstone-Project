@@ -402,8 +402,8 @@
             return;
           }
           
-          // Use server status manager to check availability
-          const serverAvailable = await serverStatus.checkServerStatus();
+          // Check if server is available
+          const serverAvailable = await checkServerAvailable();
           
           if (!serverAvailable) {
             // Server is not available, offer standalone mode
@@ -667,8 +667,8 @@
             
             console.log('Sending signup request...', { username, email });
             
-            // The auth routes are mounted directly at /auth in the backend
-            const response = await fetch(`${API_URL.split('/v1')[0]}/auth/signup`, {
+            // The auth routes are mounted at /api/v1/auth in the backend
+            const response = await fetch(`/api/v1/auth/signup`, {
               method: 'POST',
               headers: {
                 'Content-Type': 'application/json',

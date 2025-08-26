@@ -1,5 +1,7 @@
 const User = require('../models/userModel');
 const AppError = require('../utils/appError');
+const catchAsync = require('../utils/catchAsync');
+const InputValidator = require('../utils/inputValidator');
 const jwt = require('jsonwebtoken');
 
 const signToken = id => {
@@ -90,32 +92,9 @@ exports.signup = async (req, res, next) => {
       } else {
         return res.status(400).json({
           status: 'error',
-          message: 'Username is already taken'
+          message: 'Username is already in use'
         });
       }
-    }
-    
-    // Create new user
-    const newUser = await User.create({
-      username: username.trim(),
-      email: email.toLowerCase().trim(),
-      password,
-      passwordConfirm
-    });
-    
-    // Send response with token
-    return createSendToken(newUser, 201, req, res);
-    
-  } catch (err) {
-    console.error('Signup error:', err);
-    
-    // Handle duplicate key errors
-    if (err.code === 11000) {
-      const field = Object.keys(err.keyPattern)[0];
-      return res.status(400).json({
-        status: 'error',
-        message: `An account with that ${field} already exists`
-      });
     }
     
     // Handle validation errors

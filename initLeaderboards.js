@@ -5,7 +5,12 @@ require('dotenv').config();
 console.log('Starting database initialization script...');
 
 // MongoDB connection string from .env file
-const MONGODB_URI = process.env.MONGODB_URI || 'mongodb+srv://manfredjklatt:manfredjklatt@cluster0.vswiduv.mongodb.net/acnh-quiz?retryWrites=true&w=majority';
+const MONGODB_URI = process.env.MONGODB_URI;
+
+if (!MONGODB_URI) {
+  console.error('MONGODB_URI environment variable is required');
+  process.exit(1);
+}
 
 console.log('Using MongoDB URI:', MONGODB_URI.replace(/(mongodb\+srv:\/\/)([^:]+):([^@]+)@/, '$1$2:****@'));
 
@@ -85,13 +90,13 @@ userSchema.pre('save', async function(next) {
 
 const User = mongoose.model('User', userSchema);
 
-// Sample data for leaderboards
+// Sample data for leaderboards - ONLY FOR DEVELOPMENT
 const sampleUsers = [
   {
     username: 'TomNook',
     email: 'tom.nook@acnh.com',
-    password: 'password123',
-    passwordConfirm: 'password123',
+    password: 'SecureP@ssw0rd2024!',
+    passwordConfirm: 'SecureP@ssw0rd2024!',
     role: 'user',
     highScores: { fish: 95, bugs: 87, sea: 92, villagers: 78 },
     gamesPlayed: 42,
@@ -192,11 +197,18 @@ const sampleUsers = [
 // Function to initialize the database
 async function initializeDatabase() {
   try {
-    // Clear existing users
+    // Check if we're in production - don't create sample users in production
+    if (process.env.NODE_ENV === 'production') {
+      console.log('Production environment detected - skipping sample user creation');
+      console.log('Database initialization complete (production mode)');
+      return;
+    }
+
+    // Clear existing users (development only)
     await User.deleteMany({});
     console.log('Cleared existing users');
 
-    // Insert sample users
+    // Insert sample users (development only)
     const createdUsers = await User.create(sampleUsers);
     console.log(`Created ${createdUsers.length} sample users with leaderboard data`);
 

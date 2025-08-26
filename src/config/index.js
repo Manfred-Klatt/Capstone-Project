@@ -34,7 +34,9 @@ const config = {
   cors: {
     origin: process.env.CORS_ORIGIN
       ? process.env.CORS_ORIGIN.split(',').map(origin => origin.trim())
-      : ['http://localhost:3000', 'http://localhost:5501', 'http://127.0.0.1:5501', 'http://localhost:8000', 'https://acnhid.b-cdn.net', 'https://blathers.app'],
+      : process.env.NODE_ENV === 'production' 
+        ? ['https://blathers.app', 'https://www.blathers.app'] // Production only
+        : ['http://localhost:3000', 'http://localhost:5501', 'http://127.0.0.1:5501', 'http://localhost:8000', 'https://acnhid.b-cdn.net', 'https://blathers.app'], // Development
     methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
     allowedHeaders: ['Content-Type', 'Authorization'],
     exposedHeaders: ['Set-Cookie'],
@@ -48,13 +50,15 @@ const config = {
       useDefaults: true,
       directives: {
         defaultSrc: ["'self'"],
-        scriptSrc: ["'self'", "'unsafe-inline'", "'unsafe-eval'"],
-        styleSrc: ["'self'", "'unsafe-inline'"],
-        imgSrc: ["'self'", 'data:', 'blob:'],
+        scriptSrc: ["'self'", 'https://cdnjs.cloudflare.com'],
+        styleSrc: ["'self'"],
+        imgSrc: ["'self'", 'data:', 'blob:', 'https://acnhapi.com', 'https://acnhid.b-cdn.net'],
         fontSrc: ["'self'", 'data:'],
-        connectSrc: ["'self'"],
-        frameSrc: ["'self'"],
+        connectSrc: ["'self'", 'https://acnhapi.com', 'https://capstone-project-production-3cce.up.railway.app'],
+        frameSrc: ["'none'"],
         objectSrc: ["'none'"],
+        baseUri: ["'self'"],
+        formAction: ["'self'"],
         upgradeInsecureRequests: [],
       },
     },

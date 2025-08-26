@@ -108,7 +108,11 @@ function updateLeaderboard(category) {
     // Show loading state
     const leaderboardElement = document.getElementById(`${category}-scores`);
     if (leaderboardElement) {
-        leaderboardElement.innerHTML = '<div class="loading">Loading leaderboard...</div>';
+        leaderboardElement.textContent = '';
+        const loadingDiv = document.createElement('div');
+        loadingDiv.className = 'loading';
+        loadingDiv.textContent = 'Loading leaderboard...';
+        leaderboardElement.appendChild(loadingDiv);
     }
     
     // Attempt to fetch from server
@@ -128,9 +132,13 @@ function updateLeaderboard(category) {
                     updateLocalLeaderboard(category);
                 }
             } else {
-                // Show error in leaderboard
+                // Show error in leaderboard safely
                 if (leaderboardElement) {
-                    leaderboardElement.innerHTML = `<div class="error">Error: ${error.message}</div>`;
+                    leaderboardElement.textContent = '';
+                    const errorDiv = document.createElement('div');
+                    errorDiv.className = 'error';
+                    errorDiv.textContent = `Error: ${error.message}`;
+                    leaderboardElement.appendChild(errorDiv);
                 }
             }
         });
@@ -348,7 +356,11 @@ function updateLocalLeaderboard(category) {
         console.error('Error reading local leaderboard:', e);
         const leaderboardElement = document.getElementById(`${category}-scores`);
         if (leaderboardElement) {
-            leaderboardElement.innerHTML = '<div class="error">Error loading leaderboard</div>';
+            leaderboardElement.textContent = '';
+            const errorDiv = document.createElement('div');
+            errorDiv.className = 'error';
+            errorDiv.textContent = 'Error loading leaderboard';
+            leaderboardElement.appendChild(errorDiv);
         }
     }
 }
@@ -359,33 +371,51 @@ function displayLeaderboard(category, leaderboard) {
     if (!leaderboardElement) return;
     
     if (!leaderboard || leaderboard.length === 0) {
-        leaderboardElement.innerHTML = '<div class="empty">No scores yet</div>';
+        leaderboardElement.textContent = '';
+        const emptyDiv = document.createElement('div');
+        emptyDiv.className = 'empty';
+        emptyDiv.textContent = 'No scores yet';
+        leaderboardElement.appendChild(emptyDiv);
         return;
     }
     
-    let html = '';
-    leaderboard.forEach((entry, index) => {
-        const date = entry.date ? new Date(entry.date).toLocaleDateString() : 'N/A';
-        html += `
-            <div class="leaderboard-entry ${index === 0 ? 'top-score' : ''}">
-                <span class="rank">${index + 1}</span>
-                <span class="username">${entry.username}</span>
-                <span class="score">${entry.score}</span>
-                <span class="date">${date}</span>
-            </div>
-        `;
-    });
+    // Use safe leaderboard display
+    const scores = leaderboard.slice(0, 10).map(entry => ({
+        name: entry.username || entry.name || 'Anonymous',
+        score: entry.score || 0
+    }));
     
-    leaderboardElement.innerHTML = html;
+    if (typeof HTMLSanitizer !== 'undefined') {
+        HTMLSanitizer.updateLeaderboardDisplay(leaderboardElement, scores);
+    } else {
+        // Fallback for when HTMLSanitizer is not available
+        leaderboardElement.textContent = '';
+        scores.forEach((score, index) => {
+            const div = document.createElement('div');
+            div.className = 'leaderboard-entry';
+            
+            const rankSpan = document.createElement('span');
+            rankSpan.className = 'rank';
+            rankSpan.textContent = `${index + 1}.`;
+            
+            const nameSpan = document.createElement('span');
+            nameSpan.className = 'name';
+            nameSpan.textContent = score.name;
+            
+            const scoreSpan = document.createElement('span');
+            scoreSpan.className = 'score';
+            scoreSpan.textContent = score.score.toString();
+            
+            div.appendChild(rankSpan);
+            div.appendChild(nameSpan);
+            div.appendChild(scoreSpan);
+            leaderboardElement.appendChild(div);
+        });
+    }
 }
 
 // Function to offer standalone mode
 function offerStandaloneMode() {
-    // Only offer once per session
-    if (window.standaloneConfirmedThisSession) {
-        return;
-    }
-    
     const confirmStandalone = confirm(
         'The server appears to be unavailable. Would you like to play in standalone mode? ' +
         'Your scores will be saved locally but not shared with other players.'

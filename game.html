@@ -7,7 +7,8 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/fontfaceobserver/2.3.0/fontfaceobserver.standalone.js"></script>
     <script src="js/fontOptimizer.js"></script>
     <script src="js/backgroundLoader.js"></script>
-    <script src="js/serverCheck.js"></script>
+    <script src="js/fontOptimizer.js"></script>
+    <script src="js/htmlSanitizer.js"></script>
     <script src="js/leaderboard-api.js"></script>
     <!-- <script src="/js/leaderboard-manager.js"></script> Disabled to prevent conflicts -->
     <meta charset="UTF-8" />
@@ -3553,14 +3554,13 @@ function getAvailableItems(category) {
       // Helper function to show placement message
       function showPlacementMessage(placement) {
         const placementMessage = document.getElementById('placementMessage');
-        if (placement === 1) {
-            placementMessage.innerHTML = '<p style="color: #ffd700; font-weight: bold;">You achieved 1st place! 🏆</p>';
-        } else if (placement === 2) {
-            placementMessage.innerHTML = '<p style="color: #c0c0c0; font-weight: bold;">You achieved 2nd place! 🥈</p>';
-        } else if (placement === 3) {
-            placementMessage.innerHTML = '<p style="color: #cd7f32; font-weight: bold;">You achieved 3rd place! 🥉</p>';
-        } else {
-            placementMessage.innerHTML = '<p style="color: #ffa500; font-weight: bold;">You achieved ' + placement + 'th place! 🎉</p>';
+        if (placementMessage) {
+          // Clear existing content safely
+          placementMessage.textContent = '';
+          
+          // Create safe placement message using HTMLSanitizer
+          const messageElement = HTMLSanitizer.createPlacementMessage(placement);
+          placementMessage.appendChild(messageElement);
         }
       }
       
@@ -3675,14 +3675,20 @@ function getAvailableItems(category) {
           const scores = data[category] || [];
           const scoresElement = document.getElementById(`${category}-scores`);
           if (scoresElement) {
-            // Clear existing content
-            scoresElement.innerHTML = '';
-            
-            if (scores.length === 0) {
-              scoresElement.innerHTML = '<div>No scores yet</div>';
-              return;
-            }
-            
+            // Use safe leaderboard update method
+            HTMLSanitizer.updateLeaderboardDisplay(scoresElement, scores);
+          }
+        });
+      }
+      
+      // Remove the old unsafe leaderboard code below
+      function updateLeaderboardUI_OLD_UNSAFE(data) {
+        const categories = ['fish', 'bugs', 'sea', 'villagers'];
+        
+        categories.forEach(category => {
+          const scores = data[category] || [];
+          const scoresElement = document.getElementById(`${category}-scores`);
+          if (scoresElement) {
             // Add each score to the leaderboard with clean numbered format
             scores.forEach((score, index) => {
               const scoreDiv = document.createElement('div');

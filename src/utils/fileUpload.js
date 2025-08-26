@@ -57,20 +57,37 @@ const uploadFile = async (file, destination = 'uploads') => {
 
     // If file is already saved by multer, return the path
     if (file.path) {
-      return file.path.replace(process.cwd(), '').replace(/\\/g, '/');
+      // Normalize and validate the path to prevent traversal attacks
+      const normalizedPath = path.normalize(file.path);
+      const uploadsDir = path.join(process.cwd(), 'uploads');
+      
+      // Ensure the file is within the uploads directory
+      if (!normalizedPath.startsWith(uploadsDir)) {
+        throw new AppError('Invalid file path detected', 400);
+      }
+      
+      return path.relative(process.cwd(), normalizedPath).replace(/\\/g, '/');
     }
 
     // Handle buffer uploads (memory storage)
     if (file.buffer) {
-      const uploadDir = path.join(process.cwd(), destination);
+      // Validate and normalize destination path
+      const normalizedDestination = path.normalize(destination);
+      if (normalizedDestination.includes('..') || path.isAbsolute(normalizedDestination)) {
+        throw new AppError('Invalid destination path', 400);
+      }
+      
+      const uploadDir = path.join(process.cwd(), normalizedDestination);
       await fs.mkdir(uploadDir, { recursive: true });
 
       const uniqueSuffix = Date.now() + '-' + Math.round(Math.random() * 1E9);
-      const filename = file.fieldname + '-' + uniqueSuffix + path.extname(file.originalname);
+      // Sanitize original filename to prevent path traversal
+      const sanitizedOriginalName = path.basename(file.originalname);
+      const filename = file.fieldname + '-' + uniqueSuffix + path.extname(sanitizedOriginalName);
       const filepath = path.join(uploadDir, filename);
 
       await fs.writeFile(filepath, file.buffer);
-      return path.join(destination, filename).replace(/\\/g, '/');
+      return path.join(normalizedDestination, filename).replace(/\\/g, '/');
     }
 
     throw new AppError('Invalid file object', 400);

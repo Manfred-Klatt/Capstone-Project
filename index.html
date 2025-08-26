@@ -447,8 +447,10 @@
           this.updateDbStatus('checking', 'Checking...');
 
           try {
-            // Use the correct health endpoint (using full path to be explicit)
-            const response = await fetch(`/api/v1/health`, {
+            // Health endpoint is at /health (not under /api/v1)
+            // Use the base URL to ensure we're hitting the correct endpoint
+            const baseUrl = API_URL.split('/api')[0];
+            const response = await fetch(`${baseUrl}/health`, {
               method: 'GET',
               mode: 'cors',
               headers: { 'Accept': 'application/json' },
@@ -523,9 +525,11 @@
           const controller = new AbortController();
           const timeoutId = setTimeout(() => controller.abort(), 5000); // 5 second timeout
           
-          // Try health endpoint (using full path to be explicit)
+          // Try health endpoint (at /health)
           try {
-            const response = await fetch(`/api/v1/health`, {
+            // Use the base URL to ensure we're hitting the correct endpoint
+            const baseUrl = API_URL.split('/api')[0];
+            const response = await fetch(`${baseUrl}/health`, {
               method: 'GET',
               signal: controller.signal,
               mode: 'cors',
@@ -536,7 +540,7 @@
             
             clearTimeout(timeoutId);
             if (response.ok) {
-              console.log('Server is available at /api/v1/health');
+              console.log('Server is available at /health');
               return true;
             }
             console.log(`Health check failed with status: ${response.status}`);
@@ -877,6 +881,7 @@
             
             console.log('Sending signup request...', { username, email });
             
+            // The auth routes are mounted at /auth in the backend
             const response = await fetch(`${API_URL}/auth/signup`, {
               method: 'POST',
               headers: {

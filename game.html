@@ -2105,6 +2105,7 @@
       const categorySelector = document.getElementById("category");
       const difficultySelector = document.getElementById("difficulty");
       const logoutBtn = document.getElementById("logoutBtn");
+      const logoutBtnMobile = document.getElementById("logoutBtn-mobile");
       const adminToggleBtn = document.getElementById("admin-toggle-btn");
       const adminToolsContainer = document.getElementById("admin-tools-container");
       
@@ -2850,14 +2851,26 @@
       const isGuest = urlParams.get("guest") === "true";
 
       if (isGuest) {
-        logoutBtn.textContent = "Back to Home";
+        if (logoutBtn) logoutBtn.textContent = "Back to Home";
       }
 
-      logoutBtn.addEventListener("click", () => {
-        localStorage.removeItem("acnh_current_score");
-        localStorage.removeItem("acnh_last_category");
-        window.location.href = "index.html";
-      });
+      // Add event listener for desktop home button
+      if (logoutBtn) {
+        logoutBtn.addEventListener("click", () => {
+          localStorage.removeItem("acnh_current_score");
+          localStorage.removeItem("acnh_last_category");
+          window.location.href = "index.html";
+        });
+      }
+
+      // Add event listener for mobile home button
+      if (logoutBtnMobile) {
+        logoutBtnMobile.addEventListener("click", () => {
+          localStorage.removeItem("acnh_current_score");
+          localStorage.removeItem("acnh_last_category");
+          window.location.href = "index.html";
+        });
+      }
 
       let score = 0;
       let highScore = localStorage.getItem("acnh_high_score") || 0;
@@ -3607,18 +3620,13 @@
                 
                 // Remove highlight after animation
                 setTimeout(() => {
-                  scoreDiv.style.backgroundColor = 'transparent';
+                  container.style.backgroundColor = 'transparent';
                 }, 2000);
               }
-              
-              // Assemble the score entry
-              scoreDiv.appendChild(leftSpan);
-              scoreDiv.appendChild(divider);
-              scoreDiv.appendChild(scoreSpan);
-              
-              // Add to leaderboard
-              scoresElement.appendChild(scoreDiv);
             });
+            
+            // Add the list to the category section
+            categorySection.appendChild(list);
           }
         });
       }

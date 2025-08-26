@@ -96,13 +96,38 @@ exports.signup = async (req, res, next) => {
         });
       }
     }
+
+    // Create new user
+    const newUser = await User.create({
+      username: username.trim(),
+      email: email.toLowerCase(),
+      password,
+      passwordConfirm
+    });
+
+    // Remove password from output
+    newUser.password = undefined;
+    newUser.active = undefined;
+
+    // Send response with token
+    createSendToken(newUser, 201, res);
     
+  } catch (err) {
     // Handle validation errors
     if (err.name === 'ValidationError') {
       const messages = Object.values(err.errors).map(el => el.message);
       return res.status(400).json({
         status: 'error',
         message: `Invalid input data: ${messages.join('. ')}`
+      });
+    }
+    
+    // Handle duplicate key errors
+    if (err.code === 11000) {
+      const field = Object.keys(err.keyPattern)[0];
+      return res.status(400).json({
+        status: 'error',
+        message: `${field} is already in use`
       });
     }
     

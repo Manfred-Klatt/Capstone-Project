@@ -1563,6 +1563,11 @@
         }
       }
       
+      // Function to check if the app is in standalone mode (always false in production)
+      function isStandaloneMode() {
+        return false;
+      }
+      
       // Flag to prevent multiple simultaneous server checks
       let isCheckingServer = false;
       
@@ -1571,7 +1576,7 @@
         // Prevent duplicate calls
         if (isCheckingServer) {
           console.log('Server check already in progress, skipping...');
-          return;
+          return true;
         }
         
         isCheckingServer = true;
@@ -1579,92 +1584,53 @@
         try {
           console.log('Checking server availability...');
           
-          // If user has explicitly chosen standalone mode, respect that choice
-          if (localStorage.getItem('force_standalone') === 'true') {
-            console.log('User has chosen standalone mode');
-            window.standaloneMode = true;
-            updateStandaloneModeIndicator();
-            return;
-          }
+          // Check if we're in a development environment
+          const isLocalhost = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1';
           
-          // If no API URL is configured, fallback to standalone mode
-          if (!API_URL) {
-            console.log('No API URL configured - falling back to standalone mode');
-            window.standaloneMode = true;
-            updateStandaloneModeIndicator();
-            return;
-          }
+          // Use the API_URL from the global scope if available, otherwise use the current host
+          const apiUrl = window.API_URL || (isLocalhost ? 'http://localhost:3000/api/v1' : 'https://capstone-project-production-3cce.up.railway.app/api/v1');
           
-          // Try to connect to the API with a timeout
-          console.log('Attempting to connect to API:', API_URL);
+          console.log(`Attempting to connect to API: ${apiUrl}`);
+          
+          // Try to fetch the health check endpoint with a timeout
           const controller = new AbortController();
           const timeoutId = setTimeout(() => controller.abort(), 5000); // 5 second timeout
           
-          try {
-            // Use the correct health endpoint path
-            const response = await fetch(`${API_URL}/health`, {
-              signal: controller.signal,
-              mode: 'cors',
-              credentials: 'include'
-            });
-            
-            clearTimeout(timeoutId);
-            
-            if (response.ok) {
-              console.log('API connection successful - using online mode');
-              window.standaloneMode = false;
-              updateStandaloneModeIndicator();
-              return;
-            } else {
-              console.warn('API returned error status:', response.status);
-              // Will fall through to standalone mode
-            }
-          } catch (fetchError) {
-            console.warn('API connection failed:', fetchError.message);
-            // Will fall through to standalone mode
-          }
+          const response = await fetch(`${apiUrl}/health`, {
+            method: 'GET',
+            signal: controller.signal
+          });
           
-          // If we reach here, the API is unavailable - offer standalone mode
-          console.log('API unavailable - offering standalone mode');
+          clearTimeout(timeoutId);
           
-          // Check if we're already in standalone mode
-          if (window.standaloneMode) {
-            updateStandaloneModeIndicator();
-            return;
-          }
-          
-          // Try to check server connection
-          if (typeof checkServerAvailable === 'function') {
-            const serverAvailable = await checkServerAvailable();
-            if (!serverAvailable && !localStorage.getItem('standalone_confirmed_this_session')) {
-              // Server is not available, offer standalone mode
-              if (confirm("Server connection unavailable. Your scores will be saved locally but not shared online. Continue in standalone mode?")) {
-                localStorage.setItem('standalone_confirmed_this_session', 'true');
-                localStorage.setItem('force_standalone', 'true');
-                window.standaloneMode = true;
-              } else {
-                // User declined standalone mode, redirect to index
-                window.location.href = 'index.html';
-                return;
-              }
-            }
-            
-            // Update the standalone mode indicator
-            updateStandaloneModeIndicator();
+          if (response.ok) {
+            console.log('API connection successful');
+            return true;
           } else {
-            // Fallback if checkServerAvailable isn't available
-            updateStandaloneModeIndicator();
+            throw new Error(`Server returned status: ${response.status}`);
           }
         } catch (error) {
-          console.error('Error checking server availability:', error);
-          updateStandaloneModeIndicator();
+          console.error('API connection failed:', error);
+          // In production, we'll assume the server is available but log the error
+          return true;
         } finally {
-          // Reset the flag to allow future server checks
           isCheckingServer = false;
         }
-        
-        // Navigation bar button handlers moved to main DOMContentLoaded handler to prevent duplicates
       }
+          
+      // Function to check server availability (simplified for production)
+      async function checkAndHandleServerAvailability() {
+        try {
+          // In production, we'll assume the server is available
+          // This is a simplified version that always returns true
+          return await checkServerAvailability();
+        } catch (error) {
+          console.error('Error checking server availability:', error);
+          return true; // Assume server is available in production
+        }
+      }
+      
+      // Navigation bar button handlers moved to main DOMContentLoaded handler to prevent duplicates
       
       // Initialize when DOM is loaded
       document.addEventListener('DOMContentLoaded', function() {

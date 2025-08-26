@@ -3558,25 +3558,22 @@
               
               // Create name span
               const nameSpan = document.createElement('span');
-              nameSpan.textContent = entry.name;
+              nameSpan.textContent = entry.name || 'Anonymous';
               
               // Create score span
               const scoreSpan = document.createElement('span');
               scoreSpan.textContent = entry.score;
-              scoreSpan.style.minWidth = '25px';
-              scoreSpan.style.textAlign = 'right';
-              scoreSpan.style.flexShrink = '0';
               
-              // Apply colors to top 3 scores
+              // Apply color coding for top 3 scores
               if (index === 0) {
-                nameSpan.style.color = '#ff00ff'; // 1st place - magenta
-                scoreSpan.style.color = '#ff00ff';
+                nameSpan.style.color = '#FFD700'; // Gold
+                scoreSpan.style.color = '#FFD700';
               } else if (index === 1) {
-                nameSpan.style.color = '#ffff00'; // 2nd place - yellow
-                scoreSpan.style.color = '#ffff00';
+                nameSpan.style.color = '#C0C0C0'; // Silver
+                scoreSpan.style.color = '#C0C0C0';
               } else if (index === 2) {
-                nameSpan.style.color = '#00ffff'; // 3rd place - cyan
-                scoreSpan.style.color = '#00ffff';
+                nameSpan.style.color = '#CD7F32'; // Bronze
+                scoreSpan.style.color = '#CD7F32';
               } else {
                 nameSpan.style.color = '#333333'; // Default color
                 scoreSpan.style.color = '#333333';
@@ -3588,10 +3585,11 @@
               li.appendChild(container);
               list.appendChild(li);
               
-              // Add highlight animation for new scores
+              // Check if this is a new score (optional highlighting)
+              const isNewScore = entry.isNew || false;
               if (isNewScore) {
-                scoreDiv.style.animation = 'highlight 2s ease-in-out';
-                scoreDiv.style.backgroundColor = 'rgba(76, 175, 80, 0.3)';
+                container.style.animation = 'highlight 2s ease-in-out';
+                container.style.backgroundColor = 'rgba(76, 175, 80, 0.3)';
                 
                 // Add keyframes for highlight animation if not already added
                 if (!document.getElementById('highlight-animation')) {

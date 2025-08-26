@@ -877,7 +877,7 @@
             
             console.log('Sending signup request...', { username, email });
             
-            const response = await fetch(`${API_URL}/api/v1/auth/signup`, {
+            const response = await fetch(`${API_URL}/auth/signup`, {
               method: 'POST',
               headers: {
                 'Content-Type': 'application/json',

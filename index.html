@@ -241,121 +241,11 @@
         
         input {
           width: 95%;
-          padding: 10px;
-          font-size: 0.95rem;
         }
-      }
-
-      /* Server Status Container */
-      .server-status-container {
-        position: fixed;
-        top: 20px;
-        right: 20px;
-        z-index: 1000;
-        display: flex;
-        flex-direction: column;
-        gap: 8px;
-      }
-      
-      /* Server Status Icon */
-      .server-status {
-        display: flex;
-        align-items: center;
-        gap: 8px;
-        background: rgba(255, 255, 255, 0.9);
-        padding: 8px 12px;
-        border-radius: 20px;
-        box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
-        font-size: 0.85rem;
-        font-weight: 600;
-        transition: all 0.3s ease;
-      }
-
-      .server-status:hover {
-        background: rgba(255, 255, 255, 1);
-        box-shadow: 0 4px 15px rgba(0, 0, 0, 0.15);
-      }
-
-      .status-indicator {
-        width: 12px;
-        height: 12px;
-        border-radius: 50%;
-        transition: all 0.3s ease;
-      }
-
-      .status-indicator.online {
-        background: #4CAF50;
-        box-shadow: 0 0 8px rgba(76, 175, 80, 0.5);
-      }
-
-      .status-indicator.offline {
-        background: #f44336;
-        box-shadow: 0 0 8px rgba(244, 67, 54, 0.5);
-      }
-
-      .status-indicator.checking {
-        background: #ff9800;
-        box-shadow: 0 0 8px rgba(255, 152, 0, 0.5);
-        animation: spin 1s linear infinite;
-      }
-
-      @keyframes pulse {
-        0%, 100% { opacity: 1; }
-        50% { opacity: 0.5; }
-      }
-
-      @keyframes spin {
-        0% { transform: rotate(0deg); }
-        100% { transform: rotate(360deg); }
-      }
-
-      .server-status {
-        cursor: pointer;
-        user-select: none;
-      }
-
-      .server-status:active {
-        transform: scale(0.95);
-      }
-
-      .status-text {
-        color: #333;
-        font-family: 'customfont', 'Quicksand', Arial, sans-serif;
-      }
-
-      @media (max-width: 768px) {
-        .server-status-container {
-          top: 10px;
-          right: 10px;
-        }
-        
-        .server-status {
-          padding: 6px 10px;
-          font-size: 0.8rem;
-        }
-        
-        .status-indicator {
-          width: 10px;
-          height: 10px;
-        }
-      }
     </style>
   </head>
   <body>
-    <!-- Server Status Indicators -->
-    <div class="server-status-container">
-      <!-- API Server Status Indicator -->
-      <div class="server-status" id="apiServerStatus">
-        <div class="status-indicator checking" id="apiStatusIndicator"></div>
-        <span class="status-text" id="apiStatusText">API: Checking...</span>
-      </div>
-      
-      <!-- Database Server Status Indicator -->
-      <div class="server-status" id="dbServerStatus">
-        <div class="status-indicator checking" id="dbStatusIndicator"></div>
-        <span class="status-text" id="dbStatusText">DB: Checking...</span>
-      </div>
-    </div>
+    <!-- Server Status Indicators removed -->
 
     <main class="container" id="container">
       <h1>🌿 Welcome to the Blathers App Portal! 🌿</h1>
@@ -407,110 +297,6 @@
         return 'https://capstone-project-production-3cce.up.railway.app/api/v1'; // Using /v1 to match backend routing
       })();
 
-      // Server Status Manager
-      class ServerStatusManager {
-        constructor(apiIndicatorId, apiTextId, dbIndicatorId, dbTextId) {
-          this.apiIndicator = document.getElementById(apiIndicatorId);
-          this.apiText = document.getElementById(apiTextId);
-          this.dbIndicator = document.getElementById(dbIndicatorId);
-          this.dbText = document.getElementById(dbTextId);
-          
-          this.isApiOnline = false;
-          this.isDbOnline = false;
-          this.checkInterval = null;
-          this.lastCheckTime = 0;
-          this.checkFrequency = 30000; // Check every 30 seconds
-        }
-
-        updateApiStatus(status, text) {
-          this.apiIndicator.className = `status-indicator ${status}`;
-          this.apiText.textContent = `API: ${text}`;
-          this.isApiOnline = status === 'online';
-        }
-        
-        updateDbStatus(status, text) {
-          this.dbIndicator.className = `status-indicator ${status}`;
-          this.dbText.textContent = `DB: ${text}`;
-          this.isDbOnline = status === 'online';
-        }
-
-        async checkServerStatus() {
-          const now = Date.now();
-          
-          // Avoid too frequent checks
-          if (now - this.lastCheckTime < 5000) {
-            return { api: this.isApiOnline, db: this.isDbOnline };
-          }
-          
-          this.lastCheckTime = now;
-          this.updateApiStatus('checking', 'Checking...');
-          this.updateDbStatus('checking', 'Checking...');
-
-          try {
-            // Health endpoint is at /health (not under /api/v1)
-            // Use the base URL to ensure we're hitting the correct endpoint
-            const baseUrl = API_URL.split('/api')[0];
-            const response = await fetch(`${baseUrl}/health`, {
-              method: 'GET',
-              mode: 'cors',
-              headers: { 'Accept': 'application/json' },
-              cache: 'no-cache'
-            });
-            
-            // API is online if we get any response
-            this.updateApiStatus('online', 'Online');
-            
-            if (response.ok) {
-              // Parse the response to check database status
-              const data = await response.json();
-              
-              if (data.database && data.database.status === 'connected') {
-                this.updateDbStatus('online', 'Online');
-                return { api: true, db: true };
-              } else {
-                this.updateDbStatus('offline', 'Offline');
-                return { api: true, db: false };
-              }
-            } else {
-              // API responded but with an error
-              this.updateDbStatus('offline', 'Offline');
-              return { api: true, db: false };
-            }
-          } catch (error) {
-            // Network error - both API and DB are unreachable
-            this.updateApiStatus('offline', 'Offline');
-            this.updateDbStatus('offline', 'Offline');
-            return { api: false, db: false };
-          }
-        }
-
-        startMonitoring() {
-          // Initial check
-          this.checkServerStatus();
-          
-          // Set up periodic checks
-          this.checkInterval = setInterval(() => {
-            this.checkServerStatus();
-          }, this.checkFrequency);
-        }
-
-        // Manual refresh when clicked
-        async forceRefresh() {
-          this.lastCheckTime = 0; // Reset throttle
-          return await this.checkServerStatus();
-        }
-
-        stopMonitoring() {
-          if (this.checkInterval) {
-            clearInterval(this.checkInterval);
-            this.checkInterval = null;
-          }
-        }
-      }
-
-      // Initialize server status manager
-      const serverStatus = new ServerStatusManager('apiStatusIndicator', 'apiStatusText', 'dbStatusIndicator', 'dbStatusText');
-      
       // Check if we're running in standalone mode (file:// protocol)
       function isStandaloneMode() {
         return window.location.protocol === 'file:' || 
@@ -881,8 +667,8 @@
             
             console.log('Sending signup request...', { username, email });
             
-            // The auth routes are mounted at /auth in the backend
-            const response = await fetch(`${API_URL}/auth/signup`, {
+            // The auth routes are mounted directly at /auth in the backend
+            const response = await fetch(`${API_URL.split('/v1')[0]}/auth/signup`, {
               method: 'POST',
               headers: {
                 'Content-Type': 'application/json',
@@ -976,36 +762,9 @@
           }
         });
 
-      // Start server status monitoring when page loads
+      // Server status monitoring removed
       document.addEventListener('DOMContentLoaded', function() {
-        serverStatus.startMonitoring();
-        
-        // Add click handler for manual refresh for API status
-        const apiStatusElement = document.getElementById('apiServerStatus');
-        if (apiStatusElement) {
-          apiStatusElement.addEventListener('click', async function() {
-            await serverStatus.forceRefresh();
-          });
-          
-          // Add title for accessibility
-          apiStatusElement.title = 'Click to refresh server status';
-        }
-        
-        // Add click handler for manual refresh for DB status
-        const dbStatusElement = document.getElementById('dbServerStatus');
-        if (dbStatusElement) {
-          dbStatusElement.addEventListener('click', async function() {
-            await serverStatus.forceRefresh();
-          });
-          
-          // Add title for accessibility
-          dbStatusElement.title = 'Click to refresh server status';
-        }
-      });
-
-      // Clean up when page unloads
-      window.addEventListener('beforeunload', function() {
-        serverStatus.stopMonitoring();
+        // Page initialization code
       });
     </script>
   </body>

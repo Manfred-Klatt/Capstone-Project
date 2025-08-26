@@ -447,8 +447,8 @@
           this.updateDbStatus('checking', 'Checking...');
 
           try {
-            // Use the correct health endpoint
-            const response = await fetch(`${API_URL}/health`, {
+            // Use the correct health endpoint (note: no /api prefix as it's already in API_URL)
+            const response = await fetch(`/health`, {
               method: 'GET',
               mode: 'cors',
               headers: { 'Accept': 'application/json' },
@@ -523,9 +523,9 @@
           const controller = new AbortController();
           const timeoutId = setTimeout(() => controller.abort(), 5000); // 5 second timeout
           
-          // Try health endpoint
+          // Try health endpoint (note: no /api prefix as it's already in API_URL)
           try {
-            const response = await fetch(`${API_URL}/health`, {
+            const response = await fetch(`/health`, {
               method: 'GET',
               signal: controller.signal,
               mode: 'cors',
@@ -536,7 +536,7 @@
             
             clearTimeout(timeoutId);
             if (response.ok) {
-              console.log('Server is available at /api/health');
+              console.log('Server is available at /health');
               return true;
             }
             console.log(`Health check failed with status: ${response.status}`);

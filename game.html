@@ -704,7 +704,7 @@
         top: 0;
         left: 0;
         width: 100%;
-        padding: 15px;
+        padding: 10px;
         box-sizing: border-box;
         opacity: 0;
         transform: translateX(100%);
@@ -1642,6 +1642,33 @@
         
         // Initialize leaderboard
         initializeLeaderboard();
+        
+        // Add click handler for Blathers character to activate admin tools
+        const blathersCharacter = document.getElementById('blathers-character');
+        if (blathersCharacter) {
+          let clickCount = 0;
+          let clickTimer = null;
+          
+          blathersCharacter.addEventListener('click', function() {
+            clickCount++;
+            
+            // Reset click count after 3 seconds of inactivity
+            clearTimeout(clickTimer);
+            clickTimer = setTimeout(() => {
+              clickCount = 0;
+            }, 3000);
+            
+            // After 5 clicks, show admin tools
+            if (clickCount >= 5) {
+              const adminToolsContainer = document.getElementById('admin-tools-container');
+              if (adminToolsContainer) {
+                adminToolsContainer.style.display = 'block';
+                showNotification('Admin tools activated!');
+                clickCount = 0;
+              }
+            }
+          });
+        }
         
         // Simulate high score button click handler
         document.getElementById('simulate-high-score-btn').addEventListener('click', function() {
@@ -3547,63 +3574,91 @@
           if (leaderboardElement) {
             leaderboardElement.innerHTML = ''; // Clear existing content
             
-            // Create a header
-            const header = document.createElement('h3');
-            header.textContent = `${category.charAt(0).toUpperCase() + category.slice(1)} Leaderboard`;
-            leaderboardElement.appendChild(header);
+            // Header is already in the leaderboard-header section
             
-            // Create the list of top scores
-            const list = document.createElement('ol');
+            // Create a container for scores instead of an ordered list
+            const scoresContainer = document.createElement('div');
+            scoresContainer.style.width = '100%';
+            scoresContainer.style.padding = '2px';
+            scoresContainer.style.boxSizing = 'border-box';
             
             // Get top 10 scores for this category
             const topScores = (data[category] || [])
               .sort((a, b) => b.score - a.score)
               .slice(0, 10);
               
-            // Add each score to the list
+            // Add each score to the container
             topScores.forEach((entry, index) => {
-              const li = document.createElement('li');
+              // Create row container - even more compact
+              const row = document.createElement('div');
+              row.style.display = 'flex';
+              row.style.justifyContent = 'space-between';
+              row.style.width = '100%';
+              row.style.position = 'relative';
+              row.style.margin = '2px 0';
+              row.style.padding = '1px 0';
               
-              // Create name and score container
-              const container = document.createElement('div');
-              container.style.display = 'flex';
-              container.style.justifyContent = 'space-between';
-              container.style.width = '100%';
-              
-              // Create name span
+              // Create name span (left-aligned)
               const nameSpan = document.createElement('span');
               nameSpan.textContent = entry.name || 'Anonymous';
+              nameSpan.style.textAlign = 'left';
+              nameSpan.style.position = 'relative';
+              nameSpan.style.zIndex = '2';
+              nameSpan.style.backgroundColor = 'inherit';
+              nameSpan.style.paddingRight = '8px';
+              nameSpan.style.fontSize = '0.9em';
+              nameSpan.style.maxWidth = '65%';
+              nameSpan.style.overflow = 'hidden';
+              nameSpan.style.textOverflow = 'ellipsis';
+              nameSpan.style.whiteSpace = 'nowrap';
               
-              // Create score span
+              // Create score span (right-aligned)
               const scoreSpan = document.createElement('span');
               scoreSpan.textContent = entry.score;
+              scoreSpan.style.textAlign = 'right';
+              scoreSpan.style.position = 'relative';
+              scoreSpan.style.zIndex = '2';
+              scoreSpan.style.backgroundColor = 'inherit';
+              scoreSpan.style.paddingLeft = '8px';
+              scoreSpan.style.fontSize = '0.9em';
+              scoreSpan.style.fontWeight = 'bold';
+              
+              // Create the connecting dotted line
+              const lineDiv = document.createElement('div');
+              lineDiv.style.position = 'absolute';
+              lineDiv.style.top = '50%';
+              lineDiv.style.left = '25%'; // Start line after name
+              lineDiv.style.right = '25%'; // End line before score
+              lineDiv.style.height = '1px';
+              lineDiv.style.borderBottom = '1px dotted #5a3d2b';
+              lineDiv.style.zIndex = '1';
               
               // Apply color coding for top 3 scores
+              let scoreColor;
               if (index === 0) {
-                nameSpan.style.color = '#FFD700'; // Gold
-                scoreSpan.style.color = '#FFD700';
+                scoreColor = '#FFD700'; // Gold
               } else if (index === 1) {
-                nameSpan.style.color = '#C0C0C0'; // Silver
-                scoreSpan.style.color = '#C0C0C0';
+                scoreColor = '#C0C0C0'; // Silver
               } else if (index === 2) {
-                nameSpan.style.color = '#CD7F32'; // Bronze
-                scoreSpan.style.color = '#CD7F32';
+                scoreColor = '#CD7F32'; // Bronze
               } else {
-                nameSpan.style.color = '#333333'; // Default color
-                scoreSpan.style.color = '#333333';
+                scoreColor = '#333333'; // Default color
               }
               
-              // Assemble the list item
-              container.appendChild(nameSpan);
-              container.appendChild(scoreSpan);
-              li.appendChild(container);
-              list.appendChild(li);
+              nameSpan.style.color = scoreColor;
+              scoreSpan.style.color = scoreColor;
+              
+              // Assemble the row
+              row.appendChild(nameSpan);
+              row.appendChild(scoreSpan);
+              row.appendChild(lineDiv);
+              scoresContainer.appendChild(row);
               
               // Check if this is a new score (optional highlighting)
               const isNewScore = entry.isNew || false;
               if (isNewScore) {
-                container.style.animation = 'highlight 2s ease-in-out';
-                container.style.backgroundColor = 'rgba(76, 175, 80, 0.3)';
+                row.style.animation = 'highlight 2s ease-in-out';
+                row.style.backgroundColor = 'rgba(76, 175, 80, 0.3)';
                 
                 // Add keyframes for highlight animation if not already added
                 if (!document.getElementById('highlight-animation')) {
@@ -3621,73 +3676,21 @@
                 
                 // Remove highlight after animation
                 setTimeout(() => {
-                  container.style.backgroundColor = 'transparent';
+                  row.style.backgroundColor = 'transparent';
                 }, 2000);
               }
             });
             
-            // Add the list to the category section
-            categorySection.appendChild(list);
+            // Add the scores container to the leaderboard element
+            leaderboardElement.appendChild(scoresContainer);
           }
         });
       }
       
-      // Default leaderboard data
-      const DEFAULT_LEADERBOARD = {
-        fish: [
-          { name: "Kapp'n", score: 10 },
-          { name: "Leif", score: 9 },
-          { name: "Cyrus", score: 8 },
-          { name: "Kicks", score: 7 },
-          { name: "Redd", score: 6 },
-          { name: "Mabel", score: 5 },
-          { name: "Saharah", score: 4 },
-          { name: "Gulliver", score: 3 },
-          { name: "Wisp", score: 2 },
-          { name: "Harvey", score: 1 }
-        ],
-        bugs: [
-          { name: "Flick", score: 10 },
-          { name: "Cube", score: 9 },
-          { name: "Kapp'n", score: 8 },
-          { name: "Kiki", score: 7 },
-          { name: "Cyrus", score: 6 },
-          { name: "Kicks", score: 5 },
-          { name: "Redd", score: 4 },
-          { name: "Mabel", score: 3 },
-          { name: "Saharah", score: 2 },
-          { name: "Wisp", score: 1 }
-        ],
-        sea: [
-          { name: "Gulliver", score: 10 },
-          { name: "JJ", score: 9 },
-          { name: "Redd", score: 8 },
-          { name: "Kapp'n", score: 7 },
-          { name: "Flick", score: 6 },
-          { name: "Cyrus", score: 5 },
-          { name: "Kicks", score: 4 },
-          { name: "Mabel", score: 3 },
-          { name: "Saharah", score: 2 },
-          { name: "Wisp", score: 1 }
-        ],
-        villagers: [
-          { name: "K.K. Slider", score: 10 },
-          { name: "Kapp'n", score: 9 },
-          { name: "Tom Nook", score: 8 },
-          { name: "Cyrus", score: 7 },
-          { name: "Kicks", score: 6 },
-          { name: "Redd", score: 5 },
-          { name: "Mabel", score: 4 },
-          { name: "Saharah", score: 3 },
-          { name: "Gulliver", score: 2 },
-          { name: "Harvey", score: 1 }
-        ]
-      };
 
       // Initialize leaderboard with default data and set up event listeners
       function initializeLeaderboard() {
-        // Initialize with default data first
-        updateLeaderboardUI(DEFAULT_LEADERBOARD);
+        // Skip default data initialization and just fetch from server
         
         // Then try to fetch from server
         updateLeaderboard();

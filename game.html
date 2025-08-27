@@ -1647,6 +1647,7 @@
         document.getElementById('simulate-high-score-btn').addEventListener('click', function() {
           console.log('Simulating high score');
           simulateHighScore();
+          showNotification('Simulating high score');
         });
         
         updateWelcomeMessage();
@@ -1882,6 +1883,7 @@
       <button id="reset-to-defaults-btn" style="background-color: #4a90e2; margin-top: 15px;">Reset All</button>
       <button id="reset-all-btn" style="background-color: #ff6b6b;">Clear All</button>
       <button id="reset-high-score" style="background-color: #ffa500; margin-top: 15px;">Reset PB</button>
+      <button id="simulate-high-score-btn" style="background-color: #9c27b0; margin-top: 15px;">Simulate High Score</button>
     </div>
     <!-- Main Content Wrapper -->
     <div style="width: 100%; display: flex; flex-direction: column; align-items: center;">
@@ -2023,7 +2025,6 @@
         <button id="next-btn" style="display: none">Next Item</button>
       </div>
       <button id="end-game-btn" style="background-color: #ff6b6b; margin-top: 20px; display: none">End Game</button>
-      <button id="simulate-high-score-btn" style="background-color: #9c27b0; margin-top: 10px;">Simulate High Score</button>
     </div>
 
       <!-- Combined Leaderboard Stack -->

@@ -8,13 +8,8 @@ const config = {
   // Database
   database: {
     url: process.env.MONGODB_URI || 'mongodb://localhost:27017/acnh-quiz',
-    options: {
-      serverSelectionTimeoutMS: 5000,
-      socketTimeoutMS: 45000,
-      maxPoolSize: 10,
-      retryWrites: true,
-      w: 'majority'
-    },
+    // Options are now passed directly in the connection string
+    // MongoDB driver 6.x handles SRV records automatically
   },
 
   // JWT

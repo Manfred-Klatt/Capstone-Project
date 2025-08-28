@@ -17,10 +17,7 @@ console.log('Using MongoDB URI:', MONGODB_URI.replace(/(mongodb\+srv:\/\/)([^:]+
 // Connect to MongoDB
 console.log('Attempting to connect to MongoDB...');
 
-mongoose.connect(MONGODB_URI, {
-  useNewUrlParser: true,
-  useUnifiedTopology: true,
-})
+mongoose.connect(MONGODB_URI)
 .then(() => console.log('MongoDB connected successfully'))
 .catch(err => {
   console.error('MongoDB connection error:', err);

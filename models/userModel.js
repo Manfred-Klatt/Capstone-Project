@@ -86,6 +86,13 @@ userSchema.pre(/^find/, function(next) {
   next();
 });
 
+// Create indexes for leaderboard queries
+userSchema.index({ 'highScores.fish': -1, lastPlayed: -1 });
+userSchema.index({ 'highScores.bugs': -1, lastPlayed: -1 });
+userSchema.index({ 'highScores.sea': -1, lastPlayed: -1 });
+userSchema.index({ 'highScores.villagers': -1, lastPlayed: -1 });
+userSchema.index({ username: 1 }, { unique: true });
+
 // Instance methods
 userSchema.methods.correctPassword = async function(candidatePassword, userPassword) {
   return await bcrypt.compare(candidatePassword, userPassword);

@@ -197,12 +197,19 @@ const sampleUsers = [
 // Function to initialize the database
 async function initializeDatabase() {
   try {
-    // Check if we're in production - don't create sample users in production
-    if (process.env.NODE_ENV === 'production') {
-      console.log('Production environment detected - skipping sample user creation');
+    // In production, we'll create just a few sample users if the database is empty
+    const existingUsers = await User.countDocuments();
+    
+    if (process.env.NODE_ENV === 'production' && existingUsers > 0) {
+      console.log('Production environment with existing users detected - skipping sample user creation');
       console.log('Database initialization complete (production mode)');
       return;
     }
+    
+    // For production, we'll only create a few essential users if the database is empty
+    const usersToCreate = process.env.NODE_ENV === 'production' ? 
+      sampleUsers.slice(0, 5) : // Only create first 5 users in production
+      sampleUsers;
 
     // Clear existing users (development only)
     await User.deleteMany({});

@@ -7,7 +7,21 @@ const config = {
   
   // Database
   database: {
-    url: process.env.MONGODB_URI || 'mongodb://localhost:27017/acnh-quiz',
+    // Ensure database name is included in the connection string
+    url: (() => {
+      const uri = process.env.MONGODB_URI || 'mongodb://localhost:27017/acnh-quiz';
+      
+      // For MongoDB Atlas URLs, ensure database name is included
+      if (uri.includes('mongodb+srv://') && !uri.includes('/acnh-quiz')) {
+        // Add database name before query parameters
+        if (uri.includes('?')) {
+          return uri.replace('?', '/acnh-quiz?');
+        } else {
+          return `${uri}/acnh-quiz`;
+        }
+      }
+      return uri;
+    })(),
     // Options are now passed directly in the connection string
     // MongoDB driver 6.x handles SRV records automatically
   },

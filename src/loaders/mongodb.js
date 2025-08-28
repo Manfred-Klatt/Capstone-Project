@@ -92,18 +92,14 @@ const connectDB = async (retryCount = 0) => {
       });
     }
 
+    // MongoDB driver 6.x doesn't need useNewUrlParser and useUnifiedTopology
+    // These options are now the default behavior
     const connectionOptions = {
-      useNewUrlParser: true,
-      useUnifiedTopology: true,
-      serverSelectionTimeoutMS: 30000, // Increased from 10000
-      socketTimeoutMS: 60000, // Increased from 45000
-      connectTimeoutMS: 30000, // Increased from 10000
+      serverSelectionTimeoutMS: 30000,
+      socketTimeoutMS: 60000,
+      connectTimeoutMS: 30000,
       maxPoolSize: 10,
-      retryWrites: true,
-      w: 'majority',
-      ssl: true, // Explicitly enable SSL for MongoDB Atlas
-      tls: true, // Explicitly enable TLS for MongoDB Atlas
-      tlsAllowInvalidCertificates: false,
+      // Connection options that are still valid in MongoDB driver 6.x
       ...(config.database?.options || {})
     };
 

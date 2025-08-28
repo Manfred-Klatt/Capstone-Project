@@ -98,3 +98,6 @@ minimal-test.js
 ping-mongodb.js
 simple-server.js
 js/serverCheck.js
+test-mongodb-connection.js
+mongo-minimal-test.js
+MONGODB-ATLAS-SETUP.md

@@ -1,262 +1,93 @@
 <!DOCTYPE html>
 <html lang="en">
-  <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Animal Crossing Quiz Game</title>
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Animal Crossing Quiz</title>
     <link rel="stylesheet" href="game.css">
     <link rel="icon" href="favicon.ico" type="image/x-icon">
-
-    <!-- Font loads progressively via fontOptimizer.js -->
+    
+    <!-- Font loading -->
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;700&display=swap" rel="stylesheet">
     <script src="https://cdnjs.cloudflare.com/ajax/libs/fontfaceobserver/2.3.0/fontfaceobserver.standalone.js"></script>
     <script src="js/fontOptimizer.js"></script>
     <script src="js/backgroundLoader.js"></script>
     <script src="js/htmlSanitizer.js"></script>
-    <script src="js/leaderboard-api.js"></script>
     
-    <!-- Preload essential sound effects with optimized OGG files -->
+    <!-- Sound effects -->
     <audio id="correct-sound" preload="auto">
-      <source src="sounds/correct.ogg" type="audio/ogg">
+        <source src="sounds/correct.ogg" type="audio/ogg">
     </audio>
     <audio id="game-over-sound" preload="auto">
-      <source src="sounds/game-over.ogg" type="audio/ogg">
+        <source src="sounds/game-over.ogg" type="audio/ogg">
     </audio>
     <audio id="high-score-sound" preload="none">
-      <source src="sounds/high-score.ogg" type="audio/ogg">
+        <source src="sounds/high-score.ogg" type="audio/ogg">
     </audio>
     <audio id="new-round-sound" preload="none">
-      <source src="sounds/new-round.ogg" type="audio/ogg">
+        <source src="sounds/new-round.ogg" type="audio/ogg">
     </audio>
     <audio id="toggle-sound" preload="none">
-      <source src="sounds/toggle.ogg" type="audio/ogg">
+        <source src="sounds/toggle.ogg" type="audio/ogg">
     </audio>
-  </head>
-  <body>
-    <div class="container">
-      <header>
-        <h1>Animal Crossing Quiz</h1>
-        <div class="game-info">
-          <div class="score">Score: <span id="score">0</span></div>
-          <div class="high-score">High Score: <span id="high-score">0</span></div>
-          <div class="timer">Time: <span id="timer">60</span>s</div>
+</head>
+<body>
+    <div id="fixed-nav-bar">
+        <div class="nav-left">
+            <a href="index.html" class="home-button">
+                <img src="images/home-icon.png" alt="Home" class="nav-icon">
+                <span>Home</span>
+            </a>
         </div>
-      </header>
-
-      <main>
-        <div class="game-area">
-          <div class="image-container">
-            <img id="image-display" src="" alt="Animal Crossing character or item" style="display: none;">
-          </div>
-          
-          <div class="options" id="options">
-            <!-- Options will be populated by JavaScript -->
-          </div>
-          
-          <div class="controls">
-            <button id="start-btn" class="btn">Start Game</button>
-            <button id="next-btn" class="btn" disabled>Next Question</button>
-            <button id="submit-btn" class="btn" disabled>Submit</button>
-          </div>
-          
-          <div class="feedback" id="feedback"></div>
+        <div class="nav-center">
+            <h1>Animal Crossing Quiz</h1>
         </div>
-        
-        <div class="category-selector">
-          <label for="category">Select Category:</label>
-          <select id="category" name="category">
-            <option value="fish">Fish</option>
-            <option value="bugs">Bugs</option>
-            <option value="sea">Sea Creatures</option>
-            <option value="villagers">Villagers</option>
-          </select>
+        <div class="nav-right">
+            <div class="sound-toggle" id="sound-toggle">
+                <img src="images/speaker.png" alt="Sound">
+            </div>
         </div>
-      </main>
-    </div>
-          padding: 8px 12px;
-          border-radius: 6px;
-          color: white;
-          font-weight: bold;
-          cursor: pointer;
-          transition: background-color 0.3s ease !important;
-          display: none; /* Hide on mobile */
-        ">
-          <button id="admin-toggle-btn" style="
-            background: none;
-            border: none;
-            cursor: pointer;
-            padding: 0;
-            width: 40px;
-            height: 40px;
-            border-radius: 50%;
-            background-color: transparent;
-            transition: transform 0.2s ease;
-            position: absolute;
-            z-index: 1000;
-            display: none; /* Hide on mobile */
-          ">
-            <img src="images/admin.png" alt="Nook" style="width: 40px; height: 40px; border-radius: 50%;">
-          </button>
-          <button id="sound-toggle" style="
-            background: none;
-            border: none;
-            cursor: pointer;
-            padding: 0;
-            width: 40px;
-            height: 40px;
-            border-radius: 50%;
-            background-color: transparent;
-            transition: transform 0.2s ease;
-            position: relative;
-            margin: 0 auto;
-            display: none; /* Hide on mobile */
-          ">
-            <img src="images/speaker.png" alt="Sound" style="width: 40px; height: 40px; border-radius: 50%;">
-          </button>
-          <button id="logoutBtn" style="
-            background: none;
-            border: none;
-            border-radius: 4px;
-            cursor: pointer;
-            font-size: 14px;
-            font-family: 'customfont', Arial, sans-serif;
-            transition: background-color 0.3s ease;
-            display: none; /* Hide on mobile */
-          ">Home</button>
-        </div>
-        
-        <h1 style="
-          font-size: 1.8rem;
-          margin: 10px 0 20px;
-          line-height: 1.2;
-          white-space: nowrap;
-          overflow: hidden;
-          text-overflow: ellipsis;
-          background: linear-gradient(90deg, 
-            #ff9aa2 0%,    /* Soft pink */
-            #ffb7b2 10%,   /* Light coral */
-            #ffdac1 20%,   /* Peach */
-            #e2f0cb 30%,   /* Soft green */
-            #b5ead7 40%,   /* Mint green */
-            #c7ceea 50%,   /* Periwinkle */
-            #b8d8d8 60%,   /* Powder blue */
-            #f8c8dc 70%,   /* Pink */
-            #ff9aa2 80%    /* Soft pink */
-          );
-          -webkit-background-clip: text;
-          background-clip: text;
-          color: transparent;
-          animation: rainbow 2s linear infinite;
-        ">Welcome to the Identifier Game!<br>Choose a category & difficulty below.</h1>
-        <div id="category-selector" class="category-container" style="display: flex; flex-direction: column; align-items: center; gap: 10px; margin: 10px 0; width: 100%;">
-          <div style="display: flex; flex-direction: column; align-items: center; width: 100%; max-width: 200px;">
-            <label for="category" style="margin-bottom: 5px; font-size: 0.9rem; width: 100%; text-align: center;">Category</label>
-            <select id="category" style="width: 100%; padding: 6px; border-radius: 4px; border: 1px solid #5a3d2b; font-size: 0.9rem; min-width: 0;">
-              <option value="fish">Fish</option>
-              <option value="bugs">Bugs</option>
-              <option value="sea">Sea Creatures</option>
-              <option value="villagers">Villagers</option>
-            </select>
-          </div>
-          
-          <div style="display: flex; flex-direction: column; align-items: center; width: 100%; max-width: 200px;">
-            <label for="difficulty" style="margin-bottom: 5px; font-size: 0.9rem; width: 100%; text-align: center;">Difficulty</label>
-            <select id="difficulty" style="width: 100%; padding: 6px; border-radius: 4px; border: 1px solid #5a3d2b; font-size: 0.9rem; min-width: 0;">
-              <option value="15000">Easy (15s)</option>
-              <option value="10000">Medium (10s)</option>
-              <option value="5000">Hard (5s)</option>
-            </select>
-          </div>
-        </div>
-        <div class="high-score-container">
-          <div id="high-score" style="margin-bottom: 5px; font-size: 0.9rem; width: 100%; text-align: center;">Personal Best: 0</div>
-          <button id="start-game-btn" style="background-color: #4CAF50;">Start Game</button>
-          <div class="timer-container" id="game-timer-container" style="display: none; margin-top: 10px;">
-            <div id="game-timer" class="timer">Time: 15</div>
-          </div>
-        </div>
-        
-        <div class="sound-settings" style="margin-top: 10px; display: flex; justify-content: center; align-items: center;">
-        </div>
-        <div class="score-container">
-          <div class="mobile-timer-wrapper">
-            <div id="score" style="margin-bottom: 5px; font-size: 0.9rem; width: 100%; text-align: center;">Score: 0</div>
-          </div>
-        </div>
-        <div class="loading-leaf"></div>
-        <img id="imageDisplay" src="" alt="Loading..." />
-
-        <div id="feedback" aria-live="polite"></div>
-
-        <div class="input-container" style="display: flex; align-items: center; gap: 10px; justify-content: center; flex-wrap: wrap;">
-          <input
-            type="text"
-            id="guess-input"
-            placeholder="Enter your guess..."
-            autocomplete="off"
-            disabled
-            style="display: none; flex: 1; min-width: 200px; max-width: 300px;"
-          />
-          <button id="submit-guess" style="display: none">Submit</button>
-          <button id="try-again-btn" style="display: none">Try Again</button>
-        </div>
-        <div class="button-container" style="margin-top: 10px;">
-          <button id="next-btn" style="display: none">Next Item</button>
-        </div>
-        <button id="end-game-btn" style="background-color: #ff6b6b; margin-top: 20px; display: none">End Game</button>
-          </div>
-          
-          <div class="options" id="options">
-            <!-- Options will be populated by JavaScript -->
-          </div>
-          
-          <div class="controls">
-            <button id="start-btn" class="btn">Start Game</button>
-            <button id="next-btn" class="btn" disabled>Next Question</button>
-            <button id="submit-btn" class="btn" disabled>Submit</button>
-          </div>
-          
-          <div class="feedback" id="feedback"></div>
-        </div>
-        
-        <div class="category-selector">
-          <label for="category">Select Category:</label>
-          <select id="category" name="category">
-            <option value="fish">Fish</option>
-            <option value="bugs">Bugs</option>
-            <option value="sea">Sea Creatures</option>
-            <option value="villagers">Villagers</option>
-          </select>
-        </div>
-      </main>
     </div>
 
-    <!-- High Score Modal -->
-    <div id="highScoreModal" class="modal">
-      <div class="modal-content">
-        <h2>New High Score!</h2>
-        <p>Congratulations! You scored <span id="finalScore"></span> points!</p>
-        <div id="placementMessage"></div>
-        <p>Enter your name for the leaderboard:</p>
-        <input type="text" id="playerName" placeholder="Your name" maxlength="10" style="width: 150px; padding: 8px; font-size: 14px;" />
-        <div class="modal-buttons">
-          <button id="submitScore" class="modal-btn submit-btn">Submit</button>
-          <button id="skipSubmit" class="modal-btn skip-btn">Skip</button>
-        </div>
-      </div>
-    </div>
+    <div class="main-container">
+        <div class="game-container">
+            <div class="game-header">
+                <div class="score-container">
+                    <span>Score: <span id="score">0</span></span>
+                    <span>High Score: <span id="high-score">0</span></span>
+                </div>
+                <div class="timer-container">
+                    <span>Time: <span id="game-timer">60</span>s</span>
+                </div>
+            </div>
 
-    <!-- Admin Tools Container -->
-    <div id="admin-tools-container" style="display: none;">
-      <h2>Admin Tools</h2>
-      <button id="initialize-leaderboard-btn" style="background-color: #4CAF50;">Load Data</button>
-      <button id="reset-fish-btn">Reset Fish</button>
-      <button id="reset-bugs-btn">Reset Bugs</button>
-      <button id="reset-sea-btn">Reset Sea</button>
-      <button id="reset-villagers-btn">Reset Villagers</button>
-      <button id="reset-to-defaults-btn" style="background-color: #4a90e2; margin-top: 15px;">Reset All</button>
-      <button id="reset-all-btn" style="background-color: #ff6b6b;">Clear All</button>
-      <button id="reset-high-score" style="background-color: #ffa500; margin-top: 15px;">Reset PB</button>
-      <button id="simulate-high-score-btn" style="background-color: #9c27b0; margin-top: 15px;">Simulate High Score</button>
+            <div class="game-area">
+                <div class="image-container">
+                    <img id="image-display" src="" alt="Animal Crossing character or item">
+                </div>
+
+                <div class="input-container">
+                    <input type="text" id="guess-input" placeholder="Who's that villager?" autocomplete="off">
+                    <button id="submit-guess" class="btn">Submit</button>
+                </div>
+
+                <div class="feedback" id="feedback"></div>
+
+                <div class="controls">
+                    <button id="start-game-btn" class="btn btn-primary">Start Game</button>
+                    <button id="next-btn" class="btn btn-secondary" disabled>Next</button>
+                </div>
+            </div>
+
+            <div class="category-selector">
+                <select id="category" class="category-dropdown">
+                    <option value="fish">Fish</option>
+                    <option value="bugs">Bugs</option>
+                    <option value="sea">Sea Creatures</option>
+                    <option value="villagers">Villagers</option>
+                </select>
+            </div>
+        </div>
     </div>
 
     <!-- Game script must be loaded last -->
@@ -268,243 +99,33 @@
       window.standaloneMode = true;
     </script>
     
-    <!-- Sound Manager and Game Variables -->
     <script>
-      const difficultySelector = document.getElementById("difficulty");
-      const logoutBtn = document.getElementById("logoutBtn");
-      const logoutBtnMobile = document.getElementById("logoutBtn-mobile");
-      const adminToggleBtn = document.getElementById("admin-toggle-btn");
-      const adminToolsContainer = document.getElementById("admin-tools-container");
-      
-      // Sound Manager - Clean implementation with OGG support
-      const SoundManager = {
-        enabled: false,
-        hasUserInteracted: false,
-        sounds: {},
-        
-        // Sound file configurations - optimized OGG files with WAV fallbacks
-        soundConfigs: {
-          'correct': '/sounds/correct.ogg',
-          'game-over': '/sounds/game-over.ogg',
-          'start-game': '/sounds/start-game.ogg',
-          'high-score': '/sounds/high-score.ogg',
-          'toggle-on': '/sounds/toggle-on.ogg',
-          'toggle-off': '/sounds/toggle-off.ogg'
-        },
-        
-        // Initialize the sound manager
-        init: function() {
-          try {
-            // Load sound preference from localStorage
-            const savedPreference = localStorage.getItem('acnh_sound_enabled');
-            if (savedPreference !== null) {
-              this.enabled = savedPreference === 'true';
-            }
-            
-            // Initialize audio elements
-            this.initAudioElements();
-            
-            // Update UI
-            this.updateToggleUI();
-            
-            console.log('SoundManager initialized with OGG files:', {
-              enabled: this.enabled,
-              soundConfigs: this.soundConfigs
-            });
-            
-            return this;
-          } catch (error) {
-            console.error('Error initializing SoundManager:', error);
-            return this;
-          }
-        },
-        
-        // Initialize audio elements
-        initAudioElements: function() {
-          try {
-            for (const [soundId, src] of Object.entries(this.soundConfigs)) {
-              const audioElement = document.getElementById(`${soundId}-sound`);
-              if (audioElement) {
-                this.sounds[soundId] = audioElement;
-              }
-            }
-          } catch (error) {
-            console.error('Error initializing audio elements:', error);
-          }
-        },
-        
-        // Play a sound by ID
-        play: function(soundId) {
-          try {
-            // Check if sound is enabled and user has interacted
-            if (!this.enabled || !this.hasUserInteracted) {
-              const reason = !this.enabled ? 'sound is disabled' : 'no user interaction yet';
-              console.log(`Sound playback prevented: ${reason}`);
-              return Promise.resolve(false);
-            }
-            
-            // Get the sound element
-            const sound = this.sounds[soundId];
-            if (!sound) {
-              console.error(`Sound not found: ${soundId}. Available sounds:`, Object.keys(this.sounds));
-              return Promise.resolve(false);
-            }
-            
-            // Reset and prepare for playback
-            sound.currentTime = 0;
-            sound.volume = 0.5;
-            
-            // Try to play the sound
-            const playPromise = sound.play();
-            
-            if (playPromise !== undefined) {
-              return playPromise
-                .then(() => {
-                  console.log(`Sound playback started successfully: ${soundId}`);
-                  return true;
-                })
-                .catch(error => {
-                  console.error(`Error playing sound ${soundId}:`, error);
-                  return false;
-                });
-            }
-            
-            // For browsers that don't return a promise
-            console.log(`Playback started (legacy browser): ${soundId}`);
-            return Promise.resolve(true);
-            
-          } catch (error) {
-            console.error(`Unexpected error playing sound ${soundId}:`, error);
-            return Promise.resolve(false);
-          }
-        },
-        
-        // Toggle sound on/off
-        toggle: function(event) {
-          try {
-            if (event) event.preventDefault();
-            
-            // Mark that user has interacted with sound controls
-            this.hasUserInteracted = true;
-            
-            // Toggle the enabled state
-            this.enabled = !this.enabled;
-            
-            // Save preference to localStorage
-            localStorage.setItem('acnh_sound_enabled', this.enabled.toString());
-            
-            // Update the UI
-            this.updateToggleUI();
-            
-            // Play appropriate toggle sound
-            const soundToPlay = this.enabled ? 'toggle-on' : 'toggle-off';
-            this.play(soundToPlay);
-            
-            console.log('Sound toggled:', {
-              enabled: this.enabled,
-              soundPlayed: soundToPlay
-            });
-            
-          } catch (error) {
-            console.error('Error in sound toggle:', error);
-            this.updateToggleUI();
-          }
-        },
-        
-        // Update toggle UI
-        updateToggleUI: function() {
-          try {
-            const soundToggle = document.getElementById('sound-toggle');
-            if (soundToggle) {
-              let icon = soundToggle.querySelector('img');
-              if (icon) {
-                // Update desktop button image
-                icon.src = this.enabled ? 'images/speaker.png' : 'images/speaker-mute.png';
-                icon.alt = this.enabled ? 'Sound On' : 'Sound Off';
-              } else {
-                // Fallback to text if no image
-                let textIcon = soundToggle.querySelector('span');
-                if (!textIcon) {
-                  textIcon = document.createElement('span');
-                  soundToggle.appendChild(textIcon);
-                }
-                textIcon.textContent = this.enabled ? 'ðŸ”Š' : 'ðŸ”‡';
-              }
-              
-              soundToggle.title = this.enabled ? 'Mute sound' : 'Unmute sound';
-            }
-            
-            // Update mobile toggle as well
-            const soundToggleMobile = document.getElementById('sound-toggle-mobile');
-            if (soundToggleMobile) {
-              const img = soundToggleMobile.querySelector('img');
-              if (img) {
-                img.src = this.enabled ? 'images/speaker.png' : 'images/speaker-mute.png';
-                img.alt = this.enabled ? 'Sound On' : 'Sound Off';
-              }
-            }
-            
-          } catch (error) {
-            console.error('Error updating sound toggle UI:', error);
-          }
-        },
-        
-        // Create audio elements dynamically if they don't exist
-        createAudioElements: function() {
-          try {
-            const head = document.head || document.getElementsByTagName('head')[0];
-            
-            for (const [id, src] of Object.entries(this.soundConfigs)) {
-              // Check if element already exists
-              if (document.getElementById(`${id}-sound`)) {
-                continue;
-              }
-              
-              // Create audio element
-              const audio = document.createElement('audio');
-              audio.id = `${id}-sound`;
-              audio.preload = 'auto';
-              
-              // Create source element
-              const source = document.createElement('source');
-              source.src = src;
-              source.type = 'audio/ogg';
-              
-              // Append source to audio
-              audio.appendChild(source);
-              
-              // Append audio to head
-              head.appendChild(audio);
-              
-              // Add to sounds object
-              this.sounds[id] = audio;
-            }
-          } catch (error) {
-            console.error('Error creating audio elements:', error);
-          }
-        }
-      };
-      
-      // Initialize sound manager when document is ready
+      // Initialize game when DOM is loaded
       document.addEventListener('DOMContentLoaded', function() {
-        SoundManager.init();
-        
-        // Add event listener to sound toggle button
+        // Sound toggle functionality
         const soundToggle = document.getElementById('sound-toggle');
         if (soundToggle) {
-          soundToggle.addEventListener('click', function(event) {
-            SoundManager.toggle(event);
+          soundToggle.addEventListener('click', function() {
+            const soundManager = window.soundManager;
+            if (soundManager) {
+              soundManager.toggleSound();
+              const img = this.querySelector('img');
+              if (img) {
+                img.src = soundManager.enabled ? 'images/speaker.png' : 'images/speaker-mute.png';
+              }
+            }
           });
         }
         
-        // Add event listener to mobile sound toggle button
-        const soundToggleMobile = document.getElementById('sound-toggle-mobile');
-        if (soundToggleMobile) {
-          soundToggleMobile.addEventListener('click', function(event) {
-            SoundManager.toggle(event);
+        // Home button functionality
+        const homeButton = document.querySelector('.home-button');
+        if (homeButton) {
+          homeButton.addEventListener('click', function(e) {
+            e.preventDefault();
+            window.location.href = 'index.html';
           });
         }
       });
     </script>
-  </body>
+</body>
 </html>

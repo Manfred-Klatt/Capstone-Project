@@ -104,24 +104,40 @@ function initAuthHandlers() {
   const signUpButton = document.getElementById('signUp');
   const signInButton = document.getElementById('signIn');
   const container = document.getElementById('container');
-  document.getElementById('signupForm').addEventListener('submit', handleSignup);
-  document.getElementById('loginForm').addEventListener('submit', handleLogin);
-  signUpButton.addEventListener('click', () => container.classList.add("right-panel-active"));
-  signInButton.addEventListener('click', () => container.classList.remove("right-panel-active"));
+  const signupForm = document.getElementById('signupForm');
+  const loginForm = document.getElementById('loginForm');
+  
+  // Only add event listeners if elements exist
+  if (signupForm) {
+    signupForm.addEventListener('submit', handleSignup);
+  }
+  
+  if (loginForm) {
+    loginForm.addEventListener('submit', handleLogin);
+  }
+  
+  if (signUpButton && container) {
+    signUpButton.addEventListener('click', () => container.classList.add("right-panel-active"));
+  }
+  
+  if (signInButton && container) {
+    signInButton.addEventListener('click', () => container.classList.remove("right-panel-active"));
+  }
 }
 
-browser.runtime.onMessage.addListener((message, sender, sendResponse) => {
-  if (message.type === 'getData') {
-    fetchDataFromAPI().then(data => {
-      sendResponse(data); // Send the response after data is fetched
-    }).catch(error => {
-      sendResponse({
-        error: 'Failed to fetch data'
-      });
-    });
-    return true; // This keeps the message channel open for async response
+// API data fetching function
+async function fetchDataFromAPI(category) {
+  try {
+    const response = await fetch(`${API_BASE}/${category}`);
+    if (!response.ok) {
+      throw new Error(`HTTP error! status: ${response.status}`);
+    }
+    return await response.json();
+  } catch (error) {
+    console.error('Failed to fetch data:', error);
+    throw error;
   }
-});
+}
 
 function handleSignup(e) {
   e.preventDefault();

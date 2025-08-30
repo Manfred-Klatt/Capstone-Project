@@ -2,8 +2,14 @@ const mongoose = require('mongoose');
 const config = require('../config');
 const logger = require('../utils/logger');
 
-// Load environment variables from .env.railway
-require('dotenv').config({ path: '.env.railway' });
+// Load environment variables based on NODE_ENV
+if (process.env.NODE_ENV === 'production') {
+  require('dotenv').config({ path: '.env.production' });
+} else if (process.env.NODE_ENV === 'railway') {
+  require('dotenv').config({ path: '.env.railway' });
+} else {
+  require('dotenv').config(); // Default .env file
+}
 
 // Constants
 const MAX_RETRIES = 3;
@@ -50,8 +56,13 @@ const connectDB = async (retryCount = 0) => {
     return mongoose.connection;
   }
 
-  // Get connection URL from environment variables
-  const connectionUrl = process.env.MONGODB_URI;
+  // Get connection URL from environment variables or config
+  const connectionUrl = process.env.MONGODB_URI || config.database.url;
+  
+  // Ensure we have a connection URL
+  if (!connectionUrl) {
+    throw new Error('MongoDB connection URL is not defined in environment variables or config');
+  }
   
   // Sanitize URL for logging
   const logUrl = connectionUrl ? 

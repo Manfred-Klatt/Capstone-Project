@@ -242,6 +242,7 @@
         input {
           width: 95%;
         }
+      }
     </style>
   </head>
   <body>
@@ -283,9 +284,9 @@
       const API_URL = (() => {
         const hostname = window.location.hostname;
         
-        // Production environment (blathers.app) - use relative path with /v1
+        // Production environment (blathers.app) - always use full URL to avoid CORS issues
         if (hostname === 'blathers.app' || hostname.includes('blathers')) {
-          return '/api/v1'; // Using /v1 to match backend routing
+          return 'https://blathers.app/api/v1'; // Using full URL to ensure proper routing
         }
         
         // Local development
@@ -668,7 +669,7 @@
             console.log('Sending signup request...', { username, email });
             
             // The auth routes are mounted at /api/v1/auth in the backend
-            const response = await fetch(`/api/v1/auth/signup`, {
+            const response = await fetch(`${API_URL}/auth/signup`, {
               method: 'POST',
               headers: {
                 'Content-Type': 'application/json',

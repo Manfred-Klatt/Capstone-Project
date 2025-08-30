@@ -7,20 +7,34 @@ const config = require('.');
  */
 const connectDB = async () => {
   try {
-    // Ensure database name is included in the connection string
-    let connectionUrl = config.database.url;
+    // Get connection URL from environment variables or config
+    let connectionUrl = process.env.MONGODB_URI || config.database.url;
     
-    // If URL doesn't contain a database name, add 'acnh-quiz'
-    if (connectionUrl && !connectionUrl.includes('mongodb+srv://') && !connectionUrl.includes('/')) {
-      connectionUrl += '/acnh-quiz';
-    } else if (connectionUrl && connectionUrl.includes('mongodb+srv://') && 
-               !connectionUrl.includes('/?') && !connectionUrl.includes('/' + 'acnh-quiz')) {
-      // For MongoDB Atlas URLs, add database name before query parameters
-      connectionUrl = connectionUrl.replace('/?', '/acnh-quiz?');
-      if (!connectionUrl.includes('/?')) {
-        connectionUrl = connectionUrl.replace('?', '/acnh-quiz?');
-      }
+    if (!connectionUrl) {
+      throw new Error('MongoDB connection URL is not defined in environment variables or config');
     }
+    
+    // Ensure database name is included in the connection string
+    const DATABASE_NAME = 'acnh-quiz';
+    
+    // Handle different URL formats to ensure database name is included
+    if (connectionUrl.includes('mongodb+srv://')) {
+      // MongoDB Atlas URL
+      if (!connectionUrl.includes(`/${DATABASE_NAME}?`) && !connectionUrl.includes(`/${DATABASE_NAME}/`)) {
+        // Add database name before query parameters
+        if (connectionUrl.includes('?')) {
+          connectionUrl = connectionUrl.replace('?', `/${DATABASE_NAME}?`);
+        } else {
+          connectionUrl = `${connectionUrl}/${DATABASE_NAME}`;
+        }
+      }
+    } else if (!connectionUrl.includes(`/${DATABASE_NAME}`)) {
+      // Standard MongoDB URL without database name
+      connectionUrl += `/${DATABASE_NAME}`;
+    }
+    
+    console.log(`MongoDB connection URL (sanitized): ${connectionUrl.replace(/(\/\/[^:]+:)[^@]+(@)/, '$1*****$2')}`);
+    
     
     // Connection options - no need for deprecated options in mongoose 6+
     const options = {

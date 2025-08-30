@@ -1,0 +1,193 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Animal Crossing Quiz - Leaderboards</title>
+    <link rel="stylesheet" href="css/shared-variables.css">
+    <link rel="stylesheet" href="src/react/index.css">
+    <link rel="stylesheet" href="src/react/components/layout/Layout.css">
+    <link rel="icon" type="image/x-icon" href="favicon.ico">
+    
+    <!-- React and ReactDOM -->
+    <script crossorigin src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
+    <script crossorigin src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
+    
+    <!-- React Router -->
+    <script crossorigin src="https://unpkg.com/react-router-dom@6/umd/react-router-dom.production.min.js"></script>
+    
+    <!-- Font Installer -->
+    <script src="js/fontInstaller.js"></script>
+    
+    <!-- Leaderboard API -->
+    <script src="js/leaderboard-api.js"></script>
+</head>
+<body>
+    <div id="app">
+        <!-- React components will be mounted here -->
+        <header id="react-header"></header>
+        
+        <main class="app-main">
+            <div id="react-leaderboard" class="leaderboard-page-container"></div>
+        </main>
+        
+        <footer id="react-footer"></footer>
+    </div>
+    
+    <!-- Legacy leaderboard container (hidden by default) -->
+    <div id="legacy-leaderboard" style="display: none;">
+        <!-- Legacy leaderboard content will be here if needed -->
+    </div>
+    
+    <!-- Admin controls (only visible to admins) -->
+    <div id="admin-controls" class="admin-controls" style="display: none;">
+        <h3>Admin Controls</h3>
+        <div class="admin-buttons">
+            <button id="reset-fish-btn" class="admin-btn">Reset Fish Leaderboard</button>
+            <button id="reset-bugs-btn" class="admin-btn">Reset Bugs Leaderboard</button>
+            <button id="reset-sea-btn" class="admin-btn">Reset Sea Creatures Leaderboard</button>
+            <button id="reset-villagers-btn" class="admin-btn">Reset Villagers Leaderboard</button>
+            <button id="reset-all-btn" class="admin-btn danger">Reset ALL Leaderboards</button>
+        </div>
+    </div>
+    
+    <!-- React integration script -->
+    <script type="module">
+        // Import the React integration
+        import { initReactComponents } from './src/react/game-integration.tsx';
+        
+        // Initialize React components when the DOM is loaded
+        document.addEventListener('DOMContentLoaded', () => {
+            // Check if user is admin and show admin controls if needed
+            const isAdmin = localStorage.getItem('acnh_is_admin') === 'true';
+            if (isAdmin) {
+                document.getElementById('admin-controls').style.display = 'block';
+                setupAdminControls();
+            }
+            
+            // Initialize React components
+            initReactComponents();
+        });
+        
+        // Setup admin control buttons
+        function setupAdminControls() {
+            document.getElementById('reset-fish-btn').addEventListener('click', () => resetLeaderboard('fish'));
+            document.getElementById('reset-bugs-btn').addEventListener('click', () => resetLeaderboard('bugs'));
+            document.getElementById('reset-sea-btn').addEventListener('click', () => resetLeaderboard('sea'));
+            document.getElementById('reset-villagers-btn').addEventListener('click', () => resetLeaderboard('villagers'));
+            document.getElementById('reset-all-btn').addEventListener('click', resetAllLeaderboards);
+        }
+        
+        // Reset a specific leaderboard
+        async function resetLeaderboard(category) {
+            if (!confirm(`Are you sure you want to reset the ${category} leaderboard? This action cannot be undone.`)) {
+                return;
+            }
+            
+            try {
+                if (window.LeaderboardAPI) {
+                    await window.LeaderboardAPI.resetLeaderboard(category);
+                    alert(`${category} leaderboard has been reset successfully.`);
+                    location.reload();
+                } else {
+                    // Fallback to localStorage
+                    const key = 'acnh_leaderboard';
+                    const leaderboard = JSON.parse(localStorage.getItem(key) || '{}');
+                    leaderboard[category] = [];
+                    localStorage.setItem(key, JSON.stringify(leaderboard));
+                    alert(`${category} leaderboard has been reset successfully (local storage).`);
+                    location.reload();
+                }
+            } catch (error) {
+                console.error(`Error resetting ${category} leaderboard:`, error);
+                alert(`Failed to reset ${category} leaderboard. Please try again.`);
+            }
+        }
+        
+        // Reset all leaderboards
+        async function resetAllLeaderboards() {
+            if (!confirm('Are you sure you want to reset ALL leaderboards? This action cannot be undone.')) {
+                return;
+            }
+            
+            try {
+                if (window.LeaderboardAPI) {
+                    await window.LeaderboardAPI.resetAllLeaderboards();
+                    alert('All leaderboards have been reset successfully.');
+                    location.reload();
+                } else {
+                    // Fallback to localStorage
+                    localStorage.setItem('acnh_leaderboard', '{}');
+                    alert('All leaderboards have been reset successfully (local storage).');
+                    location.reload();
+                }
+            } catch (error) {
+                console.error('Error resetting all leaderboards:', error);
+                alert('Failed to reset all leaderboards. Please try again.');
+            }
+        }
+    </script>
+    
+    <style>
+        .leaderboard-page-container {
+            width: 100%;
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        
+        .admin-controls {
+            background-color: #f8f9fa;
+            border: 2px solid #ddd;
+            border-radius: 10px;
+            padding: 15px;
+            margin: 20px auto;
+            max-width: 800px;
+            text-align: center;
+        }
+        
+        .admin-buttons {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: center;
+            gap: 10px;
+            margin-top: 15px;
+        }
+        
+        .admin-btn {
+            background-color: #4CAF50;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            padding: 8px 16px;
+            cursor: pointer;
+            font-size: 14px;
+            transition: background-color 0.3s;
+        }
+        
+        .admin-btn:hover {
+            background-color: #45a049;
+        }
+        
+        .admin-btn.danger {
+            background-color: #f44336;
+        }
+        
+        .admin-btn.danger:hover {
+            background-color: #d32f2f;
+        }
+        
+        @media (max-width: 768px) {
+            .admin-buttons {
+                flex-direction: column;
+                align-items: center;
+            }
+            
+            .admin-btn {
+                width: 100%;
+                max-width: 250px;
+            }
+        }
+    </style>
+</body>
+</html>

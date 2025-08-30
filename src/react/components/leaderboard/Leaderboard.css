@@ -1,0 +1,248 @@
+.leaderboard-container {
+  background-color: var(--container-bg);
+  padding: 20px;
+  border-radius: 15px;
+  box-shadow: 0 0 15px var(--shadow-color);
+  border: 3px solid var(--border-color);
+  width: 95%;
+  max-width: 800px;
+  margin: 20px auto;
+  box-sizing: border-box;
+}
+
+.leaderboard-title {
+  color: var(--text-color);
+  margin-bottom: 20px;
+  font-size: 1.8rem;
+  text-align: center;
+  border-bottom: 2px solid var(--border-color);
+  padding-bottom: 10px;
+}
+
+.leaderboard-tabs {
+  display: flex;
+  justify-content: center;
+  flex-wrap: wrap;
+  gap: 10px;
+  margin-bottom: 20px;
+}
+
+.leaderboard-tab {
+  background-color: #f0f8ff;
+  color: var(--text-color);
+  border: 2px solid var(--border-color);
+  border-radius: 8px;
+  padding: 8px 16px;
+  font-size: 1rem;
+  font-family: inherit;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.leaderboard-tab:hover {
+  background-color: #e0e8f0;
+}
+
+.leaderboard-tab.active {
+  background-color: var(--border-color);
+  color: white;
+  font-weight: bold;
+}
+
+.leaderboard-content {
+  margin-bottom: 20px;
+}
+
+.category-leaderboard {
+  background-color: #fff9f0;
+  padding: 15px;
+  border-radius: 10px;
+  border: 2px solid var(--border-color);
+}
+
+.category-title {
+  color: var(--text-color);
+  margin-bottom: 15px;
+  font-size: 1.4rem;
+  text-align: center;
+  border-bottom: 2px solid var(--border-color);
+  padding-bottom: 8px;
+}
+
+.leaderboard-table-container {
+  overflow-x: auto;
+}
+
+.leaderboard-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.95rem;
+}
+
+.leaderboard-table th,
+.leaderboard-table td {
+  padding: 10px;
+  text-align: left;
+  border-bottom: 1px solid #ddd;
+}
+
+.leaderboard-table th {
+  background-color: #f5f5f5;
+  color: var(--text-color);
+  font-weight: bold;
+}
+
+.leaderboard-table tr:last-child td {
+  border-bottom: none;
+}
+
+.rank-cell {
+  width: 60px;
+  text-align: center;
+}
+
+.username-cell {
+  font-weight: bold;
+}
+
+.score-cell {
+  color: #4CAF50;
+  font-weight: bold;
+  text-align: center;
+}
+
+.date-cell {
+  color: #777;
+  font-size: 0.85rem;
+}
+
+/* Medal styling for top 3 ranks */
+.rank-1 {
+  background-color: rgba(255, 215, 0, 0.1);
+}
+
+.rank-2 {
+  background-color: rgba(192, 192, 192, 0.1);
+}
+
+.rank-3 {
+  background-color: rgba(205, 127, 50, 0.1);
+}
+
+.leaderboard-actions {
+  display: flex;
+  justify-content: center;
+  gap: 15px;
+  margin-top: 20px;
+}
+
+.refresh-btn,
+.view-history-btn {
+  background-color: #4CAF50;
+  color: white;
+  border: none;
+  border-radius: 6px;
+  padding: 8px 16px;
+  font-size: 0.9rem;
+  cursor: pointer;
+  transition: background-color 0.3s ease;
+  font-family: inherit;
+}
+
+.refresh-btn:hover,
+.view-history-btn:hover {
+  background-color: #45a049;
+}
+
+.view-history-btn {
+  background-color: #4a90e2;
+}
+
+.view-history-btn:hover {
+  background-color: #357abd;
+}
+
+.leaderboard-loading {
+  text-align: center;
+  padding: 20px;
+  color: var(--text-color);
+  font-style: italic;
+}
+
+.leaderboard-error {
+  background-color: #ffebee;
+  color: #c62828;
+  padding: 10px;
+  border-radius: 5px;
+  margin-bottom: 15px;
+  text-align: center;
+  border: 1px solid #ef9a9a;
+}
+
+.no-entries {
+  text-align: center;
+  padding: 20px;
+  color: #777;
+  font-style: italic;
+}
+
+/* Responsive design */
+@media (max-width: 768px) {
+  .leaderboard-container {
+    padding: 15px;
+    width: 100%;
+  }
+  
+  .leaderboard-title {
+    font-size: 1.5rem;
+  }
+  
+  .leaderboard-tab {
+    padding: 6px 12px;
+    font-size: 0.9rem;
+  }
+  
+  .category-title {
+    font-size: 1.2rem;
+  }
+  
+  .leaderboard-table {
+    font-size: 0.85rem;
+  }
+  
+  .leaderboard-table th,
+  .leaderboard-table td {
+    padding: 8px 5px;
+  }
+  
+  .rank-cell {
+    width: 50px;
+  }
+}
+
+@media (max-width: 480px) {
+  .leaderboard-container {
+    padding: 10px;
+  }
+  
+  .leaderboard-tabs {
+    gap: 5px;
+  }
+  
+  .leaderboard-tab {
+    padding: 5px 10px;
+    font-size: 0.8rem;
+  }
+  
+  .leaderboard-actions {
+    flex-direction: column;
+    align-items: center;
+    gap: 10px;
+  }
+  
+  .refresh-btn,
+  .view-history-btn {
+    width: 100%;
+    max-width: 200px;
+  }
+}

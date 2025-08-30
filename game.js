@@ -69,6 +69,24 @@ document.addEventListener('DOMContentLoaded', () => {
   try {
     console.log('DOM fully loaded, initializing game...');
     
+    // Set up React event listeners
+    setupReactEventListeners();
+    
+    // Set up simulate high score button
+    const simulateHighScoreBtn = document.getElementById('simulate-high-score-btn');
+    if (simulateHighScoreBtn) {
+      simulateHighScoreBtn.addEventListener('click', () => {
+        const simulatedScore = Math.floor(Math.random() * 10) + 1;
+        console.log(`Simulating high score: ${simulatedScore}`);
+        
+        // Update the score variable
+        score = simulatedScore;
+        
+        // Update high score
+        updateHighScore();
+      });
+    }
+    
     // Cache all DOM elements first
     cacheDOMElements();
     
@@ -198,13 +216,15 @@ function initAuthHandlers() {
 // API data fetching function
 async function fetchDataFromAPI(category) {
   try {
-    const response = await fetch(`${API_BASE}/${category}`);
+    // Make sure category has a trailing slash for Nookipedia API
+    const endpoint = category.endsWith('/') ? category : `${category}/`;
+    const response = await fetch(`${API_BASE}/${endpoint}`);
     if (!response.ok) {
       throw new Error(`HTTP error! status: ${response.status}`);
     }
     return await response.json();
   } catch (error) {
-    console.error('Failed to fetch data:', error);
+    console.log('Failed to fetch data:', error);
     throw error;
   }
 }
@@ -468,41 +488,80 @@ function setupNewRound() {
 
 // === API & Data ===
 async function loadFallbackData(category) {
-  try {
-    console.log(`Loading fallback data for ${category}...`);
-    const response = await fetch('fallback-data.json');
-    if (!response.ok) {
-      throw new Error(`Failed to load fallback data: ${response.status}`);
-    }
-    
-    const allData = await response.json();
-    if (allData && allData[category] && Array.isArray(allData[category])) {
-      cachedData[category] = allData[category];
-      cachedData[category]._fromFallback = true;
-      console.log(`Loaded fallback data for ${category}:`, cachedData[category].length, 'items');
-      return true;
-    } else {
-      console.error(`No fallback data available for ${category}`);
-      return false;
-    }
-  } catch (error) {
-    console.error('Error loading fallback data:', error);
-    return false;
+try {
+console.log(`Loading fallback data for ${category}...`);
+const response = await fetch('fallback-data.json');
+if (!response.ok) {
+throw new Error(`HTTP error! status: ${response.status}`);
+}
+const data = await response.json();
+
+if (data && data[category] && Array.isArray(data[category]) && data[category].length > 0) {
+cachedData[category] = data[category];
+console.log(`Loaded fallback data for ${category}: ${data[category].length} items`);
+
+// Offer standalone mode if we're using fallback data
+offerStandaloneMode();
+
+return data[category];
+} else {
+// If the category doesn't exist or is empty, try to use a default category
+const defaultCategories = ['fish', 'bugs', 'sea', 'villagers'];
+for (const defaultCategory of defaultCategories) {
+if (data && data[defaultCategory] && Array.isArray(data[defaultCategory]) && data[defaultCategory].length > 0) {
+console.log(`No data for ${category}, using ${defaultCategory} instead`);
+cachedData[category] = data[defaultCategory];
+return data[defaultCategory];
+}
+}
+
+console.error(`No fallback data available for ${category} or any default category`);
+return [];
+}
+} catch (error) {
+console.error(`Error loading fallback data: ${error}`);
+// Create minimal fallback data if everything else fails
+const minimalFallback = [
+{
+name: { "name-USen": "Test Fish" },
+image_uri: `images/${category}/placeholder.svg`
+}
+];
+cachedData[category] = minimalFallback;
+return minimalFallback;
+}
+}
+
+// Function to offer standalone mode when API is unavailable
+function offerStandaloneMode() {
+  // Check if we've already confirmed standalone mode this session
+  if (sessionStorage.getItem('standalone_confirmed_this_session')) {
+    return;
+  }
+
+  const confirmed = confirm("Unable to connect to the Animal Crossing API. Would you like to continue in standalone mode? Your scores will be saved locally but not shared with others.");
+
+  if (confirmed) {
+    sessionStorage.setItem('standalone_confirmed_this_session', 'true');
+    localStorage.setItem('standalone_mode', 'true');
+  } else {
+    // User declined standalone mode, redirect to home page
+    window.location.href = 'index.html';
   }
 }
 
 async function initGame() {
   // Use cached elements instead of querying the DOM again
   const category = ELEMENTS.category ? ELEMENTS.category.value : 'fish';
-  
+
   if (ELEMENTS.feedback) {
     ELEMENTS.feedback.textContent = "Loading...";
   }
-  
+
   // Define API base and proxy URL
   const apiBase = 'https://api.nookipedia.com/';
   const proxyUrl = 'https://cors-anywhere.herokuapp.com/';
-  
+
   if (!cachedData[category]) {
     try {
       // Try to fetch data directly first
@@ -532,22 +591,22 @@ async function initGame() {
       }
     }
   }
-  
+
   // Offer standalone mode if we're using fallback data
-  if (cachedData[category] && cachedData[category]._fromFallback && !window.standaloneConfirmedThisSession) {
+  if (cachedData[category] && cachedData[category]._fromFallback && !sessionStorage.getItem('standalone_confirmed_this_session')) {
     offerStandaloneMode();
   }
-  
+
   // Only proceed if we have data
   if (cachedData[category] && cachedData[category].length > 0) {
     currentItem = getRandomItem(cachedData[category]);
     displayImageFromData(currentItem);
-    
+
     // Enable input fields using cached elements
     if (ELEMENTS.guessInput) ELEMENTS.guessInput.disabled = false;
     if (ELEMENTS.submitButton) ELEMENTS.submitButton.disabled = false;
     if (ELEMENTS.scoreElement) ELEMENTS.scoreElement.textContent = `Score: ${score}`;
-    
+
     // Start a new round
     setupNewRound();
   } else {
@@ -590,13 +649,44 @@ function updateHighScore() {
   const currentHighScore = localStorage.getItem('acnh_high_score') || 0;
   if (score > currentHighScore) {
     localStorage.setItem('acnh_high_score', score);
-    ELEMENTS.highScoreElement.textContent = `High Score: ${score}`;
+    if (ELEMENTS.highScoreElement) {
+      ELEMENTS.highScoreElement.textContent = `High Score: ${score}`;
+    }
+    
+    // Check if React high score modal is available
+    if (window.ReactGameComponents && window.ReactGameComponents.showHighScoreModal) {
+      // Get placement (e.g., "1st", "2nd", etc.)
+      const placement = getScorePlacement(score);
+      
+      // Show the React high score modal
+      window.ReactGameComponents.showHighScoreModal(score, placement);
+    }
   }
 }
 
+// Get the placement of a score in the leaderboard
+function getScorePlacement(newScore) {
+  const leaderboard = getLeaderboard();
+  
+  // If leaderboard is empty, it's the first place
+  if (leaderboard.length === 0) {
+    return '1st';
+  }
+  
+  // Count how many scores are higher than the new score
+  const position = leaderboard.filter(entry => entry.score >= newScore).length;
+  
+  // Return the placement with the appropriate suffix
+  const positionNumber = position + 1;
+  if (positionNumber === 1) return '1st';
+  if (positionNumber === 2) return '2nd';
+  if (positionNumber === 3) return '3rd';
+  return `${positionNumber}th`;
+}
+
 function displayImageFromData(data) {
-  if (!data || !data.image_uri) {
-    console.error('No image data available');
+  if (!data) {
+    console.error('No data available for image display');
     return;
   }
   
@@ -605,19 +695,38 @@ function displayImageFromData(data) {
     return;
   }
   
+  // Clear previous image
+  ELEMENTS.imageDisplay.innerHTML = "";
+  
+  // Determine the image URL based on data structure
+  let imageUrl = '';
+  if (data.image_uri) {
+    imageUrl = data.image_uri;
+  } else if (data.icon_uri) {
+    imageUrl = data.icon_uri;
+  } else if (data.image) {
+    imageUrl = data.image;
+  } else if (data.photo) {
+    imageUrl = data.photo;
+  } else {
+    // Use placeholder image based on category
+    const category = ELEMENTS.category ? ELEMENTS.category.value : 'fish';
+    imageUrl = `images/${category}/placeholder.svg`;
+  }
+  
+  // Create and configure the image element
   const img = document.createElement("img");
-  img.src = data.image_uri;
-  img.alt = data.name?.["name-USen"] || "Animal Crossing item";
+  img.src = imageUrl;
+  img.alt = data.name?.["name-USen"] || data.name || "Animal Crossing item";
   
-  // Define proxyUrl for error handling
-  const proxyUrl = 'https://cors-anywhere.herokuapp.com/';
-  
+  // Handle image loading errors
   img.onerror = () => {
-    console.log('Image load error, trying proxy');
-    img.src = `${proxyUrl}${encodeURIComponent(data.image_uri)}`;
+    console.log('Image load error, using placeholder');
+    const category = ELEMENTS.category ? ELEMENTS.category.value : 'fish';
+    img.src = `images/${category}/placeholder.svg`;
   };
   
-  ELEMENTS.imageDisplay.innerHTML = "";
+  // Add the image to the display
   ELEMENTS.imageDisplay.appendChild(img);
   ELEMENTS.imageDisplay.style.display = "block";
 }
@@ -761,6 +870,32 @@ function endGame() {
   } catch (error) {
     console.error('Error in endGame:', error);
   }
+}
+
+// === React Integration ===
+function setupReactEventListeners() {
+  // Listen for high score submission from React
+  document.addEventListener('react:highscore-submit', (event) => {
+    const { name, score } = event.detail;
+    console.log(`High score submitted from React: ${name} - ${score}`);
+    
+    // Save the score to the leaderboard
+    saveScoreToLeaderboard(name, score);
+    
+    // Update the leaderboard display
+    renderLeaderboard();
+    
+    // Reset the game
+    initGame();
+  });
+  
+  // Listen for high score skip from React
+  document.addEventListener('react:highscore-skip', () => {
+    console.log('High score submission skipped');
+    
+    // Reset the game
+    initGame();
+  });
 }
 
 // === Helpers ===

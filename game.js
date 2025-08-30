@@ -8,18 +8,20 @@ const ELEMENTS = {};
 
 // Function to cache DOM elements
 function cacheDOMElements() {
+  // Get elements using their correct IDs from the HTML
   ELEMENTS.category = document.getElementById('category');
   ELEMENTS.guessInput = document.getElementById('guess-input');
   ELEMENTS.submitButton = document.getElementById('submit-guess');
-  ELEMENTS.nextButton = document.getElementById('next-button');
-  ELEMENTS.startButton = document.getElementById('start-game');
+  ELEMENTS.nextButton = document.getElementById('next-btn'); // Fixed: next-btn instead of next-button
+  ELEMENTS.startButton = document.getElementById('start-game-btn'); // Fixed: start-game-btn instead of start-game
   ELEMENTS.feedback = document.getElementById('feedback');
-  ELEMENTS.imageDisplay = document.getElementById('image-display');
+  ELEMENTS.imageDisplay = document.getElementById('imageDisplay'); // Fixed: imageDisplay instead of image-display
   ELEMENTS.scoreElement = document.getElementById('score');
   ELEMENTS.highScoreElement = document.getElementById('high-score');
-  ELEMENTS.timerElement = document.getElementById('timer');
-  ELEMENTS.timerDisplay = document.getElementById('timer'); // Alias for consistency
-  ELEMENTS.leaderboardElement = document.getElementById('leaderboard-list');
+  ELEMENTS.timerElement = document.getElementById('game-timer'); // Fixed: game-timer instead of timer
+  ELEMENTS.timerContainer = document.getElementById('game-timer-container'); // Added timer container
+  ELEMENTS.timerDisplay = document.getElementById('game-timer'); // Fixed: game-timer instead of timer
+  ELEMENTS.leaderboardElement = document.querySelector('.category-leaderboard.active'); // Using querySelector for active leaderboard
   ELEMENTS.gameContainer = document.getElementById('game-container');
   
   // Log which elements were not found
@@ -65,30 +67,50 @@ function stopTimer() {
 // === DOM Ready ===
 document.addEventListener('DOMContentLoaded', () => {
   try {
+    console.log('DOM fully loaded, initializing game...');
+    
     // Cache all DOM elements first
     cacheDOMElements();
     
-    // Check for required elements
-    const missingElements = [];
-    ['imageDisplay', 'guessInput', 'submitButton', 'startButton'].forEach(el => {
-      if (!ELEMENTS[el]) missingElements.push(el);
+    // Check for critical elements and create them if missing
+    const criticalElements = ['guessInput', 'submitButton', 'startButton', 'feedback'];
+    const missingCritical = [];
+    
+    criticalElements.forEach(el => {
+      if (!ELEMENTS[el]) {
+        missingCritical.push(el);
+        
+        // Try to find elements by alternative selectors
+        if (el === 'startButton') {
+          ELEMENTS.startButton = document.querySelector('button[id*="start"]');
+        } else if (el === 'submitButton') {
+          ELEMENTS.submitButton = document.querySelector('button[id*="submit"]');
+        } else if (el === 'nextButton') {
+          ELEMENTS.nextButton = document.querySelector('button[id*="next"]');
+        }
+      }
     });
     
-    if (missingElements.length > 0) {
-      console.error('Missing required DOM elements:', missingElements.join(', '));
-      return;
+    // Log any elements that are still missing after recovery attempts
+    const stillMissing = criticalElements.filter(el => !ELEMENTS[el]);
+    if (stillMissing.length > 0) {
+      console.warn('Some critical elements could not be found:', stillMissing.join(', '));
+      console.warn('Game functionality may be limited');
     }
 
     // Set up event listeners with null checks
     if (ELEMENTS.submitButton) {
+      console.log('Setting up submit button listener');
       ELEMENTS.submitButton.addEventListener('click', submitGuess);
     }
     
     if (ELEMENTS.nextButton) {
+      console.log('Setting up next button listener');
       ELEMENTS.nextButton.addEventListener('click', setupNewRound);
     }
     
     if (ELEMENTS.startButton) {
+      console.log('Setting up start button listener');
       // Fix the start button to call initGame instead of setupNewRound
       ELEMENTS.startButton.addEventListener('click', () => {
         console.log('Start button clicked');

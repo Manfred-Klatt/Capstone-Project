@@ -467,6 +467,30 @@ function setupNewRound() {
 
 
 // === API & Data ===
+async function loadFallbackData(category) {
+  try {
+    console.log(`Loading fallback data for ${category}...`);
+    const response = await fetch('fallback-data.json');
+    if (!response.ok) {
+      throw new Error(`Failed to load fallback data: ${response.status}`);
+    }
+    
+    const allData = await response.json();
+    if (allData && allData[category] && Array.isArray(allData[category])) {
+      cachedData[category] = allData[category];
+      cachedData[category]._fromFallback = true;
+      console.log(`Loaded fallback data for ${category}:`, cachedData[category].length, 'items');
+      return true;
+    } else {
+      console.error(`No fallback data available for ${category}`);
+      return false;
+    }
+  } catch (error) {
+    console.error('Error loading fallback data:', error);
+    return false;
+  }
+}
+
 async function initGame() {
   // Use cached elements instead of querying the DOM again
   const category = ELEMENTS.category ? ELEMENTS.category.value : 'fish';
@@ -488,16 +512,30 @@ async function initGame() {
       } catch (directError) {
         console.log('Direct API fetch failed, trying proxy:', directError);
         // Fall back to proxy if direct fetch fails
-        const apiData = await fetchWithTimeout(`${proxyUrl}${encodeURIComponent(apiBase + category + "/")}`);
-        cachedData[category] = apiData;
+        try {
+          const apiData = await fetchWithTimeout(`${proxyUrl}${encodeURIComponent(apiBase + category + "/")}`);
+          cachedData[category] = apiData;
+        } catch (proxyError) {
+          console.log('Proxy fetch failed, using local fallback data:', proxyError);
+          // Fall back to local data if both API and proxy fail
+          await loadFallbackData(category);
+        }
       }
     } catch (error) {
-      if (ELEMENTS.feedback) {
+      console.error('Failed to load data from all sources:', error);
+      // Final attempt to load fallback data
+      await loadFallbackData(category);
+      
+      if (!cachedData[category] && ELEMENTS.feedback) {
         ELEMENTS.feedback.textContent = `Failed to load ${category}. Please try again later.`;
+        return;
       }
-      console.error('Failed to load data:', error);
-      return;
     }
+  }
+  
+  // Offer standalone mode if we're using fallback data
+  if (cachedData[category] && cachedData[category]._fromFallback && !window.standaloneConfirmedThisSession) {
+    offerStandaloneMode();
   }
   
   // Only proceed if we have data
@@ -609,7 +647,16 @@ function saveScoreToLeaderboard(name, score) {
 }
 
 function getLeaderboard() {
-  return JSON.parse(localStorage.getItem("acnh_leaderboard")) || [];
+  try {
+    const leaderboardData = localStorage.getItem("acnh_leaderboard");
+    if (!leaderboardData) return [];
+    
+    const parsedData = JSON.parse(leaderboardData);
+    return Array.isArray(parsedData) ? parsedData : [];
+  } catch (error) {
+    console.error('Error parsing leaderboard data:', error);
+    return [];
+  }
 }
 
 function renderLeaderboard() {

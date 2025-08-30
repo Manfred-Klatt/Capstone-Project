@@ -1,6 +1,7 @@
 const { defineConfig } = require('vite');
 const path = require('path');
 const fs = require('fs');
+const react = require('@vitejs/plugin-react');
 
 // Function to copy static assets to the dist folder
 function copyStaticAssets() {
@@ -61,14 +62,22 @@ module.exports = defineConfig({
     cors: true
   },
   plugins: [
+    react(),
     copyStaticAssets()
   ],
+  resolve: {
+    extensions: ['.js', '.jsx', '.ts', '.tsx']
+  },
   build: {
     outDir: 'dist',
     assetsDir: 'assets',
     sourcemap: true,
     rollupOptions: {
-      input: path.resolve(__dirname, 'index.html'),
+      input: {
+        main: path.resolve(__dirname, 'index.html'),
+        game: path.resolve(__dirname, 'game.html'),
+        reactAuth: path.resolve(__dirname, 'react-auth.html')
+      },
       output: {
         entryFileNames: 'assets/[name].[hash].js',
         chunkFileNames: 'assets/[name].[hash].js',

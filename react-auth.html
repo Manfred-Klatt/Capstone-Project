@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Animal Crossing Game Portal - React Auth</title>
+  <link href="https://fonts.googleapis.com/css2?family=Quicksand:wght@400;600&display=swap" rel="stylesheet">
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/fontfaceobserver/2.3.0/fontfaceobserver.standalone.js"></script>
+  <script src="./js/fontOptimizer.js"></script>
+  <script src="./js/backgroundLoader.js"></script>
+  <script src="./js/secureTokenManager.js"></script>
+  <style>
+    @font-face {
+      font-family: 'customfont';
+      src: url('./fonts/customfont.woff2') format('woff2'),
+           url('./fonts/customfont.otf') format('opentype');
+      font-display: swap;
+      font-weight: normal;
+      font-style: normal;
+    }
+
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+      font-family: 'customfont', 'Quicksand', Arial, sans-serif;
+    }
+    
+    body {
+      margin: 0;
+      padding: 0;
+      min-height: 100vh;
+    }
+  </style>
+</head>
+<body>
+  <div id="auth-container"></div>
+
+  <!-- React will be loaded here -->
+  <script type="module">
+    // Import React components
+    import { renderReactComponent } from './src/react/react-integration.js';
+    
+    document.addEventListener('DOMContentLoaded', () => {
+      // Render the Auth container
+      renderReactComponent('auth-container', 'auth-container');
+    });
+  </script>
+</body>
+</html>

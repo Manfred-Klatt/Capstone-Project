@@ -8,6 +8,8 @@ A fun and interactive quiz game based on Animal Crossing New Horizons, featuring
   - Sign up, login, and password reset
   - JWT-based authentication with refresh tokens
   - Role-based access control (user/admin)
+  - React-based authentication UI with context API
+  - Standalone mode support
 
 - **Gameplay**
   - Multiple categories (villagers, fish, bugs, and sea creatures)
@@ -29,8 +31,10 @@ A fun and interactive quiz game based on Animal Crossing New Horizons, featuring
 ## 🛠 Tech Stack
 
 - **Backend**: Node.js, Express
+- **Frontend**: HTML, CSS, JavaScript, React
 - **Database**: MongoDB with Mongoose
-- **Authentication**: JWT (JSON Web Tokens)
+- **Authentication**: JWT (JSON Web Tokens), React Context API
+- **Build Tools**: Vite, TypeScript
 - **Real-time**: Socket.IO
 - **Logging**: Winston with daily rotation
 - **Documentation**: OpenAPI/Swagger
@@ -124,7 +128,12 @@ yarn test:coverage
 ## Deployment
 
 1. Set up production environment variables in your hosting provider.
-2. Build the frontend (if applicable).
+2. Build the frontend and React components:
+   ```bash
+   npm run build:react
+   # or
+   yarn build:react
+   ```
 3. Start the production server:
    ```bash
    npm start
@@ -156,6 +165,11 @@ yarn test:coverage
 │   ├── loaders/              # Application loaders (express, mongoose, socket.io)
 │   ├── middleware/           # Express middleware
 │   ├── models/               # Database models
+│   ├── react/                # React components and context
+│   │   ├── components/       # React UI components
+│   │   ├── context/          # React context providers
+│   │   ├── config/           # Client-side configuration
+│   │   └── react-integration.ts # Integration with HTML pages
 │   ├── services/             # Business logic
 │   ├── utils/                # Utility functions
 │   ├── app.js                # Express application
@@ -166,6 +180,8 @@ yarn test:coverage
 ├── .eslintrc.js              # ESLint configuration
 ├── .gitignore                # Git ignore file
 ├── package.json              # Project dependencies and scripts
+├── vite.config.js            # Vite build configuration
+├── tsconfig.json             # TypeScript configuration
 └── README.md                 # Project documentation
 ```
 

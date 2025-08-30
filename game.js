@@ -4,16 +4,31 @@ const TIMEOUT = 5000;
 const MAX_SCORE = 10;
 
 // === Cached Elements ===
-const ELEMENTS = {
-  imageDisplay: null,
-  feedback: null,
-  category: null,
-  guessInput: null,
-  submitButton: null,
-  nextButton: null,
-  scoreElement: null,
-  highScoreElement: null
-};
+const ELEMENTS = {};
+
+// Function to cache DOM elements
+function cacheDOMElements() {
+  ELEMENTS.category = document.getElementById('category');
+  ELEMENTS.guessInput = document.getElementById('guess-input');
+  ELEMENTS.submitButton = document.getElementById('submit-guess');
+  ELEMENTS.nextButton = document.getElementById('next-button');
+  ELEMENTS.startButton = document.getElementById('start-game');
+  ELEMENTS.feedback = document.getElementById('feedback');
+  ELEMENTS.imageDisplay = document.getElementById('image-display');
+  ELEMENTS.scoreElement = document.getElementById('score');
+  ELEMENTS.highScoreElement = document.getElementById('high-score');
+  ELEMENTS.timerElement = document.getElementById('timer');
+  ELEMENTS.timerDisplay = document.getElementById('timer'); // Alias for consistency
+  ELEMENTS.leaderboardElement = document.getElementById('leaderboard-list');
+  ELEMENTS.gameContainer = document.getElementById('game-container');
+  
+  // Log which elements were not found
+  Object.entries(ELEMENTS).forEach(([key, element]) => {
+    if (!element) {
+      console.warn(`DOM element not found: ${key}`);
+    }
+  });
+}
 
 // === Cached Data ===
 let cachedData = {};
@@ -29,7 +44,9 @@ function startTimer() {
 
 function updateTimer() {
   timeLeft--;
-  document.getElementById('timer').textContent = `Time: ${timeLeft}`;
+  
+  // Update timer display using cached element
+  updateTimerDisplay();
   
   if (timeLeft <= 0) {
     clearInterval(timerInterval);
@@ -48,51 +65,82 @@ function stopTimer() {
 // === DOM Ready ===
 document.addEventListener('DOMContentLoaded', () => {
   try {
-    // Cache DOM elements once
-    ELEMENTS.imageDisplay = document.getElementById('imageDisplay');
-    ELEMENTS.feedback = document.getElementById('feedback');
-    ELEMENTS.category = document.getElementById('category');
-    ELEMENTS.guessInput = document.getElementById('guess-input');
-    ELEMENTS.submitButton = document.getElementById('submit-guess');
-    ELEMENTS.nextButton = document.getElementById('next-btn');
-    ELEMENTS.scoreElement = document.getElementById('score');
-    ELEMENTS.highScoreElement = document.getElementById('high-score');
-    ELEMENTS.startButton = document.getElementById('start-round');
-    ELEMENTS.timerDisplay = document.getElementById('timer');
-
-    if (!ELEMENTS.imageDisplay || !ELEMENTS.guessInput || !ELEMENTS.submitButton) {
-      console.error('Missing required DOM elements');
+    // Cache all DOM elements first
+    cacheDOMElements();
+    
+    // Check for required elements
+    const missingElements = [];
+    ['imageDisplay', 'guessInput', 'submitButton', 'startButton'].forEach(el => {
+      if (!ELEMENTS[el]) missingElements.push(el);
+    });
+    
+    if (missingElements.length > 0) {
+      console.error('Missing required DOM elements:', missingElements.join(', '));
       return;
     }
 
-    // Set up event listeners
-    ELEMENTS.submitButton.addEventListener('click', submitGuess);
-    ELEMENTS.nextButton.addEventListener('click', setupNewRound);
-    ELEMENTS.startButton.addEventListener('click', setupNewRound);
+    // Set up event listeners with null checks
+    if (ELEMENTS.submitButton) {
+      ELEMENTS.submitButton.addEventListener('click', submitGuess);
+    }
+    
+    if (ELEMENTS.nextButton) {
+      ELEMENTS.nextButton.addEventListener('click', setupNewRound);
+    }
+    
+    if (ELEMENTS.startButton) {
+      // Fix the start button to call initGame instead of setupNewRound
+      ELEMENTS.startButton.addEventListener('click', () => {
+        console.log('Start button clicked');
+        initGame();
+      });
+    }
 
     // Allow Enter key to submit guess
-    ELEMENTS.guessInput.addEventListener('keypress', (e) => {
-      if (e.key === 'Enter') {
-        e.preventDefault();
-        submitGuess();
-      }
-    });
+    if (ELEMENTS.guessInput) {
+      ELEMENTS.guessInput.addEventListener('keypress', (e) => {
+        if (e.key === 'Enter') {
+          e.preventDefault();
+          submitGuess();
+        }
+      });
+    }
 
-    // Initialize game
+    // Initialize auth handlers
     initAuthHandlers();
-    initGame();
-
+    
     // Initialize game state
     score = 0;
     timeLeft = 15;
-    ELEMENTS.scoreElement.textContent = `Score: ${score}`;
-    ELEMENTS.timerDisplay.textContent = `Time: ${timeLeft}`;
-    ELEMENTS.feedback.textContent = '';
+    
+    // Update UI elements with null checks
+    if (ELEMENTS.scoreElement) {
+      ELEMENTS.scoreElement.textContent = `Score: ${score}`;
+    }
+    
+    if (ELEMENTS.timerElement) {
+      ELEMENTS.timerElement.textContent = `Time: ${timeLeft}s`;
+    }
+    
+    if (ELEMENTS.feedback) {
+      ELEMENTS.feedback.textContent = 'Welcome! Click Start Game to begin.';
+    }
 
-    // Disable input until a round starts
-    ELEMENTS.guessInput.disabled = true;
-    ELEMENTS.submitButton.disabled = true;
-    ELEMENTS.startButton.disabled = false;
+    // Disable input until game starts
+    if (ELEMENTS.guessInput) {
+      ELEMENTS.guessInput.disabled = true;
+    }
+    
+    if (ELEMENTS.submitButton) {
+      ELEMENTS.submitButton.disabled = true;
+    }
+    
+    if (ELEMENTS.startButton) {
+      ELEMENTS.startButton.disabled = false;
+    }
+    
+    // Initialize leaderboard
+    renderLeaderboard();
 
   } catch (error) {
     console.error('Error initializing game:', error);
@@ -209,85 +257,186 @@ function handleLogin(e) {
 
 // === Game Logic ===
 function submitGuess() {
-  const userGuess = ELEMENTS.guessInput.value.trim();
-  if (!userGuess) return;
+  try {
+    // Check if we have the required elements
+    if (!ELEMENTS.guessInput) {
+      console.error('Guess input element not found');
+      return;
+    }
+    
+    const userGuess = ELEMENTS.guessInput.value.trim();
+    if (!userGuess) {
+      if (ELEMENTS.feedback) {
+        ELEMENTS.feedback.textContent = 'Please enter a guess!';
+        ELEMENTS.feedback.className = 'warning';
+      }
+      return;
+    }
 
-  handleGuess(userGuess);
-  ELEMENTS.scoreElement.textContent = `Score: ${score}`;
-  ELEMENTS.guessInput.value = '';
-  ELEMENTS.guessInput.focus();
+    // Process the guess
+    handleGuess(userGuess);
+    
+    // Update score display
+    if (ELEMENTS.scoreElement) {
+      ELEMENTS.scoreElement.textContent = `Score: ${score}`;
+    }
+    
+    // Reset input field
+    if (ELEMENTS.guessInput) {
+      ELEMENTS.guessInput.value = '';
+      ELEMENTS.guessInput.focus();
+    }
+  } catch (error) {
+    console.error('Error in submitGuess:', error);
+    if (ELEMENTS.feedback) {
+      ELEMENTS.feedback.textContent = 'An error occurred. Please try again.';
+      ELEMENTS.feedback.className = 'error';
+    }
+  }
 }
 
 function handleGuess(userGuess) {
-  stopTimer(); // Stop the timer
-  
-  if (!currentItem) {
-    console.error('No current item set');
-    return;
-  }
-
-  const correctName = currentItem.name["name-USen"];
-  
-  if (userGuess.toLowerCase() === correctName.toLowerCase()) {
-    score++;
-    ELEMENTS.feedback.textContent = "Correct!";
-    ELEMENTS.feedback.className = "correct";
+  try {
+    // Stop the timer first
+    stopTimer();
     
-    // Start new round after brief delay
-    setTimeout(() => {
-      setupNewRound();
-      ELEMENTS.guessInput.focus(); // Maintain focus after new round
-    }, 1000);
-  } else {
-    ELEMENTS.feedback.textContent = `Incorrect! The correct answer was: ${correctName}`;
-    ELEMENTS.feedback.className = "error";
-    endGame();
-  }
+    // Check if we have a current item
+    if (!currentItem) {
+      console.error('No current item set');
+      if (ELEMENTS.feedback) {
+        ELEMENTS.feedback.textContent = 'Error: No item to guess. Please start a new game.';
+        ELEMENTS.feedback.className = 'error';
+      }
+      return;
+    }
 
-  ELEMENTS.scoreElement.textContent = `Score: ${score}`;
-  ELEMENTS.guessInput.value = '';
-  ELEMENTS.guessInput.focus();
+    // Get the correct answer
+    const correctName = currentItem.name?.["name-USen"];
+    if (!correctName) {
+      console.error('Current item has no name property');
+      if (ELEMENTS.feedback) {
+        ELEMENTS.feedback.textContent = 'Error: Invalid item data. Please try again.';
+        ELEMENTS.feedback.className = 'error';
+      }
+      return;
+    }
+    
+    // Check if the guess is correct
+    if (userGuess.toLowerCase() === correctName.toLowerCase()) {
+      // Handle correct answer
+      score++;
+      
+      if (ELEMENTS.feedback) {
+        ELEMENTS.feedback.textContent = "Correct!";
+        ELEMENTS.feedback.className = "correct";
+      }
+      
+      // Start new round after brief delay
+      setTimeout(() => {
+        setupNewRound();
+        // Focus on input field if it exists
+        if (ELEMENTS.guessInput) {
+          ELEMENTS.guessInput.focus();
+        }
+      }, 1000);
+    } else {
+      // Handle incorrect answer
+      if (ELEMENTS.feedback) {
+        ELEMENTS.feedback.textContent = `Incorrect! The correct answer was: ${correctName}`;
+        ELEMENTS.feedback.className = "error";
+      }
+      endGame();
+    }
+
+    // Update score display
+    if (ELEMENTS.scoreElement) {
+      ELEMENTS.scoreElement.textContent = `Score: ${score}`;
+    }
+    
+    // Reset input field
+    if (ELEMENTS.guessInput) {
+      ELEMENTS.guessInput.value = '';
+      ELEMENTS.guessInput.focus();
+    }
+  } catch (error) {
+    console.error('Error in handleGuess:', error);
+    if (ELEMENTS.feedback) {
+      ELEMENTS.feedback.textContent = 'An error occurred. Please try again.';
+      ELEMENTS.feedback.className = 'error';
+    }
+  }
 }
 
 function setupNewRound() {
   try {
     console.log('Setting up new round');
     
-    // Reset feedback
-    ELEMENTS.feedback.className = '';
-    ELEMENTS.feedback.textContent = `Current Score: ${score}`;
+    // Reset feedback if element exists
+    if (ELEMENTS.feedback) {
+      ELEMENTS.feedback.className = '';
+      ELEMENTS.feedback.textContent = `Current Score: ${score}`;
+    }
     
-    // Get a new item
-    const category = ELEMENTS.category.value;
-    if (!category) {
-      console.error('No category selected');
+    // Get a new item from the selected category
+    if (!ELEMENTS.category) {
+      console.error('Category selector not found');
       return;
     }
     
+    const category = ELEMENTS.category.value || 'fish'; // Default to fish if no category selected
+    
+    // Check if we have data for this category
+    if (!cachedData[category] || !Array.isArray(cachedData[category]) || cachedData[category].length === 0) {
+      console.error('No data available for category:', category);
+      if (ELEMENTS.feedback) {
+        ELEMENTS.feedback.textContent = `No data available for ${category}. Please try another category.`;
+      }
+      return;
+    }
+    
+    // Get a random item
     currentItem = getRandomItem(cachedData[category]);
     if (!currentItem) {
-      console.error('No item found for category:', category);
+      console.error('Failed to get random item');
       return;
     }
     
     // Display the item
     displayImageFromData(currentItem);
     
-    // Enable input fields
-    ELEMENTS.guessInput.disabled = false;
-    ELEMENTS.submitButton.disabled = false;
-    ELEMENTS.startButton.disabled = true;
+    // Enable input fields if they exist
+    if (ELEMENTS.guessInput) {
+      ELEMENTS.guessInput.disabled = false;
+      ELEMENTS.guessInput.value = ''; // Clear previous input
+      ELEMENTS.guessInput.focus(); // Focus on input field
+    }
+    
+    if (ELEMENTS.submitButton) {
+      ELEMENTS.submitButton.disabled = false;
+    }
+    
+    if (ELEMENTS.startButton) {
+      ELEMENTS.startButton.disabled = true;
+    }
     
     // Reset timer state
     timeLeft = 15;
-    ELEMENTS.timerDisplay.textContent = `Time: ${timeLeft}`;
+    updateTimerDisplay(); // Update timer display
     stopTimer(); // Clear any existing timer
     
     // Start the timer
     startTimer();
     
+    // Show next button if it exists
+    if (ELEMENTS.nextButton) {
+      ELEMENTS.nextButton.style.display = 'none'; // Hide next button until needed
+    }
+    
   } catch (error) {
     console.error('Error setting up new round:', error);
+    if (ELEMENTS.feedback) {
+      ELEMENTS.feedback.textContent = 'Error setting up game. Please try again.';
+    }
   }
 }
 
@@ -297,23 +446,56 @@ function setupNewRound() {
 
 // === API & Data ===
 async function initGame() {
-  const category = categorySelector.value;
-  feedbackElement.textContent = "Loading...";
+  // Use cached elements instead of querying the DOM again
+  const category = ELEMENTS.category ? ELEMENTS.category.value : 'fish';
+  
+  if (ELEMENTS.feedback) {
+    ELEMENTS.feedback.textContent = "Loading...";
+  }
+  
+  // Define API base and proxy URL
+  const apiBase = 'https://api.nookipedia.com/';
+  const proxyUrl = 'https://cors-anywhere.herokuapp.com/';
+  
   if (!cachedData[category]) {
     try {
-      const apiData = await fetchWithTimeout(`${proxyUrl}${encodeURIComponent(apiBase + category + "/")}`);
-      cachedData[category] = apiData;
+      // Try to fetch data directly first
+      try {
+        const apiData = await fetchDataFromAPI(category);
+        cachedData[category] = apiData;
+      } catch (directError) {
+        console.log('Direct API fetch failed, trying proxy:', directError);
+        // Fall back to proxy if direct fetch fails
+        const apiData = await fetchWithTimeout(`${proxyUrl}${encodeURIComponent(apiBase + category + "/")}`);
+        cachedData[category] = apiData;
+      }
     } catch (error) {
-      feedbackElement.textContent = `Failed to load ${category}`;
+      if (ELEMENTS.feedback) {
+        ELEMENTS.feedback.textContent = `Failed to load ${category}. Please try again later.`;
+      }
+      console.error('Failed to load data:', error);
       return;
     }
   }
-  currentItem = getRandomItem(cachedData[category]);
-  displayImageFromData(currentItem);
-  document.getElementById("guess-input").disabled = false;
-  document.getElementById("submit-guess").disabled = false;
-  document.getElementById('score').textContent = `Score: ${score}`;
-  setupNewRound(); // Start a new round which will start the timer
+  
+  // Only proceed if we have data
+  if (cachedData[category] && cachedData[category].length > 0) {
+    currentItem = getRandomItem(cachedData[category]);
+    displayImageFromData(currentItem);
+    
+    // Enable input fields using cached elements
+    if (ELEMENTS.guessInput) ELEMENTS.guessInput.disabled = false;
+    if (ELEMENTS.submitButton) ELEMENTS.submitButton.disabled = false;
+    if (ELEMENTS.scoreElement) ELEMENTS.scoreElement.textContent = `Score: ${score}`;
+    
+    // Start a new round
+    setupNewRound();
+  } else {
+    console.error('No data available for category:', category);
+    if (ELEMENTS.feedback) {
+      ELEMENTS.feedback.textContent = `No data available for ${category}. Please try another category.`;
+    }
+  }
 }
 
 function getRandomItem(data) {
@@ -353,24 +535,41 @@ function updateHighScore() {
 }
 
 function displayImageFromData(data) {
-  if (!data || !data.image_uri) return;
+  if (!data || !data.image_uri) {
+    console.error('No image data available');
+    return;
+  }
+  
+  if (!ELEMENTS.imageDisplay) {
+    console.error('Image display element not found');
+    return;
+  }
+  
   const img = document.createElement("img");
   img.src = data.image_uri;
-  img.alt = data.name?. ["name-USen"] || "Animal Crossing item";
+  img.alt = data.name?.["name-USen"] || "Animal Crossing item";
+  
+  // Define proxyUrl for error handling
+  const proxyUrl = 'https://cors-anywhere.herokuapp.com/';
+  
   img.onerror = () => {
+    console.log('Image load error, trying proxy');
     img.src = `${proxyUrl}${encodeURIComponent(data.image_uri)}`;
   };
-  imageDisplay.innerHTML = "";
-  imageDisplay.appendChild(img);
-  imageDisplay.style.display = "block";
+  
+  ELEMENTS.imageDisplay.innerHTML = "";
+  ELEMENTS.imageDisplay.appendChild(img);
+  ELEMENTS.imageDisplay.style.display = "block";
 }
 
 function updateTimerDisplay() {
-  if (timerElement) {
-    timerElement.style.display = 'block';
-    timerElement.style.visibility = 'visible';
-    timerElement.textContent = `Time left: ${timeLeft}s`;
+  if (ELEMENTS.timerElement) {
+    ELEMENTS.timerElement.style.display = 'block';
+    ELEMENTS.timerElement.style.visibility = 'visible';
+    ELEMENTS.timerElement.textContent = `Time left: ${timeLeft}s`;
     console.log('Timer updated:', timeLeft); // Debug log
+  } else {
+    console.error('Timer element not found');
   }
 }
 
@@ -393,47 +592,106 @@ function getLeaderboard() {
 
 function renderLeaderboard() {
   const leaderboard = getLeaderboard();
-  const leaderboardElement = document.getElementById('leaderboard');
-  leaderboardElement.innerHTML = "";
+  
+  if (!ELEMENTS.leaderboardElement) {
+    console.error('Leaderboard element not found');
+    return;
+  }
+  
+  ELEMENTS.leaderboardElement.innerHTML = "";
+  
+  if (leaderboard.length === 0) {
+    const emptyMessage = document.createElement('li');
+    emptyMessage.textContent = 'No scores yet. Be the first!';
+    emptyMessage.className = 'empty-leaderboard';
+    ELEMENTS.leaderboardElement.appendChild(emptyMessage);
+    return;
+  }
+  
   leaderboard.forEach(entry => {
     const li = document.createElement('li');
     li.textContent = `${entry.name}: ${entry.score}`;
-    leaderboardElement.appendChild(li);
+    ELEMENTS.leaderboardElement.appendChild(li);
   });
 }
 
 function endGame() {
-  // Reset the score
-  score = 0;
-  scoreElement.textContent = `Score: ${score}`;
-  
-  // Show feedback
-  feedbackElement.textContent = `❌ Incorrect! The correct answer was: ${currentItem.name["name-USen"]}`;
-  feedbackElement.className = 'incorrect';
-  
-  // Show the correct answer
-  imageDisplay.src = currentItem.image;
-  
-  // Disable all buttons and input
-  guessInput.disabled = true;
-  submitButton.disabled = true;
-  nextButton.style.display = 'none';
-  
-  // Add a restart button
-  const restartButton = document.createElement('button');
-  restartButton.textContent = 'Play Again';
-  restartButton.className = 'game-button';
-  restartButton.style.marginTop = '20px';
-  restartButton.onclick = () => {
-    // Remove the restart button
-    restartButton.remove();
+  try {
+    console.log('Game ended');
     
-    // Reset the game
-    setupNewRound();
-  };
-  
-  // Add the restart button to the game container
-  document.getElementById('game-container').appendChild(restartButton);
+    // Reset the score
+    score = 0;
+    
+    // Update score display if element exists
+    if (ELEMENTS.scoreElement) {
+      ELEMENTS.scoreElement.textContent = `Score: ${score}`;
+    }
+    
+    // Show feedback if element exists
+    if (ELEMENTS.feedback && currentItem && currentItem.name && currentItem.name["name-USen"]) {
+      ELEMENTS.feedback.textContent = `❌ Incorrect! The correct answer was: ${currentItem.name["name-USen"]}`;
+      ELEMENTS.feedback.className = 'incorrect';
+    }
+    
+    // Disable all buttons and input if they exist
+    if (ELEMENTS.guessInput) {
+      ELEMENTS.guessInput.disabled = true;
+      ELEMENTS.guessInput.style.display = 'none';
+    }
+    
+    if (ELEMENTS.submitButton) {
+      ELEMENTS.submitButton.disabled = true;
+      ELEMENTS.submitButton.style.display = 'none';
+    }
+    
+    if (ELEMENTS.nextButton) {
+      ELEMENTS.nextButton.style.display = 'none';
+    }
+    
+    if (ELEMENTS.startButton) {
+      ELEMENTS.startButton.disabled = false;
+      ELEMENTS.startButton.style.display = 'block';
+    }
+    
+    // Get the game container from cached elements if possible
+    const gameContainer = ELEMENTS.gameContainer || document.getElementById('game-container');
+    if (!gameContainer) {
+      console.error('Game container not found');
+      return;
+    }
+    
+    // Check if a restart button already exists and remove it
+    const existingRestartButton = document.querySelector('.restart-button');
+    if (existingRestartButton) {
+      existingRestartButton.remove();
+    }
+    
+    // Add a restart button
+    const restartButton = document.createElement('button');
+    restartButton.textContent = 'Play Again';
+    restartButton.className = 'game-button restart-button';
+    restartButton.style.marginTop = '20px';
+    restartButton.onclick = () => {
+      // Remove the restart button
+      restartButton.remove();
+      
+      // Reset the game
+      initGame(); // Call initGame instead of setupNewRound to properly reset everything
+    };
+    
+    // Add the restart button to the game container
+    gameContainer.appendChild(restartButton);
+    
+    // Stop the timer if it's running
+    stopTimer();
+    
+    // Hide timer container if it exists
+    if (ELEMENTS.timerContainer) {
+      ELEMENTS.timerContainer.style.display = 'none';
+    }
+  } catch (error) {
+    console.error('Error in endGame:', error);
+  }
 }
 
 // === Helpers ===

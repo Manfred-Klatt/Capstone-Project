@@ -1,0 +1,94 @@
+/* Import shared variables */
+@import '../../../css/shared-variables.css';
+
+/* App Layout Styles */
+.app-layout {
+  display: flex;
+  flex-direction: column;
+  min-height: 100vh;
+}
+
+.app-main {
+  flex: 1;
+  padding: var(--spacing-lg) 0;
+  width: 100%;
+  max-width: var(--container-max-width);
+  margin: 0 auto;
+}
+
+/* Page container styles */
+.page-container {
+  padding: 0 var(--spacing-lg);
+}
+
+/* Section styles */
+.section {
+  margin-bottom: var(--spacing-xl);
+}
+
+.section-title {
+  color: var(--color-primary-text);
+  font-size: var(--font-size-xlarge);
+  margin-bottom: var(--spacing-md);
+  font-family: var(--font-family);
+}
+
+.section-subtitle {
+  color: var(--color-secondary-text);
+  font-size: var(--font-size-large);
+  margin-bottom: var(--spacing-md);
+  font-family: var(--font-family);
+}
+
+/* Card styles for consistent content blocks */
+.content-card {
+  background-color: var(--color-secondary-bg);
+  border-radius: var(--border-radius-lg);
+  box-shadow: var(--shadow-md);
+  padding: var(--spacing-lg);
+  margin-bottom: var(--spacing-lg);
+  border: 2px solid var(--color-secondary-border);
+}
+
+/* Grid layout for responsive content */
+.grid-container {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+  gap: var(--spacing-lg);
+  margin-bottom: var(--spacing-lg);
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+  .app-main {
+    padding: var(--spacing-md) 0;
+  }
+  
+  .page-container {
+    padding: 0 var(--spacing-md);
+  }
+  
+  .grid-container {
+    grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+    gap: var(--spacing-md);
+  }
+}
+
+@media (max-width: 480px) {
+  .app-main {
+    padding: var(--spacing-sm) 0;
+  }
+  
+  .page-container {
+    padding: 0 var(--spacing-sm);
+  }
+  
+  .content-card {
+    padding: var(--spacing-md);
+  }
+  
+  .grid-container {
+    grid-template-columns: 1fr;
+    gap: var(--spacing-sm);
+  }
+}

@@ -6,6 +6,25 @@ import { AuthProvider } from './context/AuthContext';
 import Login from './components/auth/Login';
 import Register from './components/auth/Register';
 import AuthContainer from './components/auth/AuthContainer';
+import Header from './components/layout/Header';
+import Footer from './components/layout/Footer';
+
+// Import CSS
+import './index.css';
+import '../css/shared-variables.css';
+import './components/layout/AppLayout.css';
+import './components/layout/Layout.css';
+
+// Function to create a layout wrapper with header and footer
+const createLayoutWrapper = (Component: React.ComponentType) => {
+  return React.createElement(
+    'div',
+    { className: 'app-layout' },
+    React.createElement(Header, null),
+    React.createElement('main', { className: 'app-main' }, React.createElement(Component, null)),
+    React.createElement(Footer, null)
+  );
+};
 
 // Function to determine which component to render based on the container ID
 const renderReactComponent = (containerId: string, elementId: string) => {
@@ -24,7 +43,7 @@ const renderReactComponent = (containerId: string, elementId: string) => {
         React.createElement(React.StrictMode, null,
           React.createElement(BrowserRouter, null,
             React.createElement(AuthProvider, null,
-              React.createElement(Login, null)
+              createLayoutWrapper(Login)
             )
           )
         )
@@ -35,7 +54,7 @@ const renderReactComponent = (containerId: string, elementId: string) => {
         React.createElement(React.StrictMode, null,
           React.createElement(BrowserRouter, null,
             React.createElement(AuthProvider, null,
-              React.createElement(Register, null)
+              createLayoutWrapper(Register)
             )
           )
         )
@@ -46,8 +65,28 @@ const renderReactComponent = (containerId: string, elementId: string) => {
         React.createElement(React.StrictMode, null,
           React.createElement(BrowserRouter, null,
             React.createElement(AuthProvider, null,
-              React.createElement(AuthContainer, null)
+              createLayoutWrapper(AuthContainer)
             )
+          )
+        )
+      );
+      break;
+    case 'header-container':
+      root.render(
+        React.createElement(React.StrictMode, null,
+          React.createElement(BrowserRouter, null,
+            React.createElement(AuthProvider, null,
+              React.createElement(Header, null)
+            )
+          )
+        )
+      );
+      break;
+    case 'footer-container':
+      root.render(
+        React.createElement(React.StrictMode, null,
+          React.createElement(BrowserRouter, null,
+            React.createElement(Footer, null)
           )
         )
       );

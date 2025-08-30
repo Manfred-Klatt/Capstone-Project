@@ -1,0 +1,94 @@
+/**
+ * Shared CSS Variables for Animal Crossing Quiz Game
+ * This file contains variables used across both React and non-React components
+ * to ensure consistent styling throughout the application.
+ */
+
+:root {
+  /* Colors */
+  --color-background: #f0f8ff;
+  --color-text: #5a3d2b;
+  --color-container-bg: #fff9f0;
+  --color-border: #8b4513;
+  --color-shadow: rgba(0, 0, 0, 0.1);
+  
+  /* Primary Button Colors */
+  --color-primary-bg: #b5e48c;
+  --color-primary-text: #4b6043;
+  --color-primary-border: #4b6043;
+  --color-primary-hover: #99d98c;
+  
+  /* Secondary Button Colors */
+  --color-secondary-bg: #fefae0;
+  --color-secondary-text: #8c644d;
+  --color-secondary-border: #8c644d;
+  --color-secondary-hover: #f8eddb;
+  
+  /* Error and Success Colors */
+  --color-error: #d32f2f;
+  --color-error-bg: rgba(211, 47, 47, 0.1);
+  --color-success: #388e3c;
+  --color-success-bg: rgba(76, 175, 80, 0.1);
+  
+  /* Category Colors */
+  --color-fish-bg: linear-gradient(to top, #87CEEB, #B0E0E6);
+  --color-bugs-bg: linear-gradient(to top, #32CD32, #98FB98);
+  --color-sea-bg: linear-gradient(to top, #00BFFF, #1E90FF);
+  --color-villagers-bg: linear-gradient(to top, #FFD700, #FFB6C1);
+  
+  /* Typography */
+  --font-family: 'customfont', 'Quicksand', Arial, sans-serif;
+  --font-size-small: 0.85rem;
+  --font-size-normal: 1rem;
+  --font-size-medium: 1.2rem;
+  --font-size-large: 1.5rem;
+  --font-size-xlarge: 2rem;
+  
+  /* Spacing */
+  --spacing-xs: 5px;
+  --spacing-sm: 10px;
+  --spacing-md: 15px;
+  --spacing-lg: 20px;
+  --spacing-xl: 30px;
+  --spacing-xxl: 40px;
+  
+  /* Border Radius */
+  --border-radius-sm: 6px;
+  --border-radius-md: 10px;
+  --border-radius-lg: 15px;
+  --border-radius-xl: 25px;
+  --border-radius-round: 30px;
+  --border-radius-circle: 50%;
+  
+  /* Box Shadow */
+  --shadow-sm: 0 2px 5px rgba(0, 0, 0, 0.1);
+  --shadow-md: 0 4px 8px rgba(0, 0, 0, 0.1);
+  --shadow-lg: 0 10px 25px rgba(0, 0, 0, 0.2);
+  
+  /* Transitions */
+  --transition-fast: 0.2s ease;
+  --transition-normal: 0.3s ease;
+  
+  /* Layout */
+  --container-max-width: 1200px;
+  --auth-card-max-width: 450px;
+}
+
+/* Media query breakpoints */
+@media (max-width: 768px) {
+  :root {
+    --spacing-lg: 15px;
+    --spacing-xl: 20px;
+    --font-size-xlarge: 1.7rem;
+  }
+}
+
+@media (max-width: 480px) {
+  :root {
+    --spacing-sm: 8px;
+    --spacing-md: 10px;
+    --spacing-lg: 12px;
+    --font-size-large: 1.3rem;
+    --font-size-xlarge: 1.5rem;
+  }
+}

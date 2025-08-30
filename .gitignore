@@ -101,3 +101,4 @@ js/serverCheck.js
 test-mongodb-connection.js
 mongo-minimal-test.js
 MONGODB-ATLAS-SETUP.md
+docs/COMPONENT_USAGE.md

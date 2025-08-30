@@ -1,3 +1,6 @@
+/* Import shared variables */
+@import '../css/shared-variables.css';
+
 /* Base styles for React components */
 * {
   margin: 0;
@@ -6,9 +9,9 @@
 }
 
 body {
-  font-family: 'customfont', 'Quicksand', Arial, sans-serif;
-  background-color: #f0f8ff;
-  color: #5a3d2b;
+  font-family: var(--font-family);
+  background-color: var(--color-background);
+  color: var(--color-text);
 }
 
 /* Loading spinner */
@@ -25,15 +28,15 @@ body {
   width: 50px;
   height: 50px;
   border: 5px solid #f3f3f3;
-  border-top: 5px solid #b5e48c;
-  border-radius: 50%;
+  border-top: 5px solid var(--color-primary-bg);
+  border-radius: var(--border-radius-circle);
   animation: spin 1s linear infinite;
-  margin-bottom: 20px;
+  margin-bottom: var(--spacing-lg);
 }
 
 .loading-container p {
   color: #ffffff;
-  font-size: 1.2rem;
+  font-size: var(--font-size-medium);
 }
 
 @keyframes spin {
@@ -43,36 +46,36 @@ body {
 
 /* Global button styles */
 .primary-button, .secondary-button {
-  padding: 12px 24px;
-  border-radius: 30px;
-  font-family: 'customfont', 'Quicksand', Arial, sans-serif;
+  padding: var(--spacing-sm) var(--spacing-lg);
+  border-radius: var(--border-radius-round);
+  font-family: var(--font-family);
   font-weight: bold;
-  font-size: 1rem;
+  font-size: var(--font-size-normal);
   cursor: pointer;
-  transition: background 0.3s ease, transform 0.2s ease;
+  transition: background var(--transition-normal), transform var(--transition-fast);
   text-decoration: none;
   display: inline-block;
 }
 
 .primary-button {
-  border: 2px solid #4b6043;
-  background-color: #b5e48c;
-  color: #4b6043;
+  border: 2px solid var(--color-primary-border);
+  background-color: var(--color-primary-bg);
+  color: var(--color-primary-text);
 }
 
 .primary-button:hover:not(:disabled) {
-  background-color: #99d98c;
+  background-color: var(--color-primary-hover);
   transform: scale(1.05);
 }
 
 .secondary-button {
-  border: 2px solid #8c644d;
-  background-color: #fefae0;
-  color: #8c644d;
+  border: 2px solid var(--color-secondary-border);
+  background-color: var(--color-secondary-bg);
+  color: var(--color-secondary-text);
 }
 
 .secondary-button:hover:not(:disabled) {
-  background-color: #f8eddb;
+  background-color: var(--color-secondary-hover);
   transform: scale(1.05);
 }
 
@@ -83,37 +86,37 @@ body {
 
 /* Error message styles */
 .error-message {
-  color: #d32f2f;
-  background-color: rgba(211, 47, 47, 0.1);
-  padding: 10px;
-  border-radius: 8px;
-  margin: 10px 0;
-  font-size: 0.9rem;
+  color: var(--color-error);
+  background-color: var(--color-error-bg);
+  padding: var(--spacing-sm);
+  border-radius: var(--border-radius-md);
+  margin: var(--spacing-sm) 0;
+  font-size: var(--font-size-small);
 }
 
 /* Success message styles */
 .success-message {
-  color: #388e3c;
-  background-color: rgba(76, 175, 80, 0.1);
-  padding: 10px;
-  border-radius: 8px;
-  margin: 10px 0;
-  font-size: 0.9rem;
+  color: var(--color-success);
+  background-color: var(--color-success-bg);
+  padding: var(--spacing-sm);
+  border-radius: var(--border-radius-md);
+  margin: var(--spacing-sm) 0;
+  font-size: var(--font-size-small);
 }
 
 /* Responsive styles */
 @media (max-width: 768px) {
   .primary-button, .secondary-button {
-    padding: 10px 20px;
-    font-size: 0.9rem;
+    padding: var(--spacing-sm) var(--spacing-lg);
+    font-size: var(--font-size-small);
   }
 }
 
 @media (max-width: 480px) {
   .primary-button, .secondary-button {
-    padding: 8px 16px;
-    font-size: 0.85rem;
+    padding: var(--spacing-xs) var(--spacing-md);
+    font-size: var(--font-size-small);
     width: 100%;
-    margin: 5px 0;
+    margin: var(--spacing-xs) 0;
   }
 }

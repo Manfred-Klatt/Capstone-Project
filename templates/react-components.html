@@ -1,0 +1,17 @@
+<!-- React Header Component -->
+<div id="header-container"></div>
+
+<!-- React Footer Component -->
+<div id="footer-container"></div>
+
+<!-- Script to load React components -->
+<script type="module">
+  // Import React components
+  import { renderReactComponent } from './src/react/react-integration.js';
+  
+  document.addEventListener('DOMContentLoaded', () => {
+    // Render the header and footer
+    renderReactComponent('header-container', 'header-container');
+    renderReactComponent('footer-container', 'footer-container');
+  });
+</script>

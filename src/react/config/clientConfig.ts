@@ -9,16 +9,16 @@ export const getApiUrl = (): string => {
   
   // Production environment (blathers.app)
   if (hostname === 'blathers.app' || hostname.includes('blathers')) {
-    return 'https://blathers.app/api/v1';
+    return 'https://blathers.app';
   }
   
   // Local development
   if (hostname === 'localhost' || hostname === '127.0.0.1') {
-    return 'http://localhost:8000/api/v1';
+    return 'http://localhost:8000';
   }
   
   // Production backend on Railway
-  return 'https://capstone-project-production-3cce.up.railway.app/api/v1';
+  return 'https://capstone-project-production-3cce.up.railway.app';
 };
 
 // App configuration

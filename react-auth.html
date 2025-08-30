@@ -34,7 +34,16 @@
   </style>
 </head>
 <body>
-  <div id="auth-container"></div>
+  <!-- React Header -->
+  <div id="header-container"></div>
+  
+  <!-- Main Content -->
+  <main>
+    <div id="auth-container"></div>
+  </main>
+  
+  <!-- React Footer -->
+  <div id="footer-container"></div>
 
   <!-- React will be loaded here -->
   <script type="module">
@@ -42,8 +51,14 @@
     import { renderReactComponent } from './src/react/react-integration.js';
     
     document.addEventListener('DOMContentLoaded', () => {
+      // Render the Header
+      renderReactComponent('header-container', 'header-container');
+      
       // Render the Auth container
       renderReactComponent('auth-container', 'auth-container');
+      
+      // Render the Footer
+      renderReactComponent('footer-container', 'footer-container');
     });
   </script>
 </body>

@@ -4,7 +4,7 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Animal Crossing Quiz Game</title>
-    <link rel="stylesheet" href="game.css" />
+    <link rel="stylesheet" href="game.css">
     <link rel="icon" href="favicon.ico" type="image/x-icon">
 
     <!-- Font loads progressively via fontOptimizer.js -->
@@ -13,26 +13,14 @@
     <script src="js/backgroundLoader.js"></script>
     <script src="js/htmlSanitizer.js"></script>
     <script src="js/leaderboard-api.js"></script>
-    <!-- <script src="/js/leaderboard-manager.js"></script> Disabled to prevent conflicts -->
-    
-    <!-- React Dependencies -->
-    <script crossorigin src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
-    <script crossorigin src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
-    <!-- React Router DOM -->
-    <script src="https://cdn.jsdelivr.net/npm/react-router-dom@6.3.0/dist/umd/react-router-dom.production.min.js"></script>
-    
-    <!-- Leaderboard Component CSS -->
-    <link rel="stylesheet" href="src/react/components/leaderboard/Leaderboard.css">
     
     <!-- Preload essential sound effects with optimized OGG files -->
-    <!-- Critical sounds preloaded for immediate use -->
     <audio id="correct-sound" preload="auto">
       <source src="sounds/correct.ogg" type="audio/ogg">
     </audio>
     <audio id="game-over-sound" preload="auto">
       <source src="sounds/game-over.ogg" type="audio/ogg">
     </audio>
-    <!-- Non-critical sounds loaded on demand -->
     <audio id="high-score-sound" preload="none">
       <source src="sounds/high-score.ogg" type="audio/ogg">
     </audio>
@@ -44,22 +32,46 @@
     </audio>
   </head>
   <body>
-    <!-- React Header Container -->
-    <div id="react-header" class="react-container"></div>
-    
-    <!-- Legacy Game Container (will be hidden when React components are active) -->
-    <div id="legacy-game-container" style="width: 100%; display: flex; flex-direction: column; align-items: center;">
-      <!-- Game Container -->
-      <div id="game-container" class="mobile-container">
-        <div class="nav-container" style="
-          position: absolute;
-          top: 10px;
-          left: 10px;
-          display: flex;
-          gap: 10px;
-          align-items: center;
-          z-index: 1000;
-          background-color: #4a90e2;
+    <div class="container">
+      <header>
+        <h1>Animal Crossing Quiz</h1>
+        <div class="game-info">
+          <div class="score">Score: <span id="score">0</span></div>
+          <div class="high-score">High Score: <span id="high-score">0</span></div>
+          <div class="timer">Time: <span id="timer">60</span>s</div>
+        </div>
+      </header>
+
+      <main>
+        <div class="game-area">
+          <div class="image-container">
+            <img id="image-display" src="" alt="Animal Crossing character or item" style="display: none;">
+          </div>
+          
+          <div class="options" id="options">
+            <!-- Options will be populated by JavaScript -->
+          </div>
+          
+          <div class="controls">
+            <button id="start-btn" class="btn">Start Game</button>
+            <button id="next-btn" class="btn" disabled>Next Question</button>
+            <button id="submit-btn" class="btn" disabled>Submit</button>
+          </div>
+          
+          <div class="feedback" id="feedback"></div>
+        </div>
+        
+        <div class="category-selector">
+          <label for="category">Select Category:</label>
+          <select id="category" name="category">
+            <option value="fish">Fish</option>
+            <option value="bugs">Bugs</option>
+            <option value="sea">Sea Creatures</option>
+            <option value="villagers">Villagers</option>
+          </select>
+        </div>
+      </main>
+    </div>
           padding: 8px 12px;
           border-radius: 6px;
           color: white;
@@ -191,42 +203,32 @@
           <button id="next-btn" style="display: none">Next Item</button>
         </div>
         <button id="end-game-btn" style="background-color: #ff6b6b; margin-top: 20px; display: none">End Game</button>
-      </div>
-
-      <!-- Legacy Leaderboard Container (will be hidden when React components are active) -->
-      <div class="leaderboards-container" style="display: none;">
-        <div class="leaderboard-stack">
-          <div class="leaderboard-header">
-            <button class="leaderboard-nav prev" id="leaderboard-prev">â€¹</button>
-            <h3 id="leaderboard-title">Fish</h3>
-            <button class="leaderboard-nav next" id="leaderboard-next">â€º</button>
           </div>
-          <div class="leaderboard-content">
-            <div class="category-leaderboard active" id="fish-leaderboard" data-category="fish">
-              <div id="fish-scores"></div>
-            </div>
-            <div class="category-leaderboard" id="bugs-leaderboard" data-category="bugs">
-              <div id="bugs-scores"></div>
-            </div>
-            <div class="category-leaderboard" id="sea-leaderboard" data-category="sea">
-              <div id="sea-scores"></div>
-            </div>
-            <div class="category-leaderboard" id="villagers-leaderboard" data-category="villagers">
-              <div id="villagers-scores"></div>
-            </div>
+          
+          <div class="options" id="options">
+            <!-- Options will be populated by JavaScript -->
           </div>
-          <div class="leaderboard-indicators">
-            <span class="indicator active" data-category="fish"></span>
-            <span class="indicator" data-category="bugs"></span>
-            <span class="indicator" data-category="sea"></span>
-            <span class="indicator" data-category="villagers"></span>
+          
+          <div class="controls">
+            <button id="start-btn" class="btn">Start Game</button>
+            <button id="next-btn" class="btn" disabled>Next Question</button>
+            <button id="submit-btn" class="btn" disabled>Submit</button>
           </div>
+          
+          <div class="feedback" id="feedback"></div>
         </div>
-      </div>
+        
+        <div class="category-selector">
+          <label for="category">Select Category:</label>
+          <select id="category" name="category">
+            <option value="fish">Fish</option>
+            <option value="bugs">Bugs</option>
+            <option value="sea">Sea Creatures</option>
+            <option value="villagers">Villagers</option>
+          </select>
+        </div>
+      </main>
     </div>
-
-    <!-- React Leaderboard Container -->
-    <div id="react-leaderboard" class="react-container" style="width: 100%; max-width: 600px; margin: 20px auto;"></div>
 
     <!-- High Score Modal -->
     <div id="highScoreModal" class="modal">
@@ -257,31 +259,8 @@
       <button id="simulate-high-score-btn" style="background-color: #9c27b0; margin-top: 15px;">Simulate High Score</button>
     </div>
 
-    <!-- React Game Container -->
-    <div id="react-game" class="react-container"></div>
-    
-    <!-- React Game Bridge Container for High Score Modal -->
-    <div id="react-game-bridge" class="react-container"></div>
-    
-    <!-- React Footer Container -->
-    <div id="react-footer" class="react-container"></div>
-
     <!-- Game script must be loaded last -->
     <script src="game.js"></script>
-    
-    <!-- React Integration Script -->
-    <script src="./src/react/game-integration.js"></script>
-    <script>
-      // Initialize React components when DOM is fully loaded
-      document.addEventListener('DOMContentLoaded', () => {
-        // Initialize React components after ensuring the script is loaded
-        if (typeof window.initReactComponents === 'function') {
-          window.initReactComponents();
-        } else {
-          console.error('React integration script not loaded properly');
-        }
-      });
-    </script>
     
     <!-- Game Mode Configuration -->
     <script>

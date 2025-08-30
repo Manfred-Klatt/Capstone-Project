@@ -1,22 +1,73 @@
 {
     "fish": [
         {
-            "name": {"name-en": "bitterling"},
-            "icon_uri": "https://acnhcdn.com/latest/FishIcon/Fish1.png"
+            "id": "fish1",
+            "file_name": "fish1",
+            "name": {"name-USen": "Bitterling"},
+            "icon_uri": "images/fish/fish1.png",
+            "image_uri": "images/fish/fish1.png"
         },
         {
-            "name": {"name-en": "pale chub"},
-            "icon_uri": "https://acnhcdn.com/latest/FishIcon/Fish2.png"
+            "id": "fish2",
+            "file_name": "fish2",
+            "name": {"name-USen": "Pale Chub"},
+            "icon_uri": "images/fish/fish2.png",
+            "image_uri": "images/fish/fish2.png"
+        },
+        {
+            "id": "fish3",
+            "file_name": "fish3",
+            "name": {"name-USen": "Koi"},
+            "icon_uri": "images/fish/fish3.png",
+            "image_uri": "images/fish/fish3.png"
         }
     ],
     "bugs": [
         {
-            "name": {"name-en": "common butterfly"},
-            "icon_uri": "https://acnhcdn.com/latest/BugIcon/Bug1.png"
+            "id": "bug1",
+            "file_name": "bug1",
+            "name": {"name-USen": "Common Butterfly"},
+            "icon_uri": "images/bugs/bug1.png",
+            "image_uri": "images/bugs/bug1.png"
         },
         {
-            "name": {"name-en": "yellow butterfly"},
-            "icon_uri": "https://acnhcdn.com/latest/BugIcon/Bug2.png"
+            "id": "bug2",
+            "file_name": "bug2",
+            "name": {"name-USen": "Yellow Butterfly"},
+            "icon_uri": "images/bugs/bug2.png",
+            "image_uri": "images/bugs/bug2.png"
+        }
+    ],
+    "sea": [
+        {
+            "id": "sea1",
+            "file_name": "sea1",
+            "name": {"name-USen": "Seaweed"},
+            "icon_uri": "images/sea/sea1.png",
+            "image_uri": "images/sea/sea1.png"
+        },
+        {
+            "id": "sea2",
+            "file_name": "sea2",
+            "name": {"name-USen": "Sea Grapes"},
+            "icon_uri": "images/sea/sea2.png",
+            "image_uri": "images/sea/sea2.png"
+        }
+    ],
+    "villagers": [
+        {
+            "id": "villager1",
+            "file_name": "villager1",
+            "name": {"name-USen": "Tom Nook"},
+            "icon_uri": "images/villagers/villager1.png",
+            "image_uri": "images/villagers/villager1.png"
+        },
+        {
+            "id": "villager2",
+            "file_name": "villager2",
+            "name": {"name-USen": "Isabelle"},
+            "icon_uri": "images/villagers/villager2.png",
+            "image_uri": "images/villagers/villager2.png"
         }
     ]
 }

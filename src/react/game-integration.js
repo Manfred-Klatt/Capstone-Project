@@ -127,28 +127,28 @@
       const headerContainer = document.getElementById('react-header');
       if (headerContainer && Header) {
         console.log('Rendering Header component');
-        ReactDOM.render(<Header />, headerContainer);
+        ReactDOM.render(React.createElement(Header, null), headerContainer);
       }
       
       // Render Game Bridge component if container exists
       const gameBridgeContainer = document.getElementById('react-game-bridge');
       if (gameBridgeContainer) {
         console.log('Rendering Game Bridge component');
-        ReactDOM.render(<GameBridge />, gameBridgeContainer);
+        ReactDOM.render(React.createElement(GameBridge, null), gameBridgeContainer);
       }
       
       // Render Leaderboard component if container exists
       const leaderboardContainer = document.getElementById('react-leaderboard');
       if (leaderboardContainer && Leaderboard) {
         console.log('Rendering Leaderboard component');
-        ReactDOM.render(<Leaderboard />, leaderboardContainer);
+        ReactDOM.render(React.createElement(Leaderboard, null), leaderboardContainer);
       }
       
       // Render Footer component if container exists
       const footerContainer = document.getElementById('react-footer');
       if (footerContainer && Footer) {
         console.log('Rendering Footer component');
-        ReactDOM.render(<Footer />, footerContainer);
+        ReactDOM.render(React.createElement(Footer, null), footerContainer);
       }
 
       // Expose React components to vanilla JS

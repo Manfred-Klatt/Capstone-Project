@@ -216,6 +216,9 @@ function initAuthHandlers() {
 // API data fetching function
 async function fetchDataFromAPI(category) {
   try {
+    // API base URL
+    const API_BASE = 'https://api.nookipedia.com';
+    
     // Make sure category has a trailing slash for Nookipedia API
     const endpoint = category.endsWith('/') ? category : `${category}/`;
     const response = await fetch(`${API_BASE}/${endpoint}`);
@@ -556,32 +559,30 @@ async function initGame() {
     ELEMENTS.feedback.textContent = "Loading...";
   }
 
-  // Define API base and proxy URL
-  const apiBase = 'https://api.nookipedia.com/';
-  const proxyUrl = 'https://cors-anywhere.herokuapp.com/';
-
+  // Load local fallback data first to ensure we have something to display
   if (!cachedData[category]) {
     try {
-      // Try to fetch data directly first
-      try {
-        const apiData = await fetchDataFromAPI(category);
-        cachedData[category] = apiData;
-      } catch (directError) {
-        console.log('Direct API fetch failed, trying proxy:', directError);
-        // Fall back to proxy if direct fetch fails
+      console.log('Loading local fallback data first...');
+      await loadFallbackData(category);
+      
+      // Only try API if we have a network connection
+      if (navigator.onLine) {
         try {
-          const apiData = await fetchWithTimeout(`${proxyUrl}${encodeURIComponent(apiBase + category + "/")}`);
-          cachedData[category] = apiData;
-        } catch (proxyError) {
-          console.log('Proxy fetch failed, using local fallback data:', proxyError);
-          // Fall back to local data if both API and proxy fail
-          await loadFallbackData(category);
+          console.log('Attempting to fetch from API as enhancement...');
+          const apiData = await fetchDataFromAPI(category);
+          if (apiData && apiData.length > 0) {
+            console.log('Successfully loaded API data, replacing fallback');
+            cachedData[category] = apiData;
+          }
+        } catch (apiError) {
+          console.log('API fetch failed, continuing with fallback data:', apiError);
+          // Already using fallback data, so just continue
         }
+      } else {
+        console.log('Offline mode detected, using local data only');
       }
     } catch (error) {
-      console.error('Failed to load data from all sources:', error);
-      // Final attempt to load fallback data
-      await loadFallbackData(category);
+      console.error('Failed to load data:', error);
       
       if (!cachedData[category] && ELEMENTS.feedback) {
         ELEMENTS.feedback.textContent = `Failed to load ${category}. Please try again later.`;
@@ -717,11 +718,25 @@ function displayImageFromData(data) {
   img.src = imageUrl;
   img.alt = data.name?.["name-USen"] || data.name || "Animal Crossing item";
   
-  // Handle image loading errors
+  // Handle image loading errors with multiple fallback options
   img.onerror = () => {
-    console.log('Image load error, using placeholder');
+    console.log('Image load error, trying fallbacks');
     const category = ELEMENTS.category ? ELEMENTS.category.value : 'fish';
-    img.src = `images/${category}/placeholder.svg`;
+    
+    // Try SVG placeholder in the root images directory
+    img.src = 'images/placeholder.svg';
+    
+    // If the root placeholder fails, try the category-specific one
+    img.onerror = () => {
+      console.log('Root placeholder failed, trying category-specific');
+      img.src = `images/${category}/placeholder.svg`;
+      
+      // If that also fails, use a transparent pixel
+      img.onerror = () => {
+        console.log('All placeholders failed, using transparent pixel');
+        img.src = 'data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7';
+      };
+    };
   };
   
   // Add the image to the display

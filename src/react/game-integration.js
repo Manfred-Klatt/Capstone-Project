@@ -87,18 +87,14 @@
       }, []);
       
       // Render the high score modal
-      return (
-        <>
-          {HighScoreModal && (
-            <HighScoreModal
-              isOpen={isHighScoreModalOpen}
-              score={currentScore}
-              placement={placement}
-              onSubmit={handleSubmitHighScore}
-              onSkip={handleSkipHighScore}
-            />
-          )}
-        </>
+      return React.createElement(React.Fragment, null,
+        HighScoreModal && React.createElement(HighScoreModal, {
+          isOpen: isHighScoreModalOpen,
+          score: currentScore,
+          placement: placement,
+          onSubmit: handleSubmitHighScore,
+          onSkip: handleSkipHighScore
+        })
       );
     };
     

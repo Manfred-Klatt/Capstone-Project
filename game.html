@@ -274,51 +274,19 @@
     <script>
       // Initialize React components when DOM is fully loaded
       document.addEventListener('DOMContentLoaded', () => {
-        // Initialize React components
-        initReactComponents();
+        // Initialize React components after ensuring the script is loaded
+        if (typeof window.initReactComponents === 'function') {
+          window.initReactComponents();
+        } else {
+          console.error('React integration script not loaded properly');
+        }
       });
     </script>
     
-    <!-- Standalone Mode Functionality -->
+    <!-- Game Mode Configuration -->
     <script>
-      // Initialize standalone mode flag
-      window.standaloneMode = false;
-      
-      // Initialize session flag to track if standalone mode has been confirmed this session
-      if (typeof window.standaloneConfirmedThisSession === 'undefined') {
-        window.standaloneConfirmedThisSession = false;
-      }
-      
-      // Check if standalone mode was previously confirmed in this session
-      if (localStorage.getItem('standalone_confirmed_this_session') === 'true') {
-        window.standaloneMode = true;
-        window.standaloneConfirmedThisSession = true;
-      }
-      
-      // Function to offer standalone mode when server is unavailable
-      function offerStandaloneMode() {
-        // Don't offer again if already confirmed this session
-        if (localStorage.getItem('standalone_confirmed_this_session') === 'true') {
-          window.standaloneMode = true;
-          return;
-        }
-        
-        // Ask user if they want to switch to standalone mode
-        if (confirm("Server connection unavailable. Your scores will be saved locally but not shared online. Continue in standalone mode?")) {
-          // Set flags for standalone mode
-          localStorage.setItem('standalone_confirmed_this_session', 'true');
-          localStorage.setItem('force_standalone', 'true');
-          window.standaloneMode = true;
-          
-          // Update the standalone mode indicator if it exists
-          if (typeof updateStandaloneModeIndicator === 'function') {
-            updateStandaloneModeIndicator();
-          }
-        } else {
-          // User declined standalone mode, redirect to index
-          window.location.href = 'index.html';
-        }
-      }
+      // Always use local storage for game data
+      window.standaloneMode = true;
     </script>
     
     <!-- Sound Manager and Game Variables -->

@@ -488,65 +488,63 @@ function setupNewRound() {
 
 // === API & Data ===
 async function loadFallbackData(category) {
-try {
-console.log(`Loading fallback data for ${category}...`);
-const response = await fetch('fallback-data.json');
-if (!response.ok) {
-throw new Error(`HTTP error! status: ${response.status}`);
-}
-const data = await response.json();
+  try {
+    console.log(`Loading fallback data for ${category}...`);
+    const response = await fetch('fallback-data.json');
+    if (!response.ok) {
+      throw new Error(`HTTP error! status: ${response.status}`);
+    }
+    const data = await response.json();
 
-if (data && data[category] && Array.isArray(data[category]) && data[category].length > 0) {
-cachedData[category] = data[category];
-console.log(`Loaded fallback data for ${category}: ${data[category].length} items`);
+    if (data && data[category] && Array.isArray(data[category]) && data[category].length > 0) {
+      // Process the data to ensure image paths are correct
+      const processedData = data[category].map(item => {
+        // Add local image paths for fallback data
+        return {
+          ...item,
+          image_uri: `images/${category}/${item.id || item.file_name || 'placeholder'}.png`,
+          icon_uri: `images/${category}/${item.id || item.file_name || 'placeholder'}.png`
+        };
+      });
+      
+      cachedData[category] = processedData;
+      console.log(`Loaded fallback data for ${category}: ${processedData.length} items`);
+      
+      return processedData;
+    } else {
+      // If the category doesn't exist or is empty, try to use a default category
+      const defaultCategories = ['fish', 'bugs', 'sea', 'villagers'];
+      for (const defaultCategory of defaultCategories) {
+        if (data && data[defaultCategory] && Array.isArray(data[defaultCategory]) && data[defaultCategory].length > 0) {
+          console.log(`No data for ${category}, using ${defaultCategory} instead`);
+          
+          // Process the data to ensure image paths are correct
+          const processedData = data[defaultCategory].map(item => {
+            // Add local image paths for fallback data
+            return {
+              ...item,
+              image_uri: `images/${defaultCategory}/${item.id || item.file_name || 'placeholder'}.png`,
+              icon_uri: `images/${defaultCategory}/${item.id || item.file_name || 'placeholder'}.png`
+            };
+          });
+          
+          cachedData[category] = processedData;
+          return processedData;
+        }
+      }
+    }
 
-// Offer standalone mode if we're using fallback data
-offerStandaloneMode();
-
-return data[category];
-} else {
-// If the category doesn't exist or is empty, try to use a default category
-const defaultCategories = ['fish', 'bugs', 'sea', 'villagers'];
-for (const defaultCategory of defaultCategories) {
-if (data && data[defaultCategory] && Array.isArray(data[defaultCategory]) && data[defaultCategory].length > 0) {
-console.log(`No data for ${category}, using ${defaultCategory} instead`);
-cachedData[category] = data[defaultCategory];
-return data[defaultCategory];
-}
-}
-
-console.error(`No fallback data available for ${category} or any default category`);
-return [];
-}
-} catch (error) {
-console.error(`Error loading fallback data: ${error}`);
-// Create minimal fallback data if everything else fails
-const minimalFallback = [
-{
-name: { "name-USen": "Test Fish" },
-image_uri: `images/${category}/placeholder.svg`
-}
-];
-cachedData[category] = minimalFallback;
-return minimalFallback;
-}
-}
-
-// Function to offer standalone mode when API is unavailable
-function offerStandaloneMode() {
-  // Check if we've already confirmed standalone mode this session
-  if (sessionStorage.getItem('standalone_confirmed_this_session')) {
-    return;
-  }
-
-  const confirmed = confirm("Unable to connect to the Animal Crossing API. Would you like to continue in standalone mode? Your scores will be saved locally but not shared with others.");
-
-  if (confirmed) {
-    sessionStorage.setItem('standalone_confirmed_this_session', 'true');
-    localStorage.setItem('standalone_mode', 'true');
-  } else {
-    // User declined standalone mode, redirect to home page
-    window.location.href = 'index.html';
+    // If we still don't have data, create minimal fallback
+    const minimalFallback = [
+      { id: 'fallback1', name: { 'name-USen': 'Fallback Item 1' }, icon_uri: 'images/placeholder.svg' },
+      { id: 'fallback2', name: { 'name-USen': 'Fallback Item 2' }, icon_uri: 'images/placeholder.svg' },
+      { id: 'fallback3', name: { 'name-USen': 'Fallback Item 3' }, icon_uri: 'images/placeholder.svg' }
+    ];
+    cachedData[category] = minimalFallback;
+    return minimalFallback;
+  } catch (error) {
+    console.error('Error loading fallback data:', error);
+    return [];
   }
 }
 
@@ -592,9 +590,9 @@ async function initGame() {
     }
   }
 
-  // Offer standalone mode if we're using fallback data
-  if (cachedData[category] && cachedData[category]._fromFallback && !sessionStorage.getItem('standalone_confirmed_this_session')) {
-    offerStandaloneMode();
+  // Using fallback data if API is unavailable
+  if (cachedData[category] && cachedData[category]._fromFallback) {
+    console.log('Using fallback data for', category);
   }
 
   // Only proceed if we have data
@@ -736,7 +734,7 @@ function updateTimerDisplay() {
     ELEMENTS.timerElement.style.display = 'block';
     ELEMENTS.timerElement.style.visibility = 'visible';
     ELEMENTS.timerElement.textContent = `Time left: ${timeLeft}s`;
-    console.log('Timer updated:', timeLeft); // Debug log
+    // Timer debug logs removed
   } else {
     console.error('Timer element not found');
   }

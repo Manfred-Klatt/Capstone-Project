@@ -15,14 +15,14 @@ function cacheDOMElements() {
   ELEMENTS.nextButton = document.getElementById('next-btn'); // Fixed: next-btn instead of next-button
   ELEMENTS.startButton = document.getElementById('start-game-btn'); // Fixed: start-game-btn instead of start-game
   ELEMENTS.feedback = document.getElementById('feedback');
-  ELEMENTS.imageDisplay = document.getElementById('imageDisplay'); // Fixed: imageDisplay instead of image-display
+  ELEMENTS.imageDisplay = document.getElementById('image-display'); // Fixed: image-display is correct ID
   ELEMENTS.scoreElement = document.getElementById('score');
   ELEMENTS.highScoreElement = document.getElementById('high-score');
   ELEMENTS.timerElement = document.getElementById('game-timer'); // Fixed: game-timer instead of timer
-  ELEMENTS.timerContainer = document.getElementById('game-timer-container'); // Added timer container
+  ELEMENTS.timerContainer = document.querySelector('.timer-container'); // Fixed: timer-container class
   ELEMENTS.timerDisplay = document.getElementById('game-timer'); // Fixed: game-timer instead of timer
-  ELEMENTS.leaderboardElement = document.querySelector('.category-leaderboard.active'); // Using querySelector for active leaderboard
-  ELEMENTS.gameContainer = document.getElementById('game-container');
+  ELEMENTS.leaderboardElement = document.querySelector('.leaderboard'); // Fixed: leaderboard class
+  ELEMENTS.gameContainer = document.querySelector('.game-container'); // Fixed: game-container class
   
   // Log which elements were not found
   Object.entries(ELEMENTS).forEach(([key, element]) => {

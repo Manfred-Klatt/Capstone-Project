@@ -8,6 +8,7 @@ const router = express.Router();
 // Public routes
 router.get('/categories', catchAsync(gameController.getCategories));
 router.get('/leaderboard', catchAsync(gameController.getLeaderboard));
+router.get('/data/:category', catchAsync(gameController.getNookipediaData));
 router.get('/users/:userId/history', catchAsync(gameController.getUserGameHistory));
 router.get('/users/:userId/stats', catchAsync(gameController.getUserStats));
 

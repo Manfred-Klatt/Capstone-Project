@@ -1,6 +1,7 @@
 const gameService = require('../../../services/game.service');
 const userService = require('../../../services/user.service');
 const { catchAsync, AppError } = require('../../../utils');
+const fetch = require('node-fetch');
 
 // Get game categories
 exports.getCategories = catchAsync(async (req, res, next) => {
@@ -10,6 +11,53 @@ exports.getCategories = catchAsync(async (req, res, next) => {
     status: 'success',
     data: categories,
   });
+});
+
+// Proxy endpoint to fetch Nookipedia data and bypass CORS
+exports.getNookipediaData = catchAsync(async (req, res, next) => {
+  const { category } = req.params;
+  
+  // Validate category
+  const validCategories = ['fish', 'bugs', 'sea', 'villagers'];
+  if (!validCategories.includes(category)) {
+    return next(new AppError('Invalid category. Must be one of: fish, bugs, sea, villagers', 400));
+  }
+  
+  try {
+    console.log(`Fetching ${category} data from Nookipedia API...`);
+    
+    const nookipediaUrl = `https://api.nookipedia.com/${category}`;
+    const response = await fetch(nookipediaUrl, {
+      headers: {
+        'X-API-KEY': process.env.NOOKIPEDIA_API_KEY || 'your-api-key-here',
+        'Accept-Version': '1.0.0',
+        'User-Agent': 'Animal Crossing Quiz App'
+      },
+      timeout: 10000
+    });
+    
+    if (!response.ok) {
+      throw new Error(`Nookipedia API error: ${response.status} ${response.statusText}`);
+    }
+    
+    const data = await response.json();
+    
+    if (!Array.isArray(data) || data.length === 0) {
+      throw new Error('No data returned from Nookipedia API');
+    }
+    
+    console.log(`Successfully fetched ${data.length} ${category} items from Nookipedia`);
+    
+    res.status(200).json({
+      status: 'success',
+      results: data.length,
+      data: data
+    });
+    
+  } catch (error) {
+    console.error(`Error fetching ${category} from Nookipedia:`, error);
+    return next(new AppError(`Failed to fetch ${category} data from API: ${error.message}`, 500));
+  }
 });
 
 // Start a new game

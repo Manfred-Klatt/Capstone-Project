@@ -433,26 +433,34 @@ function initAuthHandlers() {
   }
 }
 
-// API data fetching function
+// API data fetching function - uses backend proxy to bypass CORS
 async function fetchDataFromAPI(category) {
   try {
-    console.log(`Fetching ${category} data from API...`);
+    console.log(`Fetching ${category} data from backend proxy...`);
     
-    const response = await fetchWithTimeout(`${API_BASE}/${category}`, {
+    const response = await fetch(`${BACKEND_API}/games/data/${category}`, {
+      method: 'GET',
       headers: {
-        'X-API-KEY': 'your-api-key-here', // Add your Nookipedia API key
-        'Accept-Version': '1.0.0'
+        'Content-Type': 'application/json',
+        'Accept': 'application/json'
       }
     });
     
-    if (response && Array.isArray(response) && response.length > 0) {
-      console.log(`Successfully fetched ${response.length} ${category} from API`);
-      return response;
+    if (!response.ok) {
+      throw new Error(`Backend proxy error: ${response.status} ${response.statusText}`);
+    }
+    
+    const result = await response.json();
+    const data = result.data || result;
+    
+    if (Array.isArray(data) && data.length > 0) {
+      console.log(`Successfully fetched ${data.length} ${category} items from backend proxy`);
+      return data;
     } else {
-      throw new Error('No data returned from API');
+      throw new Error('No data returned from backend proxy');
     }
   } catch (error) {
-    console.error(`API fetch failed for ${category}:`, error);
+    console.error(`Backend proxy fetch failed for ${category}:`, error);
     throw error;
   }
 }

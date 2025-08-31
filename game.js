@@ -111,34 +111,62 @@ class LeaderboardManager {
     try {
       // If we're already using local fallback, just return local data
       if (this.useLocalFallback) {
+        console.log('Using local leaderboard fallback (already set)');
         return this.getLocalLeaderboard();
       }
 
       // If not initialized yet, try to initialize first
       if (!this.initialized) {
-        await this.initialize();
+        console.log('Leaderboard manager not initialized, attempting initialization...');
+        try {
+          await this.initialize();
+        } catch (initError) {
+          console.warn('Failed to initialize leaderboard manager:', initError);
+          // Continue with local fallback
+        }
       }
 
       if (this.useLocalFallback) {
-        return this.getLocalLeaderboard(category);
+        console.log('Using local leaderboard fallback after initialization attempt');
+        return this.getLocalLeaderboard();
       }
 
-      const response = await fetch(`${this.baseURL}/${category}?limit=${limit}`, {
+      console.log(`Fetching leaderboard for category: ${category}, limit: ${limit}`);
+      const response = await fetch(`${this.baseURL}?category=${encodeURIComponent(category)}&limit=${limit}`, {
         method: 'GET',
-        headers: this.getHeaders()
+        headers: this.getHeaders(),
+        timeout: 8000 // 8 second timeout
       });
 
       if (!response.ok) {
-        throw new Error(`HTTP error! status: ${response.status}`);
+        throw new Error(`Leaderboard API error! Status: ${response.status}`);
       }
 
-      const data = await response.json();
-      // Handle both array response and object with data property
-      return Array.isArray(data) ? data : (data.data || data);
+      const responseData = await response.json();
+      
+      // Validate and extract the leaderboard data with proper error handling
+      if (!responseData) {
+        throw new Error('Empty response from leaderboard API');
+      }
+      
+      // Handle different response formats
+      let leaderboardData;
+      if (Array.isArray(responseData)) {
+        leaderboardData = responseData;
+      } else if (responseData.data && responseData.data.leaderboard) {
+        leaderboardData = responseData.data.leaderboard;
+      } else if (responseData.data) {
+        leaderboardData = Array.isArray(responseData.data) ? responseData.data : [];
+      } else {
+        throw new Error('Invalid leaderboard data format');
+      }
+      
+      console.log(`Successfully fetched ${leaderboardData.length} leaderboard entries`);
+      return leaderboardData;
     } catch (error) {
-      console.log('Backend fetch failed, using local storage:', error);
+      console.warn('Leaderboard API error, using local storage fallback:', error.message);
       this.useLocalFallback = true;
-      return this.getLocalLeaderboard(category);
+      return this.getLocalLeaderboard();
     }
   }
 
@@ -992,26 +1020,59 @@ function displayImageFromData(data) {
     return;
   }
   
-  // Use our backend proxy to avoid CORS issues
-  const proxyImageUrl = `${BACKEND_API}/games/image-proxy?url=${encodeURIComponent(originalImageUrl)}`;
-  console.log(`Using proxied image URL: ${proxyImageUrl}`);
+  // Try different image loading strategies in sequence
+  const tryLoadImage = (strategy) => {
+    switch(strategy) {
+      case 'proxy':
+        // Use our backend proxy to avoid CORS issues
+        const proxyImageUrl = `${BACKEND_API}/games/image-proxy?url=${encodeURIComponent(originalImageUrl)}`;
+        console.log(`Using proxied image URL: ${proxyImageUrl}`);
+        ELEMENTS.imageDisplay.src = proxyImageUrl;
+        break;
+        
+      case 'direct':
+        // Try direct URL as fallback
+        console.log(`Using direct image URL: ${originalImageUrl}`);
+        ELEMENTS.imageDisplay.src = originalImageUrl;
+        break;
+        
+      case 'placeholder':
+        // Use category-specific placeholder as last resort
+        const category = getCurrentCategory();
+        const placeholderPath = `./images/${category}/placeholder.svg`;
+        console.log(`Using placeholder image: ${placeholderPath}`);
+        ELEMENTS.imageDisplay.src = placeholderPath;
+        break;
+        
+      case 'hide':
+        // If all else fails, hide the image
+        console.error('All image loading strategies failed');
+        ELEMENTS.imageDisplay.style.display = 'none';
+        return;
+    }
+  };
   
-  // Set the proxied image URL
-  ELEMENTS.imageDisplay.src = proxyImageUrl;
-  ELEMENTS.imageDisplay.style.display = 'block';
+  // Start with proxy strategy
+  tryLoadImage('proxy');
   
-  // Add error handling for failed API images
+  // Set up error handling chain
   ELEMENTS.imageDisplay.onerror = () => {
-    console.error(`Failed to load proxied image: ${proxyImageUrl}`);
-    console.log('Attempting to use original URL as fallback:', originalImageUrl);
+    console.error(`Failed to load proxied image`);
+    // Try direct URL
+    tryLoadImage('direct');
     
-    // Try the original URL as a last resort
-    ELEMENTS.imageDisplay.src = originalImageUrl;
-    
-    // If that also fails, hide the image
+    // Update error handler for direct URL
     ELEMENTS.imageDisplay.onerror = () => {
-      console.error(`Failed to load original image: ${originalImageUrl}`);
-      ELEMENTS.imageDisplay.style.display = 'none';
+      console.error(`Failed to load direct image`);
+      // Try placeholder
+      tryLoadImage('placeholder');
+      
+      // Update error handler for placeholder
+      ELEMENTS.imageDisplay.onerror = () => {
+        console.error(`Failed to load placeholder image`);
+        // Give up and hide
+        tryLoadImage('hide');
+      };
     };
   };
   
@@ -1073,39 +1134,63 @@ async function renderLeaderboard() {
       }
     }
     
-    // Show loading state
-    ELEMENTS.leaderboardElement.innerHTML = '<li>Loading leaderboard...</li>';
+    // Show loading state with animation
+    ELEMENTS.leaderboardElement.innerHTML = '<li class="loading">Loading leaderboard<span class="loading-dots">...</span></li>';
 
     const category = ELEMENTS.category ? ELEMENTS.category.value : 'fish';
     let leaderboard = [];
+    let dataSource = 'api';
     
     // Check if we can use the leaderboard manager
     const canUseManager = leaderboardManager && typeof leaderboardManager.getLeaderboard === 'function';
     
     if (canUseManager) {
       try {
-        leaderboard = await leaderboardManager.getLeaderboard(category);
+        console.log(`Attempting to fetch leaderboard for category: ${category}`);
+        const startTime = performance.now();
+        leaderboard = await Promise.race([
+          leaderboardManager.getLeaderboard(category),
+          new Promise((_, reject) => setTimeout(() => reject(new Error('Leaderboard fetch timeout')), 10000))
+        ]);
+        const fetchTime = Math.round(performance.now() - startTime);
+        console.log(`Leaderboard fetch completed in ${fetchTime}ms`);
       } catch (error) {
-        console.warn('Error fetching leaderboard from backend:', error);
+        console.warn('Error fetching leaderboard from backend:', error.message);
         // Fall back to local storage
+        dataSource = 'local';
         leaderboard = getLocalLeaderboard();
       }
     } else {
       // Fallback to local storage if leaderboardManager is not available
       console.warn('Leaderboard manager not available, using local storage');
+      dataSource = 'local';
       leaderboard = getLocalLeaderboard();
+    }
+
+    // Validate leaderboard data
+    if (!Array.isArray(leaderboard)) {
+      console.error('Invalid leaderboard data format:', leaderboard);
+      leaderboard = [];
     }
 
     // Sort by score in descending order and limit to top 10
     const sortedLeaderboard = leaderboard
+      .filter(entry => entry && (typeof entry.score === 'number' || !isNaN(parseInt(entry.score))))
       .sort((a, b) => b.score - a.score)
       .slice(0, 10);
 
     // Clear and update the leaderboard
     ELEMENTS.leaderboardElement.innerHTML = '';
 
+    // Add header with data source indicator
+    const header = document.createElement('li');
+    header.className = 'leaderboard-header';
+    header.innerHTML = `<strong>Top Scores</strong>${dataSource === 'local' ? ' <span class="local-data">(Local Data)</span>' : ''}`;
+    ELEMENTS.leaderboardElement.appendChild(header);
+
     if (sortedLeaderboard.length === 0) {
       const li = document.createElement('li');
+      li.className = 'no-scores';
       li.textContent = 'No scores yet. Be the first!';
       ELEMENTS.leaderboardElement.appendChild(li);
       return;
@@ -1116,14 +1201,41 @@ async function renderLeaderboard() {
       const li = document.createElement('li');
       // Handle both backend format (username) and local format (name)
       const name = entry.username || entry.name || 'Anonymous';
-      li.textContent = `${index + 1}. ${name}: ${entry.score}`;
+      const score = typeof entry.score === 'number' ? entry.score : parseInt(entry.score) || 0;
+      
+      li.className = index < 3 ? `top-${index + 1}` : '';
+      li.innerHTML = `<span class="rank">${index + 1}.</span> <span class="name">${name}</span>: <span class="score">${score}</span>`;
       ELEMENTS.leaderboardElement.appendChild(li);
     });
 
   } catch (error) {
     console.error('Error in renderLeaderboard:', error);
     if (ELEMENTS.leaderboardElement) {
-      ELEMENTS.leaderboardElement.innerHTML = '<li>Error loading leaderboard</li>';
+      ELEMENTS.leaderboardElement.innerHTML = 
+        '<li class="error">Error loading leaderboard</li>' +
+        '<li class="error-details">Using local data instead</li>';
+      
+      // Try to show local data as fallback
+      try {
+        const localData = getLocalLeaderboard();
+        if (localData && localData.length > 0) {
+          const header = document.createElement('li');
+          header.className = 'local-header';
+          header.innerHTML = '<strong>Local Scores</strong>';
+          ELEMENTS.leaderboardElement.appendChild(header);
+          
+          localData
+            .sort((a, b) => b.score - a.score)
+            .slice(0, 5)
+            .forEach((entry, index) => {
+              const li = document.createElement('li');
+              li.textContent = `${index + 1}. ${entry.name || 'Anonymous'}: ${entry.score}`;
+              ELEMENTS.leaderboardElement.appendChild(li);
+            });
+        }
+      } catch (localError) {
+        console.error('Failed to show local leaderboard fallback:', localError);
+      }
     }
   }
 }

@@ -1,7 +1,7 @@
 const express = require('express');
 const { upload, uploadFile, deleteFile, getFileUrl } = require('../../../utils/fileUpload');
 const { successResponse, errorResponse } = require('../../../utils/response');
-const { catchAsync } = require('../../../middleware/error');
+const { catchAsync } = require('../../../utils');
 
 const router = express.Router();
 

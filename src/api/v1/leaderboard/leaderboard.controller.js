@@ -1,8 +1,8 @@
-const Leaderboard = require('../../../../models/Leaderboard');
-const User = require('../../../../models/userModel');
-const catchAsync = require('../../../../utils/catchAsync');
-const AppError = require('../../../../utils/appError');
-const { successResponse } = require('../../../../utils/response');
+const Leaderboard = require('../../../models/Leaderboard');
+const User = require('../../../models/userModel');
+const catchAsync = require('../../../utils/catchAsync');
+const AppError = require('../../../utils/appError');
+const { successResponse } = require('../../../utils/response');
 
 // Submit a new score
 const submitScore = catchAsync(async (req, res, next) => {

@@ -72,7 +72,14 @@ class LeaderboardManager {
       headers['Authorization'] = `Bearer ${this.token}`;
     } else {
       // Add guest token for public endpoints that still require authentication
-      headers['X-Guest-Token'] = 'public-leaderboard-access';
+      // This token should match the GUEST_LEADERBOARD_TOKEN in backend .env
+      headers['X-Guest-Token'] = 'a7b9c2d5e8f3g6h1j4k7m2n5p8r3t6v9';
+    }
+    
+    // Add CSRF token if available
+    const csrfToken = getCSRFToken();
+    if (csrfToken) {
+      headers['X-CSRF-Token'] = csrfToken;
     }
     
     return headers;
@@ -465,17 +472,39 @@ function initAuthHandlers() {
   }
 }
 
+// Get CSRF token from cookie
+function getCSRFToken() {
+  const tokenCookieName = 'XSRF-TOKEN';
+  const cookies = document.cookie.split(';');
+  for (let cookie of cookies) {
+    const [name, value] = cookie.trim().split('=');
+    if (name === tokenCookieName) {
+      return decodeURIComponent(value);
+    }
+  }
+  return null;
+}
+
 // API data fetching function - uses backend proxy to bypass CORS
 async function fetchDataFromAPI(category) {
   try {
     console.log(`Fetching ${category} data from backend proxy...`);
     
+    const headers = {
+      'Content-Type': 'application/json',
+      'Accept': 'application/json'
+    };
+    
+    // Add CSRF token if available
+    const csrfToken = getCSRFToken();
+    if (csrfToken) {
+      headers['X-CSRF-Token'] = csrfToken;
+    }
+    
     const response = await fetch(`${BACKEND_API}/games/data/${category}`, {
       method: 'GET',
-      headers: {
-        'Content-Type': 'application/json',
-        'Accept': 'application/json'
-      }
+      headers: headers,
+      credentials: 'include' // Include cookies in the request
     });
     
     if (!response.ok) {
@@ -1041,12 +1070,22 @@ function displayImageFromData(data) {
         console.log(`Using proxied image URL: ${proxyImageUrl}`);
         
         // Use fetch with authentication headers instead of direct src assignment
+        const headers = {
+          'Accept': 'image/*',
+          // Use the same guest token as defined for leaderboard access
+          'X-Guest-Token': 'x2y5z8a3b6c9d1e4f7g2h5j8k3m6n9p2'
+        };
+        
+        // Add CSRF token if available
+        const csrfToken = getCSRFToken();
+        if (csrfToken) {
+          headers['X-CSRF-Token'] = csrfToken;
+        }
+        
         fetch(proxyImageUrl, {
           method: 'GET',
-          headers: {
-            'Accept': 'image/*',
-            'X-Guest-Token': 'public-image-access' // Add guest token for authentication
-          }
+          headers: headers,
+          credentials: 'include' // Include cookies in the request
         })
         .then(response => {
           if (!response.ok) {

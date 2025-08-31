@@ -12,6 +12,7 @@ const config = require('../config');
 const logger = require('../utils/logger');
 const { errorHandler, notFound } = require('../middleware/error');
 const { httpLogger } = require('../middleware/logger');
+const { handleCSRFError, exemptFromCSRF, attachCSRFToken } = require('../../middleware/csrfMiddleware');
 const apiV1Routes = require('../api/v1');
 
 const setupMiddleware = (app) => {
@@ -48,6 +49,11 @@ const setupMiddleware = (app) => {
     req.id = req.get('X-Request-Id') || require('crypto').randomUUID();
     next();
   });
+  
+  // Add CSRF protection
+  app.use(cookieParser()); // Ensure cookie-parser is used before CSRF
+  app.use(handleCSRFError); // Handle CSRF errors
+  app.use(exemptFromCSRF); // Apply CSRF protection with exemptions
 
   // Log all requests
   app.use((req, res, next) => {

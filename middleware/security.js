@@ -110,11 +110,34 @@ const securityHeaders = (req, res, next) => {
   // Referrer policy
   res.setHeader('Referrer-Policy', 'strict-origin-when-cross-origin');
   
-  // Feature policy
+  // Feature/Permissions policy
   res.setHeader(
     'Permissions-Policy',
-    'camera=(), microphone=(), geolocation=(), payment=()'
+    'camera=(), microphone=(), geolocation=(), payment=(), interest-cohort=()'
   );
+  
+  // Content Security Policy
+  const cspDirectives = [
+    "default-src 'self'",
+    "img-src 'self' data: https://*.dodo.ac https://*.acnhapi.com https://*.nookipedia.com",
+    "style-src 'self' 'unsafe-inline' https://fonts.googleapis.com",
+    "font-src 'self' https://fonts.gstatic.com",
+    "script-src 'self' 'unsafe-inline' https://cdn.jsdelivr.net",
+    "connect-src 'self' https://api.nookipedia.com",
+    "frame-ancestors 'none'",
+    "base-uri 'self'",
+    "form-action 'self'"
+  ];
+  
+  // Only set CSP in production to avoid development issues
+  if (process.env.NODE_ENV === 'production') {
+    res.setHeader('Content-Security-Policy', cspDirectives.join('; '));
+  }
+  
+  // Set Strict-Transport-Security header in production
+  if (process.env.NODE_ENV === 'production') {
+    res.setHeader('Strict-Transport-Security', 'max-age=31536000; includeSubDomains; preload');
+  }
   
   next();
 };

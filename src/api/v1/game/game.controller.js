@@ -285,26 +285,49 @@ exports.proxyImage = catchAsync(async (req, res, next) => {
   
   try {
     // Check for authentication - allow both regular auth and guest token
+    const guestImageToken = process.env.GUEST_IMAGE_TOKEN || 'x2y5z8a3b6c9d1e4f7g2h5j8k3m6n9p2';
     const isAuthenticated = req.user || 
-                           req.headers['x-guest-token'] === 'public-image-access' || 
-                           req.query.token === 'public-image-access';
+                           req.headers['x-guest-token'] === guestImageToken || 
+                           req.query.token === guestImageToken;
     
     if (!isAuthenticated) {
       console.warn('Unauthorized image proxy access attempt');
       return next(new AppError('Authentication required for image proxy', 401));
     }
     
-    // Decode the URL
+    // Decode the URL once and validate it's a proper URL
     const decodedUrl = decodeURIComponent(url);
-    console.log(`Proxying image from: ${decodedUrl}`);
     
-    // Validate URL
-    const parsedUrl = new URL(decodedUrl);
+    // Validate URL format before proceeding
+    if (!decodedUrl.match(/^https?:\/\//i)) {
+      return next(new AppError('Invalid URL format', 400));
+    }
     
-    // Only allow specific domains for security
-    const allowedDomains = ['dodo.ac', 'acnhapi.com', 'nookipedia.com'];
-    if (!allowedDomains.some(domain => parsedUrl.hostname.includes(domain))) {
-      return next(new AppError(`Domain not allowed: ${parsedUrl.hostname}`, 403));
+    try {
+      // Parse the URL
+      const parsedUrl = new URL(decodedUrl);
+      
+      // Only allow http and https protocols
+      if (parsedUrl.protocol !== 'http:' && parsedUrl.protocol !== 'https:') {
+        return next(new AppError(`Protocol not allowed: ${parsedUrl.protocol}`, 403));
+      }
+      
+      // Only allow specific domains for security (exact match required)
+      const allowedDomains = ['dodo.ac', 'acnhapi.com', 'nookipedia.com'];
+      const isAllowed = allowedDomains.some(domain => {
+        // Check if hostname ends with the allowed domain
+        return parsedUrl.hostname === domain || 
+               parsedUrl.hostname.endsWith('.' + domain);
+      });
+      
+      if (!isAllowed) {
+        console.warn(`Blocked proxy request to unauthorized domain: ${parsedUrl.hostname}`);
+        return next(new AppError(`Domain not allowed: ${parsedUrl.hostname}`, 403));
+      }
+      
+      console.log(`Proxying image from: ${decodedUrl}`);
+    } catch (error) {
+      return next(new AppError(`Invalid URL: ${error.message}`, 400));
     }
     
     // Set CORS headers to allow cross-origin requests

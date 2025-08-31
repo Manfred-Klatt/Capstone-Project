@@ -435,10 +435,26 @@ function initAuthHandlers() {
 
 // API data fetching function
 async function fetchDataFromAPI(category) {
-  // Skip API fetch since it requires authentication
-  // Use fallback data which now has proper Nookipedia image URLs
-  console.log(`Skipping API fetch for ${category} - using fallback data with Nookipedia images`);
-  throw new Error('API authentication required - using fallback data');
+  try {
+    console.log(`Fetching ${category} data from API...`);
+    
+    const response = await fetchWithTimeout(`${API_BASE}/${category}`, {
+      headers: {
+        'X-API-KEY': 'your-api-key-here', // Add your Nookipedia API key
+        'Accept-Version': '1.0.0'
+      }
+    });
+    
+    if (response && Array.isArray(response) && response.length > 0) {
+      console.log(`Successfully fetched ${response.length} ${category} from API`);
+      return response;
+    } else {
+      throw new Error('No data returned from API');
+    }
+  } catch (error) {
+    console.error(`API fetch failed for ${category}:`, error);
+    throw error;
+  }
 }
 
 function handleSignup(e) {
@@ -812,67 +828,48 @@ async function loadFallbackData(category) {
 }
 
 async function initGame() {
-  // Use cached elements instead of querying the DOM again
   const category = ELEMENTS.category ? ELEMENTS.category.value : 'fish';
 
   if (ELEMENTS.feedback) {
-    ELEMENTS.feedback.textContent = "Loading...";
+    ELEMENTS.feedback.textContent = "Loading from API...";
   }
 
-  // Load local fallback data first to ensure we have something to display
-  if (!cachedData[category]) {
-    try {
-      console.log('Loading local fallback data first...');
-      await loadFallbackData(category);
+  try {
+    console.log(`Fetching fresh ${category} data from API...`);
+    
+    // Force API fetch - no fallbacks
+    const apiData = await fetchDataFromAPI(category);
+    
+    if (apiData && Array.isArray(apiData) && apiData.length > 0) {
+      console.log(`Successfully loaded ${apiData.length} ${category} items from API`);
+      cachedData[category] = apiData;
       
-      // Only try API if we have a network connection
-      if (navigator.onLine) {
-        try {
-          console.log('Attempting to fetch from API as enhancement...');
-          const apiData = await fetchDataFromAPI(category);
-          if (apiData && apiData.length > 0) {
-            console.log('Successfully loaded API data, replacing fallback');
-            cachedData[category] = apiData;
-          }
-        } catch (apiError) {
-          console.log('API fetch failed, continuing with fallback data:', apiError);
-          // Already using fallback data, so just continue
-        }
-      } else {
-        console.log('Offline mode detected, using local data only');
-      }
-    } catch (error) {
-      console.error('Failed to load data:', error);
-      
-      if (!cachedData[category] && ELEMENTS.feedback) {
-        ELEMENTS.feedback.textContent = `Failed to load ${category}. Please try again later.`;
-        return;
-      }
+      // Start the game with API data
+      currentItem = getRandomItem(cachedData[category]);
+      displayImageFromData(currentItem);
+
+      // Enable input fields
+      if (ELEMENTS.guessInput) ELEMENTS.guessInput.disabled = false;
+      if (ELEMENTS.submitButton) ELEMENTS.submitButton.disabled = false;
+      if (ELEMENTS.scoreElement) ELEMENTS.scoreElement.textContent = `Score: ${score}`;
+
+      // Start a new round
+      setupNewRound();
+    } else {
+      throw new Error('No data returned from API');
     }
-  }
-
-  // Using fallback data if API is unavailable
-  if (cachedData[category] && cachedData[category]._fromFallback) {
-    console.log('Using fallback data for', category);
-  }
-
-  // Only proceed if we have data
-  if (cachedData[category] && cachedData[category].length > 0) {
-    currentItem = getRandomItem(cachedData[category]);
-    displayImageFromData(currentItem);
-
-    // Enable input fields using cached elements
-    if (ELEMENTS.guessInput) ELEMENTS.guessInput.disabled = false;
-    if (ELEMENTS.submitButton) ELEMENTS.submitButton.disabled = false;
-    if (ELEMENTS.scoreElement) ELEMENTS.scoreElement.textContent = `Score: ${score}`;
-
-    // Start a new round
-    setupNewRound();
-  } else {
-    console.error('No data available for category:', category);
+  } catch (error) {
+    console.error(`Failed to load ${category} data from API:`, error);
+    
     if (ELEMENTS.feedback) {
-      ELEMENTS.feedback.textContent = `No data available for ${category}. Please try another category.`;
+      ELEMENTS.feedback.textContent = `Failed to load ${category} data from API. Please check your connection and try again.`;
+      ELEMENTS.feedback.className = 'error';
     }
+    
+    // Reset game state
+    if (ELEMENTS.guessInput) ELEMENTS.guessInput.disabled = true;
+    if (ELEMENTS.submitButton) ELEMENTS.submitButton.disabled = true;
+    if (ELEMENTS.startButton) ELEMENTS.startButton.disabled = false;
   }
 }
 
@@ -971,15 +968,28 @@ function displayImageFromData(data) {
   ELEMENTS.imageDisplay.style.display = 'block';
   ELEMENTS.imageDisplay.alt = data.name?.['name-USen'] || data.name || 'Animal Crossing character or item';
   
-  // Use local placeholder images only since external URLs are unreliable
-  const category = ELEMENTS.category?.value || 'fish';
-  const placeholderUrl = `images/${category}/placeholder.svg`;
+  // Force use of API images only - prioritize high quality images
+  const apiImageUrl = data.image_uri || data.icon_uri || data.image || data.photo;
   
-  // Directly set the placeholder image
-  ELEMENTS.imageDisplay.src = placeholderUrl;
+  if (!apiImageUrl) {
+    console.error('No API image URL available for:', data.name?.['name-USen'] || data.name);
+    ELEMENTS.imageDisplay.style.display = 'none';
+    return;
+  }
+  
+  // Set the API image directly
+  ELEMENTS.imageDisplay.src = apiImageUrl;
   ELEMENTS.imageDisplay.style.display = 'block';
   
-  console.log(`Displaying placeholder for ${category}: ${data.name?.['name-USen'] || data.name}`);
+  // Add error handling for failed API images
+  ELEMENTS.imageDisplay.onerror = () => {
+    console.error(`Failed to load API image: ${apiImageUrl}`);
+    ELEMENTS.imageDisplay.style.display = 'none';
+  };
+  
+  ELEMENTS.imageDisplay.onload = () => {
+    console.log(`Successfully loaded API image for: ${data.name?.['name-USen'] || data.name}`);
+  };
 }
 
 function updateTimerDisplay() {

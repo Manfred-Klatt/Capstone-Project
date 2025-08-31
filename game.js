@@ -215,45 +215,10 @@ function initAuthHandlers() {
 
 // API data fetching function
 async function fetchDataFromAPI(category) {
-  try {
-    // Nookipedia API requires proper endpoints and API key
-    const API_BASE = 'https://api.nookipedia.com';
-    
-    // Map categories to correct Nookipedia endpoints
-    const endpointMap = {
-      'fish': 'nh/fish',
-      'bugs': 'nh/bugs', 
-      'sea': 'nh/sea',
-      'villagers': 'villagers'
-    };
-    
-    const endpoint = endpointMap[category];
-    if (!endpoint) {
-      throw new Error(`Unknown category: ${category}`);
-    }
-    
-    // Note: Nookipedia API requires an API key for most endpoints
-    // For now, we'll attempt without key and gracefully fall back to local data
-    const response = await fetch(`${API_BASE}/${endpoint}`);
-    if (!response.ok) {
-      throw new Error(`HTTP error! status: ${response.status}`);
-    }
-    
-    const data = await response.json();
-    
-    // Transform API data to match our expected format
-    return data.map(item => ({
-      id: item.id || item.file_name,
-      file_name: item.file_name,
-      name: item.name,
-      icon_uri: item.icon_uri || item.image_uri,
-      image_uri: item.image_uri || item.icon_uri
-    }));
-    
-  } catch (error) {
-    console.log('Failed to fetch data from Nookipedia API:', error);
-    throw error;
-  }
+  // Skip API fetch since it requires authentication
+  // Use fallback data which now has proper Nookipedia image URLs
+  console.log(`Skipping API fetch for ${category} - using fallback data with Nookipedia images`);
+  throw new Error('API authentication required - using fallback data');
 }
 
 function handleSignup(e) {
@@ -742,24 +707,19 @@ function displayImageFromData(data) {
   img.src = imageUrl;
   img.alt = data.name?.["name-USen"] || data.name || "Animal Crossing item";
   
-  // Handle image loading errors with multiple fallback options
+  // Handle image loading errors with local fallback options only
   img.onerror = () => {
-    console.log('Image load error, trying fallbacks');
+    console.log('Image load error, using local placeholder');
     const category = ELEMENTS.category ? ELEMENTS.category.value : 'fish';
     
-    // Try SVG placeholder in the root images directory
-    img.src = 'images/placeholder.svg';
+    // Use category-specific placeholder SVG
+    img.src = `images/${category}/placeholder.svg`;
     
-    // If the root placeholder fails, try the category-specific one
+    // If that fails, use transparent pixel as final fallback
     img.onerror = () => {
-      console.log('Root placeholder failed, trying category-specific');
-      img.src = `images/${category}/placeholder.svg`;
-      
-      // If that also fails, use a transparent pixel
-      img.onerror = () => {
-        console.log('All placeholders failed, using transparent pixel');
-        img.src = 'data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7';
-      };
+      console.log('Placeholder failed, using transparent pixel');
+      img.src = 'data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7';
+      img.onerror = null; // Prevent further error loops
     };
   };
   

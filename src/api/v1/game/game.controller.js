@@ -1,6 +1,6 @@
-const gameService = require('../../../services/game.service');
-const userService = require('../../../services/user.service');
-const { catchAsync, AppError } = require('../../../utils');
+const gameService = require('../../../../services/game.service');
+const userService = require('../../../../services/user.service');
+const { catchAsync, AppError } = require('../../../../utils');
 const fetch = require('node-fetch');
 const fs = require('fs');
 const path = require('path');

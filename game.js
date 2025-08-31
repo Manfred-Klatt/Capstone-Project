@@ -491,7 +491,9 @@ async function fetchDataFromAPI(category) {
     
     const headers = {
       'Content-Type': 'application/json',
-      'Accept': 'application/json'
+      'Accept': 'application/json',
+      // Use the same guest token as defined in the backend .env
+      'X-Guest-Token': 'a7b9c2d5e8f3g6h1j4k7m2n5p8r3t6v9'
     };
     
     // Add CSRF token if available
@@ -500,7 +502,7 @@ async function fetchDataFromAPI(category) {
       headers['X-CSRF-Token'] = csrfToken;
     }
     
-    const response = await fetch(`${BACKEND_API}/games/data/${category}`, {
+    const response = await fetch(`${BACKEND_API}/game/data/${category}`, {
       method: 'GET',
       headers: headers,
       mode: 'cors',

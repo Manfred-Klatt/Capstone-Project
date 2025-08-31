@@ -41,15 +41,23 @@ class LeaderboardManager {
   
   async initialize() {
     try {
-      // Test the connection to the backend
-      await fetch(`${this.baseURL}/health`, { 
+      // Test the connection to the backend using the correct health endpoint
+      const response = await fetch(`${BACKEND_API}/health`, { 
         method: 'GET',
-        headers: this.getHeaders()
+        headers: this.getHeaders(),
+        timeout: 5000 // 5 second timeout
       });
-      this.initialized = true;
+      
+      if (response.ok) {
+        this.initialized = true;
+        console.log('LeaderboardManager initialized successfully');
+      } else {
+        throw new Error(`Health check failed with status: ${response.status}`);
+      }
     } catch (error) {
-      console.warn('Falling back to local storage for leaderboard:', error);
+      console.warn('Backend unavailable, falling back to local storage:', error.message);
       this.useLocalFallback = true;
+      this.initialized = false;
     }
   }
 
@@ -99,47 +107,38 @@ class LeaderboardManager {
     }
   }
 
-  async getLeaderboard(category = 'fish') {
-    // If we're already using local fallback, just return local data
-    if (this.useLocalFallback) {
-      return this.getLocalLeaderboard();
-    }
-
-    // If not initialized yet, try to initialize first
-    if (!this.initialized) {
-      try {
-        await this.initialize();
-      } catch (error) {
-        console.warn('Initialization failed, using local storage:', error);
-        this.useLocalFallback = true;
+  async getLeaderboard(category = 'fish', limit = 10) {
+    try {
+      // If we're already using local fallback, just return local data
+      if (this.useLocalFallback) {
         return this.getLocalLeaderboard();
       }
-    }
 
-    // If we're still not initialized, use local storage
-    if (!this.initialized) {
-      this.useLocalFallback = true;
-      return this.getLocalLeaderboard();
-    }
+      // If not initialized yet, try to initialize first
+      if (!this.initialized) {
+        await this.initialize();
+      }
 
-    try {
-      const response = await fetch(`${this.baseURL}/${category}?limit=10`, {
+      if (this.useLocalFallback) {
+        return this.getLocalLeaderboard(category);
+      }
+
+      const response = await fetch(`${this.baseURL}/${category}?limit=${limit}`, {
         method: 'GET',
-        headers: this.getHeaders(),
-        mode: 'cors',
-        signal: AbortSignal.timeout(3000)
+        headers: this.getHeaders()
       });
 
       if (!response.ok) {
         throw new Error(`HTTP error! status: ${response.status}`);
       }
 
-      const result = await response.json();
-      return result.data?.leaderboard || [];
+      const data = await response.json();
+      // Handle both array response and object with data property
+      return Array.isArray(data) ? data : (data.data || data);
     } catch (error) {
-      console.warn('Backend fetch failed, using local storage:', error);
+      console.log('Backend fetch failed, using local storage:', error);
       this.useLocalFallback = true;
-      return this.getLocalLeaderboard();
+      return this.getLocalLeaderboard(category);
     }
   }
 
@@ -963,33 +962,63 @@ function displayImageFromData(data) {
   
   // Reset display
   ELEMENTS.imageDisplay.style.display = 'block';
-  ELEMENTS.imageDisplay.alt = data.name || 'Animal Crossing character or item';
+  ELEMENTS.imageDisplay.alt = data.name?.['name-USen'] || data.name || 'Animal Crossing character or item';
   
-  // Determine the image URL based on available properties
-  const imageUrl = data.image_uri || data.icon_uri || data.image || data.photo;
+  // Determine the image URL based on available properties, with fallback hierarchy
+  const possibleUrls = [
+    data.image_uri,
+    data.icon_uri,
+    data.image,
+    data.photo,
+    // Local fallback based on category and ID
+    `images/${ELEMENTS.category?.value || 'fish'}/${data.id || data.file_name || 'placeholder'}.png`,
+    `images/${ELEMENTS.category?.value || 'fish'}/placeholder.svg`,
+    'images/placeholder.svg'
+  ].filter(Boolean);
   
-  if (!imageUrl) {
-    console.log('No image URL available');
+  if (possibleUrls.length === 0) {
+    console.log('No image URLs available');
     ELEMENTS.imageDisplay.style.display = 'none';
     return;
   }
   
-  // Create new image to test loading
-  const testImg = new Image();
+  // Try loading images in order of preference
+  let currentUrlIndex = 0;
   
-  testImg.onload = () => {
-    // Only set the source if it loads successfully
-    ELEMENTS.imageDisplay.src = imageUrl;
-    ELEMENTS.imageDisplay.style.display = 'block';
+  const tryNextImage = () => {
+    if (currentUrlIndex >= possibleUrls.length) {
+      console.log('All image URLs failed to load');
+      ELEMENTS.imageDisplay.style.display = 'none';
+      return;
+    }
+    
+    const imageUrl = possibleUrls[currentUrlIndex];
+    const testImg = new Image();
+    
+    testImg.onload = () => {
+      ELEMENTS.imageDisplay.src = imageUrl;
+      ELEMENTS.imageDisplay.style.display = 'block';
+    };
+    
+    testImg.onerror = () => {
+      console.log(`Image failed to load: ${imageUrl}`);
+      currentUrlIndex++;
+      tryNextImage();
+    };
+    
+    // Set a timeout for slow-loading images
+    setTimeout(() => {
+      if (!testImg.complete) {
+        console.log(`Image loading timeout: ${imageUrl}`);
+        currentUrlIndex++;
+        tryNextImage();
+      }
+    }, 3000);
+    
+    testImg.src = imageUrl;
   };
   
-  testImg.onerror = () => {
-    console.log('Image failed to load');
-    ELEMENTS.imageDisplay.style.display = 'none';
-  };
-  
-  // Start loading the image
-  testImg.src = imageUrl;
+  tryNextImage();
 }
 
 function updateTimerDisplay() {

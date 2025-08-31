@@ -23,7 +23,11 @@ export const GAME_EVENTS = {
  * @param {Object} detail - The data to send with the event
  */
 export function dispatchGameEvent(eventType, detail = {}) {
-  if (!GAME_EVENTS[eventType]) {
+  // Check if eventType is a valid event (either a key or value in GAME_EVENTS)
+  const isValidEvent = Object.keys(GAME_EVENTS).includes(eventType) || 
+                      Object.values(GAME_EVENTS).includes(eventType);
+  
+  if (!isValidEvent) {
     console.warn(`Unknown event type: ${eventType}`);
     return;
   }

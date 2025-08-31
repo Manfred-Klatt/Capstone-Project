@@ -731,8 +731,15 @@ function setupNewRound() {
       ELEMENTS.startButton.disabled = true;
     }
     
-    // Reset timer state
-    timeLeft = 15;
+    // Reset timer state based on difficulty
+    const difficultySelect = document.getElementById('difficulty');
+    if (difficultySelect) {
+      maxTime = parseInt(difficultySelect.value);
+      timeLeft = maxTime / 1000; // Convert ms to seconds
+    } else {
+      timeLeft = 10; // Default to 10 seconds
+    }
+    
     updateTimerDisplay(); // Update timer display
     stopTimer(); // Clear any existing timer
     
@@ -964,61 +971,15 @@ function displayImageFromData(data) {
   ELEMENTS.imageDisplay.style.display = 'block';
   ELEMENTS.imageDisplay.alt = data.name?.['name-USen'] || data.name || 'Animal Crossing character or item';
   
-  // Determine the image URL based on available properties, with fallback hierarchy
-  const possibleUrls = [
-    data.image_uri,
-    data.icon_uri,
-    data.image,
-    data.photo,
-    // Local fallback based on category and ID
-    `images/${ELEMENTS.category?.value || 'fish'}/${data.id || data.file_name || 'placeholder'}.png`,
-    `images/${ELEMENTS.category?.value || 'fish'}/placeholder.svg`,
-    'images/placeholder.svg'
-  ].filter(Boolean);
+  // Use local placeholder images only since external URLs are unreliable
+  const category = ELEMENTS.category?.value || 'fish';
+  const placeholderUrl = `images/${category}/placeholder.svg`;
   
-  if (possibleUrls.length === 0) {
-    console.log('No image URLs available');
-    ELEMENTS.imageDisplay.style.display = 'none';
-    return;
-  }
+  // Directly set the placeholder image
+  ELEMENTS.imageDisplay.src = placeholderUrl;
+  ELEMENTS.imageDisplay.style.display = 'block';
   
-  // Try loading images in order of preference
-  let currentUrlIndex = 0;
-  
-  const tryNextImage = () => {
-    if (currentUrlIndex >= possibleUrls.length) {
-      console.log('All image URLs failed to load');
-      ELEMENTS.imageDisplay.style.display = 'none';
-      return;
-    }
-    
-    const imageUrl = possibleUrls[currentUrlIndex];
-    const testImg = new Image();
-    
-    testImg.onload = () => {
-      ELEMENTS.imageDisplay.src = imageUrl;
-      ELEMENTS.imageDisplay.style.display = 'block';
-    };
-    
-    testImg.onerror = () => {
-      console.log(`Image failed to load: ${imageUrl}`);
-      currentUrlIndex++;
-      tryNextImage();
-    };
-    
-    // Set a timeout for slow-loading images
-    setTimeout(() => {
-      if (!testImg.complete) {
-        console.log(`Image loading timeout: ${imageUrl}`);
-        currentUrlIndex++;
-        tryNextImage();
-      }
-    }, 3000);
-    
-    testImg.src = imageUrl;
-  };
-  
-  tryNextImage();
+  console.log(`Displaying placeholder for ${category}: ${data.name?.['name-USen'] || data.name}`);
 }
 
 function updateTimerDisplay() {

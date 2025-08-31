@@ -67,8 +67,12 @@ class LeaderboardManager {
       'Accept': 'application/json'
     };
     
+    // Use auth token if available
     if (this.token) {
       headers['Authorization'] = `Bearer ${this.token}`;
+    } else {
+      // Add guest token for public endpoints that still require authentication
+      headers['X-Guest-Token'] = 'public-leaderboard-access';
     }
     
     return headers;
@@ -1020,6 +1024,14 @@ function displayImageFromData(data) {
     return;
   }
   
+  // Helper function to get current category
+  function getCurrentCategory() {
+    if (ELEMENTS.category && ELEMENTS.category.value) {
+      return ELEMENTS.category.value;
+    }
+    return 'fish'; // Default fallback
+  }
+  
   // Try different image loading strategies in sequence
   const tryLoadImage = (strategy) => {
     switch(strategy) {
@@ -1027,7 +1039,31 @@ function displayImageFromData(data) {
         // Use our backend proxy to avoid CORS issues
         const proxyImageUrl = `${BACKEND_API}/games/image-proxy?url=${encodeURIComponent(originalImageUrl)}`;
         console.log(`Using proxied image URL: ${proxyImageUrl}`);
-        ELEMENTS.imageDisplay.src = proxyImageUrl;
+        
+        // Use fetch with authentication headers instead of direct src assignment
+        fetch(proxyImageUrl, {
+          method: 'GET',
+          headers: {
+            'Accept': 'image/*',
+            'X-Guest-Token': 'public-image-access' // Add guest token for authentication
+          }
+        })
+        .then(response => {
+          if (!response.ok) {
+            throw new Error(`Image proxy returned ${response.status}`);
+          }
+          return response.blob();
+        })
+        .then(blob => {
+          const objectUrl = URL.createObjectURL(blob);
+          ELEMENTS.imageDisplay.src = objectUrl;
+          console.log('Successfully loaded image via proxy');
+        })
+        .catch(error => {
+          console.error(`Proxy image fetch failed:`, error);
+          // Try next strategy
+          tryLoadImage('direct');
+        });
         break;
         
       case 'direct':
@@ -1055,24 +1091,18 @@ function displayImageFromData(data) {
   // Start with proxy strategy
   tryLoadImage('proxy');
   
-  // Set up error handling chain
+  // Set up error handling for direct and placeholder strategies
   ELEMENTS.imageDisplay.onerror = () => {
-    console.error(`Failed to load proxied image`);
-    // Try direct URL
-    tryLoadImage('direct');
+    // This will only be called for direct URL loading failures
+    console.error(`Failed to load direct image`);
+    // Try placeholder
+    tryLoadImage('placeholder');
     
-    // Update error handler for direct URL
+    // Update error handler for placeholder
     ELEMENTS.imageDisplay.onerror = () => {
-      console.error(`Failed to load direct image`);
-      // Try placeholder
-      tryLoadImage('placeholder');
-      
-      // Update error handler for placeholder
-      ELEMENTS.imageDisplay.onerror = () => {
-        console.error(`Failed to load placeholder image`);
-        // Give up and hide
-        tryLoadImage('hide');
-      };
+      console.error(`Failed to load placeholder image`);
+      // Give up and hide
+      tryLoadImage('hide');
     };
   };
   

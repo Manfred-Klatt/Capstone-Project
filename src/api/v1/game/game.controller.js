@@ -284,6 +284,16 @@ exports.proxyImage = catchAsync(async (req, res, next) => {
   }
   
   try {
+    // Check for authentication - allow both regular auth and guest token
+    const isAuthenticated = req.user || 
+                           req.headers['x-guest-token'] === 'public-image-access' || 
+                           req.query.token === 'public-image-access';
+    
+    if (!isAuthenticated) {
+      console.warn('Unauthorized image proxy access attempt');
+      return next(new AppError('Authentication required for image proxy', 401));
+    }
+    
     // Decode the URL
     const decodedUrl = decodeURIComponent(url);
     console.log(`Proxying image from: ${decodedUrl}`);
@@ -297,27 +307,38 @@ exports.proxyImage = catchAsync(async (req, res, next) => {
       return next(new AppError(`Domain not allowed: ${parsedUrl.hostname}`, 403));
     }
     
-    // Choose http or https based on protocol
-    const httpClient = parsedUrl.protocol === 'https:' ? https : http;
+    // Set CORS headers to allow cross-origin requests
+    res.setHeader('Access-Control-Allow-Origin', '*');
+    res.setHeader('Access-Control-Allow-Methods', 'GET, OPTIONS');
+    res.setHeader('Access-Control-Allow-Headers', 'Origin, X-Requested-With, Content-Type, Accept, X-Guest-Token, Authorization');
     
-    // Forward the request to the target URL
-    httpClient.get(decodedUrl, (imgRes) => {
-      // Check if the image was found
-      if (imgRes.statusCode !== 200) {
-        return next(new AppError(`Image not found: ${imgRes.statusCode}`, imgRes.statusCode));
+    // For OPTIONS requests (preflight), return 200 OK with CORS headers
+    if (req.method === 'OPTIONS') {
+      return res.status(200).end();
+    }
+    
+    // Use node-fetch instead of http/https for better error handling
+    const response = await fetch(decodedUrl, {
+      timeout: 8000, // 8 second timeout
+      headers: {
+        'User-Agent': 'Animal Crossing Quiz App Image Proxy'
       }
-      
-      // Set appropriate headers
-      res.setHeader('Content-Type', imgRes.headers['content-type'] || 'image/png');
-      res.setHeader('Cache-Control', 'public, max-age=86400'); // Cache for 24 hours
-      
-      // Pipe the image data directly to our response
-      imgRes.pipe(res);
-      
-    }).on('error', (err) => {
-      console.error('Error proxying image:', err);
-      return next(new AppError(`Failed to proxy image: ${err.message}`, 500));
     });
+    
+    if (!response.ok) {
+      console.error(`Image fetch failed with status: ${response.status}`);
+      return next(new AppError(`Image not found: ${response.status}`, response.status));
+    }
+    
+    // Get the image data as a buffer
+    const imageBuffer = await response.buffer();
+    
+    // Set appropriate headers
+    res.setHeader('Content-Type', response.headers.get('content-type') || 'image/png');
+    res.setHeader('Cache-Control', 'public, max-age=86400'); // Cache for 24 hours
+    
+    // Send the image data
+    res.send(imageBuffer);
     
   } catch (error) {
     console.error('Error processing image proxy request:', error);

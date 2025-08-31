@@ -42,10 +42,16 @@ class LeaderboardManager {
   async initialize() {
     try {
       // Test the connection to the backend using the correct health endpoint
+      console.log('Checking backend health...');
+      
+      // Use simpler headers for health check to avoid CORS preflight issues
       const response = await fetch(`${BACKEND_API}/health`, { 
         method: 'GET',
-        headers: this.getHeaders(),
-        timeout: 5000 // 5 second timeout
+        headers: {
+          'Accept': 'application/json'
+        },
+        mode: 'cors',
+        credentials: 'include'
       });
       
       if (response.ok) {
@@ -98,10 +104,12 @@ class LeaderboardManager {
         }
       };
 
-      const response = await fetch(`${this.baseURL}/submit`, {
+      const response = await fetch(this.baseURL, {
         method: 'POST',
         headers: this.getHeaders(),
-        body: JSON.stringify(scoreData)
+        body: JSON.stringify(scoreData),
+        mode: 'cors',
+        credentials: 'include'
       });
 
       if (!response.ok) {
@@ -128,25 +136,16 @@ class LeaderboardManager {
 
       // If not initialized yet, try to initialize first
       if (!this.initialized) {
-        console.log('Leaderboard manager not initialized, attempting initialization...');
-        try {
-          await this.initialize();
-        } catch (initError) {
-          console.warn('Failed to initialize leaderboard manager:', initError);
-          // Continue with local fallback
-        }
+        await this.initialize();
       }
-
       if (this.useLocalFallback) {
-        console.log('Using local leaderboard fallback after initialization attempt');
         return this.getLocalLeaderboard();
       }
-
-      console.log(`Fetching leaderboard for category: ${category}, limit: ${limit}`);
       const response = await fetch(`${this.baseURL}?category=${encodeURIComponent(category)}&limit=${limit}`, {
         method: 'GET',
         headers: this.getHeaders(),
-        timeout: 8000 // 8 second timeout
+        mode: 'cors',
+        credentials: 'include'
       });
 
       if (!response.ok) {
@@ -504,6 +503,7 @@ async function fetchDataFromAPI(category) {
     const response = await fetch(`${BACKEND_API}/games/data/${category}`, {
       method: 'GET',
       headers: headers,
+      mode: 'cors',
       credentials: 'include' // Include cookies in the request
     });
     
@@ -1085,6 +1085,7 @@ function displayImageFromData(data) {
         fetch(proxyImageUrl, {
           method: 'GET',
           headers: headers,
+          mode: 'cors',
           credentials: 'include' // Include cookies in the request
         })
         .then(response => {

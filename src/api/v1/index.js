@@ -4,6 +4,7 @@ const userRoutes = require('./users/user.routes');
 const gameRoutes = require('./game/game.routes');
 const uploadRoutes = require('./upload/upload.routes');
 const leaderboardRoutes = require('./leaderboard/leaderboard.routes');
+const corsTestRoutes = require('./cors/cors.routes');
 
 const router = express.Router();
 
@@ -19,7 +20,8 @@ router.get('/', (req, res) => {
       game: '/api/v1/game',
       upload: '/api/v1/upload',
       leaderboard: '/api/v1/leaderboard',
-      health: '/api/v1/health'
+      health: '/api/v1/health',
+      corsTest: '/api/v1/cors-test'
     },
     documentation: 'https://github.com/yourusername/animal-crossing-quiz#api-documentation'
   });
@@ -67,5 +69,6 @@ router.use('/users', userRoutes);
 router.use('/games', gameRoutes);
 router.use('/upload', uploadRoutes);
 router.use('/leaderboard', leaderboardRoutes);
+router.use('/cors-test', corsTestRoutes);
 
 module.exports = router;

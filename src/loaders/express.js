@@ -1,5 +1,4 @@
 const express = require('express');
-const cors = require('cors');
 const path = require('path');
 const cookieParser = require('cookie-parser');
 const compression = require('compression');
@@ -13,6 +12,7 @@ const logger = require('../utils/logger');
 const { errorHandler, notFound } = require('../middleware/error');
 const { httpLogger } = require('../middleware/logger');
 const { handleCSRFError, exemptFromCSRF, attachCSRFToken } = require('../../middleware/csrfMiddleware');
+const { customCorsMiddleware } = require('../../middleware/corsMiddleware');
 const apiV1Routes = require('../api/v1');
 
 const setupMiddleware = (app) => {
@@ -22,9 +22,9 @@ const setupMiddleware = (app) => {
   // Set security HTTP headers
   app.use(helmet(config.security.contentSecurityPolicy));
 
-  // Implement CORS
-  app.use(cors(config.cors));
-  app.options('*', cors(config.cors));
+  // Implement CORS with custom middleware to handle preflight requests properly
+  app.use(customCorsMiddleware);
+  app.options('*', customCorsMiddleware);
 
   // Body parser, reading data from body into req.body
   app.use(express.json({ limit: '10kb' }));

@@ -47,7 +47,7 @@ const config = {
         ? ['https://blathers.app', 'https://www.blathers.app'] // Production only
         : ['http://localhost:3000', 'http://localhost:5501', 'http://127.0.0.1:5501', 'http://localhost:8000', 'https://acnhid.b-cdn.net', 'https://blathers.app'], // Development
     methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
-    allowedHeaders: ['Content-Type', 'Authorization'],
+    allowedHeaders: ['Content-Type', 'Authorization', 'X-Guest-Token', 'X-CSRF-Token', 'Accept'],
     exposedHeaders: ['Set-Cookie'],
     credentials: true,
     maxAge: 86400, // 24 hours

@@ -90,10 +90,12 @@ const corsOptions = {
     }
   },
   methods: config.cors.methods,
-  allowedHeaders: config.cors.allowedHeaders,
-  exposedHeaders: config.cors.exposedHeaders,
-  credentials: config.cors.credentials,
-  maxAge: config.cors.maxAge,
+  allowedHeaders: ['Content-Type', 'Authorization', 'X-Guest-Token', 'X-CSRF-Token', 'Accept'],
+  exposedHeaders: ['Set-Cookie', 'Content-Length', 'X-CSRF-Token'],
+  credentials: true,
+  maxAge: 86400, // 24 hours
+  preflightContinue: false,
+  optionsSuccessStatus: 204
 };
 
 // Security headers middleware

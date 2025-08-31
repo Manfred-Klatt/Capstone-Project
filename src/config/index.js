@@ -61,7 +61,7 @@ const config = {
         defaultSrc: ["'self'"],
         scriptSrc: ["'self'", 'https://cdnjs.cloudflare.com'],
         styleSrc: ["'self'"],
-        imgSrc: ["'self'", 'data:', 'blob:', 'https://acnhapi.com', 'https://acnhid.b-cdn.net'],
+        imgSrc: ["'self'", 'data:', 'blob:', 'https://acnhapi.com', 'https://acnhid.b-cdn.net', 'https://dodo.ac', '*'],
         fontSrc: ["'self'", 'data:'],
         connectSrc: ["'self'", 'https://acnhapi.com', 'https://capstone-project-production-3cce.up.railway.app'],
         frameSrc: ["'none'"],

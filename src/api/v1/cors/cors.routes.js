@@ -4,7 +4,7 @@
 
 const express = require('express');
 const corsController = require('./cors.controller');
-const { exemptFromCSRF } = require('../../../middleware/csrfMiddleware');
+const { exemptFromCSRF } = require('../../../../middleware/csrfMiddleware');
 
 const router = express.Router();
 

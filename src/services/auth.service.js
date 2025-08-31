@@ -1,5 +1,5 @@
 const User = require('../models/User');
-const { signToken } = require('../middleware/auth');
+const { signToken } = require('../../middleware/authMiddleware');
 const AppError = require('../utils/appError');
 const { promisify } = require('util');
 const jwt = require('jsonwebtoken');

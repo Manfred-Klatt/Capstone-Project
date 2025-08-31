@@ -6,8 +6,8 @@ const {
   getUserStats,
   getUserHistory
 } = require('./leaderboard.controller');
-const { protect } = require('../../../middleware/auth');
-const { validateLeaderboardSubmission } = require('../../../middleware/validation');
+const { protect } = require('../../../../middleware/authMiddleware');
+const { validateLeaderboardSubmission } = require('../../../../middleware/validation');
 const { allowWithGuestToken } = require('../../../../middleware/guestTokenMiddleware');
 
 const router = express.Router();

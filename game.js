@@ -21,7 +21,7 @@ function cacheDOMElements() {
   ELEMENTS.timerElement = document.getElementById('game-timer'); // Fixed: game-timer instead of timer
   ELEMENTS.timerContainer = document.querySelector('.timer-container'); // Fixed: timer-container class
   ELEMENTS.timerDisplay = document.getElementById('game-timer'); // Fixed: game-timer instead of timer
-  ELEMENTS.leaderboardElement = document.querySelector('.leaderboard'); // Fixed: leaderboard class
+  ELEMENTS.leaderboardElement = document.getElementById('leaderboard'); // Look for leaderboard ID
   ELEMENTS.gameContainer = document.querySelector('.game-container'); // Fixed: game-container class
   
   // Log which elements were not found

@@ -2,7 +2,7 @@ const validator = require('validator');
 const authService = require('../../../services/auth.service');
 const { catchAsync, AppError } = require('../../../utils');
 const logger = require('../../../utils/logger');
-const User = require('../../../models/userModel');
+const User = require('../../../models/User');
 
 // Register a new user
 exports.signup = catchAsync(async (req, res, next) => {

@@ -7,13 +7,13 @@ try {
   const authService = require('./src/services/auth.service');
   const authUtils = require('./src/utils');
   const authLogger = require('./src/utils/logger');
-  const User = require('./src/models/userModel');
+  const User = require('./src/models/User');
   console.log('✓ Auth controller imports successful');
 
   // Test leaderboard controller imports
   console.log('Testing leaderboard controller imports...');
   const Leaderboard = require('./src/models/Leaderboard');
-  const leaderboardUser = require('./src/models/userModel');
+  const leaderboardUser = require('./src/models/User');
   const catchAsync = require('./src/utils/catchAsync');
   const AppError = require('./src/utils/appError');
   const { successResponse } = require('./src/utils/response');

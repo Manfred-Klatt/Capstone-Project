@@ -2,6 +2,10 @@ const gameService = require('../../../services/game.service');
 const userService = require('../../../services/user.service');
 const { catchAsync, AppError } = require('../../../utils');
 const fetch = require('node-fetch');
+const fs = require('fs');
+const path = require('path');
+const https = require('https');
+const http = require('http');
 
 // Get game categories
 exports.getCategories = catchAsync(async (req, res, next) => {
@@ -269,4 +273,54 @@ exports.getUserStats = catchAsync(async (req, res, next) => {
       stats,
     },
   });
+});
+
+// Proxy for images to bypass CORS
+exports.proxyImage = catchAsync(async (req, res, next) => {
+  const { url } = req.query;
+  
+  if (!url) {
+    return next(new AppError('Image URL is required', 400));
+  }
+  
+  try {
+    // Decode the URL
+    const decodedUrl = decodeURIComponent(url);
+    console.log(`Proxying image from: ${decodedUrl}`);
+    
+    // Validate URL
+    const parsedUrl = new URL(decodedUrl);
+    
+    // Only allow specific domains for security
+    const allowedDomains = ['dodo.ac', 'acnhapi.com', 'nookipedia.com'];
+    if (!allowedDomains.some(domain => parsedUrl.hostname.includes(domain))) {
+      return next(new AppError(`Domain not allowed: ${parsedUrl.hostname}`, 403));
+    }
+    
+    // Choose http or https based on protocol
+    const httpClient = parsedUrl.protocol === 'https:' ? https : http;
+    
+    // Forward the request to the target URL
+    httpClient.get(decodedUrl, (imgRes) => {
+      // Check if the image was found
+      if (imgRes.statusCode !== 200) {
+        return next(new AppError(`Image not found: ${imgRes.statusCode}`, imgRes.statusCode));
+      }
+      
+      // Set appropriate headers
+      res.setHeader('Content-Type', imgRes.headers['content-type'] || 'image/png');
+      res.setHeader('Cache-Control', 'public, max-age=86400'); // Cache for 24 hours
+      
+      // Pipe the image data directly to our response
+      imgRes.pipe(res);
+      
+    }).on('error', (err) => {
+      console.error('Error proxying image:', err);
+      return next(new AppError(`Failed to proxy image: ${err.message}`, 500));
+    });
+    
+  } catch (error) {
+    console.error('Error processing image proxy request:', error);
+    return next(new AppError(`Failed to process image: ${error.message}`, 500));
+  }
 });

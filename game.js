@@ -984,26 +984,39 @@ function displayImageFromData(data) {
   ELEMENTS.imageDisplay.alt = data.name?.['name-USen'] || data.name || 'Animal Crossing character or item';
   
   // Force use of API images only - prioritize high quality images
-  const apiImageUrl = data.image_uri || data.icon_uri || data.image || data.photo;
+  const originalImageUrl = data.image_uri || data.icon_uri || data.image || data.photo;
   
-  if (!apiImageUrl) {
+  if (!originalImageUrl) {
     console.error('No API image URL available for:', data.name?.['name-USen'] || data.name);
     ELEMENTS.imageDisplay.style.display = 'none';
     return;
   }
   
-  // Set the API image directly
-  ELEMENTS.imageDisplay.src = apiImageUrl;
+  // Use our backend proxy to avoid CORS issues
+  const proxyImageUrl = `${BACKEND_API}/games/image-proxy?url=${encodeURIComponent(originalImageUrl)}`;
+  console.log(`Using proxied image URL: ${proxyImageUrl}`);
+  
+  // Set the proxied image URL
+  ELEMENTS.imageDisplay.src = proxyImageUrl;
   ELEMENTS.imageDisplay.style.display = 'block';
   
   // Add error handling for failed API images
   ELEMENTS.imageDisplay.onerror = () => {
-    console.error(`Failed to load API image: ${apiImageUrl}`);
-    ELEMENTS.imageDisplay.style.display = 'none';
+    console.error(`Failed to load proxied image: ${proxyImageUrl}`);
+    console.log('Attempting to use original URL as fallback:', originalImageUrl);
+    
+    // Try the original URL as a last resort
+    ELEMENTS.imageDisplay.src = originalImageUrl;
+    
+    // If that also fails, hide the image
+    ELEMENTS.imageDisplay.onerror = () => {
+      console.error(`Failed to load original image: ${originalImageUrl}`);
+      ELEMENTS.imageDisplay.style.display = 'none';
+    };
   };
   
   ELEMENTS.imageDisplay.onload = () => {
-    console.log(`Successfully loaded API image for: ${data.name?.['name-USen'] || data.name}`);
+    console.log(`Successfully loaded image for: ${data.name?.['name-USen'] || data.name}`);
   };
 }
 

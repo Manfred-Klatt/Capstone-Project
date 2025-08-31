@@ -107,15 +107,16 @@
     </script>
     
     <script>
-      // Initialize game when DOM is loaded
       document.addEventListener('DOMContentLoaded', function() {
         // Sound toggle functionality
-        const soundToggle = document.getElementById('sound-toggle');
+        const soundToggle = document.querySelector('.sound-toggle');
         if (soundToggle) {
-          soundToggle.addEventListener('click', function() {
-            const soundManager = window.soundManager;
-            if (soundManager) {
-              soundManager.toggleSound();
+          soundToggle.addEventListener('click', function(e) {
+            e.preventDefault();
+            if (typeof soundManager !== 'undefined') {
+              soundManager.toggle();
+              
+              // Update button image
               const img = this.querySelector('img');
               if (img) {
                 img.src = soundManager.enabled ? 'images/speaker.png' : 'images/speaker-mute.png';

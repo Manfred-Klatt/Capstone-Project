@@ -3,6 +3,19 @@ const API_BASE = 'https://api.nookipedia.com';
 const TIMEOUT = 5000;
 const MAX_SCORE = 10;
 
+// Backend API configuration
+const BACKEND_API = (() => {
+  const hostname = window.location.hostname;
+  
+  // Local development
+  if (hostname === 'localhost' || hostname === '127.0.0.1') {
+    return 'http://localhost:8000/api/v1';
+  }
+  
+  // Production environment - use Railway backend
+  return 'https://capstone-project-production-3cce.up.railway.app/api/v1';
+})();
+
 // === Cached Elements ===
 const ELEMENTS = {};
 
@@ -489,15 +502,8 @@ async function loadFallbackData(category) {
     const data = await response.json();
 
     if (data && data[category] && Array.isArray(data[category]) && data[category].length > 0) {
-      // Process the data to ensure image paths are correct
-      const processedData = data[category].map(item => {
-        // Add local image paths for fallback data
-        return {
-          ...item,
-          image_uri: `images/${category}/${item.id || item.file_name || 'placeholder'}.png`,
-          icon_uri: `images/${category}/${item.id || item.file_name || 'placeholder'}.png`
-        };
-      });
+      // Use the fallback data as-is (already has Nookipedia URLs)
+      const processedData = data[category];
       
       cachedData[category] = processedData;
       console.log(`Loaded fallback data for ${category}: ${processedData.length} items`);
@@ -510,15 +516,8 @@ async function loadFallbackData(category) {
         if (data && data[defaultCategory] && Array.isArray(data[defaultCategory]) && data[defaultCategory].length > 0) {
           console.log(`No data for ${category}, using ${defaultCategory} instead`);
           
-          // Process the data to ensure image paths are correct
-          const processedData = data[defaultCategory].map(item => {
-            // Add local image paths for fallback data
-            return {
-              ...item,
-              image_uri: `images/${defaultCategory}/${item.id || item.file_name || 'placeholder'}.png`,
-              icon_uri: `images/${defaultCategory}/${item.id || item.file_name || 'placeholder'}.png`
-            };
-          });
+          // Use the fallback data as-is (already has Nookipedia URLs)
+          const processedData = data[defaultCategory];
           
           cachedData[category] = processedData;
           return processedData;
@@ -739,34 +738,124 @@ function updateTimerDisplay() {
   }
 }
 
-// === Leaderboard ===
-function saveScoreToLeaderboard(name, score) {
-  const key = "acnh_leaderboard";
-  let leaderboard = JSON.parse(localStorage.getItem(key)) || [];
-  leaderboard.push({
-    name,
-    score
-  });
-  leaderboard.sort((a, b) => b.score - a.score);
-  leaderboard = leaderboard.slice(0, 10);
-  localStorage.setItem(key, JSON.stringify(leaderboard));
-}
+// === Leaderboard API Integration ===
+class LeaderboardManager {
+  constructor() {
+    this.baseURL = `${BACKEND_API}/leaderboard`;
+    this.token = localStorage.getItem('authToken');
+    this.useLocalFallback = false;
+  }
 
-function getLeaderboard() {
-  try {
-    const leaderboardData = localStorage.getItem("acnh_leaderboard");
-    if (!leaderboardData) return [];
+  getHeaders() {
+    const headers = {
+      'Content-Type': 'application/json',
+      'Accept': 'application/json'
+    };
     
-    const parsedData = JSON.parse(leaderboardData);
-    return Array.isArray(parsedData) ? parsedData : [];
-  } catch (error) {
-    console.error('Error parsing leaderboard data:', error);
-    return [];
+    if (this.token) {
+      headers['Authorization'] = `Bearer ${this.token}`;
+    }
+    
+    return headers;
+  }
+
+  async submitScore(name, score, category = 'fish') {
+    try {
+      const scoreData = {
+        category: category,
+        score: score,
+        gameData: {
+          correctAnswers: score,
+          totalQuestions: MAX_SCORE,
+          timeTaken: 120,
+          difficulty: 'medium'
+        }
+      };
+
+      const response = await fetch(`${this.baseURL}/submit`, {
+        method: 'POST',
+        headers: this.getHeaders(),
+        body: JSON.stringify(scoreData)
+      });
+
+      if (!response.ok) {
+        throw new Error('Failed to submit score to backend');
+      }
+
+      const result = await response.json();
+      console.log('Score submitted to backend successfully:', result);
+      return result;
+    } catch (error) {
+      console.log('Backend submission failed, using local storage:', error);
+      this.useLocalFallback = true;
+      return this.saveScoreToLocalStorage(name, score);
+    }
+  }
+
+  async getLeaderboard(category = 'fish') {
+    try {
+      if (this.useLocalFallback) {
+        return this.getLocalLeaderboard();
+      }
+
+      const response = await fetch(`${this.baseURL}/${category}?limit=10`, {
+        method: 'GET',
+        headers: this.getHeaders(),
+        mode: 'cors'
+      });
+
+      if (!response.ok) {
+        throw new Error('Failed to fetch leaderboard from backend');
+      }
+
+      const result = await response.json();
+      return result.data?.leaderboard || [];
+    } catch (error) {
+      console.log('Backend fetch failed, using local storage:', error);
+      this.useLocalFallback = true;
+      return this.getLocalLeaderboard();
+    }
+  }
+
+  saveScoreToLocalStorage(name, score) {
+    const key = "acnh_leaderboard";
+    let leaderboard = JSON.parse(localStorage.getItem(key)) || [];
+    leaderboard.push({ name, score });
+    leaderboard.sort((a, b) => b.score - a.score);
+    leaderboard = leaderboard.slice(0, 10);
+    localStorage.setItem(key, JSON.stringify(leaderboard));
+    return { success: true, local: true };
+  }
+
+  getLocalLeaderboard() {
+    try {
+      const leaderboardData = localStorage.getItem("acnh_leaderboard");
+      if (!leaderboardData) return [];
+      
+      const parsedData = JSON.parse(leaderboardData);
+      return Array.isArray(parsedData) ? parsedData : [];
+    } catch (error) {
+      console.error('Error parsing leaderboard data:', error);
+      return [];
+    }
   }
 }
 
-function renderLeaderboard() {
-  const leaderboard = getLeaderboard();
+// Initialize leaderboard manager
+const leaderboardManager = new LeaderboardManager();
+
+// Legacy functions for compatibility
+function saveScoreToLeaderboard(name, score) {
+  return leaderboardManager.submitScore(name, score);
+}
+
+function getLeaderboard() {
+  return leaderboardManager.getLocalLeaderboard();
+}
+
+async function renderLeaderboard() {
+  const category = ELEMENTS.category ? ELEMENTS.category.value : 'fish';
+  const leaderboard = await leaderboardManager.getLeaderboard(category);
   
   if (!ELEMENTS.leaderboardElement) {
     console.error('Leaderboard element not found');
@@ -785,7 +874,9 @@ function renderLeaderboard() {
   
   leaderboard.forEach(entry => {
     const li = document.createElement('li');
-    li.textContent = `${entry.name}: ${entry.score}`;
+    // Handle both backend format (username) and local format (name)
+    const name = entry.username || entry.name;
+    li.textContent = `${name}: ${entry.score}`;
     ELEMENTS.leaderboardElement.appendChild(li);
   });
 }

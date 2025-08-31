@@ -63,7 +63,7 @@ const config = {
         styleSrc: ["'self'"],
         imgSrc: ["'self'", 'data:', 'blob:', 'https://acnhapi.com', 'https://acnhid.b-cdn.net', 'https://dodo.ac', '*'],
         fontSrc: ["'self'", 'data:'],
-        connectSrc: ["'self'", 'https://acnhapi.com', 'https://capstone-project-production-3cce.up.railway.app'],
+        connectSrc: ["'self'", 'https://acnhapi.com', 'https://capstone-project-production-3cce.up.railway.app', 'https://blathers.app', 'https://www.blathers.app'],
         frameSrc: ["'none'"],
         objectSrc: ["'none'"],
         baseUri: ["'self'"],

@@ -9,6 +9,30 @@ const DailyRotateFile = require('winston-daily-rotate-file');
 const stripAnsi = require('strip-ansi');
 const sensitiveFields = ['password', 'token', 'authorization', 'apiKey', 'apikey', 'secret'];
 
+// Define log levels
+const levels = {
+  error: 0,
+  warn: 1,
+  info: 2,
+  http: 3,
+  debug: 4,
+};
+
+// Define log level based on environment
+const level = () => {
+  // Get environment from multiple sources
+  const env = process.env.NODE_ENV || 'development';
+  
+  // On Railway, use more verbose logging to help with debugging
+  if (process.env.RAILWAY_ENVIRONMENT_NAME) {
+    return process.env.LOG_LEVEL || 'debug';
+  }
+  
+  // Default behavior
+  const isDevelopment = env === 'development';
+  return isDevelopment ? 'debug' : (process.env.LOG_LEVEL || 'info');
+};
+
 // Create logs directory if it doesn't exist
 const logsDir = path.join(process.cwd(), 'logs');
 

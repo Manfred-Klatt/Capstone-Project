@@ -3,12 +3,16 @@ const config = require('../config');
 const logger = require('../utils/logger');
 
 // Load environment variables based on NODE_ENV
-if (process.env.NODE_ENV === 'production') {
+// Railway automatically injects environment variables, so we only need to load from files in local environments
+if (process.env.RAILWAY_ENVIRONMENT_NAME) {
+  // We're on Railway, environment variables are already loaded
+  logger.info('Running on Railway, using injected environment variables');
+} else if (process.env.NODE_ENV === 'production') {
   require('dotenv').config({ path: '.env.production' });
-} else if (process.env.NODE_ENV === 'railway') {
-  require('dotenv').config({ path: '.env.railway' });
+  logger.info('Loaded environment variables from .env.production');
 } else {
   require('dotenv').config(); // Default .env file
+  logger.info('Loaded environment variables from default .env file');
 }
 
 // Constants

@@ -54,9 +54,23 @@ const startServer = async () => {
     // Connect to MongoDB
     await connectDB();
     
+    // Determine port - Railway provides PORT environment variable
+    const port = process.env.PORT || config.port;
+    
+    // Log environment details
+    console.log('Starting server with environment:', {
+      NODE_ENV: process.env.NODE_ENV,
+      RAILWAY_ENVIRONMENT_NAME: process.env.RAILWAY_ENVIRONMENT_NAME || 'not-on-railway',
+      PORT: port,
+      configPort: config.port,
+      configEnv: config.env
+    });
+    
     // Start listening
-    server.listen(config.port, '0.0.0.0', () => {
-      console.log(`Server running in ${config.env} mode on port ${config.port}`);
+    server.listen(port, '0.0.0.0', () => {
+      console.log(`Server running in ${config.env} mode on port ${port}`);
+      console.log(`MongoDB connection string: ${process.env.MONGODB_URI ? 'is set' : 'is NOT set'}`);
+      console.log(`CORS origin: ${process.env.CORS_ORIGIN || config.cors?.origin || 'not explicitly set'}`);
     });
   } catch (err) {
     console.error('Failed to start server:', err);

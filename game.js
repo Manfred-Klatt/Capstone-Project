@@ -31,12 +31,22 @@ class LeaderboardManager {
     this.token = localStorage.getItem('authToken');
     this.useLocalFallback = false;
     this.initialized = false;
+    this.healthCheckTimeout = 5000; // 5 second timeout for health checks
+    this.healthCheckInterval = 60000; // Check every minute if backend is back online
+    this.healthCheckIntervalId = null;
+    this.standaloneConfirmed = localStorage.getItem('standalone_confirmed_this_session') === 'true';
     
     // Initialize with a small delay to avoid blocking the main thread
-    this.initialize().catch(error => {
-      console.warn('LeaderboardManager initialization warning:', error);
-      this.useLocalFallback = true;
-    });
+    setTimeout(() => {
+      this.initialize().catch(error => {
+        console.warn('LeaderboardManager initialization warning:', error);
+        this.useLocalFallback = true;
+        this.enableStandaloneMode('Backend server unavailable. Using standalone mode with local storage.');
+        
+        // Start periodic health checks to detect when backend comes back online
+        this.startPeriodicHealthCheck();
+      });
+    }, 100);
   }
   
   async initialize() {
@@ -44,26 +54,103 @@ class LeaderboardManager {
       // Test the connection to the backend using the correct health endpoint
       console.log('Checking backend health...');
       
-      // Use simpler headers for health check to avoid CORS preflight issues
-      const response = await fetch(`${BACKEND_API}/health`, { 
-        method: 'GET',
-        headers: {
-          'Accept': 'application/json'
-        },
-        mode: 'cors',
-        credentials: 'same-origin'
-      });
+      // Set up timeout for health check
+      const controller = new AbortController();
+      const timeoutId = setTimeout(() => controller.abort(), this.healthCheckTimeout);
       
-      if (response.ok) {
-        this.initialized = true;
-        console.log('LeaderboardManager initialized successfully');
-      } else {
-        throw new Error(`Health check failed with status: ${response.status}`);
+      try {
+        // Use simpler headers for health check to avoid CORS preflight issues
+        const response = await fetch(`${BACKEND_API}/health`, { 
+          method: 'GET',
+          headers: {
+            'Accept': 'application/json'
+          },
+          mode: 'cors',
+          credentials: 'same-origin',
+          signal: controller.signal
+        });
+        
+        clearTimeout(timeoutId);
+        
+        if (response.ok) {
+          const data = await response.json();
+          this.initialized = true;
+          console.log('LeaderboardManager initialized successfully', data);
+          
+          // If we were previously in standalone mode, show a message that we're back online
+          if (this.useLocalFallback) {
+            this.useLocalFallback = false;
+            showMessage('Backend connection restored. Your scores will now be saved online.', 'success');
+          }
+          
+          return true;
+        } else {
+          throw new Error(`Health check failed with status: ${response.status}`);
+        }
+      } catch (fetchError) {
+        clearTimeout(timeoutId);
+        throw fetchError;
       }
     } catch (error) {
       console.warn('Backend unavailable, falling back to local storage:', error.message);
       this.useLocalFallback = true;
       this.initialized = false;
+      
+      // Only show the standalone mode message if not already confirmed
+      if (!this.standaloneConfirmed) {
+        this.enableStandaloneMode('Backend server unavailable. Using standalone mode with local storage.');
+      }
+      
+      return false;
+    }
+  }
+  
+  enableStandaloneMode(message) {
+    // Show a message to the user about standalone mode
+    showMessage(message, 'warning', 10000);
+    this.standaloneConfirmed = true;
+    localStorage.setItem('standalone_confirmed_this_session', 'true');
+  }
+  
+  /**
+   * Start periodic health checks to detect when backend comes back online
+   */
+  startPeriodicHealthCheck() {
+    // Clear any existing interval
+    if (this.healthCheckIntervalId) {
+      clearInterval(this.healthCheckIntervalId);
+    }
+    
+    console.log(`Starting periodic health checks every ${this.healthCheckInterval/1000} seconds`);
+    
+    // Set up new interval
+    this.healthCheckIntervalId = setInterval(async () => {
+      if (this.useLocalFallback) {
+        console.log('Performing periodic health check...');
+        try {
+          const isBackOnline = await this.initialize();
+          if (isBackOnline) {
+            // Backend is back online, stop checking
+            this.stopPeriodicHealthCheck();
+          }
+        } catch (error) {
+          console.log('Backend still unavailable:', error.message);
+        }
+      } else {
+        // We're already online, no need to keep checking
+        this.stopPeriodicHealthCheck();
+      }
+    }, this.healthCheckInterval);
+  }
+  
+  /**
+   * Stop periodic health checks
+   */
+  stopPeriodicHealthCheck() {
+    if (this.healthCheckIntervalId) {
+      console.log('Stopping periodic health checks');
+      clearInterval(this.healthCheckIntervalId);
+      this.healthCheckIntervalId = null;
     }
   }
 
@@ -445,6 +532,83 @@ document.addEventListener('DOMContentLoaded', () => {
   }
 });
 
+// === Game Utilities ===
+function clearErrors() {
+  document.querySelectorAll('.error-message').forEach(el => el.textContent = '');
+}
+
+function displayError(elementId, message) {
+  const errorElement = document.getElementById(`${elementId}Error`);
+  if (errorElement) {
+    errorElement.textContent = message;
+  }
+}
+
+/**
+ * Shows a message notification to the user
+ * @param {string} message - The message to display
+ * @param {string} type - The type of message: 'success', 'error', 'warning', 'info'
+ * @param {number} duration - How long to show the message in milliseconds (default: 5000)
+ */
+function showMessage(message, type = 'info', duration = 5000) {
+  // Check if notification container exists, create if not
+  let notificationContainer = document.getElementById('notification-container');
+  if (!notificationContainer) {
+    notificationContainer = document.createElement('div');
+    notificationContainer.id = 'notification-container';
+    notificationContainer.style.cssText = 'position: fixed; top: 20px; right: 20px; z-index: 9999;';
+    document.body.appendChild(notificationContainer);
+  }
+  
+  // Create notification element
+  const notification = document.createElement('div');
+  notification.className = `notification ${type}`;
+  notification.style.cssText = `
+    padding: 12px 20px;
+    margin-bottom: 10px;
+    border-radius: 4px;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    font-size: 14px;
+    max-width: 350px;
+    opacity: 0;
+    transition: opacity 0.3s ease-in-out;
+    color: white;
+    background-color: ${type === 'success' ? '#4caf50' : 
+                      type === 'error' ? '#f44336' : 
+                      type === 'warning' ? '#ff9800' : 
+                      '#2196f3'};
+  `;
+  
+  // Add message content
+  notification.textContent = message;
+  
+  // Add close button
+  const closeButton = document.createElement('span');
+  closeButton.innerHTML = '&times;';
+  closeButton.style.cssText = 'margin-left: 10px; float: right; cursor: pointer; font-weight: bold;';
+  closeButton.onclick = () => {
+    notification.style.opacity = '0';
+    setTimeout(() => notification.remove(), 300);
+  };
+  notification.prepend(closeButton);
+  
+  // Add to container and animate in
+  notificationContainer.appendChild(notification);
+  setTimeout(() => notification.style.opacity = '1', 10);
+  
+  // Auto-remove after duration
+  if (duration > 0) {
+    setTimeout(() => {
+      if (notification.parentNode) {
+        notification.style.opacity = '0';
+        setTimeout(() => notification.remove(), 300);
+      }
+    }, duration);
+  }
+  
+  return notification;
+}
+
 // === Auth Logic ===
 function initAuthHandlers() {
   const signUpButton = document.getElementById('signUp');
@@ -502,35 +666,81 @@ async function fetchDataFromAPI(category) {
       headers['X-CSRF-Token'] = csrfToken;
     }
     
-    const response = await fetch(`${BACKEND_API}/game/data/${category}`, {
-      method: 'GET',
-      headers: headers,
-      mode: 'cors',
-      credentials: 'same-origin' // Use same-origin to avoid CORS issues
-    });
+    // Set a timeout for the fetch request
+    const controller = new AbortController();
+    const timeoutId = setTimeout(() => controller.abort(), 5000); // 5 second timeout
     
-    if (!response.ok) {
-      throw new Error(`Backend proxy error: ${response.status} ${response.statusText}`);
-    }
-    
-    const result = await response.json();
-    
-    // Check if we have a proper response structure
-    if (result.status === 'success') {
-      const data = result.data || [];
-      const source = result.source || 'api';
+    try {
+      const response = await fetch(`${BACKEND_API}/game/data/${category}`, {
+        method: 'GET',
+        headers: headers,
+        mode: 'cors',
+        credentials: 'same-origin', // Use same-origin to avoid CORS issues
+        signal: controller.signal
+      });
       
-      if (Array.isArray(data) && data.length > 0) {
-        console.log(`Successfully fetched ${data.length} ${category} items from ${source}`);
-        return data;
-      } else {
-        throw new Error('No data returned from backend proxy');
+      clearTimeout(timeoutId); // Clear the timeout if fetch completes
+      
+      if (!response.ok) {
+        throw new Error(`Backend proxy error: ${response.status} ${response.statusText}`);
       }
-    } else {
-      throw new Error(`Invalid response format: ${JSON.stringify(result)}`);
+      
+      const result = await response.json();
+      
+      // Check if we have a proper response structure
+      if (result.status === 'success') {
+        const data = result.data || [];
+        const source = result.source || 'api';
+        
+        if (Array.isArray(data) && data.length > 0) {
+          console.log(`Successfully fetched ${data.length} ${category} items from ${source}`);
+          // Cache the data for offline use
+          localStorage.setItem(`${category}_data`, JSON.stringify(data));
+          localStorage.setItem(`${category}_data_timestamp`, Date.now());
+          return data;
+        } else {
+          throw new Error('No data returned from backend proxy');
+        }
+      } else {
+        throw new Error(`Invalid response format: ${JSON.stringify(result)}`);
+      }
+    } catch (fetchError) {
+      clearTimeout(timeoutId); // Ensure timeout is cleared if fetch fails
+      throw fetchError;
     }
   } catch (error) {
     console.error(`Backend proxy fetch failed for ${category}:`, error);
+    
+    // Try to load from local fallback data
+    console.log(`Attempting to load ${category} data from local fallback...`);
+    
+    // First try localStorage cache
+    const cachedData = localStorage.getItem(`${category}_data`);
+    if (cachedData) {
+      try {
+        const parsedData = JSON.parse(cachedData);
+        console.log(`Successfully loaded ${parsedData.length} ${category} items from local cache`);
+        return parsedData;
+      } catch (cacheError) {
+        console.error('Error parsing cached data:', cacheError);
+      }
+    }
+    
+    // Then try the fallback JSON file
+    try {
+      const fallbackResponse = await fetch(`./fallback-data.json`);
+      if (fallbackResponse.ok) {
+        const fallbackData = await fallbackResponse.json();
+        if (fallbackData[category] && Array.isArray(fallbackData[category])) {
+          console.log(`Successfully loaded ${fallbackData[category].length} ${category} items from fallback file`);
+          return fallbackData[category];
+        }
+      }
+    } catch (fallbackError) {
+      console.error('Error loading fallback data:', fallbackError);
+    }
+    
+    // If all else fails, throw the original error
     throw error;
   }
 }

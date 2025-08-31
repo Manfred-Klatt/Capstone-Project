@@ -26,10 +26,36 @@ const corsMiddleware = cors({
     // Allow requests with no origin (like mobile apps or curl requests)
     if (!origin) return callback(null, true);
     
-    const allowedOrigins = config.cors.origin;
+    // Get allowed origins from environment or config
+    const configOrigins = config.cors.origin || [];
+    const envOrigin = process.env.CORS_ORIGIN;
+    
+    // Combine origins from different sources
+    let allowedOrigins = [...configOrigins];
+    
+    // Add environment-specific origin if available
+    if (envOrigin) {
+      // Handle comma-separated list of origins
+      const envOrigins = envOrigin.split(',').map(o => o.trim());
+      allowedOrigins = [...allowedOrigins, ...envOrigins];
+    }
+    
+    // Always allow blathers.app in production
+    if (process.env.NODE_ENV === 'production' || process.env.RAILWAY_ENVIRONMENT_NAME) {
+      allowedOrigins.push('https://blathers.app');
+      allowedOrigins.push('https://www.blathers.app');
+    }
+    
+    // Log allowed origins in debug mode
+    if (process.env.LOG_LEVEL === 'debug') {
+      console.log('CORS allowed origins:', allowedOrigins);
+      console.log('Request origin:', origin);
+    }
+    
     if (allowedOrigins.includes(origin) || !origin) {
       callback(null, true);
     } else {
+      console.warn(`CORS blocked origin: ${origin}`);
       callback(new Error('Not allowed by CORS'));
     }
   },

@@ -1,3 +1,11 @@
+// === Imports ===
+import { 
+  GAME_EVENTS, 
+  onGameEvent, 
+  updateGameState,
+  getGameState 
+} from './js/reactBridge.js';
+
 // === Constants ===
 const API_BASE = 'https://api.nookipedia.com';
 const TIMEOUT = 5000;
@@ -16,6 +24,161 @@ const BACKEND_API = (() => {
   return 'https://capstone-project-production-3cce.up.railway.app/api/v1';
 })();
 
+// === Leaderboard API Integration ===
+class LeaderboardManager {
+  constructor() {
+    this.baseURL = `${BACKEND_API}/leaderboard`;
+    this.token = localStorage.getItem('authToken');
+    this.useLocalFallback = false;
+    this.initialized = false;
+    
+    // Initialize with a small delay to avoid blocking the main thread
+    this.initialize().catch(error => {
+      console.warn('LeaderboardManager initialization warning:', error);
+      this.useLocalFallback = true;
+    });
+  }
+  
+  async initialize() {
+    try {
+      // Test the connection to the backend
+      await fetch(`${this.baseURL}/health`, { 
+        method: 'GET',
+        headers: this.getHeaders()
+      });
+      this.initialized = true;
+    } catch (error) {
+      console.warn('Falling back to local storage for leaderboard:', error);
+      this.useLocalFallback = true;
+    }
+  }
+
+  getHeaders() {
+    const headers = {
+      'Content-Type': 'application/json',
+      'Accept': 'application/json'
+    };
+    
+    if (this.token) {
+      headers['Authorization'] = `Bearer ${this.token}`;
+    }
+    
+    return headers;
+  }
+
+  async submitScore(name, score, category = 'fish') {
+    try {
+      const scoreData = {
+        category: category,
+        score: score,
+        gameData: {
+          correctAnswers: score,
+          totalQuestions: MAX_SCORE,
+          timeTaken: 120,
+          difficulty: 'medium'
+        }
+      };
+
+      const response = await fetch(`${this.baseURL}/submit`, {
+        method: 'POST',
+        headers: this.getHeaders(),
+        body: JSON.stringify(scoreData)
+      });
+
+      if (!response.ok) {
+        throw new Error('Failed to submit score to backend');
+      }
+
+      const result = await response.json();
+      console.log('Score submitted to backend successfully:', result);
+      return result;
+    } catch (error) {
+      console.log('Backend submission failed, using local storage:', error);
+      this.useLocalFallback = true;
+      return this.saveScoreToLocalStorage(name, score);
+    }
+  }
+
+  async getLeaderboard(category = 'fish') {
+    // If we're already using local fallback, just return local data
+    if (this.useLocalFallback) {
+      return this.getLocalLeaderboard();
+    }
+
+    // If not initialized yet, try to initialize first
+    if (!this.initialized) {
+      try {
+        await this.initialize();
+      } catch (error) {
+        console.warn('Initialization failed, using local storage:', error);
+        this.useLocalFallback = true;
+        return this.getLocalLeaderboard();
+      }
+    }
+
+    // If we're still not initialized, use local storage
+    if (!this.initialized) {
+      this.useLocalFallback = true;
+      return this.getLocalLeaderboard();
+    }
+
+    try {
+      const response = await fetch(`${this.baseURL}/${category}?limit=10`, {
+        method: 'GET',
+        headers: this.getHeaders(),
+        mode: 'cors',
+        signal: AbortSignal.timeout(3000)
+      });
+
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
+
+      const result = await response.json();
+      return result.data?.leaderboard || [];
+    } catch (error) {
+      console.warn('Backend fetch failed, using local storage:', error);
+      this.useLocalFallback = true;
+      return this.getLocalLeaderboard();
+    }
+  }
+
+  saveScoreToLocalStorage(name, score) {
+    const key = "acnh_leaderboard";
+    let leaderboard = JSON.parse(localStorage.getItem(key)) || [];
+    leaderboard.push({ name, score });
+    leaderboard.sort((a, b) => b.score - a.score);
+    leaderboard = leaderboard.slice(0, 10);
+    localStorage.setItem(key, JSON.stringify(leaderboard));
+    return { success: true, local: true };
+  }
+
+  getLocalLeaderboard() {
+    try {
+      const leaderboardData = localStorage.getItem("acnh_leaderboard");
+      if (!leaderboardData) return [];
+      
+      const parsedData = JSON.parse(leaderboardData);
+      return Array.isArray(parsedData) ? parsedData : [];
+    } catch (error) {
+      console.error('Error parsing leaderboard data:', error);
+      return [];
+    }
+  }
+}
+
+// Initialize leaderboard manager early to avoid reference errors
+const leaderboardManager = new LeaderboardManager();
+
+// Legacy functions for compatibility
+async function saveScoreToLeaderboard(name, score) {
+  return leaderboardManager.submitScore(name, score);
+}
+
+async function getLeaderboard() {
+  return leaderboardManager.getLeaderboard();
+}
+
 // === Cached Elements ===
 const ELEMENTS = {};
 
@@ -24,22 +187,31 @@ function cacheDOMElements() {
   // Get elements using their correct IDs from the HTML
   ELEMENTS.category = document.getElementById('category');
   ELEMENTS.guessInput = document.getElementById('guess-input');
-  ELEMENTS.submitButton = document.getElementById('submit-guess');
-  ELEMENTS.nextButton = document.getElementById('next-btn'); // Fixed: next-btn instead of next-button
-  ELEMENTS.startButton = document.getElementById('start-game-btn'); // Fixed: start-game-btn instead of start-game
+  ELEMENTS.gameActionButton = document.getElementById('game-action-btn');
   ELEMENTS.feedback = document.getElementById('feedback');
-  ELEMENTS.imageDisplay = document.getElementById('image-display'); // Fixed: image-display is correct ID
-  ELEMENTS.scoreElement = document.getElementById('score');
-  ELEMENTS.highScoreElement = document.getElementById('high-score');
-  ELEMENTS.timerElement = document.getElementById('game-timer'); // Fixed: game-timer instead of timer
-  ELEMENTS.timerContainer = document.querySelector('.timer-container'); // Fixed: timer-container class
-  ELEMENTS.timerDisplay = document.getElementById('game-timer'); // Fixed: game-timer instead of timer
-  ELEMENTS.leaderboardElement = document.getElementById('leaderboard'); // Look for leaderboard ID
-  ELEMENTS.gameContainer = document.querySelector('.game-container'); // Fixed: game-container class
+  ELEMENTS.imageDisplay = document.getElementById('image-display');
+  ELEMENTS.leaderboardElement = document.getElementById('leaderboard');
+  ELEMENTS.gameContainer = document.querySelector('.game-container');
+  
+  // Get score and high score elements with their value spans
+  ELEMENTS.scoreElement = document.getElementById('score-value');
+  ELEMENTS.highScoreElement = document.getElementById('high-score-value');
+  
+  // Get timer elements
+  ELEMENTS.timerElement = document.getElementById('game-timer');
+  ELEMENTS.timeSpan = document.getElementById('time');
+  ELEMENTS.timerContainer = document.querySelector('.timer-container');
+  
+  // Set up button references - use the same button for both start and submit
+  ELEMENTS.startButton = ELEMENTS.gameActionButton;
+  ELEMENTS.submitButton = ELEMENTS.gameActionButton;
+  
+  // Game state
+  ELEMENTS.gameState = 'idle'; // 'idle', 'playing', 'gameOver'
   
   // Log which elements were not found
   Object.entries(ELEMENTS).forEach(([key, element]) => {
-    if (!element) {
+    if (!element && key !== 'gameState') {
       console.warn(`DOM element not found: ${key}`);
     }
   });
@@ -49,8 +221,9 @@ function cacheDOMElements() {
 let cachedData = {};
 let score = 0;
 let currentItem = null;
-let timeLeft = 15;
+let timeLeft = 10; // Default to medium difficulty (10s)
 let timerInterval;
+let maxTime = 10000; // Default to medium difficulty (10s in ms)
 
 // === Timer Functions ===
 function startTimer() {
@@ -58,13 +231,23 @@ function startTimer() {
 }
 
 function updateTimer() {
-  timeLeft--;
+  // Decrease time based on the actual time passed for better accuracy
+  const now = Date.now();
+  if (!this.lastUpdateTime) {
+    this.lastUpdateTime = now;
+  }
+  
+  const deltaTime = now - this.lastUpdateTime;
+  this.lastUpdateTime = now;
+  
+  timeLeft = Math.max(0, timeLeft - (deltaTime / 1000)); // Convert ms to seconds
   
   // Update timer display using cached element
   updateTimerDisplay();
   
   if (timeLeft <= 0) {
     clearInterval(timerInterval);
+    timerInterval = null;
     endGame();
   }
 }
@@ -102,6 +285,33 @@ document.addEventListener('DOMContentLoaded', () => {
     
     // Cache all DOM elements first
     cacheDOMElements();
+    
+    // Function to update input placeholder based on selected category
+    function updatePlaceholder() {
+      if (ELEMENTS.category && ELEMENTS.guessInput) {
+        let category = ELEMENTS.category.value;
+        let displayText;
+        
+        // Handle special case for 'sea' category
+        if (category === 'sea') {
+          displayText = 'sea creature';
+        } else {
+          // Make other categories singular and lowercase
+          displayText = category.endsWith('s') ? category.slice(0, -1) : category;
+          displayText = displayText.toLowerCase();
+        }
+        
+        ELEMENTS.guessInput.placeholder = `Name that ${displayText}!`;
+      }
+    }
+    
+    // Set initial placeholder
+    updatePlaceholder();
+    
+    // Update placeholder when category changes
+    if (ELEMENTS.category) {
+      ELEMENTS.category.addEventListener('change', updatePlaceholder);
+    }
     
     // Check for critical elements and create them if missing
     const criticalElements = ['guessInput', 'submitButton', 'startButton', 'feedback'];
@@ -142,11 +352,7 @@ document.addEventListener('DOMContentLoaded', () => {
     
     if (ELEMENTS.startButton) {
       console.log('Setting up start button listener');
-      // Fix the start button to call initGame instead of setupNewRound
-      ELEMENTS.startButton.addEventListener('click', () => {
-        console.log('Start button clicked');
-        initGame();
-      });
+      ELEMENTS.startButton.addEventListener('click', initGame);
     }
 
     // Allow Enter key to submit guess
@@ -164,24 +370,29 @@ document.addEventListener('DOMContentLoaded', () => {
     
     // Initialize game state
     score = 0;
-    timeLeft = 15;
-    
-    // Update UI elements with null checks
-    if (ELEMENTS.scoreElement) {
-      ELEMENTS.scoreElement.textContent = `Score: ${score}`;
+    const difficultySelect = document.getElementById('difficulty');
+    if (difficultySelect) {
+      maxTime = parseInt(difficultySelect.value);
+      timeLeft = maxTime / 1000; // Convert ms to seconds
+    } else {
+      maxTime = 10000; // Default to 10s if not found
+      timeLeft = 10;
     }
     
-    if (ELEMENTS.timerElement) {
-      ELEMENTS.timerElement.textContent = `Time: ${timeLeft}s`;
-    }
+    // Update UI elements
+    updateScoreDisplay();
+    updateTimerDisplay();
     
-    if (ELEMENTS.feedback) {
-      ELEMENTS.feedback.textContent = 'Welcome! Click Start Game to begin.';
-    }
-
     // Disable input until game starts
     if (ELEMENTS.guessInput) {
       ELEMENTS.guessInput.disabled = true;
+    }
+    
+    // Initialize leaderboard with error handling
+    try {
+      renderLeaderboard();
+    } catch (error) {
+      console.error('Error initializing leaderboard:', error);
     }
     
     if (ELEMENTS.submitButton) {
@@ -191,9 +402,6 @@ document.addEventListener('DOMContentLoaded', () => {
     if (ELEMENTS.startButton) {
       ELEMENTS.startButton.disabled = false;
     }
-    
-    // Initialize leaderboard
-    renderLeaderboard();
 
   } catch (error) {
     console.error('Error initializing game:', error);
@@ -297,12 +505,56 @@ function handleLogin(e) {
   if (!password) showError('loginPassword', 'Password is required'), isValid = false;
 
   if (isValid) {
-    document.getElementById('greeting').textContent = `Hello, ${email.split('@')[0]}!`;
-    document.getElementById('loginForm').reset();
+    // Handle successful login
+    console.log('Login successful for:', email);
+    // Add your login success logic here
   }
 }
 
-// === Game Logic ===
+if (ELEMENTS.timerElement) {
+  ELEMENTS.timerElement.textContent = `Time: ${timeLeft}s`;
+}
+
+// Disable input until game starts
+if (ELEMENTS.guessInput) {
+  ELEMENTS.guessInput.disabled = true;
+}
+
+if (ELEMENTS.gameActionButton) {
+  ELEMENTS.gameActionButton.textContent = 'Start Game';
+  ELEMENTS.gameActionButton.className = 'btn btn-primary';
+}
+
+// Initialize leaderboard
+renderLeaderboard();
+
+// Game state management is handled by reactBridge.js
+
+function handleGameAction() {
+  const currentState = getGameState();
+  
+  if (!currentState.isPlaying && !currentState.gameOver) {
+    // Start a new game
+    initGame();
+    updateGameState({ 
+      isPlaying: true,
+      gameOver: false,
+      score: 0
+    });
+  } else if (currentState.isPlaying) {
+    // Submit current guess
+    submitGuess();
+  } else if (currentState.gameOver) {
+    // Restart the game
+    initGame();
+    updateGameState({ 
+      isPlaying: true,
+      gameOver: false,
+      score: 0
+    });
+  }
+}
+
 function submitGuess() {
   try {
     // Check if we have the required elements
@@ -310,25 +562,20 @@ function submitGuess() {
       console.error('Guess input element not found');
       return;
     }
-    
+
     const userGuess = ELEMENTS.guessInput.value.trim();
+    
     if (!userGuess) {
       if (ELEMENTS.feedback) {
-        ELEMENTS.feedback.textContent = 'Please enter a guess!';
-        ELEMENTS.feedback.className = 'warning';
+        ELEMENTS.feedback.textContent = 'Please enter a guess';
+        ELEMENTS.feedback.className = 'error';
       }
       return;
     }
 
-    // Process the guess
     handleGuess(userGuess);
     
-    // Update score display
-    if (ELEMENTS.scoreElement) {
-      ELEMENTS.scoreElement.textContent = `Score: ${score}`;
-    }
-    
-    // Reset input field
+    // Clear the input and refocus
     if (ELEMENTS.guessInput) {
       ELEMENTS.guessInput.value = '';
       ELEMENTS.guessInput.focus();
@@ -344,73 +591,92 @@ function submitGuess() {
 
 function handleGuess(userGuess) {
   try {
-    // Stop the timer first
-    stopTimer();
-    
-    // Check if we have a current item
     if (!currentItem) {
-      console.error('No current item set');
-      if (ELEMENTS.feedback) {
-        ELEMENTS.feedback.textContent = 'Error: No item to guess. Please start a new game.';
-        ELEMENTS.feedback.className = 'error';
-      }
-      return;
+      console.error('No current item to check against');
+      return false;
     }
 
-    // Get the correct answer
-    const correctName = currentItem.name?.["name-USen"];
-    if (!correctName) {
-      console.error('Current item has no name property');
-      if (ELEMENTS.feedback) {
-        ELEMENTS.feedback.textContent = 'Error: Invalid item data. Please try again.';
-        ELEMENTS.feedback.className = 'error';
-      }
-      return;
-    }
-    
-    // Check if the guess is correct
-    if (userGuess.toLowerCase() === correctName.toLowerCase()) {
-      // Handle correct answer
+    // Get the correct answer (handle both string and object with name-USen)
+    const correctAnswer = typeof currentItem.name === 'string' 
+      ? currentItem.name.toLowerCase().trim() 
+      : (currentItem.name?.['name-USen'] || '').toLowerCase().trim();
+
+    const normalizedGuess = userGuess.toLowerCase().trim();
+    const isCorrect = normalizedGuess === correctAnswer;
+
+    // Update score and UI based on the result
+    if (isCorrect) {
       score++;
       
+      // Notify React of score update
+      document.dispatchEvent(new CustomEvent(GAME_EVENTS.SCORE_UPDATE, {
+        detail: {
+          score: score,
+          isCorrect: true,
+          correctAnswer: correctAnswer
+        }
+      }));
+      
       if (ELEMENTS.feedback) {
-        ELEMENTS.feedback.textContent = "Correct!";
-        ELEMENTS.feedback.className = "correct";
+        ELEMENTS.feedback.textContent = ' Correct!';
+        ELEMENTS.feedback.className = 'correct';
       }
       
-      // Start new round after brief delay
+      // Update score display if element exists
+      if (ELEMENTS.scoreElement) {
+        ELEMENTS.scoreElement.textContent = `Score: ${score}`;
+      }
+      
+      // Play correct sound if available
+      const correctSound = document.getElementById('correct-sound');
+      if (correctSound) {
+        correctSound.currentTime = 0;
+        correctSound.play().catch(e => console.warn('Could not play sound:', e));
+      }
+      
+      // Setup next round after a short delay
       setTimeout(() => {
         setupNewRound();
-        // Focus on input field if it exists
-        if (ELEMENTS.guessInput) {
-          ELEMENTS.guessInput.focus();
-        }
       }, 1000);
+      
+      return true;
     } else {
-      // Handle incorrect answer
+      // Notify React of incorrect guess
+      document.dispatchEvent(new CustomEvent(GAME_EVENTS.SCORE_UPDATE, {
+        detail: {
+          score: score,
+          isCorrect: false,
+          correctAnswer: correctAnswer
+        }
+      }));
+      
       if (ELEMENTS.feedback) {
-        ELEMENTS.feedback.textContent = `Incorrect! The correct answer was: ${correctName}`;
-        ELEMENTS.feedback.className = "error";
+        ELEMENTS.feedback.textContent = ` Incorrect! The correct answer was: ${correctAnswer}`;
+        ELEMENTS.feedback.className = 'incorrect';
       }
+      
+      // Play incorrect sound if available
+      const incorrectSound = document.getElementById('incorrect-sound');
+      if (incorrectSound) {
+        incorrectSound.currentTime = 0;
+        incorrectSound.play().catch(e => console.warn('Could not play sound:', e));
+      }
+      
+      // End the game on wrong answer
       endGame();
-    }
-
-    // Update score display
-    if (ELEMENTS.scoreElement) {
-      ELEMENTS.scoreElement.textContent = `Score: ${score}`;
-    }
-    
-    // Reset input field
-    if (ELEMENTS.guessInput) {
-      ELEMENTS.guessInput.value = '';
-      ELEMENTS.guessInput.focus();
+      return false;
     }
   } catch (error) {
     console.error('Error in handleGuess:', error);
-    if (ELEMENTS.feedback) {
-      ELEMENTS.feedback.textContent = 'An error occurred. Please try again.';
-      ELEMENTS.feedback.className = 'error';
-    }
+    // Notify React of error
+    document.dispatchEvent(new CustomEvent(GAME_EVENTS.ERROR, {
+      detail: {
+        type: 'guess_error',
+        message: 'Error processing guess',
+        details: error.message
+      }
+    }));
+    return false;
   }
 }
 
@@ -637,7 +903,7 @@ function updateHighScore() {
   if (score > currentHighScore) {
     localStorage.setItem('acnh_high_score', score);
     if (ELEMENTS.highScoreElement) {
-      ELEMENTS.highScoreElement.textContent = `High Score: ${score}`;
+      ELEMENTS.highScoreElement.textContent = score;
     }
     
     // Check if React high score modal is available
@@ -648,7 +914,20 @@ function updateHighScore() {
       // Show the React high score modal
       window.ReactGameComponents.showHighScoreModal(score, placement);
     }
+  } else if (ELEMENTS.highScoreElement && !ELEMENTS.highScoreElement.textContent) {
+    // If no high score is set yet, show the current high score
+    ELEMENTS.highScoreElement.textContent = currentHighScore;
   }
+}
+
+// Update score display
+function updateScoreDisplay() {
+  if (ELEMENTS.scoreElement) {
+    ELEMENTS.scoreElement.textContent = score;
+  }
+  
+  // Also update the high score display
+  updateHighScore();
 }
 
 // Get the placement of a score in the leaderboard
@@ -682,221 +961,165 @@ function displayImageFromData(data) {
     return;
   }
   
-  // Clear previous image
-  ELEMENTS.imageDisplay.innerHTML = "";
+  // Reset display
+  ELEMENTS.imageDisplay.style.display = 'block';
+  ELEMENTS.imageDisplay.alt = data.name || 'Animal Crossing character or item';
   
-  // Determine the image URL based on data structure
-  let imageUrl = '';
-  if (data.image_uri) {
-    imageUrl = data.image_uri;
-  } else if (data.icon_uri) {
-    imageUrl = data.icon_uri;
-  } else if (data.image) {
-    imageUrl = data.image;
-  } else if (data.photo) {
-    imageUrl = data.photo;
-  } else {
-    // Use placeholder image based on category
-    const category = ELEMENTS.category ? ELEMENTS.category.value : 'fish';
-    imageUrl = `images/${category}/placeholder.svg`;
+  // Determine the image URL based on available properties
+  const imageUrl = data.image_uri || data.icon_uri || data.image || data.photo;
+  
+  if (!imageUrl) {
+    console.log('No image URL available');
+    ELEMENTS.imageDisplay.style.display = 'none';
+    return;
   }
   
-  // Create and configure the image element
-  const img = document.createElement("img");
-  img.src = imageUrl;
-  img.alt = data.name?.["name-USen"] || data.name || "Animal Crossing item";
+  // Create new image to test loading
+  const testImg = new Image();
   
-  // Handle image loading errors with local fallback options only
-  img.onerror = () => {
-    console.log('Image load error, using local placeholder');
-    const category = ELEMENTS.category ? ELEMENTS.category.value : 'fish';
-    
-    // Use category-specific placeholder SVG
-    img.src = `images/${category}/placeholder.svg`;
-    
-    // If that fails, use transparent pixel as final fallback
-    img.onerror = () => {
-      console.log('Placeholder failed, using transparent pixel');
-      img.src = 'data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7';
-      img.onerror = null; // Prevent further error loops
-    };
+  testImg.onload = () => {
+    // Only set the source if it loads successfully
+    ELEMENTS.imageDisplay.src = imageUrl;
+    ELEMENTS.imageDisplay.style.display = 'block';
   };
   
-  // Add the image to the display
-  ELEMENTS.imageDisplay.appendChild(img);
-  ELEMENTS.imageDisplay.style.display = "block";
+  testImg.onerror = () => {
+    console.log('Image failed to load');
+    ELEMENTS.imageDisplay.style.display = 'none';
+  };
+  
+  // Start loading the image
+  testImg.src = imageUrl;
 }
 
 function updateTimerDisplay() {
-  if (ELEMENTS.timerElement) {
-    ELEMENTS.timerElement.style.display = 'block';
-    ELEMENTS.timerElement.style.visibility = 'visible';
-    ELEMENTS.timerElement.textContent = `Time left: ${timeLeft}s`;
-    // Timer debug logs removed
-  } else {
-    console.error('Timer element not found');
+  // Update the time display if elements exist, using Math.floor to get whole numbers
+  if (ELEMENTS.timeSpan) {
+    ELEMENTS.timeSpan.textContent = Math.floor(timeLeft);
+  }
+  
+  // Update timer container classes for styling
+  if (ELEMENTS.timerContainer) {
+    // Show the timer
+    ELEMENTS.timerContainer.style.display = 'block';
+    ELEMENTS.timerContainer.style.visibility = 'visible';
+    
+    // Update warning and danger states
+    const secondsLeft = Math.floor(timeLeft);
+    if (secondsLeft <= 10) {
+      ELEMENTS.timerContainer.classList.add('warning');
+      if (secondsLeft <= 5) {
+        ELEMENTS.timerContainer.classList.add('danger');
+      } else {
+        ELEMENTS.timerContainer.classList.remove('danger');
+      }
+    } else {
+      ELEMENTS.timerContainer.classList.remove('warning', 'danger');
+    }
   }
 }
 
-// === Leaderboard API Integration ===
-class LeaderboardManager {
-  constructor() {
-    this.baseURL = `${BACKEND_API}/leaderboard`;
-    this.token = localStorage.getItem('authToken');
-    this.useLocalFallback = false;
-  }
+// Leaderboard API Integration (using the class defined at the top of the file)
 
-  getHeaders() {
-    const headers = {
-      'Content-Type': 'application/json',
-      'Accept': 'application/json'
-    };
-    
-    if (this.token) {
-      headers['Authorization'] = `Bearer ${this.token}`;
-    }
-    
-    return headers;
-  }
+// Legacy functions for compatibility (already defined at the top of the file)
 
-  async submitScore(name, score, category = 'fish') {
+async function renderLeaderboard() {
+  // Helper function to get leaderboard from local storage
+  function getLocalLeaderboard() {
     try {
-      const scoreData = {
-        category: category,
-        score: score,
-        gameData: {
-          correctAnswers: score,
-          totalQuestions: MAX_SCORE,
-          timeTaken: 120,
-          difficulty: 'medium'
-        }
-      };
-
-      const response = await fetch(`${this.baseURL}/submit`, {
-        method: 'POST',
-        headers: this.getHeaders(),
-        body: JSON.stringify(scoreData)
-      });
-
-      if (!response.ok) {
-        throw new Error('Failed to submit score to backend');
-      }
-
-      const result = await response.json();
-      console.log('Score submitted to backend successfully:', result);
-      return result;
+      const localData = localStorage.getItem('acnh_leaderboard');
+      return localData ? JSON.parse(localData) : [];
     } catch (error) {
-      console.log('Backend submission failed, using local storage:', error);
-      this.useLocalFallback = true;
-      return this.saveScoreToLocalStorage(name, score);
-    }
-  }
-
-  async getLeaderboard(category = 'fish') {
-    try {
-      if (this.useLocalFallback) {
-        return this.getLocalLeaderboard();
-      }
-
-      const response = await fetch(`${this.baseURL}/${category}?limit=10`, {
-        method: 'GET',
-        headers: this.getHeaders(),
-        mode: 'cors'
-      });
-
-      if (!response.ok) {
-        throw new Error('Failed to fetch leaderboard from backend');
-      }
-
-      const result = await response.json();
-      return result.data?.leaderboard || [];
-    } catch (error) {
-      console.log('Backend fetch failed, using local storage:', error);
-      this.useLocalFallback = true;
-      return this.getLocalLeaderboard();
-    }
-  }
-
-  saveScoreToLocalStorage(name, score) {
-    const key = "acnh_leaderboard";
-    let leaderboard = JSON.parse(localStorage.getItem(key)) || [];
-    leaderboard.push({ name, score });
-    leaderboard.sort((a, b) => b.score - a.score);
-    leaderboard = leaderboard.slice(0, 10);
-    localStorage.setItem(key, JSON.stringify(leaderboard));
-    return { success: true, local: true };
-  }
-
-  getLocalLeaderboard() {
-    try {
-      const leaderboardData = localStorage.getItem("acnh_leaderboard");
-      if (!leaderboardData) return [];
-      
-      const parsedData = JSON.parse(leaderboardData);
-      return Array.isArray(parsedData) ? parsedData : [];
-    } catch (error) {
-      console.error('Error parsing leaderboard data:', error);
+      console.error('Error reading from local storage:', error);
       return [];
     }
   }
-}
 
-// Initialize leaderboard manager
-const leaderboardManager = new LeaderboardManager();
+  try {
+    // Try to find the leaderboard element if not already cached
+    if (!ELEMENTS.leaderboardElement) {
+      ELEMENTS.leaderboardElement = document.getElementById('leaderboard');
+      if (!ELEMENTS.leaderboardElement) {
+        console.warn('Leaderboard element not found in the DOM');
+        return;
+      }
+    }
+    
+    // Show loading state
+    ELEMENTS.leaderboardElement.innerHTML = '<li>Loading leaderboard...</li>';
 
-// Legacy functions for compatibility
-function saveScoreToLeaderboard(name, score) {
-  return leaderboardManager.submitScore(name, score);
-}
+    const category = ELEMENTS.category ? ELEMENTS.category.value : 'fish';
+    let leaderboard = [];
+    
+    // Check if we can use the leaderboard manager
+    const canUseManager = leaderboardManager && typeof leaderboardManager.getLeaderboard === 'function';
+    
+    if (canUseManager) {
+      try {
+        leaderboard = await leaderboardManager.getLeaderboard(category);
+      } catch (error) {
+        console.warn('Error fetching leaderboard from backend:', error);
+        // Fall back to local storage
+        leaderboard = getLocalLeaderboard();
+      }
+    } else {
+      // Fallback to local storage if leaderboardManager is not available
+      console.warn('Leaderboard manager not available, using local storage');
+      leaderboard = getLocalLeaderboard();
+    }
 
-function getLeaderboard() {
-  return leaderboardManager.getLocalLeaderboard();
-}
+    // Sort by score in descending order and limit to top 10
+    const sortedLeaderboard = leaderboard
+      .sort((a, b) => b.score - a.score)
+      .slice(0, 10);
 
-async function renderLeaderboard() {
-  const category = ELEMENTS.category ? ELEMENTS.category.value : 'fish';
-  const leaderboard = await leaderboardManager.getLeaderboard(category);
-  
-  if (!ELEMENTS.leaderboardElement) {
-    console.error('Leaderboard element not found');
-    return;
+    // Clear and update the leaderboard
+    ELEMENTS.leaderboardElement.innerHTML = '';
+
+    if (sortedLeaderboard.length === 0) {
+      const li = document.createElement('li');
+      li.textContent = 'No scores yet. Be the first!';
+      ELEMENTS.leaderboardElement.appendChild(li);
+      return;
+    }
+
+    // Add entries to the leaderboard
+    sortedLeaderboard.forEach((entry, index) => {
+      const li = document.createElement('li');
+      // Handle both backend format (username) and local format (name)
+      const name = entry.username || entry.name || 'Anonymous';
+      li.textContent = `${index + 1}. ${name}: ${entry.score}`;
+      ELEMENTS.leaderboardElement.appendChild(li);
+    });
+
+  } catch (error) {
+    console.error('Error in renderLeaderboard:', error);
+    if (ELEMENTS.leaderboardElement) {
+      ELEMENTS.leaderboardElement.innerHTML = '<li>Error loading leaderboard</li>';
+    }
   }
-  
-  ELEMENTS.leaderboardElement.innerHTML = "";
-  
-  if (leaderboard.length === 0) {
-    const emptyMessage = document.createElement('li');
-    emptyMessage.textContent = 'No scores yet. Be the first!';
-    emptyMessage.className = 'empty-leaderboard';
-    ELEMENTS.leaderboardElement.appendChild(emptyMessage);
-    return;
-  }
-  
-  leaderboard.forEach(entry => {
-    const li = document.createElement('li');
-    // Handle both backend format (username) and local format (name)
-    const name = entry.username || entry.name;
-    li.textContent = `${name}: ${entry.score}`;
-    ELEMENTS.leaderboardElement.appendChild(li);
-  });
 }
 
 function endGame() {
   try {
     console.log('Game ended');
     
-    // Reset the score
-    score = 0;
+    // Dispatch game over event to React
+    document.dispatchEvent(new CustomEvent(GAME_EVENTS.GAME_OVER, {
+      detail: {
+        score: score,
+        maxScore: MAX_SCORE,
+        correctAnswer: currentItem?.name?.['name-USen'] || 'Unknown'
+      }
+    }));
     
     // Update score display if element exists
     if (ELEMENTS.scoreElement) {
       ELEMENTS.scoreElement.textContent = `Score: ${score}`;
-    }
-    
-    // Show feedback if element exists
-    if (ELEMENTS.feedback && currentItem && currentItem.name && currentItem.name["name-USen"]) {
-      ELEMENTS.feedback.textContent = `❌ Incorrect! The correct answer was: ${currentItem.name["name-USen"]}`;
-      ELEMENTS.feedback.className = 'incorrect';
+      if (ELEMENTS.feedback && currentItem && currentItem.name && currentItem.name["name-USen"]) {
+        ELEMENTS.feedback.textContent = `❌ Incorrect! The correct answer was: ${currentItem.name["name-USen"]}`;
+        ELEMENTS.feedback.className = 'incorrect';
+      }
     }
     
     // Disable all buttons and input if they exist
@@ -942,7 +1165,8 @@ function endGame() {
       restartButton.remove();
       
       // Reset the game
-      initGame(); // Call initGame instead of setupNewRound to properly reset everything
+      resetGame();
+      initGame();
     };
     
     // Add the restart button to the game container
@@ -960,46 +1184,121 @@ function endGame() {
   }
 }
 
+// Reset the game to its initial state
+function resetGame() {
+  try {
+    console.log('Resetting game...');
+    
+    // Stop any running timers
+    stopTimer();
+    
+    // Reset game state
+    score = 0;
+    timeLeft = 10; // Reset to default time
+    
+    // Reset UI elements
+    if (ELEMENTS.scoreElement) ELEMENTS.scoreElement.textContent = '0';
+    if (ELEMENTS.feedback) {
+      ELEMENTS.feedback.textContent = '';
+      ELEMENTS.feedback.className = '';
+    }
+    if (ELEMENTS.guessInput) {
+      ELEMENTS.guessInput.value = '';
+      ELEMENTS.guessInput.disabled = false;
+      ELEMENTS.guessInput.style.display = 'block';
+    }
+    if (ELEMENTS.submitButton) {
+      ELEMENTS.submitButton.disabled = false;
+      ELEMENTS.submitButton.style.display = 'inline-block';
+    }
+    if (ELEMENTS.timerContainer) {
+      ELEMENTS.timerContainer.style.display = 'block';
+    }
+    
+    // Remove any existing restart buttons
+    const existingRestartButton = document.querySelector('.restart-button');
+    if (existingRestartButton) {
+      existingRestartButton.remove();
+    }
+    
+    console.log('Game reset complete');
+  } catch (error) {
+    console.error('Error in resetGame:', error);
+  }
+}
+
 // === React Integration ===
 function setupReactEventListeners() {
-  // Listen for high score submission from React
-  document.addEventListener('react:highscore-submit', (event) => {
-    const { name, score } = event.detail;
-    console.log(`High score submitted from React: ${name} - ${score}`);
-    
-    // Save the score to the leaderboard
-    saveScoreToLeaderboard(name, score);
-    
-    // Update the leaderboard display
-    renderLeaderboard();
-    
-    // Reset the game
-    initGame();
-  });
-  
-  // Listen for high score skip from React
-  document.addEventListener('react:highscore-skip', () => {
-    console.log('High score submission skipped');
-    
-    // Reset the game
-    initGame();
-  });
-}
+  try {
+    // Listen for game start from React
+    document.addEventListener(GAME_EVENTS.GAME_START, (e) => {
+      console.log('Game started from React');
+      if (typeof initGame === 'function') {
+        initGame();
+      }
+    });
 
-// === Helpers ===
-function showError(fieldId, message) {
-  const field = document.getElementById(fieldId);
-  const errorDiv = document.createElement('div');
-  errorDiv.className = 'error';
-  errorDiv.textContent = message;
-  field.parentNode.insertBefore(errorDiv, field.nextSibling);
-}
+    // Listen for game pause from React
+    document.addEventListener(GAME_EVENTS.GAME_PAUSE, (e) => {
+      console.log('Game paused from React');
+      if (typeof stopTimer === 'function') {
+        stopTimer();
+      }
+    });
 
-function clearErrors() {
-  document.querySelectorAll('.error').forEach(err => err.remove());
-}
+    // Listen for game reset from React
+    document.addEventListener(GAME_EVENTS.GAME_RESET, (e) => {
+      console.log('Game reset from React');
+      resetGame();
+    });
 
-function isValidEmail(email) {
-  const re = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-  return re.test(email);
+    // Listen for score submission from React
+    document.addEventListener(GAME_EVENTS.SCORE_SUBMIT, async (e) => {
+      const { name, score, category = 'fish' } = e.detail || {};
+      if (!name || typeof score === 'undefined') {
+        console.error('Invalid score submission data');
+        return;
+      }
+      
+      console.log(`Score submitted from React: ${name} - ${score} (${category})`);
+      
+      try {
+        if (typeof saveScoreToLeaderboard === 'function') {
+          await saveScoreToLeaderboard(name, score, category);
+        }
+        if (typeof renderLeaderboard === 'function') {
+          await renderLeaderboard();
+        }
+        resetGame();
+      } catch (error) {
+        console.error('Error submitting score:', error);
+        // Dispatch error event
+        document.dispatchEvent(new CustomEvent(GAME_EVENTS.ERROR, {
+          detail: {
+            type: 'score_submission_failed',
+            message: 'Failed to submit score',
+            details: error.message
+          }
+        }));
+      }
+    });
+
+    // Update React with initial game state
+    document.dispatchEvent(new CustomEvent(GAME_EVENTS.STATE_UPDATE, {
+      detail: {
+        isPlaying: false,
+        score: 0,
+        highScore: localStorage.getItem('highScore') || 0,
+        timeLeft: 0,
+        category: (ELEMENTS.category && ELEMENTS.category.value) || 'fish',
+        difficulty: 'medium'
+      }
+    }));
+
+    console.log('React event listeners initialized');
+    return true;
+  } catch (error) {
+    console.error('Error initializing React event listeners:', error);
+    return false;
+  }
 }

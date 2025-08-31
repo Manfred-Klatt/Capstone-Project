@@ -7,20 +7,111 @@
     <link rel="stylesheet" href="game.css">
     <link rel="icon" href="favicon.ico" type="image/x-icon">
     
-    <!-- Font loading -->
-    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;700&display=swap" rel="stylesheet">
+    <!-- Custom font loading -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/fontfaceobserver/2.3.0/fontfaceobserver.standalone.js"></script>
-    <script src="js/fontOptimizer.js"></script>
-    <script src="js/backgroundLoader.js"></script>
-    <script src="js/htmlSanitizer.js"></script>
+    <script src="./js/fontOptimizer.js"></script>
+    <script src="./js/backgroundLoader.js"></script>
+    <script src="./js/secureTokenManager.js"></script>
+    
+    <style>
+      @font-face {
+        font-family: 'customfont';
+        src: url('./fonts/customfont.woff2') format('woff2'),
+             url('./fonts/customfont.otf') format('opentype');
+        font-display: swap;
+        font-weight: normal;
+        font-style: normal;
+      }
+
+      * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+        font-family: 'customfont', Arial, sans-serif;
+      }
+      
+      /* Apply custom font to all text elements */
+      body, button, input, select, textarea, h1, h2, h3, h4, h5, h6, p, span, div, a, label, option, optgroup {
+        font-family: 'customfont', Arial, sans-serif;
+        -webkit-font-smoothing: antialiased;
+        -moz-osx-font-smoothing: grayscale;
+        font-synthesis: none;
+        text-rendering: optimizeLegibility;
+      }
+      
+      /* Fallback for font loading */
+      .font-loading * {
+        visibility: hidden;
+      }
+      
+      html.font-fallback * {
+        font-family: Arial, sans-serif;
+      }
+
+      /* CSS custom properties for dynamic background image selection */
+      :root {
+        --background-image: url('images/background.svg');
+      }
+      
+      body {
+        margin: 0;
+        padding: 20px;
+        background-color: #f0f8ff;
+        color: #5a3d2b;
+        background-image: url('images/background.svg');
+        background-size: 100px 100px;
+        background-repeat: repeat;
+        background-attachment: scroll;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        min-height: 100vh;
+        transition: background-image 0.3s ease;
+        /* Text rendering improvements */
+        -webkit-font-smoothing: antialiased;
+        -moz-osx-font-smoothing: grayscale;
+        text-rendering: optimizeLegibility;
+      }
+      
+      /* Progressive background loading */
+      body.bg-loading {
+        background-image: linear-gradient(135deg, #f0f8ff 0%, #e6f3ff 50%, #ddeeff 100%);
+      }
+      
+      body.bg-loaded {
+        background-image: var(--background-image);
+      }
+      
+      /* Responsive background images */
+      @media (max-width: 768px) {
+        body.bg-loaded {
+          background-image: var(--background-image);
+          background-size: cover;
+        }
+      }
+      
+      @media (min-width: 769px) and (max-width: 1200px) {
+        body.bg-loaded {
+          background-image: var(--background-image);
+        }
+      }
+      
+      @media (min-width: 1201px) {
+        body.bg-loaded {
+          background-image: url("images/background.svg");
+        }
+      }
+    </style>
     
     <!-- Sound effects -->
     <audio id="correct-sound" preload="auto">
         <source src="sounds/correct.ogg" type="audio/ogg">
     </audio>
-    <audio id="game-over-sound" preload="auto">
-        <source src="sounds/game-over.ogg" type="audio/ogg">
-    </audio>
+    <div id="game-over" class="hidden rainbow-text">
+        <audio preload="auto">
+            <source src="sounds/game-over.ogg" type="audio/ogg">
+        </audio>
+    </div>
     <audio id="high-score-sound" preload="none">
         <source src="sounds/high-score.ogg" type="audio/ogg">
     </audio>
@@ -40,7 +131,7 @@
             </a>
         </div>
         <div class="nav-center">
-            <h1>Animal Crossing Quiz</h1>
+            <h1 class="rainbow-text">Animal Crossing Quiz</h1>
         </div>
         <div class="nav-right">
             <div class="sound-toggle" id="sound-toggle">
@@ -53,11 +144,33 @@
         <div class="game-container">
             <div class="game-header">
                 <div class="score-container">
-                    <span>Score: <span id="score">0</span></span>
-                    <span>High Score: <span id="high-score">0</span></span>
+                    <div id="score">Score: <span id="score-value">0</span></div>
+                    <div id="high-score">High Score: <span id="high-score-value">0</span></div>
                 </div>
+            </div>
+
+            <div class="game-controls">
+                <div class="category-selector">
+                    <label for="category">Category:</label>
+                    <select id="category" class="category-dropdown">
+                        <option value="fish">Fish</option>
+                        <option value="bugs">Bugs</option>
+                        <option value="sea">Sea Creatures</option>
+                        <option value="villagers">Villagers</option>
+                    </select>
+                </div>
+
+                <div class="difficulty-selector">
+                    <label for="difficulty">Difficulty:</label>
+                    <select id="difficulty" class="category-dropdown">
+                        <option value="5000">Easy (15s)</option>
+                        <option value="10000" selected>Medium (10s)</option>
+                        <option value="15000">Hard (5s)</option>
+                    </select>
+                </div>
+                
                 <div class="timer-container">
-                    <span>Time: <span id="game-timer">60</span>s</span>
+                    <div id="game-timer">Time: <span id="time">30</span>s</div>
                 </div>
             </div>
 
@@ -66,26 +179,14 @@
                     <img id="image-display" src="" alt="Animal Crossing character or item">
                 </div>
 
+                <div id="question" class="question"></div>
                 <div class="input-container">
                     <input type="text" id="guess-input" placeholder="Who's that villager?" autocomplete="off">
-                    <button id="submit-guess" class="btn">Submit</button>
                 </div>
-
-                <div class="feedback" id="feedback"></div>
-
+                <div id="feedback" class="feedback"></div>
                 <div class="controls">
-                    <button id="start-game-btn" class="btn btn-primary">Start Game</button>
-                    <button id="next-btn" class="btn btn-secondary" disabled>Next</button>
+                    <button id="game-action-btn" class="btn btn-primary">Start Game</button>
                 </div>
-            </div>
-
-            <div class="category-selector">
-                <select id="category" class="category-dropdown">
-                    <option value="fish">Fish</option>
-                    <option value="bugs">Bugs</option>
-                    <option value="sea">Sea Creatures</option>
-                    <option value="villagers">Villagers</option>
-                </select>
             </div>
 
             <div class="leaderboard-container" style="margin-top: 20px;">
@@ -98,10 +199,36 @@
     </div>
 
     <!-- Game script must be loaded last -->
-    <script src="game.js"></script>
+    <script type="module" src="game.js"></script>
+    
+    <!-- Font loading script -->
+    <script>
+      // Add font loading class to handle FOUT (Flash of Unstyled Text)
+      document.documentElement.classList.add('font-loading');
+      
+      // Load custom font
+      const customFont = new FontFaceObserver('customfont');
+      
+      Promise.all([
+        customFont.load(),
+        document.fonts.ready
+      ]).then(() => {
+        document.documentElement.classList.remove('font-loading');
+        document.documentElement.classList.add('fonts-loaded');
+      }).catch((err) => {
+        console.warn('Font loading failed, using fallback font', err);
+        document.documentElement.classList.remove('font-loading');
+        document.documentElement.classList.add('font-fallback');
+      });
+    </script>
     
     <!-- Game Mode Configuration -->
     <script>
+      // Set backend URL - use Railway URL in production, fallback to localhost in development
+      const BACKEND_URL = window.location.hostname === 'localhost' 
+        ? 'http://localhost:8000' 
+        : 'https://capstone-project-production-3cce.up.railway.app';
+      
       // Always use local storage for game data
       window.standaloneMode = true;
     </script>

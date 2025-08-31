@@ -2,14 +2,15 @@ const express = require('express');
 const gameController = require('./game.controller');
 const authMiddleware = require('../../../middleware/auth');
 const { catchAsync } = require('../../../utils');
+const { allowWithGuestToken } = require('../../../../middleware/guestTokenMiddleware');
 
 const router = express.Router();
 
 // Public routes
 router.get('/categories', catchAsync(gameController.getCategories));
 router.get('/leaderboard', catchAsync(gameController.getLeaderboard));
-router.get('/data/:category', catchAsync(gameController.getNookipediaData));
-router.get('/image-proxy', catchAsync(gameController.proxyImage));
+router.get('/data/:category', allowWithGuestToken('leaderboard'), catchAsync(gameController.getNookipediaData));
+router.get('/image-proxy', allowWithGuestToken('image'), catchAsync(gameController.proxyImage));
 router.get('/users/:userId/history', catchAsync(gameController.getUserGameHistory));
 router.get('/users/:userId/stats', catchAsync(gameController.getUserStats));
 

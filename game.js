@@ -216,18 +216,42 @@ function initAuthHandlers() {
 // API data fetching function
 async function fetchDataFromAPI(category) {
   try {
-    // API base URL
+    // Nookipedia API requires proper endpoints and API key
     const API_BASE = 'https://api.nookipedia.com';
     
-    // Make sure category has a trailing slash for Nookipedia API
-    const endpoint = category.endsWith('/') ? category : `${category}/`;
+    // Map categories to correct Nookipedia endpoints
+    const endpointMap = {
+      'fish': 'nh/fish',
+      'bugs': 'nh/bugs', 
+      'sea': 'nh/sea',
+      'villagers': 'villagers'
+    };
+    
+    const endpoint = endpointMap[category];
+    if (!endpoint) {
+      throw new Error(`Unknown category: ${category}`);
+    }
+    
+    // Note: Nookipedia API requires an API key for most endpoints
+    // For now, we'll attempt without key and gracefully fall back to local data
     const response = await fetch(`${API_BASE}/${endpoint}`);
     if (!response.ok) {
       throw new Error(`HTTP error! status: ${response.status}`);
     }
-    return await response.json();
+    
+    const data = await response.json();
+    
+    // Transform API data to match our expected format
+    return data.map(item => ({
+      id: item.id || item.file_name,
+      file_name: item.file_name,
+      name: item.name,
+      icon_uri: item.icon_uri || item.image_uri,
+      image_uri: item.image_uri || item.icon_uri
+    }));
+    
   } catch (error) {
-    console.log('Failed to fetch data:', error);
+    console.log('Failed to fetch data from Nookipedia API:', error);
     throw error;
   }
 }

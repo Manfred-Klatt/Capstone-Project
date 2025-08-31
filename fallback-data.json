@@ -1,73 +1,73 @@
 {
     "fish": [
         {
-            "id": "fish1",
-            "file_name": "fish1",
+            "id": "bitterling",
+            "file_name": "bitterling",
             "name": {"name-USen": "Bitterling"},
-            "icon_uri": "images/fish/fish1.png",
-            "image_uri": "images/fish/fish1.png"
+            "icon_uri": "https://dodo.ac/np/images/thumb/1/1e/Bitterling_NH_Icon.png/64px-Bitterling_NH_Icon.png",
+            "image_uri": "https://dodo.ac/np/images/1/1e/Bitterling_NH_Icon.png"
         },
         {
-            "id": "fish2",
-            "file_name": "fish2",
+            "id": "pale_chub",
+            "file_name": "pale_chub", 
             "name": {"name-USen": "Pale Chub"},
-            "icon_uri": "images/fish/fish2.png",
-            "image_uri": "images/fish/fish2.png"
+            "icon_uri": "https://dodo.ac/np/images/thumb/3/31/Pale_Chub_NH_Icon.png/64px-Pale_Chub_NH_Icon.png",
+            "image_uri": "https://dodo.ac/np/images/3/31/Pale_Chub_NH_Icon.png"
         },
         {
-            "id": "fish3",
-            "file_name": "fish3",
+            "id": "koi",
+            "file_name": "koi",
             "name": {"name-USen": "Koi"},
-            "icon_uri": "images/fish/fish3.png",
-            "image_uri": "images/fish/fish3.png"
+            "icon_uri": "https://dodo.ac/np/images/thumb/3/39/Koi_NH_Icon.png/64px-Koi_NH_Icon.png",
+            "image_uri": "https://dodo.ac/np/images/3/39/Koi_NH_Icon.png"
         }
     ],
     "bugs": [
         {
-            "id": "bug1",
-            "file_name": "bug1",
+            "id": "common_butterfly",
+            "file_name": "common_butterfly",
             "name": {"name-USen": "Common Butterfly"},
-            "icon_uri": "images/bugs/bug1.png",
-            "image_uri": "images/bugs/bug1.png"
+            "icon_uri": "https://dodo.ac/np/images/thumb/8/89/Common_Butterfly_NH_Icon.png/64px-Common_Butterfly_NH_Icon.png",
+            "image_uri": "https://dodo.ac/np/images/8/89/Common_Butterfly_NH_Icon.png"
         },
         {
-            "id": "bug2",
-            "file_name": "bug2",
+            "id": "yellow_butterfly",
+            "file_name": "yellow_butterfly",
             "name": {"name-USen": "Yellow Butterfly"},
-            "icon_uri": "images/bugs/bug2.png",
-            "image_uri": "images/bugs/bug2.png"
+            "icon_uri": "https://dodo.ac/np/images/thumb/b/b8/Yellow_Butterfly_NH_Icon.png/64px-Yellow_Butterfly_NH_Icon.png",
+            "image_uri": "https://dodo.ac/np/images/b/b8/Yellow_Butterfly_NH_Icon.png"
         }
     ],
     "sea": [
         {
-            "id": "sea1",
-            "file_name": "sea1",
+            "id": "seaweed",
+            "file_name": "seaweed",
             "name": {"name-USen": "Seaweed"},
-            "icon_uri": "images/sea/sea1.png",
-            "image_uri": "images/sea/sea1.png"
+            "icon_uri": "https://dodo.ac/np/images/thumb/1/1f/Seaweed_NH_Icon.png/64px-Seaweed_NH_Icon.png",
+            "image_uri": "https://dodo.ac/np/images/1/1f/Seaweed_NH_Icon.png"
         },
         {
-            "id": "sea2",
-            "file_name": "sea2",
+            "id": "sea_grapes",
+            "file_name": "sea_grapes",
             "name": {"name-USen": "Sea Grapes"},
-            "icon_uri": "images/sea/sea2.png",
-            "image_uri": "images/sea/sea2.png"
+            "icon_uri": "https://dodo.ac/np/images/thumb/d/d0/Sea_Grapes_NH_Icon.png/64px-Sea_Grapes_NH_Icon.png",
+            "image_uri": "https://dodo.ac/np/images/d/d0/Sea_Grapes_NH_Icon.png"
         }
     ],
     "villagers": [
         {
-            "id": "villager1",
-            "file_name": "villager1",
+            "id": "tom_nook",
+            "file_name": "tom_nook",
             "name": {"name-USen": "Tom Nook"},
-            "icon_uri": "images/villagers/villager1.png",
-            "image_uri": "images/villagers/villager1.png"
+            "icon_uri": "https://dodo.ac/np/images/thumb/6/6a/Tom_Nook_NH.png/64px-Tom_Nook_NH.png",
+            "image_uri": "https://dodo.ac/np/images/6/6a/Tom_Nook_NH.png"
         },
         {
-            "id": "villager2",
-            "file_name": "villager2",
+            "id": "isabelle",
+            "file_name": "isabelle",
             "name": {"name-USen": "Isabelle"},
-            "icon_uri": "images/villagers/villager2.png",
-            "image_uri": "images/villagers/villager2.png"
+            "icon_uri": "https://dodo.ac/np/images/thumb/c/c6/Isabelle_NH.png/64px-Isabelle_NH.png",
+            "image_uri": "https://dodo.ac/np/images/c/c6/Isabelle_NH.png"
         }
     ]
 }

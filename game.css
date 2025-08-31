@@ -15,17 +15,15 @@
 
 body {
     font-family: "Montserrat", "Arial Rounded MT Bold", "Arial", sans-serif;
-    max-width: 800px;
-    margin: 100px auto 0;
-    padding: 20px;
-    text-align: center;
-    background-color: var(--background-color);
-    color: var(--text-color);
+    margin: 0;
+    padding: 0;
+    min-height: 100vh;
+    background-color: rgba(40, 40, 50, 0.85);
     background-image: url("images/background.svg");
-    background-size: 200px 200px; /* Smaller repeating pattern */
+    background-size: 200px 200px;
     background-repeat: repeat;
-    background-position: center;
-    /* Adding text shadow for a black outline effect */
+    background-blend-mode: multiply;
+    color: #ffffff;
     text-shadow: 2px 2px 0px black,
         -2px -2px 0px black,
         2px -2px 0px black,
@@ -43,15 +41,70 @@ body {
   left: 0;
   width: 100vw;
   height: 85px;
-  background: rgba(255,255,255,0.5);
+  background: rgba(255,255,255,0.9);
   z-index: 999;
   display: flex;
   justify-content: space-between;
   align-items: center;
-  box-shadow: 0 2px 12px rgba(0,0,0,0.07);
+  box-shadow: 0 2px 12px rgba(0,0,0,0.2);
   backdrop-filter: blur(10px);
   -webkit-backdrop-filter: blur(10px);
   padding: 0 30px 0 20px;
+}
+
+.nav-left, .nav-center, .nav-right {
+  flex: 1;
+  display: flex;
+  align-items: center;
+}
+
+.nav-left {
+  justify-content: flex-start;
+}
+
+.nav-center {
+  justify-content: center;
+}
+
+.nav-right {
+  justify-content: flex-end;
+}
+
+.home-button {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  text-decoration: none;
+  color: #5a3d2b;
+  font-weight: bold;
+  padding: 8px 12px;
+  border-radius: 8px;
+  transition: background-color 0.3s;
+}
+
+.home-button:hover {
+  background-color: rgba(255, 255, 255, 0.8);
+}
+
+.nav-icon {
+  width: 24px;
+  height: 24px;
+}
+
+.sound-toggle {
+  cursor: pointer;
+  padding: 8px;
+  border-radius: 8px;
+  transition: background-color 0.3s;
+}
+
+.sound-toggle:hover {
+  background-color: rgba(255, 255, 255, 0.8);
+}
+
+.sound-toggle img {
+  width: 24px;
+  height: 24px;
 }
 
 .nav-buttons {
@@ -129,16 +182,85 @@ body {
   cursor: pointer;
 }
 
-#game-container {
-  background-color: var(--container-bg);
-  padding: 20px;
+.main-container {
+  padding-top: 100px;
+  min-height: 100vh;
+  display: flex;
+  justify-content: center;
+  align-items: flex-start;
+}
+
+.game-container {
+  background-color: rgba(255, 249, 240, 0.95);
+  padding: 30px;
   border-radius: 15px;
-  box-shadow: 0 0 15px var(--shadow-color);
-  border: 3px solid var(--border-color);
+  box-shadow: 0 0 20px rgba(0, 0, 0, 0.3);
+  border: 3px solid #8b4513;
   width: 100%;
-  max-width: 1200px;
-  margin: 0 auto;
+  max-width: 800px;
+  margin: 20px;
   box-sizing: border-box;
+  color: #5a3d2b;
+}
+
+.game-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 20px;
+  padding: 15px;
+  background: rgba(255, 255, 255, 0.8);
+  border-radius: 10px;
+}
+
+.score-container {
+  display: flex;
+  gap: 20px;
+  font-weight: bold;
+}
+
+.game-area {
+  text-align: center;
+  margin: 20px 0;
+}
+
+.image-container {
+  margin: 20px 0;
+  min-height: 300px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.input-container {
+  margin: 20px 0;
+  display: flex;
+  gap: 10px;
+  justify-content: center;
+  align-items: center;
+  flex-wrap: wrap;
+}
+
+.controls {
+  margin: 20px 0;
+  display: flex;
+  gap: 15px;
+  justify-content: center;
+  flex-wrap: wrap;
+}
+
+.category-selector {
+  margin: 20px 0;
+  text-align: center;
+}
+
+.category-dropdown {
+  padding: 10px 15px;
+  font-size: 16px;
+  border-radius: 8px;
+  border: 2px solid #8b4513;
+  background-color: #fff;
+  color: #5a3d2b;
 }
 
 h1,
@@ -163,7 +285,7 @@ input,
         -2px 0px 0px black;
 }
 
-#imageDisplay {
+#image-display {
   max-width: 100%;
   max-height: 400px;
   margin: 10px auto;
@@ -176,7 +298,7 @@ input,
   transition: opacity 0.3s ease-in-out;
 }
 
-#imageDisplay.loaded {
+#image-display.loaded {
   opacity: 1;
 }
 
@@ -221,19 +343,58 @@ input, button {
 
 #guess-input {
   width: 100%;
-  max-width: 280px;
-  border: 1px solid var(--border-color);
-  background-color: #fffdf8;
+  max-width: 300px;
+  border: 2px solid #8b4513;
+  background-color: #fff;
   margin: 5px 0;
+  padding: 12px 15px;
+  border-radius: 8px;
+  font-size: 16px;
+  color: #5a3d2b;
 }
 
-button {
+#guess-input:focus {
+  outline: none;
+  border-color: #4CAF50;
+  box-shadow: 0 0 5px rgba(76, 175, 80, 0.3);
+}
+
+.btn {
   background-color: #6b8e23;
   color: white;
   border: none;
   cursor: pointer;
   transition: background-color 0.3s;
-  margin-bottom: 20px;
+  padding: 12px 24px;
+  border-radius: 8px;
+  font-size: 16px;
+  font-weight: bold;
+  margin: 5px;
+}
+
+.btn:hover {
+  background-color: #556b2f;
+}
+
+.btn:disabled {
+  background-color: #cccccc;
+  cursor: not-allowed;
+}
+
+.btn-primary {
+  background-color: #4CAF50;
+}
+
+.btn-primary:hover {
+  background-color: #45a049;
+}
+
+.btn-secondary {
+  background-color: #ff8c00;
+}
+
+.btn-secondary:hover {
+  background-color: #e67e00;
 }
 
 #start-round:hover {

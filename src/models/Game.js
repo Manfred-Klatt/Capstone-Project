@@ -70,87 +70,131 @@ gameSchema.pre(/^find/, function (next) {
 
 // Static method to get leaderboard
 gameSchema.statics.getLeaderboard = async function (category, difficulty, limit = 10) {
-  return this.aggregate([
-    {
-      $match: {
-        ...(category && { category }),
-        ...(difficulty && { difficulty }),
+  try {
+    // Handle case where no games exist yet
+    const gamesExist = await this.countDocuments();
+    if (!gamesExist) {
+      return [];
+    }
+    
+    // Convert limit to number if it's a string
+    const limitNum = parseInt(limit) || 10;
+    
+    // Build match criteria
+    const matchCriteria = {};
+    if (category) matchCriteria.category = category;
+    if (difficulty) matchCriteria.difficulty = difficulty;
+    
+    return this.aggregate([
+      {
+        $match: matchCriteria
       },
-    },
-    {
-      $sort: { score: -1, timeSpent: 1 },
-    },
-    {
-      $limit: limit,
-    },
-    {
-      $lookup: {
-        from: 'users',
-        localField: 'user',
-        foreignField: '_id',
-        as: 'user',
+      {
+        $sort: { score: -1, timeSpent: 1 },
       },
-    },
-    {
-      $unwind: {
-        path: '$user',
-        preserveNullAndEmptyArrays: true, // Allow games without users (guest players)
+      {
+        $limit: limitNum,
       },
-    },
-    {
-      $project: {
-        'user.password': 0,
-        'user.email': 0,
-        'user.active': 0,
-        'user.role': 0,
-        'user.createdAt': 0,
-        'user.updatedAt': 0,
+      {
+        $lookup: {
+          from: 'users',
+          localField: 'user',
+          foreignField: '_id',
+          as: 'user',
+        },
       },
-    },
-  ]);
+      {
+        $unwind: {
+          path: '$user',
+          preserveNullAndEmptyArrays: true, // Allow games without users (guest players)
+        },
+      },
+      {
+        $project: {
+          score: 1,
+          category: 1,
+          difficulty: 1,
+          timeSpent: 1,
+          correctAnswers: 1,
+          totalQuestions: 1,
+          completedAt: 1,
+          createdAt: 1,
+          'user.username': 1,
+          'user.avatar': 1,
+        },
+      },
+    ]);
+  } catch (error) {
+    console.error('Error in getLeaderboard:', error);
+    return [];
+  }
 };
 
 // Static method to get user stats
 gameSchema.statics.getUserStats = async function (userId) {
-  const stats = await this.aggregate([
-    {
-      $match: { user: mongoose.Types.ObjectId(userId) },
-    },
-    {
-      $group: {
-        _id: null,
-        totalGames: { $sum: 1 },
-        totalScore: { $sum: '$score' },
-        avgScore: { $avg: '$score' },
-        bestScore: { $max: '$score' },
-        categories: { $addToSet: '$category' },
-        difficulties: { $addToSet: '$difficulty' },
-        totalCorrect: { $sum: '$correctAnswers' },
-        totalQuestions: { $sum: '$totalQuestions' },
-        avgTimePerGame: { $avg: '$timeSpent' },
+  try {
+    if (!userId) {
+      return null;
+    }
+    
+    // Convert userId to ObjectId if it's a string
+    let userObjectId;
+    try {
+      userObjectId = typeof userId === 'string' ? mongoose.Types.ObjectId(userId) : userId;
+    } catch (err) {
+      console.error('Invalid userId format:', err);
+      return null;
+    }
+    
+    // Check if user has any games
+    const gamesExist = await this.countDocuments({ user: userObjectId });
+    if (!gamesExist) {
+      return null;
+    }
+    
+    const stats = await this.aggregate([
+      {
+        $match: { user: userObjectId },
       },
-    },
-    {
-      $project: {
-        _id: 0,
-        totalGames: 1,
-        totalScore: 1,
-        avgScore: { $round: ['$avgScore', 1] },
-        bestScore: 1,
-        accuracy: {
-          $multiply: [
-            { $divide: ['$totalCorrect', '$totalQuestions'] },
-            100,
-          ],
+      {
+        $group: {
+          _id: null,
+          totalGames: { $sum: 1 },
+          totalScore: { $sum: '$score' },
+          avgScore: { $avg: '$score' },
+          bestScore: { $max: '$score' },
+          categories: { $addToSet: '$category' },
+          difficulties: { $addToSet: '$difficulty' },
+          totalCorrect: { $sum: '$correctAnswers' },
+          totalQuestions: { $sum: '$totalQuestions' },
+          avgTimePerGame: { $avg: '$timeSpent' },
         },
-        categories: 1,
-        difficulties: 1,
-        avgTimePerGame: { $round: ['$avgTimePerGame', 1] },
       },
-    },
-  ]);
+      {
+        $project: {
+          _id: 0,
+          totalGames: 1,
+          totalScore: 1,
+          avgScore: { $round: ['$avgScore', 1] },
+          bestScore: 1,
+          accuracy: {
+            $multiply: [
+              { $divide: ['$totalCorrect', '$totalQuestions'] },
+              100,
+            ],
+          },
+          categories: 1,
+          difficulties: 1,
+          avgTimePerGame: { $round: ['$avgTimePerGame', 1] },
+        },
+      },
+    ]);
 
-  return stats[0] || null;
+    return stats[0] || null;
+  } catch (error) {
+    console.error('Error in getUserStats:', error);
+    return null;
+  }
 };
 
 const Game = mongoose.model('Game', gameSchema);

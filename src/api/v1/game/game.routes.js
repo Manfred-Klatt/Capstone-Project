@@ -2,7 +2,7 @@ const express = require('express');
 const gameController = require('./game.controller');
 const authMiddleware = require('../../../middleware/auth');
 const { catchAsync } = require('../../../utils');
-const { allowWithGuestToken } = require('../../../middleware/guestTokenMiddleware');
+const { allowWithGuestToken } = require('../../../../middleware/guestTokenMiddleware');
 
 const router = express.Router();
 

@@ -330,10 +330,23 @@ exports.proxyImage = catchAsync(async (req, res, next) => {
       return next(new AppError(`Invalid URL: ${error.message}`, 400));
     }
     
-    // Set CORS headers to allow cross-origin requests
-    res.setHeader('Access-Control-Allow-Origin', '*');
+    // Set CORS headers to allow cross-origin requests with credentials
+    // When credentials are included, we can't use wildcard origin
+    const origin = req.headers.origin || '';
+    const allowedOrigins = process.env.NODE_ENV === 'production'
+      ? ['https://blathers.app', 'https://www.blathers.app']
+      : ['http://localhost:3000', 'http://localhost:5501', 'http://127.0.0.1:5501', 'http://localhost:8000', 'https://acnhid.b-cdn.net', 'https://blathers.app'];
+    
+    if (allowedOrigins.includes(origin)) {
+      res.setHeader('Access-Control-Allow-Origin', origin);
+    } else {
+      // Default to the first allowed origin if no match (better than nothing)
+      res.setHeader('Access-Control-Allow-Origin', allowedOrigins[0]);
+    }
+    
     res.setHeader('Access-Control-Allow-Methods', 'GET, OPTIONS');
-    res.setHeader('Access-Control-Allow-Headers', 'Origin, X-Requested-With, Content-Type, Accept, X-Guest-Token, Authorization');
+    res.setHeader('Access-Control-Allow-Headers', 'Origin, X-Requested-With, Content-Type, Accept, X-Guest-Token, Authorization, X-CSRF-Token');
+    res.setHeader('Access-Control-Allow-Credentials', 'true');
     
     // For OPTIONS requests (preflight), return 200 OK with CORS headers
     if (req.method === 'OPTIONS') {
@@ -353,15 +366,29 @@ exports.proxyImage = catchAsync(async (req, res, next) => {
       return next(new AppError(`Image not found: ${response.status}`, response.status));
     }
     
-    // Get the image data as a buffer
-    const imageBuffer = await response.buffer();
+    // Get the image data as an array buffer
+    const imageArrayBuffer = await response.arrayBuffer();
+    const imageBuffer = Buffer.from(imageArrayBuffer);
+    
+    // Get content type from response or infer from URL
+    let contentType = response.headers.get('content-type');
+    if (!contentType) {
+      // Try to infer content type from URL extension
+      if (decodedUrl.endsWith('.png')) contentType = 'image/png';
+      else if (decodedUrl.endsWith('.jpg') || decodedUrl.endsWith('.jpeg')) contentType = 'image/jpeg';
+      else if (decodedUrl.endsWith('.gif')) contentType = 'image/gif';
+      else if (decodedUrl.endsWith('.webp')) contentType = 'image/webp';
+      else if (decodedUrl.endsWith('.svg')) contentType = 'image/svg+xml';
+      else contentType = 'image/png'; // Default fallback
+    }
     
     // Set appropriate headers
-    res.setHeader('Content-Type', response.headers.get('content-type') || 'image/png');
+    res.setHeader('Content-Type', contentType);
+    res.setHeader('Content-Length', imageBuffer.length);
     res.setHeader('Cache-Control', 'public, max-age=86400'); // Cache for 24 hours
     
     // Send the image data
-    res.send(imageBuffer);
+    res.status(200).send(imageBuffer);
     
   } catch (error) {
     console.error('Error processing image proxy request:', error);

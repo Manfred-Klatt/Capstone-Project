@@ -51,7 +51,7 @@ class LeaderboardManager {
           'Accept': 'application/json'
         },
         mode: 'cors',
-        credentials: 'include'
+        credentials: 'same-origin'
       });
       
       if (response.ok) {
@@ -141,11 +141,11 @@ class LeaderboardManager {
       if (this.useLocalFallback) {
         return this.getLocalLeaderboard();
       }
-      const response = await fetch(`${this.baseURL}?category=${encodeURIComponent(category)}&limit=${limit}`, {
+      const response = await fetch(`${this.baseURL}/${encodeURIComponent(category)}?limit=${limit}`, {
         method: 'GET',
         headers: this.getHeaders(),
         mode: 'cors',
-        credentials: 'include'
+        credentials: 'same-origin'
       });
 
       if (!response.ok) {
@@ -504,7 +504,7 @@ async function fetchDataFromAPI(category) {
       method: 'GET',
       headers: headers,
       mode: 'cors',
-      credentials: 'include' // Include cookies in the request
+      credentials: 'same-origin' // Use same-origin to avoid CORS issues
     });
     
     if (!response.ok) {
@@ -1072,8 +1072,8 @@ function displayImageFromData(data) {
         // Use fetch with authentication headers instead of direct src assignment
         const headers = {
           'Accept': 'image/*',
-          // Use the same guest token as defined for leaderboard access
-          'X-Guest-Token': 'x2y5z8a3b6c9d1e4f7g2h5j8k3m6n9p2'
+          // Use the same guest token as defined in the backend .env
+          'X-Guest-Token': 'a7b9c2d5e8f3g6h1j4k7m2n5p8r3t6v9'
         };
         
         // Add CSRF token if available
@@ -1086,7 +1086,7 @@ function displayImageFromData(data) {
           method: 'GET',
           headers: headers,
           mode: 'cors',
-          credentials: 'include' // Include cookies in the request
+          credentials: 'same-origin' // Use same-origin to avoid CORS issues with credentials
         })
         .then(response => {
           if (!response.ok) {

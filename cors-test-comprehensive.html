@@ -1,0 +1,444 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Comprehensive CORS Test</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+            background-color: #f5f5f5;
+            color: #333;
+        }
+        h1 {
+            color: #2c3e50;
+            border-bottom: 2px solid #3498db;
+            padding-bottom: 10px;
+        }
+        .test-section {
+            background-color: #fff;
+            border-radius: 8px;
+            padding: 20px;
+            margin-bottom: 20px;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+        }
+        .test-section h2 {
+            margin-top: 0;
+            color: #2980b9;
+        }
+        .test-controls {
+            margin-bottom: 15px;
+        }
+        button {
+            background-color: #3498db;
+            color: white;
+            border: none;
+            padding: 8px 15px;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 14px;
+            margin-right: 10px;
+            transition: background-color 0.3s;
+        }
+        button:hover {
+            background-color: #2980b9;
+        }
+        .result-container {
+            background-color: #f9f9f9;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            padding: 15px;
+            margin-top: 15px;
+            max-height: 300px;
+            overflow-y: auto;
+            font-family: monospace;
+            white-space: pre-wrap;
+        }
+        .success {
+            color: #27ae60;
+            font-weight: bold;
+        }
+        .error {
+            color: #e74c3c;
+            font-weight: bold;
+        }
+        .warning {
+            color: #f39c12;
+            font-weight: bold;
+        }
+        .info {
+            color: #2980b9;
+        }
+        .image-preview {
+            max-width: 200px;
+            max-height: 200px;
+            border: 1px solid #ddd;
+            margin-top: 10px;
+            display: block;
+        }
+        .test-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
+            gap: 20px;
+        }
+        .credentials-toggle {
+            margin: 10px 0;
+        }
+        select {
+            padding: 8px;
+            border-radius: 4px;
+            border: 1px solid #ddd;
+            margin-right: 10px;
+        }
+        input[type="text"] {
+            padding: 8px;
+            border-radius: 4px;
+            border: 1px solid #ddd;
+            width: 300px;
+        }
+    </style>
+</head>
+<body>
+    <h1>Animal Crossing Quiz - Comprehensive CORS Test</h1>
+    
+    <div class="test-section">
+        <h2>Configuration</h2>
+        <div class="test-controls">
+            <label for="api-url">API Base URL:</label>
+            <input type="text" id="api-url" value="http://localhost:3000/api/v1" />
+        </div>
+        <div class="test-controls">
+            <label for="guest-token">Guest Token:</label>
+            <input type="text" id="guest-token" value="a7b9c2d5e8f3g6h1j4k7m2n5p8r3t6v9" />
+        </div>
+        <button id="save-config">Save Configuration</button>
+        <div id="config-result" class="result-container"></div>
+    </div>
+
+    <div class="test-grid">
+        <div class="test-section">
+            <h2>Health Check</h2>
+            <div class="test-controls">
+                <button id="test-health">Test Health Endpoint</button>
+                <div class="credentials-toggle">
+                    <label for="health-credentials">Credentials Mode:</label>
+                    <select id="health-credentials">
+                        <option value="same-origin">same-origin</option>
+                        <option value="include">include</option>
+                        <option value="omit">omit</option>
+                    </select>
+                </div>
+            </div>
+            <div id="health-result" class="result-container">Results will appear here...</div>
+        </div>
+
+        <div class="test-section">
+            <h2>Leaderboard API</h2>
+            <div class="test-controls">
+                <label for="leaderboard-category">Category:</label>
+                <select id="leaderboard-category">
+                    <option value="fish">Fish</option>
+                    <option value="bugs">Bugs</option>
+                    <option value="sea">Sea Creatures</option>
+                    <option value="villagers">Villagers</option>
+                </select>
+                <div class="credentials-toggle">
+                    <label for="leaderboard-credentials">Credentials Mode:</label>
+                    <select id="leaderboard-credentials">
+                        <option value="same-origin">same-origin</option>
+                        <option value="include">include</option>
+                        <option value="omit">omit</option>
+                    </select>
+                </div>
+                <button id="test-leaderboard">Get Leaderboard</button>
+            </div>
+            <div id="leaderboard-result" class="result-container">Results will appear here...</div>
+        </div>
+
+        <div class="test-section">
+            <h2>Image Proxy</h2>
+            <div class="test-controls">
+                <label for="image-url">Image URL:</label>
+                <select id="image-url">
+                    <option value="https://acnhapi.com/v1/images/fish/1">Fish (Bitterling)</option>
+                    <option value="https://acnhapi.com/v1/images/bugs/1">Bug (Common Butterfly)</option>
+                    <option value="https://acnhapi.com/v1/images/sea/1">Sea Creature (Seaweed)</option>
+                    <option value="https://acnhapi.com/v1/images/villagers/1">Villager (Cyrano)</option>
+                </select>
+                <div class="credentials-toggle">
+                    <label for="image-credentials">Credentials Mode:</label>
+                    <select id="image-credentials">
+                        <option value="same-origin">same-origin</option>
+                        <option value="include">include</option>
+                        <option value="omit">omit</option>
+                    </select>
+                </div>
+                <button id="test-image">Load Image</button>
+            </div>
+            <div id="image-result" class="result-container">Results will appear here...</div>
+            <img id="image-preview" class="image-preview" alt="Image preview will appear here" style="display: none;">
+        </div>
+
+        <div class="test-section">
+            <h2>Game Data API</h2>
+            <div class="test-controls">
+                <label for="data-category">Category:</label>
+                <select id="data-category">
+                    <option value="fish">Fish</option>
+                    <option value="bugs">Bugs</option>
+                    <option value="sea">Sea Creatures</option>
+                    <option value="villagers">Villagers</option>
+                </select>
+                <div class="credentials-toggle">
+                    <label for="data-credentials">Credentials Mode:</label>
+                    <select id="data-credentials">
+                        <option value="same-origin">same-origin</option>
+                        <option value="include">include</option>
+                        <option value="omit">omit</option>
+                    </select>
+                </div>
+                <button id="test-data">Get Game Data</button>
+            </div>
+            <div id="data-result" class="result-container">Results will appear here...</div>
+        </div>
+    </div>
+
+    <script>
+        // Configuration
+        let apiBaseUrl = localStorage.getItem('cors-test-api-url') || 'http://localhost:3000/api/v1';
+        let guestToken = localStorage.getItem('cors-test-guest-token') || 'a7b9c2d5e8f3g6h1j4k7m2n5p8r3t6v9';
+
+        // Initialize form fields
+        document.getElementById('api-url').value = apiBaseUrl;
+        document.getElementById('guest-token').value = guestToken;
+
+        // Save configuration
+        document.getElementById('save-config').addEventListener('click', () => {
+            apiBaseUrl = document.getElementById('api-url').value.trim();
+            guestToken = document.getElementById('guest-token').value.trim();
+            
+            localStorage.setItem('cors-test-api-url', apiBaseUrl);
+            localStorage.setItem('cors-test-guest-token', guestToken);
+            
+            const resultElement = document.getElementById('config-result');
+            resultElement.innerHTML = `<span class="success">Configuration saved!</span>\nAPI URL: ${apiBaseUrl}\nGuest Token: ${guestToken}`;
+        });
+
+        // Helper function to log results
+        function logResult(elementId, message, type = 'info') {
+            const resultElement = document.getElementById(elementId);
+            const timestamp = new Date().toLocaleTimeString();
+            resultElement.innerHTML += `<div class="${type}">[${timestamp}] ${message}</div>`;
+            resultElement.scrollTop = resultElement.scrollHeight;
+        }
+
+        // Helper function to clear results
+        function clearResult(elementId) {
+            const resultElement = document.getElementById(elementId);
+            resultElement.innerHTML = '';
+        }
+
+        // Helper function to get headers
+        function getHeaders() {
+            const headers = {
+                'Accept': 'application/json',
+                'X-Guest-Token': guestToken
+            };
+            
+            // Add CSRF token if available
+            const csrfToken = document.cookie
+                .split('; ')
+                .find(row => row.startsWith('XSRF-TOKEN='))
+                ?.split('=')[1];
+                
+            if (csrfToken) {
+                headers['X-CSRF-Token'] = csrfToken;
+            }
+            
+            return headers;
+        }
+
+        // Test health endpoint
+        document.getElementById('test-health').addEventListener('click', async () => {
+            const resultElement = document.getElementById('health-result');
+            clearResult('health-result');
+            
+            const credentialsMode = document.getElementById('health-credentials').value;
+            logResult('health-result', `Testing health endpoint with credentials: ${credentialsMode}...`);
+            
+            try {
+                const response = await fetch(`${apiBaseUrl}/health`, {
+                    method: 'GET',
+                    headers: getHeaders(),
+                    mode: 'cors',
+                    credentials: credentialsMode
+                });
+                
+                if (response.ok) {
+                    const data = await response.json();
+                    logResult('health-result', `Status: ${response.status} ${response.statusText}`, 'success');
+                    logResult('health-result', `Response: ${JSON.stringify(data, null, 2)}`, 'success');
+                } else {
+                    logResult('health-result', `Error: ${response.status} ${response.statusText}`, 'error');
+                }
+                
+                // Log response headers
+                logResult('health-result', 'Response Headers:', 'info');
+                response.headers.forEach((value, key) => {
+                    logResult('health-result', `${key}: ${value}`, 'info');
+                });
+                
+            } catch (error) {
+                logResult('health-result', `Error: ${error.message}`, 'error');
+            }
+        });
+
+        // Test leaderboard API
+        document.getElementById('test-leaderboard').addEventListener('click', async () => {
+            const resultElement = document.getElementById('leaderboard-result');
+            clearResult('leaderboard-result');
+            
+            const category = document.getElementById('leaderboard-category').value;
+            const credentialsMode = document.getElementById('leaderboard-credentials').value;
+            
+            logResult('leaderboard-result', `Testing leaderboard API for ${category} with credentials: ${credentialsMode}...`);
+            
+            try {
+                const response = await fetch(`${apiBaseUrl}/leaderboard/${category}`, {
+                    method: 'GET',
+                    headers: getHeaders(),
+                    mode: 'cors',
+                    credentials: credentialsMode
+                });
+                
+                if (response.ok) {
+                    const data = await response.json();
+                    logResult('leaderboard-result', `Status: ${response.status} ${response.statusText}`, 'success');
+                    
+                    // Log a summary of the data
+                    if (data.data && data.data.entries) {
+                        logResult('leaderboard-result', `Received ${data.data.entries.length} leaderboard entries`, 'success');
+                    } else {
+                        logResult('leaderboard-result', `Response format: ${JSON.stringify(data, null, 2)}`, 'warning');
+                    }
+                } else {
+                    logResult('leaderboard-result', `Error: ${response.status} ${response.statusText}`, 'error');
+                }
+                
+                // Log response headers
+                logResult('leaderboard-result', 'Response Headers:', 'info');
+                response.headers.forEach((value, key) => {
+                    logResult('leaderboard-result', `${key}: ${value}`, 'info');
+                });
+                
+            } catch (error) {
+                logResult('leaderboard-result', `Error: ${error.message}`, 'error');
+            }
+        });
+
+        // Test image proxy
+        document.getElementById('test-image').addEventListener('click', async () => {
+            const resultElement = document.getElementById('image-result');
+            const imagePreview = document.getElementById('image-preview');
+            clearResult('image-result');
+            imagePreview.style.display = 'none';
+            
+            const imageUrl = document.getElementById('image-url').value;
+            const credentialsMode = document.getElementById('image-credentials').value;
+            
+            logResult('image-result', `Testing image proxy with credentials: ${credentialsMode}...`);
+            logResult('image-result', `Original image URL: ${imageUrl}`);
+            
+            const proxyUrl = `${apiBaseUrl}/games/image-proxy?url=${encodeURIComponent(imageUrl)}`;
+            logResult('image-result', `Proxy URL: ${proxyUrl}`);
+            
+            try {
+                const startTime = performance.now();
+                const response = await fetch(proxyUrl, {
+                    method: 'GET',
+                    headers: {
+                        'Accept': 'image/*',
+                        'X-Guest-Token': guestToken
+                    },
+                    mode: 'cors',
+                    credentials: credentialsMode
+                });
+                
+                if (response.ok) {
+                    const blob = await response.blob();
+                    const endTime = performance.now();
+                    const timeTaken = (endTime - startTime).toFixed(2);
+                    
+                    logResult('image-result', `Status: ${response.status} ${response.statusText}`, 'success');
+                    logResult('image-result', `Content-Type: ${response.headers.get('content-type')}`, 'success');
+                    logResult('image-result', `Image size: ${(blob.size / 1024).toFixed(2)} KB`, 'success');
+                    logResult('image-result', `Time taken: ${timeTaken} ms`, 'success');
+                    
+                    // Display the image
+                    const objectUrl = URL.createObjectURL(blob);
+                    imagePreview.src = objectUrl;
+                    imagePreview.style.display = 'block';
+                } else {
+                    logResult('image-result', `Error: ${response.status} ${response.statusText}`, 'error');
+                }
+                
+                // Log response headers
+                logResult('image-result', 'Response Headers:', 'info');
+                response.headers.forEach((value, key) => {
+                    logResult('image-result', `${key}: ${value}`, 'info');
+                });
+                
+            } catch (error) {
+                logResult('image-result', `Error: ${error.message}`, 'error');
+            }
+        });
+
+        // Test game data API
+        document.getElementById('test-data').addEventListener('click', async () => {
+            const resultElement = document.getElementById('data-result');
+            clearResult('data-result');
+            
+            const category = document.getElementById('data-category').value;
+            const credentialsMode = document.getElementById('data-credentials').value;
+            
+            logResult('data-result', `Testing game data API for ${category} with credentials: ${credentialsMode}...`);
+            
+            try {
+                const response = await fetch(`${apiBaseUrl}/games/data/${category}`, {
+                    method: 'GET',
+                    headers: getHeaders(),
+                    mode: 'cors',
+                    credentials: credentialsMode
+                });
+                
+                if (response.ok) {
+                    const data = await response.json();
+                    logResult('data-result', `Status: ${response.status} ${response.statusText}`, 'success');
+                    
+                    // Log a summary of the data
+                    if (data.data && Array.isArray(data.data)) {
+                        logResult('data-result', `Received ${data.data.length} ${category} items`, 'success');
+                        logResult('data-result', `First item: ${JSON.stringify(data.data[0], null, 2).substring(0, 150)}...`, 'info');
+                    } else {
+                        logResult('data-result', `Response format: ${JSON.stringify(data, null, 2).substring(0, 200)}...`, 'warning');
+                    }
+                } else {
+                    logResult('data-result', `Error: ${response.status} ${response.statusText}`, 'error');
+                }
+                
+                // Log response headers
+                logResult('data-result', 'Response Headers:', 'info');
+                response.headers.forEach((value, key) => {
+                    logResult('data-result', `${key}: ${value}`, 'info');
+                });
+                
+            } catch (error) {
+                logResult('data-result', `Error: ${error.message}`, 'error');
+            }
+        });
+    </script>
+</body>
+</html>

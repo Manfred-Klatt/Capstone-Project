@@ -66,7 +66,7 @@ router.get('/health', (req, res) => {
 // Mount routes
 router.use('/auth', authRoutes);
 router.use('/users', userRoutes);
-router.use('/games', gameRoutes);
+router.use('/game', gameRoutes);
 router.use('/upload', uploadRoutes);
 router.use('/leaderboard', leaderboardRoutes);
 router.use('/cors-test', corsTestRoutes);

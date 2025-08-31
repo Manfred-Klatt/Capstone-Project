@@ -451,13 +451,20 @@ async function fetchDataFromAPI(category) {
     }
     
     const result = await response.json();
-    const data = result.data || result;
     
-    if (Array.isArray(data) && data.length > 0) {
-      console.log(`Successfully fetched ${data.length} ${category} items from backend proxy`);
-      return data;
+    // Check if we have a proper response structure
+    if (result.status === 'success') {
+      const data = result.data || [];
+      const source = result.source || 'api';
+      
+      if (Array.isArray(data) && data.length > 0) {
+        console.log(`Successfully fetched ${data.length} ${category} items from ${source}`);
+        return data;
+      } else {
+        throw new Error('No data returned from backend proxy');
+      }
     } else {
-      throw new Error('No data returned from backend proxy');
+      throw new Error(`Invalid response format: ${JSON.stringify(result)}`);
     }
   } catch (error) {
     console.error(`Backend proxy fetch failed for ${category}:`, error);

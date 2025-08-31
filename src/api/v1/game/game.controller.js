@@ -16,6 +16,8 @@ exports.getCategories = catchAsync(async (req, res, next) => {
 // Proxy endpoint to fetch Nookipedia data and bypass CORS
 exports.getNookipediaData = catchAsync(async (req, res, next) => {
   const { category } = req.params;
+  const fs = require('fs');
+  const path = require('path');
   
   // Validate category
   const validCategories = ['fish', 'bugs', 'sea', 'villagers'];
@@ -24,12 +26,33 @@ exports.getNookipediaData = catchAsync(async (req, res, next) => {
   }
   
   try {
-    console.log(`Fetching ${category} data from Nookipedia API...`);
+    // Check if API key is available
+    const apiKey = process.env.NOOKIPEDIA_API_KEY;
+    if (!apiKey) {
+      console.warn('Missing Nookipedia API key. Using local fallback data.');
+      // Use local fallback data
+      const fallbackPath = path.join(__dirname, '../../../../fallback-data.json');
+      if (fs.existsSync(fallbackPath)) {
+        const fallbackData = JSON.parse(fs.readFileSync(fallbackPath, 'utf8'));
+        if (fallbackData && fallbackData[category] && Array.isArray(fallbackData[category])) {
+          console.log(`Using local fallback data for ${category}`);
+          return res.status(200).json({
+            status: 'success',
+            results: fallbackData[category].length,
+            data: fallbackData[category],
+            source: 'fallback'
+          });
+        }
+      }
+      return next(new AppError('No API key and no fallback data available', 500));
+    }
+    
+    console.log(`Fetching ${category} data from Nookipedia API with key: ${apiKey.substring(0, 5)}...`);
     
     const nookipediaUrl = `https://api.nookipedia.com/${category}`;
     const response = await fetch(nookipediaUrl, {
       headers: {
-        'X-API-KEY': process.env.NOOKIPEDIA_API_KEY || 'your-api-key-here',
+        'X-API-KEY': apiKey,
         'Accept-Version': '1.0.0',
         'User-Agent': 'Animal Crossing Quiz App'
       },
@@ -51,12 +74,33 @@ exports.getNookipediaData = catchAsync(async (req, res, next) => {
     res.status(200).json({
       status: 'success',
       results: data.length,
-      data: data
+      data: data,
+      source: 'api'
     });
     
   } catch (error) {
     console.error(`Error fetching ${category} from Nookipedia:`, error);
-    return next(new AppError(`Failed to fetch ${category} data from API: ${error.message}`, 500));
+    
+    // Try to use fallback data if API request fails
+    try {
+      const fallbackPath = path.join(__dirname, '../../../../fallback-data.json');
+      if (fs.existsSync(fallbackPath)) {
+        const fallbackData = JSON.parse(fs.readFileSync(fallbackPath, 'utf8'));
+        if (fallbackData && fallbackData[category] && Array.isArray(fallbackData[category])) {
+          console.log(`API request failed. Using local fallback data for ${category}`);
+          return res.status(200).json({
+            status: 'success',
+            results: fallbackData[category].length,
+            data: fallbackData[category],
+            source: 'fallback'
+          });
+        }
+      }
+    } catch (fallbackError) {
+      console.error('Failed to load fallback data:', fallbackError);
+    }
+    
+    return next(new AppError(`Failed to fetch ${category} data: ${error.message}`, 500));
   }
 });
 

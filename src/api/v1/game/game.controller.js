@@ -17,11 +17,9 @@ exports.getCategories = catchAsync(async (req, res, next) => {
   });
 });
 
-// Proxy endpoint to fetch Nookipedia data and bypass CORS
+// Get game data - uses local fallback when Nookipedia API is unavailable
 exports.getNookipediaData = catchAsync(async (req, res, next) => {
   const { category } = req.params;
-  const fs = require('fs');
-  const path = require('path');
   
   // Validate category
   const validCategories = ['fish', 'bugs', 'sea', 'villagers'];
@@ -31,46 +29,75 @@ exports.getNookipediaData = catchAsync(async (req, res, next) => {
   
   // Check if API key is available
   const apiKey = process.env.NOOKIPEDIA_API_KEY;
-  if (!apiKey) {
-    return next(new AppError('Nookipedia API key is required for production', 500));
+  
+  // If API key is available, try to fetch from Nookipedia
+  if (apiKey && apiKey.trim() && !apiKey.includes('your_actual_api_key_here')) {
+    try {
+      console.log(`Fetching ${category} data from Nookipedia API...`);
+      
+      const nookipediaUrl = `https://api.nookipedia.com/nh/${category}`;
+      const response = await fetch(nookipediaUrl, {
+        headers: {
+          'X-API-KEY': apiKey,
+          'Accept-Version': '1.0.0',
+          'User-Agent': 'Animal Crossing Quiz App'
+        },
+        timeout: 10000
+      });
+      
+      if (!response.ok) {
+        throw new Error(`Nookipedia API error: ${response.status} ${response.statusText}`);
+      }
+      
+      const data = await response.json();
+      
+      if (!Array.isArray(data) || data.length === 0) {
+        throw new Error('No data returned from Nookipedia API');
+      }
+      
+      console.log(`Successfully fetched ${data.length} ${category} items from Nookipedia`);
+      
+      return res.status(200).json({
+        status: 'success',
+        results: data.length,
+        data: data,
+        source: 'api'
+      });
+      
+    } catch (error) {
+      console.warn(`Nookipedia API failed for ${category}, falling back to local data:`, error.message);
+      // Fall through to local data fallback
+    }
+  } else {
+    console.log(`No valid Nookipedia API key found, using local data for ${category}`);
   }
   
+  // Fallback to local data
   try {
+    const fallbackPath = path.join(__dirname, '../../../../data', `${category}.json`);
     
-    console.log(`Fetching ${category} data from Nookipedia API with key: ${apiKey.substring(0, 5)}...`);
-    
-    const nookipediaUrl = `https://api.nookipedia.com/${category}`;
-    const response = await fetch(nookipediaUrl, {
-      headers: {
-        'X-API-KEY': apiKey,
-        'Accept-Version': '1.0.0',
-        'User-Agent': 'Animal Crossing Quiz App'
-      },
-      timeout: 10000
-    });
-    
-    if (!response.ok) {
-      throw new Error(`Nookipedia API error: ${response.status} ${response.statusText}`);
+    if (!fs.existsSync(fallbackPath)) {
+      return next(new AppError(`No local data available for ${category}`, 404));
     }
     
-    const data = await response.json();
+    const localData = JSON.parse(fs.readFileSync(fallbackPath, 'utf8'));
     
-    if (!Array.isArray(data) || data.length === 0) {
-      throw new Error('No data returned from Nookipedia API');
+    if (!Array.isArray(localData) || localData.length === 0) {
+      return next(new AppError(`Invalid local data for ${category}`, 500));
     }
     
-    console.log(`Successfully fetched ${data.length} ${category} items from Nookipedia`);
+    console.log(`Using local fallback data for ${category}: ${localData.length} items`);
     
     res.status(200).json({
       status: 'success',
-      results: data.length,
-      data: data,
-      source: 'api'
+      results: localData.length,
+      data: localData,
+      source: 'local'
     });
     
   } catch (error) {
-    console.error(`Error fetching ${category} from Nookipedia:`, error);
-    return next(new AppError(`Failed to fetch ${category} data from Nookipedia: ${error.message}`, 500));
+    console.error(`Error loading local data for ${category}:`, error);
+    return next(new AppError(`Failed to load ${category} data: ${error.message}`, 500));
   }
 });
 

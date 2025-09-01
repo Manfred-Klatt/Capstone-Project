@@ -648,7 +648,7 @@ function getCSRFToken() {
   return null;
 }
 
-// API data fetching function - uses backend proxy to bypass CORS
+// API data fetching function - uses backend proxy with local fallback
 async function fetchDataFromAPI(category) {
   try {
     console.log(`Fetching ${category} data from backend proxy...`);
@@ -667,34 +667,31 @@ async function fetchDataFromAPI(category) {
     }
     
     // Set a timeout for the fetch request
-    const controller = new AbortController();
-    const timeoutId = setTimeout(() => controller.abort(), 5000); // 5 second timeout
+    const timeoutId = setTimeout(() => {
+      throw new Error('Request timeout');
+    }, 10000);
     
     try {
       const response = await fetch(`${BACKEND_API}/game/data/${category}`, {
         method: 'GET',
         headers: headers,
         mode: 'cors',
-        credentials: 'same-origin', // Use same-origin to avoid CORS issues
-        signal: controller.signal
+        credentials: 'omit'
       });
       
-      clearTimeout(timeoutId); // Clear the timeout if fetch completes
+      clearTimeout(timeoutId); // Clear timeout if request completes
       
       if (!response.ok) {
-        throw new Error(`Backend proxy error: ${response.status} ${response.statusText}`);
+        throw new Error(`Backend proxy error: ${response.status}`);
       }
       
       const result = await response.json();
       
-      // Check if we have a proper response structure
-      if (result.status === 'success') {
-        const data = result.data || [];
-        const source = result.source || 'api';
-        
-        if (Array.isArray(data) && data.length > 0) {
-          console.log(`Successfully fetched ${data.length} ${category} items from ${source}`);
-          // Cache the data for offline use
+      if (result.status === 'success' && result.data && Array.isArray(result.data)) {
+        const data = result.data;
+        if (data.length > 0) {
+          console.log(`Successfully fetched ${data.length} ${category} items from backend proxy`);
+          // Cache the data with timestamp
           localStorage.setItem(`${category}_data`, JSON.stringify(data));
           localStorage.setItem(`${category}_data_timestamp`, Date.now());
           return data;
@@ -711,8 +708,28 @@ async function fetchDataFromAPI(category) {
   } catch (error) {
     console.error(`Backend proxy fetch failed for ${category}:`, error);
     
-    // No fallback - throw the original error
-    throw error;
+    // Fallback to local data files as last resort
+    try {
+      console.log(`Attempting to load local ${category} data as fallback...`);
+      const response = await fetch(`data/${category}.json`);
+      if (!response.ok) {
+        throw new Error(`Local data file not found: ${response.status}`);
+      }
+      const localData = await response.json();
+      
+      if (Array.isArray(localData) && localData.length > 0) {
+        console.log(`Successfully loaded ${localData.length} ${category} items from local data`);
+        // Cache the fallback data
+        localStorage.setItem(`${category}_data`, JSON.stringify(localData));
+        localStorage.setItem(`${category}_data_timestamp`, Date.now());
+        return localData;
+      } else {
+        throw new Error('Invalid local data format');
+      }
+    } catch (fallbackError) {
+      console.error(`Local data fallback failed for ${category}:`, fallbackError);
+      throw new Error(`Failed to load ${category} data from both backend and local sources`);
+    }
   }
 }
 

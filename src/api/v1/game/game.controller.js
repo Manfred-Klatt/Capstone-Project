@@ -29,27 +29,13 @@ exports.getNookipediaData = catchAsync(async (req, res, next) => {
     return next(new AppError('Invalid category. Must be one of: fish, bugs, sea, villagers', 400));
   }
   
+  // Check if API key is available
+  const apiKey = process.env.NOOKIPEDIA_API_KEY;
+  if (!apiKey) {
+    return next(new AppError('Nookipedia API key is required for production', 500));
+  }
+  
   try {
-    // Check if API key is available
-    const apiKey = process.env.NOOKIPEDIA_API_KEY;
-    if (!apiKey) {
-      console.warn('Missing Nookipedia API key. Using local fallback data.');
-      // Use local fallback data
-      const fallbackPath = path.join(__dirname, '../../../../fallback-data.json');
-      if (fs.existsSync(fallbackPath)) {
-        const fallbackData = JSON.parse(fs.readFileSync(fallbackPath, 'utf8'));
-        if (fallbackData && fallbackData[category] && Array.isArray(fallbackData[category])) {
-          console.log(`Using local fallback data for ${category}`);
-          return res.status(200).json({
-            status: 'success',
-            results: fallbackData[category].length,
-            data: fallbackData[category],
-            source: 'fallback'
-          });
-        }
-      }
-      return next(new AppError('No API key and no fallback data available', 500));
-    }
     
     console.log(`Fetching ${category} data from Nookipedia API with key: ${apiKey.substring(0, 5)}...`);
     
@@ -84,27 +70,7 @@ exports.getNookipediaData = catchAsync(async (req, res, next) => {
     
   } catch (error) {
     console.error(`Error fetching ${category} from Nookipedia:`, error);
-    
-    // Try to use fallback data if API request fails
-    try {
-      const fallbackPath = path.join(__dirname, '../../../../fallback-data.json');
-      if (fs.existsSync(fallbackPath)) {
-        const fallbackData = JSON.parse(fs.readFileSync(fallbackPath, 'utf8'));
-        if (fallbackData && fallbackData[category] && Array.isArray(fallbackData[category])) {
-          console.log(`API request failed. Using local fallback data for ${category}`);
-          return res.status(200).json({
-            status: 'success',
-            results: fallbackData[category].length,
-            data: fallbackData[category],
-            source: 'fallback'
-          });
-        }
-      }
-    } catch (fallbackError) {
-      console.error('Failed to load fallback data:', fallbackError);
-    }
-    
-    return next(new AppError(`Failed to fetch ${category} data: ${error.message}`, 500));
+    return next(new AppError(`Failed to fetch ${category} data from Nookipedia: ${error.message}`, 500));
   }
 });
 

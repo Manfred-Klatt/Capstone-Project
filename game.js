@@ -711,36 +711,7 @@ async function fetchDataFromAPI(category) {
   } catch (error) {
     console.error(`Backend proxy fetch failed for ${category}:`, error);
     
-    // Try to load from local fallback data
-    console.log(`Attempting to load ${category} data from local fallback...`);
-    
-    // First try localStorage cache
-    const cachedData = localStorage.getItem(`${category}_data`);
-    if (cachedData) {
-      try {
-        const parsedData = JSON.parse(cachedData);
-        console.log(`Successfully loaded ${parsedData.length} ${category} items from local cache`);
-        return parsedData;
-      } catch (cacheError) {
-        console.error('Error parsing cached data:', cacheError);
-      }
-    }
-    
-    // Then try the fallback JSON file
-    try {
-      const fallbackResponse = await fetch(`./fallback-data.json`);
-      if (fallbackResponse.ok) {
-        const fallbackData = await fallbackResponse.json();
-        if (fallbackData[category] && Array.isArray(fallbackData[category])) {
-          console.log(`Successfully loaded ${fallbackData[category].length} ${category} items from fallback file`);
-          return fallbackData[category];
-        }
-      }
-    } catch (fallbackError) {
-      console.error('Error loading fallback data:', fallbackError);
-    }
-    
-    // If all else fails, throw the original error
+    // No fallback - throw the original error
     throw error;
   }
 }
@@ -1068,52 +1039,6 @@ function setupNewRound() {
 
 
 // === API & Data ===
-async function loadFallbackData(category) {
-  try {
-    console.log(`Loading fallback data for ${category}...`);
-    const response = await fetch('fallback-data.json');
-    if (!response.ok) {
-      throw new Error(`HTTP error! status: ${response.status}`);
-    }
-    const data = await response.json();
-
-    if (data && data[category] && Array.isArray(data[category]) && data[category].length > 0) {
-      // Use the fallback data as-is (already has Nookipedia URLs)
-      const processedData = data[category];
-      
-      cachedData[category] = processedData;
-      console.log(`Loaded fallback data for ${category}: ${processedData.length} items`);
-      
-      return processedData;
-    } else {
-      // If the category doesn't exist or is empty, try to use a default category
-      const defaultCategories = ['fish', 'bugs', 'sea', 'villagers'];
-      for (const defaultCategory of defaultCategories) {
-        if (data && data[defaultCategory] && Array.isArray(data[defaultCategory]) && data[defaultCategory].length > 0) {
-          console.log(`No data for ${category}, using ${defaultCategory} instead`);
-          
-          // Use the fallback data as-is (already has Nookipedia URLs)
-          const processedData = data[defaultCategory];
-          
-          cachedData[category] = processedData;
-          return processedData;
-        }
-      }
-    }
-
-    // If we still don't have data, create minimal fallback
-    const minimalFallback = [
-      { id: 'fallback1', name: { 'name-USen': 'Fallback Item 1' }, icon_uri: 'images/placeholder.svg' },
-      { id: 'fallback2', name: { 'name-USen': 'Fallback Item 2' }, icon_uri: 'images/placeholder.svg' },
-      { id: 'fallback3', name: { 'name-USen': 'Fallback Item 3' }, icon_uri: 'images/placeholder.svg' }
-    ];
-    cachedData[category] = minimalFallback;
-    return minimalFallback;
-  } catch (error) {
-    console.error('Error loading fallback data:', error);
-    return [];
-  }
-}
 
 async function initGame() {
   const category = ELEMENTS.category ? ELEMENTS.category.value : 'fish';
@@ -1273,46 +1198,15 @@ function displayImageFromData(data) {
     return 'fish'; // Default fallback
   }
   
-  // Try different image loading strategies in sequence
-  const tryLoadImage = (strategy) => {
-    switch(strategy) {
-      case 'direct':
-        // Try direct URL first
-        console.log(`Using direct image URL: ${originalImageUrl}`);
-        ELEMENTS.imageDisplay.src = originalImageUrl;
-        break;
-        
-      case 'placeholder':
-        // Use category-specific placeholder as fallback
-        const category = getCurrentCategory();
-        const placeholderPath = `./images/${category}/placeholder.svg`;
-        console.log(`Using placeholder image: ${placeholderPath}`);
-        ELEMENTS.imageDisplay.src = placeholderPath;
-        break;
-        
-      case 'hide':
-        // If all else fails, hide the image
-        console.error('All image loading strategies failed');
-        ELEMENTS.imageDisplay.style.display = 'none';
-        return;
-    }
-  };
+  // Use Nookipedia image URL directly
+  console.log(`Loading Nookipedia image: ${originalImageUrl}`);
+  ELEMENTS.imageDisplay.src = originalImageUrl;
+  ELEMENTS.imageDisplay.style.display = 'block';
   
-  // Start with direct strategy
-  tryLoadImage('direct');
-  
-  // Set up error handling for direct URL loading failures
+  // Handle image load errors
   ELEMENTS.imageDisplay.onerror = () => {
-    console.error(`Failed to load direct image`);
-    // Try placeholder as fallback
-    tryLoadImage('placeholder');
-    
-    // Update error handler for placeholder
-    ELEMENTS.imageDisplay.onerror = () => {
-      console.error(`Failed to load placeholder image`);
-      // Give up and hide
-      tryLoadImage('hide');
-    };
+    console.error(`Failed to load Nookipedia image: ${originalImageUrl}`);
+    ELEMENTS.imageDisplay.style.display = 'none';
   };
   
   ELEMENTS.imageDisplay.onload = () => {

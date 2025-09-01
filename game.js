@@ -717,14 +717,25 @@ async function fetchDataFromAPI(category) {
       }
       const localData = await response.json();
       
-      if (Array.isArray(localData) && localData.length > 0) {
-        console.log(`Successfully loaded ${localData.length} ${category} items from local data`);
-        // Cache the fallback data
-        localStorage.setItem(`${category}_data`, JSON.stringify(localData));
-        localStorage.setItem(`${category}_data_timestamp`, Date.now());
-        return localData;
+      // Convert object format to array format if needed
+      let processedData;
+      if (Array.isArray(localData)) {
+        processedData = localData;
+      } else if (typeof localData === 'object' && localData !== null) {
+        // Convert object with keys to array of values
+        processedData = Object.values(localData);
       } else {
         throw new Error('Invalid local data format');
+      }
+      
+      if (processedData.length > 0) {
+        console.log(`Successfully loaded ${processedData.length} ${category} items from local data`);
+        // Cache the fallback data
+        localStorage.setItem(`${category}_data`, JSON.stringify(processedData));
+        localStorage.setItem(`${category}_data_timestamp`, Date.now());
+        return processedData;
+      } else {
+        throw new Error('No data found in local file');
       }
     } catch (fallbackError) {
       console.error(`Local data fallback failed for ${category}:`, fallbackError);

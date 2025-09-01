@@ -10,7 +10,7 @@ const router = express.Router();
 router.get('/categories', catchAsync(gameController.getCategories));
 router.get('/leaderboard', catchAsync(gameController.getLeaderboard));
 router.get('/data/:category', allowWithGuestToken('leaderboard'), catchAsync(gameController.getNookipediaData));
-router.get('/image-proxy', allowWithGuestToken('image'), catchAsync(gameController.proxyImage));
+// Image proxy removed - using direct image loading
 router.get('/users/:userId/history', catchAsync(gameController.getUserGameHistory));
 router.get('/users/:userId/stats', catchAsync(gameController.getUserStats));
 

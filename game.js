@@ -1276,56 +1276,14 @@ function displayImageFromData(data) {
   // Try different image loading strategies in sequence
   const tryLoadImage = (strategy) => {
     switch(strategy) {
-      case 'proxy':
-        // Use our backend proxy to avoid CORS issues
-        const proxyImageUrl = `${BACKEND_API}/game/image-proxy?url=${encodeURIComponent(originalImageUrl)}`;
-        console.log(`Using proxied image URL: ${proxyImageUrl}`);
-        
-        // Use fetch with authentication headers instead of direct src assignment
-        const headers = {
-          'Accept': 'image/*',
-          // Use the same guest token as defined in the backend .env
-          'X-Guest-Token': 'a7b9c2d5e8f3g6h1j4k7m2n5p8r3t6v9'
-        };
-        
-        // Add CSRF token if available
-        const csrfToken = getCSRFToken();
-        if (csrfToken) {
-          headers['X-CSRF-Token'] = csrfToken;
-        }
-        
-        fetch(proxyImageUrl, {
-          method: 'GET',
-          headers: headers,
-          mode: 'cors',
-          credentials: 'same-origin' // Use same-origin to avoid CORS issues with credentials
-        })
-        .then(response => {
-          if (!response.ok) {
-            throw new Error(`Image proxy returned ${response.status}`);
-          }
-          return response.blob();
-        })
-        .then(blob => {
-          const objectUrl = URL.createObjectURL(blob);
-          ELEMENTS.imageDisplay.src = objectUrl;
-          console.log('Successfully loaded image via proxy');
-        })
-        .catch(error => {
-          console.error(`Proxy image fetch failed:`, error);
-          // Try next strategy
-          tryLoadImage('direct');
-        });
-        break;
-        
       case 'direct':
-        // Try direct URL as fallback
+        // Try direct URL first
         console.log(`Using direct image URL: ${originalImageUrl}`);
         ELEMENTS.imageDisplay.src = originalImageUrl;
         break;
         
       case 'placeholder':
-        // Use category-specific placeholder as last resort
+        // Use category-specific placeholder as fallback
         const category = getCurrentCategory();
         const placeholderPath = `./images/${category}/placeholder.svg`;
         console.log(`Using placeholder image: ${placeholderPath}`);
@@ -1340,14 +1298,13 @@ function displayImageFromData(data) {
     }
   };
   
-  // Start with proxy strategy
-  tryLoadImage('proxy');
+  // Start with direct strategy
+  tryLoadImage('direct');
   
-  // Set up error handling for direct and placeholder strategies
+  // Set up error handling for direct URL loading failures
   ELEMENTS.imageDisplay.onerror = () => {
-    // This will only be called for direct URL loading failures
     console.error(`Failed to load direct image`);
-    // Try placeholder
+    // Try placeholder as fallback
     tryLoadImage('placeholder');
     
     // Update error handler for placeholder

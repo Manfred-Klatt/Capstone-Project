@@ -56,7 +56,7 @@ const submitScore = catchAsync(async (req, res, next) => {
   // Get user's new rank
   const rank = await Leaderboard.getUserRank(userId, category);
 
-  res.status(201).json(successResponse('Score submitted successfully', {
+  successResponse(res, 201, 'Score submitted successfully', {
     entry: {
       id: leaderboardEntry._id,
       score: leaderboardEntry.score,
@@ -64,7 +64,7 @@ const submitScore = catchAsync(async (req, res, next) => {
       isPersonalBest: leaderboardEntry.isPersonalBest,
       timestamp: leaderboardEntry.timestamp
     }
-  }));
+  });
 });
 
 // Get leaderboard for a category
@@ -95,19 +95,19 @@ const getLeaderboard = catchAsync(async (req, res, next) => {
       timestamp: entry.timestamp
     }));
 
-    res.json(successResponse('Leaderboard retrieved successfully', {
+    successResponse(res, 200, 'Leaderboard retrieved successfully', {
       category,
       entries: leaderboardWithRanks,
       total: leaderboardWithRanks.length
-    }));
+    });
   } catch (error) {
     console.error(`Error getting leaderboard for ${category}:`, error);
     // Return empty leaderboard as fallback
-    res.json(successResponse('Leaderboard retrieved (empty)', {
+    successResponse(res, 200, 'Leaderboard retrieved (empty)', {
       category,
       entries: [],
       total: 0
-    }));
+    });
   }
 });
 
@@ -130,10 +130,10 @@ const getAllLeaderboards = catchAsync(async (req, res, next) => {
       }));
     }
 
-    res.json(successResponse('All leaderboards retrieved successfully', {
+    successResponse(res, 200, 'All leaderboards retrieved successfully', {
       leaderboards,
       lastUpdated: new Date().toISOString()
-    }));
+    });
   } catch (error) {
     console.error('Error in getAllLeaderboards:', error);
     // Return empty leaderboards as fallback
@@ -142,10 +142,10 @@ const getAllLeaderboards = catchAsync(async (req, res, next) => {
       emptyLeaderboards[category] = [];
     });
     
-    res.json(successResponse('Leaderboards retrieved (empty)', {
+    successResponse(res, 200, 'Leaderboards retrieved (empty)', {
       leaderboards: emptyLeaderboards,
       lastUpdated: new Date().toISOString()
-    }));
+    });
   }
 });
 
@@ -169,7 +169,7 @@ const getUserStats = catchAsync(async (req, res, next) => {
     };
   }
 
-  res.json(successResponse('User stats retrieved successfully', { stats }));
+  successResponse(res, 200, 'User stats retrieved successfully', { stats });
 });
 
 // Get user's score history for a category
@@ -190,11 +190,11 @@ const getUserHistory = catchAsync(async (req, res, next) => {
     .select('score gameData timestamp isPersonalBest')
     .lean();
 
-  res.json(successResponse('User history retrieved successfully', {
+  successResponse(res, 200, 'User history retrieved successfully', {
     category,
     history,
     total: history.length
-  }));
+  });
 });
 
 module.exports = {

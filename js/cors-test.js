@@ -62,7 +62,7 @@ async function testCORS() {
     },
     {
       name: 'Image Proxy with Guest Token (Preflight)',
-      url: `${BACKEND_API}/games/image-proxy?url=${encodeURIComponent('https://acnhapi.com/v1/images/fish/1')}`,
+      url: `${BACKEND_API}/game/image-proxy?url=${encodeURIComponent('https://acnhapi.com/v1/images/fish/1')}`,
       method: 'GET',
       headers: { 
         'Accept': 'image/png',

@@ -352,7 +352,7 @@
             logResult('image-result', `Testing image proxy with credentials: ${credentialsMode}...`);
             logResult('image-result', `Original image URL: ${imageUrl}`);
             
-            const proxyUrl = `${apiBaseUrl}/games/image-proxy?url=${encodeURIComponent(imageUrl)}`;
+            const proxyUrl = `${apiBaseUrl}/game/image-proxy?url=${encodeURIComponent(imageUrl)}`;
             logResult('image-result', `Proxy URL: ${proxyUrl}`);
             
             try {
@@ -407,7 +407,7 @@
             logResult('data-result', `Testing game data API for ${category} with credentials: ${credentialsMode}...`);
             
             try {
-                const response = await fetch(`${apiBaseUrl}/games/data/${category}`, {
+                const response = await fetch(`${apiBaseUrl}/game/data/${category}`, {
                     method: 'GET',
                     headers: getHeaders(),
                     mode: 'cors',

@@ -1278,7 +1278,7 @@ function displayImageFromData(data) {
     switch(strategy) {
       case 'proxy':
         // Use our backend proxy to avoid CORS issues
-        const proxyImageUrl = `${BACKEND_API}/games/image-proxy?url=${encodeURIComponent(originalImageUrl)}`;
+        const proxyImageUrl = `${BACKEND_API}/game/image-proxy?url=${encodeURIComponent(originalImageUrl)}`;
         console.log(`Using proxied image URL: ${proxyImageUrl}`);
         
         // Use fetch with authentication headers instead of direct src assignment

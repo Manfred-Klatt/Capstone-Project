@@ -37,7 +37,7 @@ const exemptFromCSRF = (req, res, next) => {
   
   // Skip CSRF for public endpoints that use guest tokens
   if (
-    (req.path.startsWith('/api/games/image-proxy') || 
+    (req.path.startsWith('/api/game/image-proxy') || 
      req.path.startsWith('/api/leaderboard')) && 
     (req.headers['x-guest-token'] || req.query.token)
   ) {

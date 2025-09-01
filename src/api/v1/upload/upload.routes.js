@@ -18,17 +18,14 @@ router.post('/single', upload.single('file'), catchAsync(async (req, res) => {
   const filePath = await uploadFile(req.file);
   const fileUrl = getFileUrl(filePath);
 
-  successResponse(res, {
-    message: 'File uploaded successfully',
-    data: {
-      filename: req.file.filename,
-      originalName: req.file.originalname,
-      size: req.file.size,
-      mimetype: req.file.mimetype,
-      path: filePath,
-      url: fileUrl
-    }
-  }, 201);
+  successResponse(res, 201, 'File uploaded successfully', {
+    filename: req.file.filename,
+    originalName: req.file.originalname,
+    size: req.file.size,
+    mimetype: req.file.mimetype,
+    path: filePath,
+    url: fileUrl
+  });
 }));
 
 /**
@@ -57,10 +54,7 @@ router.post('/multiple', upload.array('files', 5), catchAsync(async (req, res) =
     })
   );
 
-  successResponse(res, {
-    message: `${uploadedFiles.length} files uploaded successfully`,
-    data: uploadedFiles
-  }, 201);
+  successResponse(res, 201, `${uploadedFiles.length} files uploaded successfully`, uploadedFiles);
 }));
 
 /**
@@ -75,9 +69,7 @@ router.delete('/:filename', catchAsync(async (req, res) => {
   const deleted = await deleteFile(filePath);
   
   if (deleted) {
-    successResponse(res, {
-      message: 'File deleted successfully'
-    });
+    successResponse(res, 200, 'File deleted successfully');
   } else {
     errorResponse(res, 'File not found or could not be deleted', 404);
   }

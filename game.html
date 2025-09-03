@@ -5,6 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Animal Crossing Quiz</title>
     <link rel="stylesheet" href="game.css">
+    <link rel="stylesheet" href="css/game-styles.css">
     <link rel="icon" href="favicon.ico" type="image/x-icon">
     
     <!-- Custom font loading -->
@@ -122,7 +123,7 @@
         <source src="sounds/toggle.ogg" type="audio/ogg">
     </audio>
 </head>
-<body>
+<body class="game-container">
     <div id="fixed-nav-bar">
         <div class="nav-left">
             <a href="index.html" class="home-button">
@@ -141,7 +142,7 @@
     </div>
 
     <div class="main-container">
-        <div class="game-container">
+        <div id="game-container" class="game-main-container">
             <div class="game-header">
                 <div class="score-container">
                     <div id="score">Score: <span id="score-value">0</span></div>

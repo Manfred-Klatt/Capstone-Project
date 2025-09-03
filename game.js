@@ -1226,14 +1226,18 @@ function displayImageFromData(data) {
     return 'fish'; // Default fallback
   }
   
-  // Use Nookipedia image URL directly
-  console.log(`Loading Nookipedia image: ${originalImageUrl}`);
-  ELEMENTS.imageDisplay.src = originalImageUrl;
+  // Ensure URL uses HTTPS
+  const secureImageUrl = originalImageUrl.startsWith('http:') 
+    ? 'https:' + originalImageUrl.substring(5) 
+    : originalImageUrl;
+    
+  console.log(`Loading Nookipedia image: ${secureImageUrl}`);
+  ELEMENTS.imageDisplay.src = secureImageUrl;
   ELEMENTS.imageDisplay.style.display = 'block';
   
   // Handle image load errors
   ELEMENTS.imageDisplay.onerror = () => {
-    console.error(`Failed to load Nookipedia image: ${originalImageUrl}`);
+    console.error(`Failed to load Nookipedia image: ${secureImageUrl}`);
     ELEMENTS.imageDisplay.style.display = 'none';
   };
   

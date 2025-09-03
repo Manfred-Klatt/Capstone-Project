@@ -4,17 +4,26 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Animal Crossing Quiz</title>
-    <link rel="stylesheet" href="game.css">
-    <link rel="stylesheet" href="css/game-styles.css">
-    <link rel="icon" href="favicon.ico" type="image/x-icon">
+    <meta name="description" content="Test your Animal Crossing knowledge with this fun quiz game! Guess villagers, fish, bugs, and more.">
+    <meta name="theme-color" content="#ff6b6b">
     
-    <!-- Custom font loading -->
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/fontfaceobserver/2.3.0/fontfaceobserver.standalone.js"></script>
-    <script src="./js/fontOptimizer.js"></script>
-    <script src="./js/backgroundLoader.js"></script>
-    <script src="./js/secureTokenManager.js"></script>
+    <!-- Favicon -->
+    <link rel="icon" href="favicon.ico" type="image/x-icon">
+    <link rel="apple-touch-icon" href="images/icon-192x192.png">
+    <link rel="manifest" href="manifest.json">
+    
+    <!-- CSS -->
+    <link rel="stylesheet" href="css/game-container.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700&display=swap" rel="stylesheet">
+    
+    <!-- Preload critical resources -->
+    <link rel="preload" href="css/game-container.css" as="style">
+    <link rel="preconnect" href="https://fonts.gstatic.com">
+    <link rel="preconnect" href="https://cdnjs.cloudflare.com">
     
     <style>
+      /* Font face for custom font */
       @font-face {
         font-family: 'customfont';
         src: url('./fonts/customfont.woff2') format('woff2'),
@@ -28,15 +37,13 @@
         margin: 0;
         padding: 0;
         box-sizing: border-box;
-        font-family: 'customfont', Arial, sans-serif;
       }
       
       /* Apply custom font to all text elements */
       body, button, input, select, textarea, h1, h2, h3, h4, h5, h6, p, span, div, a, label, option, optgroup {
-        font-family: 'customfont', Arial, sans-serif;
+        font-family: 'Nunito', 'customfont', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
         -webkit-font-smoothing: antialiased;
         -moz-osx-font-smoothing: grayscale;
-        font-synthesis: none;
         text-rendering: optimizeLegibility;
       }
       
@@ -45,62 +52,46 @@
         visibility: hidden;
       }
       
-      html.font-fallback * {
-        font-family: Arial, sans-serif;
-      }
-
-      /* CSS custom properties for dynamic background image selection */
-      :root {
-        --background-image: url('images/background.svg');
+      /* Smooth scrolling */
+      html {
+        scroll-behavior: smooth;
       }
       
+      /* Body styles */
       body {
         margin: 0;
         padding: 20px;
-        background-color: #f0f8ff;
-        color: #5a3d2b;
-        background-image: url('images/background.svg');
-        background-size: 100px 100px;
-        background-repeat: repeat;
-        background-attachment: scroll;
-        display: flex;
-        justify-content: center;
-        align-items: center;
+        background-color: #f8f9fa;
+        color: #333;
         min-height: 100vh;
-        transition: background-image 0.3s ease;
-        /* Text rendering improvements */
-        -webkit-font-smoothing: antialiased;
-        -moz-osx-font-smoothing: grayscale;
-        text-rendering: optimizeLegibility;
+        background-image: url('images/background.svg');
+        background-size: 200px;
+        background-attachment: fixed;
+        transition: all 0.3s ease;
       }
       
-      /* Progressive background loading */
-      body.bg-loading {
-        background-image: linear-gradient(135deg, #f0f8ff 0%, #e6f3ff 50%, #ddeeff 100%);
+      /* Focus styles for accessibility */
+      *:focus {
+        outline: 3px solid rgba(255, 107, 107, 0.5);
+        outline-offset: 2px;
       }
       
-      body.bg-loaded {
-        background-image: var(--background-image);
+      /* Skip to main content link */
+      .skip-to-content {
+        position: absolute;
+        left: -9999px;
+        z-index: 999;
+        padding: 1em;
+        background-color: #333;
+        color: white;
+        opacity: 0;
+        transition: opacity 0.3s ease-in-out;
       }
       
-      /* Responsive background images */
-      @media (max-width: 768px) {
-        body.bg-loaded {
-          background-image: var(--background-image);
-          background-size: cover;
-        }
-      }
-      
-      @media (min-width: 769px) and (max-width: 1200px) {
-        body.bg-loaded {
-          background-image: var(--background-image);
-        }
-      }
-      
-      @media (min-width: 1201px) {
-        body.bg-loaded {
-          background-image: url("images/background.svg");
-        }
+      .skip-to-content:focus {
+        left: 50%;
+        transform: translateX(-50%);
+        opacity: 1;
       }
     </style>
     
@@ -108,7 +99,7 @@
     <audio id="correct-sound" preload="auto">
         <source src="sounds/correct.ogg" type="audio/ogg">
     </audio>
-    <div id="game-over" class="hidden rainbow-text">
+    <div id="game-over" class="hidden">
         <audio preload="auto">
             <source src="sounds/game-over.ogg" type="audio/ogg">
         </audio>
@@ -122,82 +113,191 @@
     <audio id="toggle-sound" preload="none">
         <source src="sounds/toggle.ogg" type="audio/ogg">
     </audio>
+    
+    <!-- Preload scripts -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/fontfaceobserver/2.3.0/fontfaceobserver.standalone.js" defer></script>
+    <script src="./js/fontOptimizer.js" defer></script>
+    <script src="./js/backgroundLoader.js" defer></script>
+    <script src="./js/secureTokenManager.js" defer></script>
+    <script src="./js/game.js" defer></script>
 </head>
 <body class="game-container">
-    <div id="fixed-nav-bar">
+    <a href="#main-content" class="skip-to-content">Skip to main content</a>
+    
+    <!-- Navigation Bar -->
+    <nav id="fixed-nav-bar" aria-label="Main navigation">
         <div class="nav-left">
-            <a href="index.html" class="home-button">
-                <img src="images/home.png" alt="Home" class="nav-icon">
+            <a href="index.html" class="home-button" aria-label="Return to home">
+                <i class="fas fa-home" aria-hidden="true"></i>
                 <span>Home</span>
             </a>
         </div>
         <div class="nav-center">
-            <h1 class="rainbow-text">Animal Crossing Quiz</h1>
+            <h1 class="game-title">
+                <i class="fas fa-leaf" aria-hidden="true"></i>
+                Animal Crossing Quiz
+            </h1>
         </div>
         <div class="nav-right">
-            <div class="sound-toggle" id="sound-toggle">
-                <img src="images/speaker.png" alt="Sound">
-            </div>
+            <button id="sound-toggle" class="sound-toggle" aria-label="Toggle sound" aria-pressed="false">
+                <i class="fas fa-volume-up" aria-hidden="true"></i>
+                <span class="sr-only">Sound is on</span>
+            </button>
         </div>
-    </div>
+    </nav>
 
-    <div class="main-container">
-        <div id="game-container" class="game-main-container">
-            <div class="game-header">
+    <main id="main-content" class="game-wrapper">
+        <div id="game-container">
+            <!-- Game Header -->
+            <header class="game-header">
+                <h1>Animal Crossing Quiz</h1>
                 <div class="score-container">
                     <div id="score">Score: <span id="score-value">0</span></div>
                     <div id="high-score">High Score: <span id="high-score-value">0</span></div>
-                </div>
-            </div>
-
-            <div class="game-controls">
-                <div class="category-selector">
-                    <label for="category">Category:</label>
-                    <select id="category" class="category-dropdown">
-                        <option value="fish">Fish</option>
-                        <option value="bugs">Bugs</option>
-                        <option value="sea">Sea Creatures</option>
-                        <option value="villagers">Villagers</option>
-                    </select>
-                </div>
-
-                <div class="difficulty-selector">
-                    <label for="difficulty">Difficulty:</label>
-                    <select id="difficulty" class="category-dropdown">
-                        <option value="5000">Easy (15s)</option>
-                        <option value="10000" selected>Medium (10s)</option>
-                        <option value="15000">Hard (5s)</option>
-                    </select>
-                </div>
-                
-                <div class="timer-container">
                     <div id="game-timer">Time: <span id="time">30</span>s</div>
                 </div>
-            </div>
+            </header>
 
-            <div class="game-area">
-                <div class="image-container">
-                    <img id="image-display" src="" alt="Animal Crossing character or item">
+            <!-- Game Controls -->
+            <section class="game-controls" aria-labelledby="game-controls-heading">
+                <h2 id="game-controls-heading" class="sr-only">Game Controls</h2>
+                <div class="control-group">
+                    <label for="category">
+                        <i class="fas fa-tags" aria-hidden="true"></i>
+                        Category:
+                    </label>
+                    <select id="category" class="form-control" aria-label="Select quiz category">
+                        <option value="fish">
+                            <i class="fas fa-fish" aria-hidden="true"></i>
+                            Fish
+                        </option>
+                        <option value="bugs">
+                            <i class="fas fa-bug" aria-hidden="true"></i>
+                            Bugs
+                        </option>
+                        <option value="sea">
+                            <i class="fas fa-water" aria-hidden="true"></i>
+                            Sea Creatures
+                        </option>
+                        <option value="villagers">
+                            <i class="fas fa-users" aria-hidden="true"></i>
+                            Villagers
+                        </option>
+                    </select>
                 </div>
 
-                <div id="question" class="question"></div>
-                <div class="input-container">
-                    <input type="text" id="guess-input" placeholder="Who's that villager?" autocomplete="off">
+                <div class="control-group">
+                    <label for="difficulty">
+                        <i class="fas fa-tachometer-alt" aria-hidden="true"></i>
+                        Difficulty:
+                    </label>
+                    <select id="difficulty" class="form-control" aria-label="Select game difficulty">
+                        <option value="15000">
+                            <i class="fas fa-baby" aria-hidden="true"></i>
+                            Easy (15s)
+                        </option>
+                        <option value="10000" selected>
+                            <i class="fas fa-user" aria-hidden="true"></i>
+                            Medium (10s)
+                        </option>
+                        <option value="5000">
+                            <i class="fas fa-skull" aria-hidden="true"></i>
+                            Hard (5s)
+                        </option>
+                    </select>
                 </div>
-                <div id="feedback" class="feedback"></div>
-                <div class="controls">
-                    <button id="game-action-btn" class="btn btn-primary">Start Game</button>
-                </div>
-            </div>
+            </section>
 
-            <div class="leaderboard-container" style="margin-top: 20px;">
-                <h3>Top Scores</h3>
-                <ul id="leaderboard" class="leaderboard-list">
-                    <!-- Leaderboard entries will be populated by JavaScript -->
-                </ul>
+            <!-- Game Area -->
+            <section class="game-area" aria-labelledby="game-area-heading">
+                <h2 id="game-area-heading" class="sr-only">Game Area</h2>
+                <div class="image-container" id="image-container">
+                    <img id="image-display" src="" alt="" aria-hidden="true">
+                    <div id="image-loading" class="loading-indicator" aria-hidden="true">
+                        <div class="spinner"></div>
+                        <p>Loading image...</p>
+                    </div>
+                </div>
+
+                <div id="question" class="question" role="alert" aria-live="polite">
+                    Click 'Start Game' to begin!
+                </div>
+                
+                <div class="input-group">
+                    <label for="guess-input" class="sr-only">Your guess</label>
+                    <input 
+                        type="text" 
+                        id="guess-input" 
+                        class="form-control" 
+                        placeholder="Enter your guess..." 
+                        autocomplete="off"
+                        disabled
+                        aria-describedby="guess-instructions"
+                    >
+                    <button id="game-action-btn" class="btn" aria-live="polite">
+                        <span class="btn-text">Start Game</span>
+                        <span class="btn-loading" aria-hidden="true">
+                            <i class="fas fa-spinner fa-spin"></i>
+                        </span>
+                    </button>
+                    <div id="guess-instructions" class="sr-only">
+                        Type your answer and press Enter or click the button to submit
+                    </div>
+                </div>
+                
+                <div id="feedback" class="feedback" role="alert" aria-live="polite"></div>
+                <div id="feedback-message" class="feedback-message" aria-live="polite"></div>
+            </section>
+
+            <!-- Leaderboard -->
+            <aside class="leaderboard-container" aria-labelledby="leaderboard-heading">
+                <h3 id="leaderboard-heading">
+                    <i class="fas fa-trophy" aria-hidden="true"></i>
+                    <span>Top Scores</span>
+                </h3>
+                <div class="leaderboard-tabs" role="tablist" aria-label="Leaderboard categories">
+                    <button class="tab-btn active" data-category="all" aria-selected="true" role="tab" tabindex="0">
+                        All
+                    </button>
+                    <button class="tab-btn" data-category="fish" aria-selected="false" role="tab" tabindex="-1">
+                        <i class="fas fa-fish" aria-hidden="true"></i> Fish
+                    </button>
+                    <button class="tab-btn" data-category="bugs" aria-selected="false" role="tab" tabindex="-1">
+                        <i class="fas fa-bug" aria-hidden="true"></i> Bugs
+                    </button>
+                    <button class="tab-btn" data-category="villagers" aria-selected="false" role="tab" tabindex="-1">
+                        <i class="fas fa-users" aria-hidden="true"></i> Villagers
+                    </button>
+                </div>
+                <div class="leaderboard-wrapper">
+                    <ul id="leaderboard" class="leaderboard-list" role="list" aria-live="polite">
+                        <li class="loading">
+                            <span class="loading-spinner"></span>
+                            <span>Loading leaderboard...</span>
+                        </li>
+                    </ul>
+                </div>
+                <div class="leaderboard-actions">
+                    <button id="refresh-leaderboard" class="btn btn-secondary" aria-label="Refresh leaderboard">
+                        <i class="fas fa-sync-alt" aria-hidden="true"></i>
+                        Refresh
+                    </button>
+                </div>
+            </aside>
+        </div>
+    </main>
+    
+    <!-- Footer -->
+    <footer class="game-footer">
+        <div class="footer-content">
+            <p>© 2023 Animal Crossing Quiz | Not affiliated with Nintendo</p>
+            <div class="footer-links">
+                <a href="#" id="privacy-link">Privacy Policy</a>
+                <span class="divider">•</span>
+                <a href="#" id="terms-link">Terms of Service</a>
             </div>
         </div>
-    </div>
+    </footer>
 
     <!-- Game script must be loaded last -->
     <script type="module" src="game.js"></script>
@@ -223,7 +323,7 @@
       });
     </script>
     
-    <!-- Game Mode Configuration -->
+    <!-- Game Configuration and Initialization -->
     <script>
       // Set backend URL - use Railway URL in production, fallback to localhost in development
       const BACKEND_URL = window.location.hostname === 'localhost' 
@@ -232,28 +332,315 @@
       
       // Always use local storage for game data
       window.standaloneMode = true;
-    </script>
-    
-    <script>
+      
+      // Initialize the game when the DOM is fully loaded
       document.addEventListener('DOMContentLoaded', function() {
         // Sound toggle functionality
-        const soundToggle = document.querySelector('.sound-toggle');
+        const soundToggle = document.getElementById('sound-toggle');
+        let isSoundOn = true;
+        
         if (soundToggle) {
-          soundToggle.addEventListener('click', function(e) {
-            e.preventDefault();
-            if (typeof soundManager !== 'undefined') {
-              soundManager.toggle();
-              
-              // Update button image
-              const img = this.querySelector('img');
-              if (img) {
-                img.src = soundManager.enabled ? 'images/speaker.png' : 'images/speaker-mute.png';
-              }
+          soundToggle.addEventListener('click', function() {
+            isSoundOn = !isSoundOn;
+            const icon = this.querySelector('i');
+            const statusText = this.querySelector('.sr-only');
+            
+            if (isSoundOn) {
+              icon.className = 'fas fa-volume-up';
+              statusText.textContent = 'Sound is on';
+              this.setAttribute('aria-pressed', 'true');
+              // Unmute all audio elements
+              document.querySelectorAll('audio').forEach(audio => {
+                audio.muted = false;
+              });
+            } else {
+              icon.className = 'fas fa-volume-mute';
+              statusText.textContent = 'Sound is off';
+              this.setAttribute('aria-pressed', 'false');
+              // Mute all audio elements
+              document.querySelectorAll('audio').forEach(audio => {
+                audio.muted = true;
+              });
+            }
+            
+            // Save preference to localStorage
+            localStorage.setItem('soundEnabled', isSoundOn);
+            
+            // Play toggle sound if not muted
+            const toggleSound = document.getElementById('toggle-sound');
+            if (toggleSound && isSoundOn) {
+              toggleSound.currentTime = 0;
+              toggleSound.play().catch(e => console.log('Could not play toggle sound:', e));
             }
           });
+          
+          // Load sound preference from localStorage
+          const savedSoundPref = localStorage.getItem('soundEnabled');
+          if (savedSoundPref === 'false') {
+            soundToggle.click(); // Toggle to off if saved preference is false
+          }
         }
         
-        // Home button functionality
+        // Tab functionality for leaderboard
+        const tabButtons = document.querySelectorAll('.tab-btn');
+        tabButtons.forEach(button => {
+          button.addEventListener('click', function() {
+            // Remove active class from all buttons
+            tabButtons.forEach(btn => {
+              btn.classList.remove('active');
+              btn.setAttribute('aria-selected', 'false');
+              btn.setAttribute('tabindex', '-1');
+            });
+            
+            // Add active class to clicked button
+            this.classList.add('active');
+            this.setAttribute('aria-selected', 'true');
+            this.removeAttribute('tabindex');
+            
+            // Filter leaderboard by category
+            const category = this.getAttribute('data-category');
+            if (window.leaderboard) {
+              window.leaderboard.filterByCategory(category);
+            }
+          });
+          
+          // Keyboard navigation for tabs
+          button.addEventListener('keydown', function(e) {
+            if (e.key === 'Enter' || e.key === ' ') {
+              e.preventDefault();
+              this.click();
+            } else if (e.key === 'ArrowRight' || e.key === 'ArrowLeft') {
+              e.preventDefault();
+              const currentIndex = Array.from(tabButtons).indexOf(this);
+              let nextIndex;
+              
+              if (e.key === 'ArrowRight') {
+                nextIndex = (currentIndex + 1) % tabButtons.length;
+              } else {
+                nextIndex = (currentIndex - 1 + tabButtons.length) % tabButtons.length;
+              }
+              
+              tabButtons[nextIndex].focus();
+              tabButtons[nextIndex].click();
+            }
+          });
+        });
+        
+        // Initialize game
+        if (window.Game) {
+          window.game = new Game();
+          window.game.init();
+        }
+        
+        // Initialize leaderboard
+        if (window.Leaderboard) {
+          window.leaderboard = new Leaderboard();
+          window.leaderboard.load();
+          
+          // Add refresh button event listener
+          const refreshBtn = document.getElementById('refresh-leaderboard');
+          if (refreshBtn) {
+            refreshBtn.addEventListener('click', () => {
+              window.leaderboard.load(true); // Force refresh
+              
+              // Add loading class temporarily
+              refreshBtn.classList.add('loading');
+              setTimeout(() => {
+                refreshBtn.classList.remove('loading');
+              }, 1000);
+            });
+          }
+        }
+        
+        // Check for PWA installation prompt
+        let deferredPrompt;
+        const installButton = document.createElement('button');
+        installButton.className = 'install-btn';
+        installButton.innerHTML = '📱 Install App';
+        installButton.style.display = 'none';
+        document.body.appendChild(installButton);
+        
+        window.addEventListener('beforeinstallprompt', (e) => {
+          // Prevent the mini-infobar from appearing on mobile
+          e.preventDefault();
+          // Stash the event so it can be triggered later
+          deferredPrompt = e;
+          // Show the install button
+          installButton.style.display = 'block';
+          
+          installButton.addEventListener('click', async () => {
+            // Hide the install button
+            installButton.style.display = 'none';
+            // Show the install prompt
+            deferredPrompt.prompt();
+            // Wait for the user to respond to the prompt
+            const { outcome } = await deferredPrompt.userChoice;
+            console.log(`User response to the install prompt: ${outcome}`);
+            // We've used the prompt, and can't use it again, throw it away
+            deferredPrompt = null;
+          });
+        });
+      });
+    </script>
+    
+    <!-- Service Worker Registration -->
+    <script>
+      // Register service worker for PWA functionality
+      if ('serviceWorker' in navigator) {
+        window.addEventListener('load', () => {
+          navigator.serviceWorker.register('/sw.js').then(registration => {
+            console.log('ServiceWorker registration successful');
+          }).catch(error => {
+            console.log('ServiceWorker registration failed: ', error);
+document.addEventListener('DOMContentLoaded', function() {
+// Sound toggle functionality
+const soundToggle = document.getElementById('sound-toggle');
+let isSoundOn = true;
+        
+if (soundToggle) {
+soundToggle.addEventListener('click', function() {
+isSoundOn = !isSoundOn;
+const icon = this.querySelector('i');
+const statusText = this.querySelector('.sr-only');
+            
+if (isSoundOn) {
+icon.className = 'fas fa-volume-up';
+statusText.textContent = 'Sound is on';
+this.setAttribute('aria-pressed', 'true');
+// Unmute all audio elements
+document.querySelectorAll('audio').forEach(audio => {
+audio.muted = false;
+});
+} else {
+icon.className = 'fas fa-volume-mute';
+statusText.textContent = 'Sound is off';
+this.setAttribute('aria-pressed', 'false');
+// Mute all audio elements
+document.querySelectorAll('audio').forEach(audio => {
+audio.muted = true;
+});
+}
+            
+// Play toggle sound if not muted
+const toggleSound = document.getElementById('toggle-sound');
+if (toggleSound && isSoundOn) {
+toggleSound.currentTime = 0;
+toggleSound.play().catch(e => console.log('Could not play toggle sound:', e));
+}
+            
+// Save preference to localStorage
+localStorage.setItem('soundEnabled', isSoundOn);
+});
+          
+// Load sound preference from localStorage
+const savedSoundPref = localStorage.getItem('soundEnabled');
+if (savedSoundPref === 'false') {
+soundToggle.click(); // Toggle to off if saved preference is false
+}
+}
+        
+// Tab functionality for leaderboard
+const tabButtons = document.querySelectorAll('.tab-btn');
+tabButtons.forEach(button => {
+button.addEventListener('click', function() {
+// Remove active class from all buttons
+tabButtons.forEach(btn => {
+btn.classList.remove('active');
+btn.setAttribute('aria-selected', 'false');
+btn.setAttribute('tabindex', '-1');
+});
+            
+// Add active class to clicked button
+this.classList.add('active');
+this.setAttribute('aria-selected', 'true');
+this.removeAttribute('tabindex');
+            
+// Filter leaderboard by category
+const category = this.getAttribute('data-category');
+// Call function to filter leaderboard
+if (window.leaderboard) {
+window.leaderboard.filterByCategory(category);
+}
+});
+          
+// Keyboard navigation for tabs
+button.addEventListener('keydown', function(e) {
+if (e.key === 'Enter' || e.key === ' ') {
+e.preventDefault();
+this.click();
+} else if (e.key === 'ArrowRight' || e.key === 'ArrowLeft') {
+e.preventDefault();
+const currentIndex = Array.from(tabButtons).indexOf(this);
+let nextIndex;
+              
+if (e.key === 'ArrowRight') {
+nextIndex = (currentIndex + 1) % tabButtons.length;
+} else {
+nextIndex = (currentIndex - 1 + tabButtons.length) % tabButtons.length;
+}
+              
+tabButtons[nextIndex].focus();
+tabButtons[nextIndex].click();
+}
+});
+});
+        
+// Initialize game
+if (window.Game) {
+window.game = new Game();
+window.game.init();
+}
+        
+// Initialize leaderboard
+if (window.Leaderboard) {
+window.leaderboard = new Leaderboard();
+window.leaderboard.load();
+          
+// Add refresh button event listener
+const refreshBtn = document.getElementById('refresh-leaderboard');
+if (refreshBtn) {
+refreshBtn.addEventListener('click', () => {
+window.leaderboard.load(true); // Force refresh
+              
+// Add loading class temporarily
+refreshBtn.classList.add('loading');
+setTimeout(() => {
+refreshBtn.classList.remove('loading');
+}, 1000);
+});
+}
+}
+        
+// Check for PWA installation prompt
+let deferredPrompt;
+const installButton = document.createElement('button');
+installButton.className = 'install-btn';
+installButton.innerHTML = '&#128241; Install App';
+installButton.style.display = 'none';
+document.body.appendChild(installButton);
+        
+window.addEventListener('beforeinstallprompt', (e) => {
+// Prevent the mini-infobar from appearing on mobile
+e.preventDefault();
+// Stash the event so it can be triggered later
+deferredPrompt = e;
+// Show the install button
+installButton.style.display = 'block';
+          
+installButton.addEventListener('click', async () => {
+// Hide the install button
+installButton.style.display = 'none';
+// Show the install prompt
+deferredPrompt.prompt();
+// Wait for the user to respond to the prompt
+const { outcome } = await deferredPrompt.userChoice;
+console.log(`User response to the install prompt: ${outcome}`);
+// We've used the prompt, and can't use it again, throw it away
+deferredPrompt = null;
+});
+});
+}
+</script>
         const homeButton = document.querySelector('.home-button');
         if (homeButton) {
           homeButton.addEventListener('click', function(e) {

@@ -1291,16 +1291,20 @@ async function renderLeaderboard() {
 
   try {
     // Try to find the leaderboard element if not already cached
-    if (!ELEMENTS.leaderboardElement) {
-      ELEMENTS.leaderboardElement = document.getElementById('leaderboard');
-      if (!ELEMENTS.leaderboardElement) {
+    if (!ELEMENTS.leaderboard) {
+      ELEMENTS.leaderboard = document.getElementById('leaderboard');
+      if (!ELEMENTS.leaderboard) {
         console.warn('Leaderboard element not found in the DOM');
         return;
       }
     }
     
     // Show loading state with animation
-    ELEMENTS.leaderboardElement.innerHTML = '<li class="loading">Loading leaderboard<span class="loading-dots">...</span></li>';
+    ELEMENTS.leaderboard.innerHTML = `
+      <li class="loading">
+        <div class="loading-spinner"></div>
+        <span>Loading leaderboard...</span>
+      </li>`;
 
     const category = ELEMENTS.category ? ELEMENTS.category.value : 'fish';
     let leaderboard = [];
@@ -1344,63 +1348,73 @@ async function renderLeaderboard() {
       .sort((a, b) => b.score - a.score)
       .slice(0, 10);
 
-    // Clear and update the leaderboard
-    ELEMENTS.leaderboardElement.innerHTML = '';
+    // Clear the leaderboard
+    ELEMENTS.leaderboard.innerHTML = '';
 
-    // Add header with data source indicator
-    const header = document.createElement('li');
-    header.className = 'leaderboard-header';
-    header.innerHTML = `<strong>Top Scores</strong>${dataSource === 'local' ? ' <span class="local-data">(Local Data)</span>' : ''}`;
-    ELEMENTS.leaderboardElement.appendChild(header);
-
+    // Add medal emojis for top 3 positions
+    const medals = ['🥇', '🥈', '🥉'];
+    
     if (sortedLeaderboard.length === 0) {
-      const li = document.createElement('li');
-      li.className = 'no-scores';
-      li.textContent = 'No scores yet. Be the first!';
-      ELEMENTS.leaderboardElement.appendChild(li);
+      // Show empty state
+      ELEMENTS.leaderboard.innerHTML = `
+        <li class="no-scores">
+          <i class="fas fa-trophy" style="font-size: 24px; margin-bottom: 10px; opacity: 0.7;"></i>
+          <div>No scores yet</div>
+          <div style="font-size: 0.9em; opacity: 0.8;">Be the first to play!</div>
+        </li>`;
       return;
     }
-
-    // Add entries to the leaderboard
+    
+    // Add each score to the leaderboard
     sortedLeaderboard.forEach((entry, index) => {
       const li = document.createElement('li');
-      // Handle both backend format (username) and local format (name)
-      const name = entry.username || entry.name || 'Anonymous';
-      const score = typeof entry.score === 'number' ? entry.score : parseInt(entry.score) || 0;
       
-      li.className = index < 3 ? `top-${index + 1}` : '';
-      li.innerHTML = `<span class="rank">${index + 1}.</span> <span class="name">${name}</span>: <span class="score">${score}</span>`;
-      ELEMENTS.leaderboardElement.appendChild(li);
-    });
-
-  } catch (error) {
-    console.error('Error in renderLeaderboard:', error);
-    if (ELEMENTS.leaderboardElement) {
-      ELEMENTS.leaderboardElement.innerHTML = 
-        '<li class="error">Error loading leaderboard</li>' +
-        '<li class="error-details">Using local data instead</li>';
+      // Add medal for top 3, otherwise show rank number
+      const rank = document.createElement('span');
+      rank.className = 'rank';
+      rank.textContent = index < 3 ? medals[index] : `#${index + 1}`;
       
-      // Try to show local data as fallback
-      try {
-        const localData = getLocalLeaderboard();
-        if (localData && localData.length > 0) {
-          const header = document.createElement('li');
-          header.className = 'local-header';
-          header.innerHTML = '<strong>Local Scores</strong>';
-          ELEMENTS.leaderboardElement.appendChild(header);
-          
-          localData
-            .sort((a, b) => b.score - a.score)
-            .slice(0, 5)
-            .forEach((entry, index) => {
-              const li = document.createElement('li');
-              li.textContent = `${index + 1}. ${entry.name || 'Anonymous'}: ${entry.score}`;
-              ELEMENTS.leaderboardElement.appendChild(li);
-            });
-        }
-      } catch (localError) {
-        console.error('Failed to show local leaderboard fallback:', localError);
+      // Create name element with optional crown for top scorer
+      const name = document.createElement('span');
+      name.className = 'name';
+      if (index === 0) {
+        const crown = document.createElement('span');
+        crown.className = 'crown';
+        crown.innerHTML = '👑 ';
+        name.appendChild(crown);
       }
+      name.appendChild(document.createTextNode(entry.username || entry.name || 'Anonymous'));
+      
+      // Create score element
+      const score = document.createElement('span');
+      score.className = 'score';
+      score.textContent = entry.score;
+      
+      // Append elements to list item
+      li.appendChild(rank);
+      li.appendChild(name);
+      li.appendChild(score);
+      
+      // Add highlight class if this is the current user's score
+      if (entry.isCurrentUser) {
+        li.classList.add('current-user');
+      }
+      
+      // Add animation delay for staggered entry
+      li.style.animationDelay = `${index * 0.1}s`;
+      
+      ELEMENTS.leaderboard.appendChild(li);
+    });
+    
+  } catch (error) {
+    console.error('Error rendering leaderboard:', error);
+    if (ELEMENTS.leaderboard) {
+      ELEMENTS.leaderboard.innerHTML = `
+        <li class="error">
+          <i class="fas fa-exclamation-triangle"></i>
+          <div>Error loading leaderboard</div>
+          <div style="font-size: 0.9em; opacity: 0.8;">${error.message || 'Please try again later'}</div>
+        </li>`;
     }
   }
 }

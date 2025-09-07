@@ -1885,19 +1885,19 @@
     <div class="leaderboards-container">
     <div class="category-leaderboard" id="fish-leaderboard">
       <h3>Fish</h3>
-      <div id="fish-scores"></div>
+      <div id="fish-scores" class="leaderboard-list"></div>
     </div>
     <div class="category-leaderboard" id="bugs-leaderboard">
       <h3>Bugs</h3>
-      <div id="bugs-scores"></div>
+      <div id="bugs-scores" class="leaderboard-list"></div>
     </div>
     <div class="category-leaderboard" id="sea-leaderboard">
       <h3>Sea Creatures</h3>
-      <div id="sea-scores"></div>
+      <div id="sea-scores" class="leaderboard-list"></div>
     </div>
     <div class="category-leaderboard" id="villagers-leaderboard">
       <h3>Villagers</h3>
-      <div id="villagers-scores"></div>
+      <div id="villagers-scores" class="leaderboard-list"></div>
     </div>
     </div>
     <!-- High Score Modal -->
@@ -2586,9 +2586,20 @@
             }
           });
 
-          // If no data, show empty state
+          // If no data, use default leaderboard
           if (!data) {
-            console.warn('No leaderboard data provided');
+            console.warn('No leaderboard data provided, using default');
+            if (window.DEFAULT_LEADERBOARD) {
+              updateLeaderboardUI(window.DEFAULT_LEADERBOARD);
+            } else {
+              console.error('No default leaderboard data available');
+            }
+            return;
+          }
+          
+          // Ensure data is in the correct format
+          if (typeof data !== 'object' || (Array.isArray(data) && data.length === 0)) {
+            console.warn('Invalid leaderboard data format, using default');
             if (window.DEFAULT_LEADERBOARD) {
               updateLeaderboardUI(window.DEFAULT_LEADERBOARD);
             }
@@ -2821,6 +2832,12 @@
         const category = categorySelector?.value || 'fish';
         console.log(`[Leaderboard] Fetching ${category} leaderboard from ${window.BACKEND_API}`);
         
+        // Function to use default leaderboard data
+        const useDefaultLeaderboard = () => {
+          console.log('[Leaderboard] Using default leaderboard data');
+          updateLeaderboardUI(DEFAULT_LEADERBOARD);
+        };
+        
         // Check if we're in standalone mode
         if (isStandaloneMode()) {
           console.log('[Leaderboard] Running in standalone mode, using local data');
@@ -2828,13 +2845,17 @@
           try {
             const savedLeaderboard = localStorage.getItem('leaderboard');
             if (savedLeaderboard) {
-              updateLeaderboardUI(JSON.parse(savedLeaderboard));
-            } else {
-              updateLeaderboardUI(DEFAULT_LEADERBOARD);
+              const parsed = JSON.parse(savedLeaderboard);
+              // Ensure we have valid data
+              if (parsed && Object.keys(parsed).length > 0) {
+                updateLeaderboardUI(parsed);
+                return;
+              }
             }
+            useDefaultLeaderboard();
           } catch (e) {
             console.error('Error parsing saved leaderboard:', e);
-            updateLeaderboardUI(DEFAULT_LEADERBOARD);
+            useDefaultLeaderboard();
           }
           return;
         }
@@ -2858,24 +2879,32 @@
             headers['Authorization'] = `Bearer ${token}`;
           }
           
-          const response = await fetch(`https://capstone-project-production-3cce.up.railway.app/api/v1/leaderboard/${category}`, {
-            method: 'GET',
-            headers: headers,
-            signal: controller.signal
-          }).catch(error => {
+          let response;
+          try {
+            response = await fetch(`https://capstone-project-production-3cce.up.railway.app/api/v1/leaderboard/${category}`, {
+              method: 'GET',
+              headers: headers,
+              signal: controller.signal
+            });
+          } catch (error) {
             if (error.name === 'AbortError') {
               console.warn('[Leaderboard] Request timed out');
+            } else {
+              console.error('[Leaderboard] Fetch error:', error);
             }
             window.apiUnavailable = true;
-            throw error;
-          });
+            useDefaultLeaderboard();
+            return;
+          }
           
           clearTimeout(timeoutId);
           
           if (!response.ok) {
             const errorText = await response.text();
             console.error(`[Leaderboard] Server error: ${response.status} ${errorText}`);
-            throw new Error(`Server responded with ${response.status}`);
+            window.apiUnavailable = true;
+            useDefaultLeaderboard();
+            return;
           }
           
           const responseTime = Date.now() - startTime;

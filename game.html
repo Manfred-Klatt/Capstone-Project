@@ -2443,7 +2443,7 @@
           const controller = new AbortController();
           const timeoutId = setTimeout(() => controller.abort(), 2000); // 2 second timeout
           
-          const response = await fetch('https://capstone-project-production-3cce.up.railway.app/api/v1/leaderboard', {
+          const response = await fetch('https://capstone-project-production-3cce.up.railway.app/api/v1/leaderboard/submit', {
             method: 'POST',
             headers: headers,
             body: JSON.stringify({

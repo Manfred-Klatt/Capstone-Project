@@ -3,7 +3,8 @@ import {
   GAME_EVENTS, 
   onGameEvent, 
   updateGameState,
-  getGameState 
+  getGameState,
+  dispatchGameEvent
 } from './js/reactBridge.js';
 
 // === Constants ===
@@ -304,41 +305,50 @@ async function getLeaderboard() {
 }
 
 // === Cached Elements ===
-const ELEMENTS = {};
+const ELEMENTS = {
+  gameState: 'idle' // Initialize game state
+};
 
 // Function to cache DOM elements
 function cacheDOMElements() {
-  // Get elements using their correct IDs from the HTML
-  ELEMENTS.category = document.getElementById('category');
-  ELEMENTS.guessInput = document.getElementById('guess-input');
-  ELEMENTS.gameActionButton = document.getElementById('game-action-btn');
-  ELEMENTS.feedback = document.getElementById('feedback');
-  ELEMENTS.imageDisplay = document.getElementById('image-display');
-  ELEMENTS.leaderboardElement = document.getElementById('leaderboard');
-  ELEMENTS.gameContainer = document.querySelector('.game-container');
-  
-  // Get score and high score elements with their value spans
-  ELEMENTS.scoreElement = document.getElementById('score-value');
-  ELEMENTS.highScoreElement = document.getElementById('high-score-value');
-  
-  // Get timer elements
-  ELEMENTS.timerElement = document.getElementById('game-timer');
-  ELEMENTS.timeSpan = document.getElementById('time');
-  ELEMENTS.timerContainer = document.querySelector('.timer-container');
-  
-  // Set up button references - use the same button for both start and submit
-  ELEMENTS.startButton = ELEMENTS.gameActionButton;
-  ELEMENTS.submitButton = ELEMENTS.gameActionButton;
-  
-  // Game state
-  ELEMENTS.gameState = 'idle'; // 'idle', 'playing', 'gameOver'
-  
-  // Log which elements were not found
-  Object.entries(ELEMENTS).forEach(([key, element]) => {
-    if (!element && key !== 'gameState') {
-      console.warn(`DOM element not found: ${key}`);
+  // Game elements - use querySelector for better error handling
+  const elementsToCache = {
+    leaderboard: '#leaderboard',
+    gameActionButton: '#gameActionButton',
+    imageDisplay: '#imageDisplay',
+    leaderboardElement: '#leaderboard',
+    gameContainer: '#gameContainer',
+    scoreElement: '#score',
+    highScoreElement: '#highScore',
+    timerElement: '#timer',
+    timeSpan: '#timeSpan',
+    startButton: '#startButton',
+    submitButton: '#submitButton',
+    guessInput: '#guessInput',
+    feedbackElement: '#feedback',
+    category: '#category-selector',
+    gameContent: '#game-content',
+    loadingIndicator: '#loading-indicator',
+    gameOverContent: '#game-over-content',
+    finalScore: '#final-score',
+    newHighScore: '#new-high-score',
+    playAgainButton: '#play-again-button',
+    mainMenuButton: '#main-menu-button'
+  };
+
+  // Cache all elements
+  Object.entries(elementsToCache).forEach(([key, selector]) => {
+    ELEMENTS[key] = document.querySelector(selector);
+    if (!ELEMENTS[key] && key !== 'gameState') {
+      console.warn(`DOM element not found: ${key} (${selector})`);
     }
   });
+
+  // Set up button references - use the same button for both start and submit if they exist
+  if (ELEMENTS.gameActionButton) {
+    ELEMENTS.startButton = ELEMENTS.gameActionButton;
+    ELEMENTS.submitButton = ELEMENTS.gameActionButton;
+  }
 }
 
 // === Cached Data ===
@@ -382,59 +392,51 @@ function stopTimer() {
   }
 }
 
-
+// Function to update input placeholder based on selected category
+function updatePlaceholder() {
+  if (ELEMENTS.category && ELEMENTS.guessInput) {
+    let category = ELEMENTS.category.value;
+    let displayText;
+    
+    // Handle special case for 'sea' category
+    if (category === 'sea') {
+      displayText = 'sea creature';
+    } else {
+      // Make other categories singular and lowercase
+      displayText = category.endsWith('s') ? category.slice(0, -1) : category;
+      displayText = displayText.toLowerCase();
+    }
+    
+    ELEMENTS.guessInput.placeholder = `Name that ${displayText}!`;
+  }
+}
 
 // === DOM Ready ===
-document.addEventListener('DOMContentLoaded', () => {
+function init() {
   try {
-    console.log('DOM fully loaded, initializing game...');
-    
-    // Set up React event listeners
-    setupReactEventListeners();
-    
-    // Set up simulate high score button
-    const simulateHighScoreBtn = document.getElementById('simulate-high-score-btn');
-    if (simulateHighScoreBtn) {
-      simulateHighScoreBtn.addEventListener('click', () => {
-        const simulatedScore = Math.floor(Math.random() * 10) + 1;
-        console.log(`Simulating high score: ${simulatedScore}`);
-        
-        // Update the score variable
-        score = simulatedScore;
-        
-        // Update high score
-        updateHighScore();
-      });
-    }
-    
-    // Cache all DOM elements first
+    // Cache DOM elements first
     cacheDOMElements();
     
-    // Function to update input placeholder based on selected category
-    function updatePlaceholder() {
-      if (ELEMENTS.category && ELEMENTS.guessInput) {
-        let category = ELEMENTS.category.value;
-        let displayText;
-        
-        // Handle special case for 'sea' category
-        if (category === 'sea') {
-          displayText = 'sea creature';
-        } else {
-          // Make other categories singular and lowercase
-          displayText = category.endsWith('s') ? category.slice(0, -1) : category;
-          displayText = displayText.toLowerCase();
-        }
-        
-        ELEMENTS.guessInput.placeholder = `Name that ${displayText}!`;
-      }
-    }
+    // Initialize the game
+    initGame();
     
-    // Set initial placeholder
-    updatePlaceholder();
+    // Set up event listeners
+    initEventListeners();
     
-    // Update placeholder when category changes
+    // Initialize auth handlers
+    initAuthHandlers();
+    
+    // Set up category change handler
     if (ELEMENTS.category) {
       ELEMENTS.category.addEventListener('change', updatePlaceholder);
+      updatePlaceholder(); // Set initial placeholder
+    }
+    
+    // Initial leaderboard render - only if leaderboard element exists
+    if (ELEMENTS.leaderboard) {
+      renderLeaderboard();
+    } else {
+      console.warn('Leaderboard element not found, skipping initial render');
     }
     
     // Check for critical elements and create them if missing
@@ -513,11 +515,7 @@ document.addEventListener('DOMContentLoaded', () => {
     }
     
     // Initialize leaderboard with error handling
-    try {
-      renderLeaderboard();
-    } catch (error) {
-      console.error('Error initializing leaderboard:', error);
-    }
+    renderLeaderboard();
     
     if (ELEMENTS.submitButton) {
       ELEMENTS.submitButton.disabled = true;
@@ -526,12 +524,9 @@ document.addEventListener('DOMContentLoaded', () => {
     if (ELEMENTS.startButton) {
       ELEMENTS.startButton.disabled = false;
     }
-
   } catch (error) {
     console.error('Error initializing game:', error);
   }
-});
-
 // === Game Utilities ===
 function clearErrors() {
   document.querySelectorAll('.error-message').forEach(el => el.textContent = '');
@@ -563,21 +558,36 @@ function showMessage(message, type = 'info', duration = 5000) {
   // Create notification element
   const notification = document.createElement('div');
   notification.className = `notification ${type}`;
-  notification.style.cssText = `
-    padding: 12px 20px;
-    margin-bottom: 10px;
-    border-radius: 4px;
-    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-    font-size: 14px;
-    max-width: 350px;
-    opacity: 0;
-    transition: opacity 0.3s ease-in-out;
-    color: white;
-    background-color: ${type === 'success' ? '#4caf50' : 
-                      type === 'error' ? '#f44336' : 
-                      type === 'warning' ? '#ff9800' : 
-                      '#2196f3'};
-  `;
+  
+  // Determine background color based on message type
+  let bgColor;
+  switch(type) {
+    case 'success':
+      bgColor = '#4caf50';
+      break;
+    case 'error':
+      bgColor = '#f44336';
+      break;
+    case 'warning':
+      bgColor = '#ff9800';
+      break;
+    default:
+      bgColor = '#2196f3';
+  }
+
+  // Set notification styles
+  notification.style.position = 'fixed';
+  notification.style.bottom = '20px';
+  notification.style.right = '20px';
+  notification.style.padding = '15px 25px';
+  notification.style.borderRadius = '4px';
+  notification.style.boxShadow = '0 4px 6px rgba(0, 0, 0, 0.1)';
+  notification.style.fontSize = '14px';
+  notification.style.maxWidth = '350px';
+  notification.style.opacity = '0';
+  notification.style.transition = 'opacity 0.3s ease-in-out';
+  notification.style.color = 'white';
+  notification.style.backgroundColor = bgColor;
   
   // Add message content
   notification.textContent = message;
@@ -813,24 +823,26 @@ function handleLogin(e) {
   }
 }
 
-if (ELEMENTS.timerElement) {
-  ELEMENTS.timerElement.textContent = `Time: ${timeLeft}s`;
-}
+    // Initialize timer display
+    if (ELEMENTS.timerElement) {
+      ELEMENTS.timerElement.textContent = `Time: ${timeLeft}s`;
+    }
 
-// Disable input until game starts
-if (ELEMENTS.guessInput) {
-  ELEMENTS.guessInput.disabled = true;
-}
+    // Disable input until game starts
+    if (ELEMENTS.guessInput) {
+      ELEMENTS.guessInput.disabled = true;
+    }
 
-if (ELEMENTS.gameActionButton) {
-  ELEMENTS.gameActionButton.textContent = 'Start Game';
-  ELEMENTS.gameActionButton.className = 'btn btn-primary';
-}
+    // Set up game action button
+    if (ELEMENTS.gameActionButton) {
+      ELEMENTS.gameActionButton.textContent = 'Start Game';
+      ELEMENTS.gameActionButton.className = 'btn btn-primary';
+    }
 
-// Initialize leaderboard
-renderLeaderboard();
-
-// Game state management is handled by reactBridge.js
+    // Initialize leaderboard
+    renderLeaderboard();
+    
+    // Game state management is handled by reactBridge.js
 
 function handleGameAction() {
   const currentState = getGameState();
@@ -1511,25 +1523,12 @@ function resetGame() {
     // Stop any running timers
     stopTimer();
     
-    // Reset game state
-    score = 0;
-    timeLeft = 10; // Reset to default time
-    
     // Reset UI elements
-    if (ELEMENTS.scoreElement) ELEMENTS.scoreElement.textContent = '0';
-    if (ELEMENTS.feedback) {
-      ELEMENTS.feedback.textContent = '';
-      ELEMENTS.feedback.className = '';
-    }
-    if (ELEMENTS.guessInput) {
-      ELEMENTS.guessInput.value = '';
-      ELEMENTS.guessInput.disabled = false;
-      ELEMENTS.guessInput.style.display = 'block';
-    }
     if (ELEMENTS.submitButton) {
       ELEMENTS.submitButton.disabled = false;
       ELEMENTS.submitButton.style.display = 'inline-block';
     }
+    
     if (ELEMENTS.timerContainer) {
       ELEMENTS.timerContainer.style.display = 'block';
     }
@@ -1620,4 +1619,5 @@ function setupReactEventListeners() {
     console.error('Error initializing React event listeners:', error);
     return false;
   }
+}
 }

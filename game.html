@@ -2723,10 +2723,6 @@
 
       // Function to detect if we're running in standalone mode (without a server)
       function isStandaloneMode() {
-        // Check URL parameters
-        const urlParams = new URLSearchParams(window.location.search);
-        const guestParam = urlParams.get('guest');
-        
         // Check if running via file:// protocol
         const isFileProtocol = window.location.protocol === 'file:';
         
@@ -2735,6 +2731,20 @@
         
         // Check if force_standalone is set in localStorage
         const forceStandalone = localStorage.getItem('force_standalone') === 'true';
+        
+        // Check if we have a valid backend connection
+        const backendAvailable = window.BACKEND_API && 
+                               localStorage.getItem('backendHealth') && 
+                               JSON.parse(localStorage.getItem('backendHealth')).status === 'available';
+        
+        // Only use guest mode if backend is actually unavailable
+        if (backendAvailable) {
+          return isFileProtocol || forceStandalone;
+        }
+        
+        // For backward compatibility, check guest param if backend status is unknown
+        const urlParams = new URLSearchParams(window.location.search);
+        const guestParam = urlParams.get('guest');
         
         return guestParam === 'true' || isFileProtocol || apiUnavailable || forceStandalone;
       }
@@ -4001,7 +4011,7 @@
         document.getElementById('simulate-score-btn').addEventListener('click', () => {
           const categories = ['fish', 'bugs', 'sea', 'villagers'];
           const randomCategory = categories[Math.floor(Math.random() * categories.length)];
-          const testScore = Math.floor(Math.random() * 100) + 1; // Random score between 1-100
+          const testScore = Math.floor(Math.random() * 371) + 130; // Random score between 130-500
           
           // Directly show the high score modal for the test score
           showHighScoreModal(testScore, randomCategory);

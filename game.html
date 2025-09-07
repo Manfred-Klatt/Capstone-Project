@@ -2430,7 +2430,8 @@
           
           // Prepare the headers
           const headers = {
-            'Content-Type': 'application/json'
+            'Content-Type': 'application/json',
+            'x-guest-token': 'a7b9c2d5e8f3g6h1j4k7m2n5p8r3t6v9' // Default guest token from backend
           };
           
           // Add authorization header if token exists
@@ -2448,7 +2449,13 @@
             body: JSON.stringify({
               category: category,
               score: finalScore,
-              name: playerName || 'Guest'
+              playerName: playerName || 'Guest',
+              gameData: {
+                correctAnswers: finalScore,  // Using finalScore instead of score
+                totalQuestions: 10,          // Should match your game's total questions
+                timeTaken: 15,               // Using a default value, replace with actual time if available
+                difficulty: 'medium'          // Default difficulty
+              }
             }),
             signal: controller.signal
           }).catch(error => {
@@ -2766,43 +2773,53 @@
       
       async function updateLeaderboard() {
         const category = categorySelector?.value || 'fish';
+        console.log(`[Leaderboard] Fetching ${category} leaderboard from ${window.BACKEND_API}`);
         
-        try {
-          console.log(`[Leaderboard] Fetching ${category} leaderboard from ${window.BACKEND_API}`);
-          
-          // Check if we're in standalone mode
-          if (isStandaloneMode()) {
-            console.log('[Leaderboard] Running in standalone mode, using local data');
-            // Use local data if available
-            const savedLeaderboard = localStorage.getItem('acnh_leaderboard');
+        // Check if we're in standalone mode
+        if (isStandaloneMode()) {
+          console.log('[Leaderboard] Running in standalone mode, using local data');
+          // Use local data if available
+          try {
+            const savedLeaderboard = localStorage.getItem('leaderboard');
             if (savedLeaderboard) {
-              try {
-                const data = JSON.parse(savedLeaderboard);
-                updateLeaderboardUI(data);
-              } catch (e) {
-                console.error('Error parsing saved leaderboard:', e);
-                updateLeaderboardUI(DEFAULT_LEADERBOARD);
-              }
+              updateLeaderboardUI(JSON.parse(savedLeaderboard));
             } else {
               updateLeaderboardUI(DEFAULT_LEADERBOARD);
             }
-            return;
+          } catch (e) {
+            console.error('Error parsing saved leaderboard:', e);
+            updateLeaderboardUI(DEFAULT_LEADERBOARD);
           }
-          
+          return;
+        }
+        
+        // If not in standalone mode, try to fetch from server
+        try {
           // Fetch leaderboard data from the server with a timeout
           const controller = new AbortController();
           const timeoutId = setTimeout(() => controller.abort(), 5000); // 5 second timeout
           
           const startTime = Date.now();
-          const response = await fetch(`${window.BACKEND_API}/leaderboard/${category}`, {
-            signal: controller.signal,
-            credentials: 'include',
-            headers: {
-              'Accept': 'application/json',
-              'Content-Type': 'application/json'
-            }
+          const headers = {
+            'Accept': 'application/json',
+            'Content-Type': 'application/json',
+            'x-guest-token': 'a7b9c2d5e8f3g6h1j4k7m2n5p8r3t6v9' // Default guest token from backend
+          };
+          
+          // Add authorization header if user is logged in
+          const token = localStorage.getItem('token') || sessionStorage.getItem('token');
+          if (token) {
+            headers['Authorization'] = `Bearer ${token}`;
+          }
+          
+          const response = await fetch(`https://capstone-project-production-3cce.up.railway.app/api/v1/leaderboard/${category}`, {
+            method: 'GET',
+            headers: headers,
+            signal: controller.signal
           }).catch(error => {
-            console.error('[Leaderboard] Fetch error:', error);
+            if (error.name === 'AbortError') {
+              console.warn('[Leaderboard] Request timed out');
+            }
             window.apiUnavailable = true;
             throw error;
           });
@@ -2838,9 +2855,9 @@
           // Update the UI with the fetched data
           updateLeaderboardUI(formattedData);
         } catch (error) {
-          console.log('Using local leaderboard data');
+          console.log('Using local leaderboard data:', error);
           // Fall back to local data if server request fails
-          const savedLeaderboard = localStorage.getItem('acnh_leaderboard');
+          const savedLeaderboard = localStorage.getItem('leaderboard');
           if (savedLeaderboard) {
             try {
               const data = JSON.parse(savedLeaderboard);

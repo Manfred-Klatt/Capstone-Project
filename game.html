@@ -2723,59 +2723,77 @@
 
       // Function to detect if we're running in standalone mode (without a server)
       function isStandaloneMode() {
+        // If we have a valid backend API URL and no explicit force_standalone flag
+        if (window.BACKEND_API) {
+          // Check if we have a recent successful health check
+          const healthData = localStorage.getItem('backendHealth');
+          if (healthData) {
+            try {
+              const { status, timestamp } = JSON.parse(healthData);
+              // Consider health check valid if it's less than 5 minutes old
+              const isRecent = Date.now() - new Date(timestamp).getTime() < 5 * 60 * 1000;
+              if (status === 'available' && isRecent) {
+                return false; // Backend is available, don't use standalone mode
+              }
+            } catch (e) {
+              console.warn('Error parsing backend health data', e);
+            }
+          }
+        }
+        
         // Check if running via file:// protocol
         const isFileProtocol = window.location.protocol === 'file:';
         
-        // Check if API has been marked as unavailable
+        // Check if API has been marked as unavailable in this session
         const apiUnavailable = window.apiUnavailable === true;
         
         // Check if force_standalone is set in localStorage
         const forceStandalone = localStorage.getItem('force_standalone') === 'true';
         
-        // Check if we have a valid backend connection
-        const backendAvailable = window.BACKEND_API && 
-                               localStorage.getItem('backendHealth') && 
-                               JSON.parse(localStorage.getItem('backendHealth')).status === 'available';
-        
-        // Only use guest mode if backend is actually unavailable
-        if (backendAvailable) {
-          return isFileProtocol || forceStandalone;
-        }
-        
-        // For backward compatibility, check guest param if backend status is unknown
+        // Check URL parameters (for testing purposes only)
         const urlParams = new URLSearchParams(window.location.search);
         const guestParam = urlParams.get('guest');
         
+        // In production, ignore the guest parameter unless explicitly in file:// protocol
+        if (window.location.hostname !== 'localhost' && !isFileProtocol) {
+          return apiUnavailable || forceStandalone;
+        }
+        
+        // For local development, respect the guest parameter
         return guestParam === 'true' || isFileProtocol || apiUnavailable || forceStandalone;
       }
       
       async function updateLeaderboard() {
+        const category = categorySelector?.value || 'fish';
+        
         try {
-          // Get the current category
-          const category = categorySelector.value || 'fish';
+          console.log(`[Leaderboard] Fetching ${category} leaderboard from ${window.BACKEND_API}`);
           
           // Check if we're in standalone mode
           if (isStandaloneMode()) {
-            // Always confirm before switching to standalone mode
-            if (!localStorage.getItem('standalone_confirmed_this_session')) {
-              if (confirm("Server connection unavailable. Your scores will be saved locally but not shared online. Continue in standalone mode?")) {
-                // Set a session flag to avoid multiple prompts in the same session
-                localStorage.setItem('standalone_confirmed_this_session', 'true');
-                localStorage.setItem('force_standalone', 'true');
-              } else {
-                // User declined standalone mode, redirect to index
-                window.location.href = 'index.html';
-                return;
+            console.log('[Leaderboard] Running in standalone mode, using local data');
+            // Use local data if available
+            const savedLeaderboard = localStorage.getItem('acnh_leaderboard');
+            if (savedLeaderboard) {
+              try {
+                const data = JSON.parse(savedLeaderboard);
+                updateLeaderboardUI(data);
+              } catch (e) {
+                console.error('Error parsing saved leaderboard:', e);
+                updateLeaderboardUI(DEFAULT_LEADERBOARD);
               }
+            } else {
+              updateLeaderboardUI(DEFAULT_LEADERBOARD);
             }
-            throw new Error('Running in standalone mode');
+            return;
           }
           
           // Fetch leaderboard data from the server with a timeout
           const controller = new AbortController();
-          const timeoutId = setTimeout(() => controller.abort(), 2000); // 2 second timeout
+          const timeoutId = setTimeout(() => controller.abort(), 5000); // 5 second timeout
           
-          const response = await fetch(`${window.BACKEND_API || ''}/leaderboard/${category}`, {
+          const startTime = Date.now();
+          const response = await fetch(`${window.BACKEND_API}/leaderboard/${category}`, {
             signal: controller.signal,
             credentials: 'include',
             headers: {
@@ -2783,7 +2801,7 @@
               'Content-Type': 'application/json'
             }
           }).catch(error => {
-            // Mark API as unavailable for future calls
+            console.error('[Leaderboard] Fetch error:', error);
             window.apiUnavailable = true;
             throw error;
           });
@@ -2791,10 +2809,22 @@
           clearTimeout(timeoutId);
           
           if (!response.ok) {
-            throw new Error(`Failed to fetch leaderboard: ${response.status}`);
+            const errorText = await response.text();
+            console.error(`[Leaderboard] Server error: ${response.status} ${errorText}`);
+            throw new Error(`Server responded with ${response.status}`);
           }
           
+          const responseTime = Date.now() - startTime;
+          console.log(`[Leaderboard] Fetched in ${responseTime}ms`);
+          
           const leaderboardData = await response.json();
+          
+          // Update backend health status
+          localStorage.setItem('backendHealth', JSON.stringify({
+            status: 'available',
+            timestamp: new Date().toISOString(),
+            responseTime
+          }));
           
           // Format the data for the UI
           const formattedData = {};

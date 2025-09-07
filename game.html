@@ -1368,11 +1368,6 @@
     <div style="width:100%; height:85px;" id="header-spacer"></div>
     
     <script>
-      // Function to check if we're in standalone mode
-      function isStandaloneMode() {
-        return window.location.protocol === 'file:' || localStorage.getItem('force_standalone') === 'true' || localStorage.getItem('standalone_confirmed_this_session') === 'true';
-      }
-      
       // Function to check if the server is available
       async function checkServerAvailable() {
         const API_URL = 'http://localhost:3002';
@@ -1721,15 +1716,16 @@
 
     
     <!-- Main Content Wrapper -->
-    <div id="admin-tools-container" style="display: none; margin: 10px auto; max-width: 800px; padding: 15px; background: rgba(255, 255, 255, 0.9); border-radius: 8px; box-shadow: 0 2px 10px rgba(0,0,0,0.1);">
-      <h2 style="margin-top: 0; text-align: center;">Admin Tools</h2>
-      <div style="display: flex; flex-wrap: wrap; gap: 10px; justify-content: center;">
-        <button id="reset-fish-btn">Reset Fish</button>
-        <button id="reset-bugs-btn">Reset Bugs</button>
-        <button id="reset-sea-btn">Reset Sea</button>
-        <button id="reset-villagers-btn">Reset Villagers</button>
-        <button id="reset-to-defaults-btn" style="background-color: #4a90e2;">Reset All Leaderboards</button>
-        <button id="reset-high-score" style="background-color: #ffa500;">Reset Personal Best</button>
+    <div id="admin-tools-container" style="display: none; margin: 10px auto; max-width: 300px; padding: 20px; background: rgba(255, 255, 255, 0.95); border-radius: 8px; box-shadow: 0 2px 15px rgba(0,0,0,0.15);">
+      <h2 style="margin: 0 0 15px 0; text-align: center; color: #5a3d2b; font-size: 1.5em;">Admin Tools</h2>
+      <div style="display: flex; flex-direction: column; gap: 12px;">
+        <button id="simulate-score-btn" style="width: 100%; padding: 10px; margin: 0;">Simulate High Score</button>
+        <button id="reset-fish-btn" style="width: 100%; padding: 10px; margin: 0;">Reset Fish</button>
+        <button id="reset-bugs-btn" style="width: 100%; padding: 10px; margin: 0;">Reset Bugs</button>
+        <button id="reset-sea-btn" style="width: 100%; padding: 10px; margin: 0;">Reset Sea</button>
+        <button id="reset-villagers-btn" style="width: 100%; padding: 10px; margin: 0;">Reset Villagers</button>
+        <button id="reset-to-defaults-btn" style="width: 100%; padding: 10px; margin: 0; background-color: #4a90e2; color: white;">Reset All Leaderboards</button>
+        <button id="reset-high-score" style="width: 100%; padding: 10px; margin: 0; background-color: #ffa500; color: white;">Reset Personal Best</button>
       </div>
     </div>
 
@@ -1903,10 +1899,10 @@
     <!-- High Score Modal -->
     <div id="highScoreModal" class="modal">
       <div class="modal-content">
-        <h2>New High Score!</h2>
-        <p>Congratulations! You scored <span id="finalScore"></span> points!</p>
+        <h2 style="color: #2c3e50;">New High Score!</h2>
+        <p style="color: #34495e;">🎉 Congratulations! You scored <span id="finalScore" style="font-weight: bold; color: #2c3e50;"></span> points! 🎉</p>
         <div id="placementMessage"></div>
-        <p>Enter your name for the leaderboard:</p>
+        <p style="color: #2c3e50; font-weight: 500; margin-top: 15px;">🏆 Enter your name for the leaderboard:</p>
         <input type="text" id="playerName" placeholder="Your name" maxlength="10" style="width: 150px; padding: 8px; font-size: 14px;" />
         <div class="modal-buttons">
           <button id="submitScore" class="modal-btn submit-btn">Submit</button>
@@ -2332,50 +2328,74 @@
       }
 
       function showHighScoreModal(finalScore, category) {
-        // Play high score sound
-        playSound(highScoreSound);
+        // Play high score sound if available
+        const highScoreSound = document.getElementById('high-score-sound');
+        if (highScoreSound) {
+          highScoreSound.currentTime = 0;
+          highScoreSound.play().catch(e => console.log('Could not play high score sound:', e));
+        }
         
         // Set the final score in the modal
-        document.getElementById('finalScore').textContent = finalScore;
+        const finalScoreElement = document.getElementById('finalScore');
+        if (finalScoreElement) {
+          finalScoreElement.textContent = finalScore;
+        }
         
         // Show the modal
         const modal = document.getElementById('highScoreModal');
-        modal.style.display = 'block';
-        
-        // Focus on the name input
-        const playerNameInput = document.getElementById('playerName');
-        playerNameInput.value = '';
-        playerNameInput.focus();
-        
-        // Store category for later use
-        modal.dataset.category = category;
-        
-        // Add event listeners for the buttons
-        document.getElementById('submitScore').onclick = function() {
-          submitHighScore(finalScore, category);
-        };
-        
-        document.getElementById('skipSubmit').onclick = function() {
-          closeHighScoreModal();
-        };
-        
-        // Allow Enter key to submit
-        playerNameInput.addEventListener('keypress', function(e) {
-          if (e.key === 'Enter') {
-            submitHighScore(finalScore, category);
+        if (modal) {
+          modal.style.display = 'block';
+          
+          // Store category for later use
+          modal.dataset.category = category;
+          
+          // Focus on the name input
+          const playerNameInput = document.getElementById('playerName');
+          if (playerNameInput) {
+            playerNameInput.value = '';
+            playerNameInput.focus();
+            
+            // Allow Enter key to submit
+            playerNameInput.onkeypress = function(e) {
+              if (e.key === 'Enter') {
+                submitHighScore(finalScore, category);
+              }
+            };
           }
-        });
+          
+          // Add event listeners for the buttons
+          const submitButton = document.getElementById('submitScore');
+          if (submitButton) {
+            submitButton.onclick = function() {
+              submitHighScore(finalScore, category);
+            };
+          }
+          
+          const skipButton = document.getElementById('skipSubmit');
+          if (skipButton) {
+            skipButton.onclick = closeHighScoreModal;
+          }
+        }
       }
       
       function closeHighScoreModal() {
         document.getElementById('highScoreModal').style.display = 'none';
       }
       
-      async function submitHighScore(finalScore, category) {
-        const playerName = document.getElementById('playerName').value.trim();
-        if (!playerName) {
-          alert('Please enter your name or click Skip');
-          return;
+      async function submitHighScore(finalScore, category, playerName = null) {
+        // If playerName is not provided, get it from the input field
+        if (playerName === null) {
+          const playerNameInput = document.getElementById('playerName');
+          if (playerNameInput) {
+            playerName = playerNameInput.value.trim();
+            if (!playerName) {
+              alert('Please enter your name or click Skip');
+              return;
+            }
+          } else {
+            // If no input field is found, use a default name
+            playerName = 'Player';
+          }
         }
         
         // Get the current username from localStorage or sessionStorage
@@ -2542,97 +2562,6 @@
             placementMessage.innerHTML = '<p style="color: #c0c0c0; font-weight: bold;">You achieved 2nd place! 🥈</p>';
         } else if (placement === 3) {
             placementMessage.innerHTML = '<p style="color: #cd7f32; font-weight: bold;">You achieved 3rd place! 🥉</p>';
-        } else {
-            placementMessage.innerHTML = '<p style="color: #ffa500; font-weight: bold;">You achieved ' + placement + 'th place! 🎉</p>';
-        }
-      }
-      
-      function saveLeaderboard(data) {
-        // In a real application, this would send the data to a server
-        // For this demo, we'll store it in localStorage
-        console.log('Leaderboard data updated:', data);
-        
-        // Save to localStorage for persistence
-        localStorage.setItem('acnh_leaderboard', JSON.stringify(data));
-        
-        // Directly update the leaderboard UI with the new data
-        updateLeaderboardUI(data);
-      }
-      
-      // Check if a score is high enough to be on the leaderboard
-      async function isHighScore(score, category) {
-        try {
-          // Check if we're in standalone mode
-          if (isStandaloneMode()) {
-            // Always confirm before switching to standalone mode
-            if (!localStorage.getItem('standalone_confirmed_this_session')) {
-              if (confirm("Server connection unavailable. Your scores will be saved locally but not shared online. Continue in standalone mode?")) {
-                // Set a session flag to avoid multiple prompts in the same session
-                // This will be cleared when the browser is closed
-                localStorage.setItem('standalone_confirmed_this_session', 'true');
-                localStorage.setItem('force_standalone', 'true');
-              } else {
-                // User declined standalone mode, redirect to index
-                window.location.href = 'index.html';
-                return false;
-              }
-            }
-            throw new Error('Running in standalone mode');
-          }
-          
-          // Fetch the current leaderboard from the server with a timeout
-          const controller = new AbortController();
-          const timeoutId = setTimeout(() => controller.abort(), 2000); // 2 second timeout
-          
-          const response = await fetch(`/api/leaderboard/${category}`, {
-            signal: controller.signal
-          }).catch(error => {
-            // Mark API as unavailable for future calls
-            window.apiUnavailable = true;
-            throw error;
-          });
-          
-          clearTimeout(timeoutId);
-          
-          if (!response.ok) {
-            throw new Error(`Failed to fetch leaderboard: ${response.status}`);
-          }
-          
-          const leaderboardData = await response.json();
-          
-          // If there are fewer than 10 scores, any score qualifies
-          if (leaderboardData.length < 10) {
-            return true;
-          }
-          
-          // Otherwise, check if the score is higher than the lowest score on the leaderboard
-          const lowestScore = leaderboardData[leaderboardData.length - 1].score;
-          return score > lowestScore;
-        } catch (error) {
-          console.log('Using local leaderboard data for high score check');
-          
-          // Fall back to local storage if server request fails
-          const savedLeaderboard = localStorage.getItem('acnh_leaderboard');
-          if (savedLeaderboard) {
-            try {
-              const data = JSON.parse(savedLeaderboard);
-              const categoryScores = data[category] || [];
-              
-              // If there are fewer than 10 scores, any score qualifies
-              if (categoryScores.length < 10) {
-                return true;
-              }
-              
-              // Otherwise, check if the score is higher than the lowest score on the leaderboard
-              const lowestScore = categoryScores[categoryScores.length - 1].score;
-              return score > lowestScore;
-            } catch (e) {
-              console.error('Error parsing saved leaderboard:', e);
-              return true; // Assume it's a high score if we can't check
-            }
-          } else {
-            return true; // Assume it's a high score if we can't check
-          }
         }
       }
       
@@ -2877,10 +2806,6 @@
         }
       }
 
-      function resetToDefaults() {
-        localStorage.setItem('acnh_leaderboard', JSON.stringify(DEFAULT_LEADERBOARD));
-        updateLeaderboardUI(DEFAULT_LEADERBOARD);
-      }
 
       async function initGame(isInitialLoad = false) {
         // Prevent multiple initializations
@@ -3011,112 +2936,6 @@
         }
       }
 
-      async function getRandomItem(category) {
-        // Check if we're already loading an item to prevent race conditions
-        if (isLoadingItem) {
-          // Wait for the current operation to complete with a shorter timeout to prevent getting stuck
-          let timeoutCounter = 0;
-          await new Promise(resolve => {
-            const checkInterval = setInterval(() => {
-              timeoutCounter++;
-              // Reduced timeout to 1 second (10 * 100ms) to make next image load faster
-              if (!isLoadingItem || timeoutCounter > 10) { 
-                clearInterval(checkInterval);
-                
-                // If we timed out, force reset the loading state
-                if (timeoutCounter > 10) {
-                  isLoadingItem = false;
-                }
-                
-                resolve();
-              }
-            }, 100);
-          });
-          
-          // If the last item loaded was very recent (within 200ms), return the current item
-          // This prevents race conditions where multiple calls happen in quick succession
-          // Reduced from 500ms to 200ms to make next image load faster
-          if (Date.now() - lastLoadTimestamp < 200 && currentItem && currentItem.name) {
-            return currentItem;
-          }
-        }
-        
-        try {
-          // Set the loading flag to prevent concurrent calls
-          isLoadingItem = true;
-          console.log(`Loading item for: ${category}`);
-          
-          // Make sure we have items for this category
-          if (!allItems[category] || allItems[category].length === 0) {
-            try {
-              await loadCategoryItems(category);
-            } catch (error) {
-              console.log(`Error loading category items, using fallback data for ${category}`);
-              // Use fallback data if API fails
-              allItems[category] = getFallbackData(category);
-            }
-          }
-          
-          // Initialize shown items array for this category if it doesn't exist
-          if (!shownItems[category]) {
-            shownItems[category] = [];
-          }
-          
-          // Get items that haven't been shown yet
-          const availableItems = allItems[category].filter(item => {
-            return !shownItems[category].includes(item.name);
-          });
-          
-          // If all items have been shown, reset the shown items for this category
-          if (availableItems.length === 0) {
-            console.log(`All items in ${category} have been shown. Resetting.`);
-            shownItems[category] = [];
-            
-            // Return a random item from all items
-            const randomIndex = Math.floor(Math.random() * allItems[category].length);
-            const randomItem = allItems[category][randomIndex];
-            if (randomItem) {
-              shownItems[category].push(randomItem.name);
-              return randomItem;
-            } else {
-              console.error(`Failed to get random item from allItems[${category}]`);
-              throw new Error(`Failed to get random item for category: ${category}`);
-            }
-          }
-          
-          // Get a random item from the available items
-          const randomIndex = Math.floor(Math.random() * availableItems.length);
-          const randomItem = availableItems[randomIndex];
-          
-          if (!randomItem) {
-            console.error('Failed to get random item from available items');
-            throw new Error('Failed to select a random item');
-          }
-          
-          // Add the selected item to the shown items list
-          shownItems[category].push(randomItem.name);
-          
-          // Record the timestamp of this successful load
-          lastLoadTimestamp = Date.now();
-          
-          return randomItem;
-        } catch (error) {
-          console.error('Error in getRandomItem:', error);
-          
-          // Create a fallback item as last resort
-          console.log(`Creating emergency fallback item for ${category}`);
-          const fallbackItem = {
-            name: `${category.charAt(0).toUpperCase() + category.slice(1)} Item`,
-            image_url: null,
-            fallback_image_url: `images/${category}/placeholder.svg`
-          };
-          
-          return fallbackItem; // Return fallback item instead of throwing error
-        } finally {
-          // Always release the lock, even if an error occurred
-          isLoadingItem = false;
-        }
-      }
 
       function startTimer() {
         // Don't start the timer if the game is over
@@ -3728,32 +3547,30 @@
         
         const guess = guessInput.value.trim().toLowerCase();
         const correctAnswer = currentItem.name.toLowerCase();
+        
+        // Initialize points earned for this guess
+        let pointsEarned = 10; // Base points for correct answer
 
         if (guess === correctAnswer) {
-          // Play correct answer sound
-          playSound(correctSound);
+          // Update score
+          score += 10;
+          scoreElement.textContent = score;
           
-          // Get current difficulty
-          const difficulty = document.getElementById('difficulty').value;
-          
-          // Calculate base points
-          let pointsEarned = 10 + timeLeft;
-          let multiplier = 1;
-          
-          // Apply difficulty multiplier
-          if (difficulty === '10000') { // Medium
-            multiplier = 2;
-          } else if (difficulty === '5000') { // Hard
+          // Play correct sound
+          const correctSound = document.getElementById('correct-sound');
+          if (correctSound) {
+            correctSound.currentTime = 0;
+            correctSound.play().catch(e => console.log('Could not play sound:', e));
             multiplier = 3;
           }
           
-          // Calculate final points
-          pointsEarned *= multiplier;
-          score += pointsEarned;
+          // Calculate final points with multiplier
+          const totalPoints = pointsEarned * multiplier;
+          score += totalPoints;
           
           scoreElement.textContent = `Score: ${score}`;
           const multiplierText = multiplier > 1 ? ` x${multiplier}!` : '';
-          feedbackElement.textContent = `Correct! +${pointsEarned} points${multiplierText}`;
+          feedbackElement.textContent = `Correct! +${totalPoints} points${multiplierText}`;
           feedbackElement.className = "correct";
           
           // Update personal best score after each correct answer
@@ -3945,33 +3762,43 @@
           });
       }
 
-      function isHighScore(score, category) {
-        return new Promise((resolve) => {
-          fetch('leaderboard.json')
-            .then(response => response.json())
-            .then(data => {
-              // Get the scores for the current category
-              const scores = data[category] || [];
-              
-              // If there are fewer than 10 scores, any score is a high score
-              if (scores.length < 10) {
-                resolve(true);
-                return;
-              }
-              
-              // Find the lowest score in the top 10
-              const lowestScore = scores.reduce((min, entry) => 
-                entry.score < min ? entry.score : min, scores[0].score);
-              
-              // It's a high score if it's higher than the lowest score in the top 10
-              resolve(score > lowestScore);
-            })
-            .catch(error => {
-              console.error('Error checking high score:', error);
-              // Default to true if there's an error (to be safe)
-              resolve(true);
-            });
-        });
+      async function isHighScore(score, category) {
+        try {
+          // First check local storage for any existing scores
+          const savedLeaderboard = localStorage.getItem('acnh_leaderboard');
+          if (savedLeaderboard) {
+            const data = JSON.parse(savedLeaderboard);
+            const scores = data[category] || [];
+            
+            // If there are fewer than 10 scores, any score is a high score
+            if (scores.length < 10) return true;
+            
+            // Find the lowest score in the top 10
+            const lowestScore = scores.reduce((min, entry) => 
+              entry.score < min ? entry.score : min, scores[0].score);
+            
+            return score > lowestScore;
+          }
+          
+          // If no local data, check the server
+          const response = await fetch('leaderboard.json');
+          const data = await response.json();
+          const scores = data[category] || [];
+          
+          // If there are fewer than 10 scores, any score is a high score
+          if (scores.length < 10) return true;
+          
+          // Find the lowest score in the top 10
+          const lowestScore = scores.reduce((min, entry) => 
+            entry.score < min ? entry.score : min, scores[0].score);
+          
+          return score > lowestScore;
+          
+        } catch (error) {
+          console.error('Error checking high score:', error);
+          // Default to true if there's an error (to be safe)
+          return true;
+        }
       }
 
       window.addEventListener("DOMContentLoaded", () => {
@@ -4161,6 +3988,16 @@
         const resetFishBtn = document.getElementById('reset-fish-btn');
         if (resetFishBtn) resetFishBtn.addEventListener('click', () => resetLeaderboardCategory('fish'));
         
+        // Add event listeners for admin buttons
+        document.getElementById('simulate-score-btn').addEventListener('click', () => {
+          const categories = ['fish', 'bugs', 'sea', 'villagers'];
+          const randomCategory = categories[Math.floor(Math.random() * categories.length)];
+          const testScore = Math.floor(Math.random() * 100) + 1; // Random score between 1-100
+          
+          // Directly show the high score modal for the test score
+          showHighScoreModal(testScore, randomCategory);
+        });
+        
         const resetBugsBtn = document.getElementById('reset-bugs-btn');
         if (resetBugsBtn) resetBugsBtn.addEventListener('click', () => resetLeaderboardCategory('bugs'));
         
@@ -4335,37 +4172,6 @@
               setupNewRound();
             }, 100);
           });  
-        }
-        
-        function resetLeaderboardCategory(category) {
-          if (!confirm(`Are you sure you want to reset the ${category} leaderboard?`)) {
-            return; // User canceled
-          }
-          // Get current leaderboard data
-          const savedLeaderboard = localStorage.getItem('acnh_leaderboard');
-          let leaderboardData = {};
-          
-          if (savedLeaderboard) {
-            try {
-              leaderboardData = JSON.parse(savedLeaderboard);
-              // Reset the specified category
-              leaderboardData[category] = [];
-              // Save the updated leaderboard
-              localStorage.setItem('acnh_leaderboard', JSON.stringify(leaderboardData));
-              // Update the UI
-              updateLeaderboardUI(leaderboardData);
-              alert(`${category.charAt(0).toUpperCase() + category.slice(1)} leaderboard has been reset.`);
-            } catch (e) {
-              console.error('Error resetting leaderboard category:', e);
-              alert('An error occurred while resetting the leaderboard.');
-            }
-          } else {
-            // If no leaderboard exists yet, create an empty one
-            leaderboardData = { fish: [], bugs: [], sea: [], villagers: [] };
-            localStorage.setItem('acnh_leaderboard', JSON.stringify(leaderboardData));
-            updateLeaderboardUI(leaderboardData);
-            alert(`${category.charAt(0).toUpperCase() + category.slice(1)} leaderboard has been reset.`);
-          }
         }
         
         // Store the current category change promise to prevent race conditions

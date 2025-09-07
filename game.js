@@ -18,12 +18,84 @@ const BACKEND_API = (() => {
   
   // Local development
   if (hostname === 'localhost' || hostname === '127.0.0.1') {
+    console.log('[Config] Using local development backend');
     return 'http://localhost:8000/api/v1';
   }
   
   // Production environment - use Railway backend
-  return 'https://capstone-project-production-3cce.up.railway.app/api/v1';
+  const prodUrl = 'https://capstone-project-production-3cce.up.railway.app/api/v1';
+  console.log(`[Config] Using production backend: ${prodUrl}`);
+  return prodUrl;
 })();
+
+// Enhanced fetch with better error handling and logging
+async function fetchWithLogging(url, options = {}) {
+  const startTime = Date.now();
+  const requestId = Math.random().toString(36).substr(2, 9);
+  
+  console.log(`[${requestId}] ${options.method || 'GET'} ${url}`, {
+    timestamp: new Date().toISOString(),
+    ...(options.body && { body: JSON.parse(options.body) })
+  });
+  
+  try {
+    const response = await fetch(url, {
+      ...options,
+      headers: {
+        'Content-Type': 'application/json',
+        ...options.headers
+      }
+    });
+    
+    const responseTime = Date.now() - startTime;
+    const responseData = await response.clone().json().catch(() => ({}));
+    
+    console.log(`[${requestId}] ${response.status} (${response.statusText}) in ${responseTime}ms`, {
+      url,
+      status: response.status,
+      statusText: response.statusText,
+      response: responseData,
+      headers: Object.fromEntries([...response.headers.entries()])
+    });
+    
+    if (!response.ok) {
+      const error = new Error(`HTTP error! status: ${response.status}`);
+      error.response = response;
+      error.responseData = responseData;
+      throw error;
+    }
+    
+    return responseData;
+  } catch (error) {
+    const errorTime = Date.now() - startTime;
+    const errorDetails = {
+      url,
+      error: error.message,
+      stack: error.stack
+    };
+    
+    if (error.response) {
+      errorDetails.status = error.response.status;
+      errorDetails.statusText = error.response.statusText;
+    }
+    
+    if (error.responseData) {
+      errorDetails.responseData = error.responseData;
+    }
+    
+    console.error(`[${requestId}] Request failed after ${errorTime}ms`, errorDetails);
+    
+    // Show more detailed error to user if it's a network error
+    if (error.name === 'TypeError' && error.message.includes('Failed to fetch')) {
+      showMessage(
+        'Unable to connect to the game server. Please check your internet connection and try again.',
+        'error'
+      );
+    }
+    
+    throw error;
+  }
+}
 
 // === Leaderboard API Integration ===
 class LeaderboardManager {
@@ -52,20 +124,48 @@ class LeaderboardManager {
   
   async initialize() {
     try {
-      // Test the connection to the backend using the correct health endpoint
-      console.log('Checking backend health...');
+      console.log('[LeaderboardManager] Initializing...');
       
-      // Set up timeout for health check
+      // First check if we're forcing standalone mode via URL parameter
+      const urlParams = new URLSearchParams(window.location.search);
+      if (urlParams.get('standalone') === 'true') {
+        console.log('[LeaderboardManager] Standalone mode forced via URL parameter');
+        this.enableStandaloneMode('Standalone mode enabled via URL parameter');
+        return false;
+      }
+
+      // Check if we have a cached health status that's still valid (less than 5 minutes old)
+      const cachedHealth = localStorage.getItem('backendHealth');
+      if (cachedHealth) {
+        try {
+          const { status, timestamp } = JSON.parse(cachedHealth);
+          const now = Date.now();
+          const fiveMinutes = 5 * 60 * 1000; // 5 minutes in milliseconds
+          
+          if (now - timestamp < fiveMinutes) {
+            console.log(`[LeaderboardManager] Using cached health status: ${status}`);
+            if (status === 'unavailable') {
+              this.enableStandaloneMode('Using cached offline status');
+              return false;
+            }
+            this.initialized = true;
+            return true;
+          }
+        } catch (e) {
+          console.error('Error parsing cached health status:', e);
+          localStorage.removeItem('backendHealth');
+        }
+      }
+
+      // Perform a fresh health check
+      console.log('[LeaderboardManager] Performing fresh health check...');
       const controller = new AbortController();
       const timeoutId = setTimeout(() => controller.abort(), this.healthCheckTimeout);
       
       try {
-        // Use simpler headers for health check to avoid CORS preflight issues
-        const response = await fetch(`${BACKEND_API}/health`, { 
+        const response = await fetchWithLogging(`${BACKEND_API}/health`, { 
           method: 'GET',
-          headers: {
-            'Accept': 'application/json'
-          },
+          headers: { 'Accept': 'application/json' },
           mode: 'cors',
           credentials: 'same-origin',
           signal: controller.signal
@@ -75,10 +175,16 @@ class LeaderboardManager {
         
         if (response.ok) {
           const data = await response.json();
-          this.initialized = true;
-          console.log('LeaderboardManager initialized successfully', data);
+          console.log('[LeaderboardManager] Backend health check successful:', data);
           
-          // If we were previously in standalone mode, show a message that we're back online
+          // Cache the successful health status
+          localStorage.setItem('backendHealth', JSON.stringify({
+            status: 'available',
+            timestamp: Date.now()
+          }));
+          
+          this.initialized = true;
+          
           if (this.useLocalFallback) {
             this.useLocalFallback = false;
             showMessage('Backend connection restored. Your scores will now be saved online.', 'success');
@@ -88,20 +194,32 @@ class LeaderboardManager {
         } else {
           throw new Error(`Health check failed with status: ${response.status}`);
         }
-      } catch (fetchError) {
+      } catch (error) {
+        console.error('[LeaderboardManager] Health check failed:', error);
         clearTimeout(timeoutId);
-        throw fetchError;
+        
+        // Cache the failed health status
+        localStorage.setItem('backendHealth', JSON.stringify({
+          status: 'unavailable',
+          timestamp: Date.now(),
+          error: error.message
+        }));
+        
+        // Only show the standalone mode message if not already in standalone mode
+        if (!this.useLocalFallback) {
+          this.enableStandaloneMode('Backend server unavailable. Using standalone mode with local storage.');
+        }
+        
+        // Only show the standalone mode message if not already confirmed
+        if (!this.standaloneConfirmed) {
+          this.enableStandaloneMode('Backend server unavailable. Using standalone mode with local storage.');
+        }
+        
+        return false;
       }
     } catch (error) {
-      console.warn('Backend unavailable, falling back to local storage:', error.message);
-      this.useLocalFallback = true;
-      this.initialized = false;
-      
-      // Only show the standalone mode message if not already confirmed
-      if (!this.standaloneConfirmed) {
-        this.enableStandaloneMode('Backend server unavailable. Using standalone mode with local storage.');
-      }
-      
+      console.error('[LeaderboardManager] Initialization error:', error);
+      this.enableStandaloneMode('Error initializing leaderboard: ' + error.message);
       return false;
     }
   }
@@ -110,7 +228,9 @@ class LeaderboardManager {
     // Show a message to the user about standalone mode
     showMessage(message, 'warning', 10000);
     this.standaloneConfirmed = true;
+    this.useLocalFallback = true;
     localStorage.setItem('standalone_confirmed_this_session', 'true');
+    localStorage.setItem('standaloneMode', 'true');
   }
   
   /**
@@ -120,6 +240,7 @@ class LeaderboardManager {
     // Clear any existing interval
     if (this.healthCheckIntervalId) {
       clearInterval(this.healthCheckIntervalId);
+      this.healthCheckIntervalId = null;
     }
     
     console.log(`Starting periodic health checks every ${this.healthCheckInterval/1000} seconds`);
@@ -133,15 +254,18 @@ class LeaderboardManager {
           if (isBackOnline) {
             // Backend is back online, stop checking
             this.stopPeriodicHealthCheck();
+            showMessage('Connection to server restored!', 'success');
           }
         } catch (error) {
-          console.log('Backend still unavailable:', error.message);
+          console.error('Health check failed:', error);
         }
       } else {
-        // We're already online, no need to keep checking
+        // If we're not in local fallback mode, stop checking
         this.stopPeriodicHealthCheck();
       }
     }, this.healthCheckInterval);
+    
+    return this.healthCheckIntervalId;
   }
   
   /**
@@ -304,6 +428,93 @@ async function getLeaderboard() {
   return leaderboardManager.getLeaderboard();
 }
 
+// === Utility Functions ===
+
+/**
+ * Shows a notification message to the user
+ * @param {string} message - The message to display
+ * @param {string} type - The type of message: 'success', 'error', 'warning', 'info'
+ * @param {number} duration - How long to show the message in milliseconds (default: 5000)
+ */
+function showMessage(message, type = 'info', duration = 5000) {
+  // Check if notification container exists, create if not
+  let notificationContainer = document.getElementById('notification-container');
+  if (!notificationContainer) {
+    notificationContainer = document.createElement('div');
+    notificationContainer.id = 'notification-container';
+    notificationContainer.style.position = 'fixed';
+    notificationContainer.style.top = '20px';
+    notificationContainer.style.right = '20px';
+    notificationContainer.style.zIndex = '1000';
+    notificationContainer.style.display = 'flex';
+    notificationContainer.style.flexDirection = 'column';
+    notificationContainer.style.gap = '10px';
+    document.body.appendChild(notificationContainer);
+  }
+
+  // Create notification element
+  const notification = document.createElement('div');
+  notification.className = `notification ${type}`;
+  notification.style.padding = '15px 20px';
+  notification.style.borderRadius = '4px';
+  notification.style.color = 'white';
+  notification.style.boxShadow = '0 4px 6px rgba(0, 0, 0, 0.1)';
+  notification.style.opacity = '0';
+  notification.style.transform = 'translateX(100%)';
+  notification.style.transition = 'opacity 0.3s ease, transform 0.3s ease';
+  notification.style.maxWidth = '300px';
+  notification.style.wordBreak = 'break-word';
+  
+  // Set background color based on type
+  const colors = {
+    success: '#4CAF50',
+    error: '#F44336',
+    warning: '#FF9800',
+    info: '#2196F3'
+  };
+  notification.style.backgroundColor = colors[type] || colors.info;
+  
+  // Add message text
+  notification.textContent = message;
+  
+  // Add to container
+  notificationContainer.appendChild(notification);
+  
+  // Trigger animation
+  setTimeout(() => {
+    notification.style.opacity = '1';
+    notification.style.transform = 'translateX(0)';
+  }, 10);
+  
+  // Auto-remove after duration
+  setTimeout(() => {
+    notification.style.opacity = '0';
+    notification.style.transform = 'translateX(100%)';
+    
+    // Remove from DOM after animation
+    setTimeout(() => {
+      notification.remove();
+      // Remove container if no more notifications
+      if (notificationContainer && notificationContainer.children.length === 0) {
+        notificationContainer.remove();
+      }
+    }, 300);
+  }, duration);
+  
+  // Click to dismiss
+  notification.addEventListener('click', () => {
+    notification.style.opacity = '0';
+    notification.style.transform = 'translateX(100%)';
+    
+    setTimeout(() => {
+      notification.remove();
+      if (notificationContainer && notificationContainer.children.length === 0) {
+        notificationContainer.remove();
+      }
+    }, 300);
+  });
+}
+
 // === Cached Elements ===
 const ELEMENTS = {
   gameState: 'idle' // Initialize game state
@@ -355,9 +566,11 @@ function cacheDOMElements() {
 let cachedData = {};
 let score = 0;
 let currentItem = null;
+let isHighScore = false; // Track if current score is a high score
 let timeLeft = 10; // Default to medium difficulty (10s)
 let timerInterval;
 let maxTime = 10000; // Default to medium difficulty (10s in ms)
+let gameOver = false; // Track if game is over
 
 // === Timer Functions ===
 function startTimer() {
@@ -418,7 +631,7 @@ function init() {
     cacheDOMElements();
     
     // Initialize the game
-    initGame();
+    resetGame();
     
     // Set up event listeners
     initEventListeners();
@@ -496,6 +709,7 @@ function init() {
     
     // Initialize game state
     score = 0;
+    isHighScore = false;
     const difficultySelect = document.getElementById('difficulty');
     if (difficultySelect) {
       maxTime = parseInt(difficultySelect.value);
@@ -1092,386 +1306,6 @@ async function initGame() {
     
     // Force API fetch - no fallbacks
     const apiData = await fetchDataFromAPI(category);
-    
-    if (apiData && Array.isArray(apiData) && apiData.length > 0) {
-      console.log(`Successfully loaded ${apiData.length} ${category} items from API`);
-      cachedData[category] = apiData;
-      
-      // Start the game with API data
-      currentItem = getRandomItem(cachedData[category]);
-      displayImageFromData(currentItem);
-
-      // Enable input fields
-      if (ELEMENTS.guessInput) ELEMENTS.guessInput.disabled = false;
-      if (ELEMENTS.submitButton) ELEMENTS.submitButton.disabled = false;
-      if (ELEMENTS.scoreElement) ELEMENTS.scoreElement.textContent = `Score: ${score}`;
-
-      // Start a new round
-      setupNewRound();
-    } else {
-      throw new Error('No data returned from API');
-    }
-  } catch (error) {
-    console.error(`Failed to load ${category} data from API:`, error);
-    
-    if (ELEMENTS.feedback) {
-      ELEMENTS.feedback.textContent = `Failed to load ${category} data from API. Please check your connection and try again.`;
-      ELEMENTS.feedback.className = 'error';
-    }
-    
-    // Reset game state
-    if (ELEMENTS.guessInput) ELEMENTS.guessInput.disabled = true;
-    if (ELEMENTS.submitButton) ELEMENTS.submitButton.disabled = true;
-    if (ELEMENTS.startButton) ELEMENTS.startButton.disabled = false;
-  }
-}
-
-function getRandomItem(data) {
-  return data[Math.floor(Math.random() * data.length)];
-}
-
-async function fetchWithTimeout(resource, options = {}, timeout = TIMEOUT) {
-  const controller = new AbortController();
-  const id = setTimeout(() => controller.abort(), timeout);
-  
-  try {
-    const response = await fetch(resource, {
-      ...options,
-      signal: controller.signal
-    });
-    
-    if (!response.ok) {
-      throw new Error(`HTTP error! status: ${response.status}`);
-    }
-    
-    return response.json();
-  } catch (error) {
-    console.error('API request failed:', error);
-    throw error;
-  } finally {
-    clearTimeout(id);
-  }
-}
-
-// === UI Display ===
-function updateHighScore() {
-  const currentHighScore = localStorage.getItem('acnh_high_score') || 0;
-  if (score > currentHighScore) {
-    localStorage.setItem('acnh_high_score', score);
-    if (ELEMENTS.highScoreElement) {
-      ELEMENTS.highScoreElement.textContent = score;
-    }
-    
-    // Check if React high score modal is available
-    if (window.ReactGameComponents && window.ReactGameComponents.showHighScoreModal) {
-      // Get placement (e.g., "1st", "2nd", etc.)
-      const placement = getScorePlacement(score);
-      
-      // Show the React high score modal
-      window.ReactGameComponents.showHighScoreModal(score, placement);
-    }
-  } else if (ELEMENTS.highScoreElement && !ELEMENTS.highScoreElement.textContent) {
-    // If no high score is set yet, show the current high score
-    ELEMENTS.highScoreElement.textContent = currentHighScore;
-  }
-}
-
-// Update score display
-function updateScoreDisplay() {
-  if (ELEMENTS.scoreElement) {
-    ELEMENTS.scoreElement.textContent = score;
-  }
-  
-  // Also update the high score display
-  updateHighScore();
-}
-
-// Get the placement of a score in the leaderboard
-function getScorePlacement(newScore) {
-  const leaderboard = getLeaderboard();
-  
-  // If leaderboard is empty, it's the first place
-  if (leaderboard.length === 0) {
-    return '1st';
-  }
-  
-  // Count how many scores are higher than the new score
-  const position = leaderboard.filter(entry => entry.score >= newScore).length;
-  
-  // Return the placement with the appropriate suffix
-  const positionNumber = position + 1;
-  if (positionNumber === 1) return '1st';
-  if (positionNumber === 2) return '2nd';
-  if (positionNumber === 3) return '3rd';
-  return `${positionNumber}th`;
-}
-
-function displayImageFromData(data) {
-  if (!data) {
-    console.error('No data available for image display');
-    return;
-  }
-  
-  if (!ELEMENTS.imageDisplay) {
-    console.error('Image display element not found');
-    return;
-  }
-  
-  // Reset display
-  ELEMENTS.imageDisplay.style.display = 'block';
-  ELEMENTS.imageDisplay.alt = data.name?.['name-USen'] || data.name || 'Animal Crossing character or item';
-  
-  // Force use of API images only - prioritize high quality images
-  const originalImageUrl = data.image_uri || data.icon_uri || data.image || data.photo;
-  
-  if (!originalImageUrl) {
-    console.error('No API image URL available for:', data.name?.['name-USen'] || data.name);
-    ELEMENTS.imageDisplay.style.display = 'none';
-    return;
-  }
-  
-  // Helper function to get current category
-  function getCurrentCategory() {
-    if (ELEMENTS.category && ELEMENTS.category.value) {
-      return ELEMENTS.category.value;
-    }
-    return 'fish'; // Default fallback
-  }
-  
-  // Ensure URL uses HTTPS
-  const secureImageUrl = originalImageUrl.startsWith('http:') 
-    ? 'https:' + originalImageUrl.substring(5) 
-    : originalImageUrl;
-    
-  console.log(`Loading Nookipedia image: ${secureImageUrl}`);
-  ELEMENTS.imageDisplay.src = secureImageUrl;
-  ELEMENTS.imageDisplay.style.display = 'block';
-  
-  // Handle image load errors
-  ELEMENTS.imageDisplay.onerror = () => {
-    console.error(`Failed to load Nookipedia image: ${secureImageUrl}`);
-    ELEMENTS.imageDisplay.style.display = 'none';
-  };
-  
-  ELEMENTS.imageDisplay.onload = () => {
-    console.log(`Successfully loaded image for: ${data.name?.['name-USen'] || data.name}`);
-  };
-}
-
-function updateTimerDisplay() {
-  // Update the time display if elements exist, using Math.floor to get whole numbers
-  if (ELEMENTS.timeSpan) {
-    ELEMENTS.timeSpan.textContent = Math.floor(timeLeft);
-  }
-  
-  // Update timer container classes for styling
-  if (ELEMENTS.timerContainer) {
-    // Show the timer
-    ELEMENTS.timerContainer.style.display = 'block';
-    ELEMENTS.timerContainer.style.visibility = 'visible';
-    
-    // Update warning and danger states
-    const secondsLeft = Math.floor(timeLeft);
-    if (secondsLeft <= 10) {
-      ELEMENTS.timerContainer.classList.add('warning');
-      if (secondsLeft <= 5) {
-        ELEMENTS.timerContainer.classList.add('danger');
-      } else {
-        ELEMENTS.timerContainer.classList.remove('danger');
-      }
-    } else {
-      ELEMENTS.timerContainer.classList.remove('warning', 'danger');
-    }
-  }
-}
-
-// Leaderboard API Integration (using the class defined at the top of the file)
-
-// Legacy functions for compatibility (already defined at the top of the file)
-
-async function renderLeaderboard() {
-  // Helper function to get leaderboard from local storage
-  function getLocalLeaderboard() {
-    try {
-      const localData = localStorage.getItem('acnh_leaderboard');
-      return localData ? JSON.parse(localData) : [];
-    } catch (error) {
-      console.error('Error reading from local storage:', error);
-      return [];
-    }
-  }
-
-  try {
-    // Try to find the leaderboard element if not already cached
-    if (!ELEMENTS.leaderboard) {
-      ELEMENTS.leaderboard = document.getElementById('leaderboard');
-      if (!ELEMENTS.leaderboard) {
-        console.warn('Leaderboard element not found in the DOM');
-        return;
-      }
-    }
-    
-    // Show loading state with animation
-    ELEMENTS.leaderboard.innerHTML = `
-      <li class="loading">
-        <div class="loading-spinner"></div>
-        <span>Loading leaderboard...</span>
-      </li>`;
-
-    const category = ELEMENTS.category ? ELEMENTS.category.value : 'fish';
-    let leaderboard = [];
-    let dataSource = 'api';
-    
-    // Check if we can use the leaderboard manager
-    const canUseManager = leaderboardManager && typeof leaderboardManager.getLeaderboard === 'function';
-    
-    if (canUseManager) {
-      try {
-        console.log(`Attempting to fetch leaderboard for category: ${category}`);
-        const startTime = performance.now();
-        leaderboard = await Promise.race([
-          leaderboardManager.getLeaderboard(category),
-          new Promise((_, reject) => setTimeout(() => reject(new Error('Leaderboard fetch timeout')), 10000))
-        ]);
-        const fetchTime = Math.round(performance.now() - startTime);
-        console.log(`Leaderboard fetch completed in ${fetchTime}ms`);
-      } catch (error) {
-        console.warn('Error fetching leaderboard from backend:', error.message);
-        // Fall back to local storage
-        dataSource = 'local';
-        leaderboard = getLocalLeaderboard();
-      }
-    } else {
-      // Fallback to local storage if leaderboardManager is not available
-      console.warn('Leaderboard manager not available, using local storage');
-      dataSource = 'local';
-      leaderboard = getLocalLeaderboard();
-    }
-
-    // Validate leaderboard data
-    if (!Array.isArray(leaderboard)) {
-      console.error('Invalid leaderboard data format:', leaderboard);
-      leaderboard = [];
-    }
-
-    // Sort by score in descending order and limit to top 10
-    const sortedLeaderboard = leaderboard
-      .filter(entry => entry && (typeof entry.score === 'number' || !isNaN(parseInt(entry.score))))
-      .sort((a, b) => b.score - a.score)
-      .slice(0, 10);
-
-    // Clear the leaderboard
-    ELEMENTS.leaderboard.innerHTML = '';
-
-    // Add medal emojis for top 3 positions
-    const medals = ['🥇', '🥈', '🥉'];
-    
-    if (sortedLeaderboard.length === 0) {
-      // Show empty state
-      ELEMENTS.leaderboard.innerHTML = `
-        <li class="no-scores">
-          <i class="fas fa-trophy" style="font-size: 24px; margin-bottom: 10px; opacity: 0.7;"></i>
-          <div>No scores yet</div>
-          <div style="font-size: 0.9em; opacity: 0.8;">Be the first to play!</div>
-        </li>`;
-      return;
-    }
-    
-    // Add each score to the leaderboard
-    sortedLeaderboard.forEach((entry, index) => {
-      const li = document.createElement('li');
-      
-      // Add medal for top 3, otherwise show rank number
-      const rank = document.createElement('span');
-      rank.className = 'rank';
-      rank.textContent = index < 3 ? medals[index] : `#${index + 1}`;
-      
-      // Create name element with optional crown for top scorer
-      const name = document.createElement('span');
-      name.className = 'name';
-      if (index === 0) {
-        const crown = document.createElement('span');
-        crown.className = 'crown';
-        crown.innerHTML = '👑 ';
-        name.appendChild(crown);
-      }
-      name.appendChild(document.createTextNode(entry.username || entry.name || 'Anonymous'));
-      
-      // Create score element
-      const score = document.createElement('span');
-      score.className = 'score';
-      score.textContent = entry.score;
-      
-      // Append elements to list item
-      li.appendChild(rank);
-      li.appendChild(name);
-      li.appendChild(score);
-      
-      // Add highlight class if this is the current user's score
-      if (entry.isCurrentUser) {
-        li.classList.add('current-user');
-      }
-      
-      // Add animation delay for staggered entry
-      li.style.animationDelay = `${index * 0.1}s`;
-      
-      ELEMENTS.leaderboard.appendChild(li);
-    });
-    
-  } catch (error) {
-    console.error('Error rendering leaderboard:', error);
-    if (ELEMENTS.leaderboard) {
-      ELEMENTS.leaderboard.innerHTML = `
-        <li class="error">
-          <i class="fas fa-exclamation-triangle"></i>
-          <div>Error loading leaderboard</div>
-          <div style="font-size: 0.9em; opacity: 0.8;">${error.message || 'Please try again later'}</div>
-        </li>`;
-    }
-  }
-}
-
-function endGame() {
-  try {
-    console.log('Game ended');
-    
-    // Dispatch game over event to React
-    document.dispatchEvent(new CustomEvent(GAME_EVENTS.GAME_OVER, {
-      detail: {
-        score: score,
-        maxScore: MAX_SCORE,
-        correctAnswer: currentItem?.name?.['name-USen'] || 'Unknown'
-      }
-    }));
-    
-    // Update score display if element exists
-    if (ELEMENTS.scoreElement) {
-      ELEMENTS.scoreElement.textContent = `Score: ${score}`;
-      if (ELEMENTS.feedback && currentItem && currentItem.name && currentItem.name["name-USen"]) {
-        ELEMENTS.feedback.textContent = `❌ Incorrect! The correct answer was: ${currentItem.name["name-USen"]}`;
-        ELEMENTS.feedback.className = 'incorrect';
-      }
-    }
-    
-    // Disable all buttons and input if they exist
-    if (ELEMENTS.guessInput) {
-      ELEMENTS.guessInput.disabled = true;
-      ELEMENTS.guessInput.style.display = 'none';
-    }
-    
-    if (ELEMENTS.submitButton) {
-      ELEMENTS.submitButton.disabled = true;
-      ELEMENTS.submitButton.style.display = 'none';
-    }
-    
-    if (ELEMENTS.nextButton) {
-      ELEMENTS.nextButton.style.display = 'none';
-    }
-    
-    if (ELEMENTS.startButton) {
-      ELEMENTS.startButton.disabled = false;
-      ELEMENTS.startButton.style.display = 'block';
-    }
     
     // Get the game container from cached elements if possible
     const gameContainer = ELEMENTS.gameContainer || document.getElementById('game-container');

@@ -2578,86 +2578,103 @@
       }
       
       function updateLeaderboardUI(data) {
-        const categories = ['fish', 'bugs', 'sea', 'villagers'];
-        
-        categories.forEach(category => {
-          const scores = data[category] || [];
-          const scoresElement = document.getElementById(`${category}-scores`);
-          if (scoresElement) {
-            // Clear existing content
-            scoresElement.innerHTML = '';
-            
-            if (scores.length === 0) {
-              scoresElement.innerHTML = '<div>No scores yet</div>';
-              return;
+        try {
+          // Clear existing leaderboard items
+          document.querySelectorAll('.leaderboard-list').forEach(list => {
+            if (list && list.innerHTML) {
+              list.innerHTML = '';
             }
-            
-            // Add each score to the leaderboard with animation for new scores
-            scores.forEach((score, index) => {
-              const scoreDiv = document.createElement('div');
-              scoreDiv.style.display = 'flex';
-              scoreDiv.style.alignItems = 'center';
-              
-              // Determine if this is a newly added score (could be marked in the data)
-              const isNewScore = score.isNew;
-              
-              // Create name span with appropriate styling
-              const nameSpan = document.createElement('span');
-              nameSpan.textContent = `${index + 1}. ${score.name}`;
-              
-              // Add medal colors for top 3
-              if (index === 0) {
-                nameSpan.style.color = '#ff00ff'; // 1st place
-                nameSpan.style.textShadow = '1px 1px 2px black';
-              } else if (index === 1) {
-                nameSpan.style.color = '#ffff00'; // 2nd place
-                nameSpan.style.textShadow = '1px 1px 2px black';
-              } else if (index === 2) {
-                nameSpan.style.color = '#00ffff'; // 3rd place
-                nameSpan.style.textShadow = '1px 1px 2px black';
-              }
-              
-              // Create divider - positioned higher to align with text
-              const divider = document.createElement('span');
-              divider.style.flexGrow = '1';
-              divider.style.borderBottom = '1px solid black';
-              divider.style.margin = '0 10px';
-              divider.style.transform = 'translateY(-4px)'; // Move it up to center with text
-              
-              // Create score span
-              const scoreSpan = document.createElement('span');
-              scoreSpan.textContent = score.score;
-              
-              // Apply same color to score as name
-              if (index === 0) {
-                scoreSpan.style.color = '#ff00ff';
-                scoreSpan.style.textShadow = '1px 1px 2px black';
-              } else if (index === 1) {
-                scoreSpan.style.color = '#ffff00';
-                scoreSpan.style.textShadow = '1px 1px 2px black';
-              } else if (index === 2) {
-                scoreSpan.style.color = '#00ffff';
-                scoreSpan.style.textShadow = '1px 1px 2px black';
-              }
-              
-              // Add highlight animation for new scores
-              if (isNewScore) {
-                scoreDiv.style.animation = 'highlight 2s ease-in-out';
-                scoreDiv.style.backgroundColor = 'rgba(76, 175, 80, 0.3)';
-                
-                // Add keyframes for highlight animation if not already added
-                if (!document.getElementById('highlight-animation')) {
-                  const style = document.createElement('style');
-                  style.id = 'highlight-animation';
-                  style.textContent = `
-                    @keyframes highlight {
-                      0% { background-color: rgba(76, 175, 80, 0.3); }
-                      50% { background-color: rgba(76, 175, 80, 0.6); }
-                      100% { background-color: transparent; }
-                    }
+          });
+
+          // If no data, show empty state
+          if (!data) {
+            console.warn('No leaderboard data provided');
+            if (window.DEFAULT_LEADERBOARD) {
+              updateLeaderboardUI(window.DEFAULT_LEADERBOARD);
+            }
+            return;
+          }
+
+          // Handle case where data is an array (direct scores)
+          if (Array.isArray(data)) {
+            const defaultCategory = document.querySelector('.leaderboard-category');
+            if (defaultCategory) {
+              const scoresList = defaultCategory.querySelector('.leaderboard-list');
+              if (scoresList) {
+                scoresList.innerHTML = data.map((entry, index) => {
+                  // Add special styling for top 3 positions
+                  let scoreClass = 'leaderboard-score';
+                  if (index === 0) scoreClass += ' first-place';
+                  else if (index === 1) scoreClass += ' second-place';
+                  else if (index === 2) scoreClass += ' third-place';
+                  
+                  return `
+                    <div class="${scoreClass}">
+                      <span class="leaderboard-rank">${index + 1}.</span>
+                      <span class="leaderboard-name">${entry.name || 'Unknown'}</span>
+                      <span class="leaderboard-score-value">${entry.score || 0}</span>
+                      ${entry.date ? `<span class="leaderboard-date">${entry.date}</span>` : ''}
+                    </div>
                   `;
-                  document.head.appendChild(style);
-                }
+                }).join('');
+              }
+            }
+            return;
+          }
+
+          // Handle case where data is an object with category keys
+          if (typeof data === 'object') {
+            Object.entries(data).forEach(([category, scores]) => {
+              if (!scores || !Array.isArray(scores)) {
+                console.warn(`Invalid scores data for category ${category}:`, scores);
+                return;
+              }
+
+              const categoryElement = document.getElementById(`${category}-leaderboard`);
+              if (!categoryElement) {
+                console.warn(`No element found for category: ${category}`);
+                return;
+              }
+
+              const scoresList = categoryElement.querySelector('.leaderboard-list');
+              if (!scoresList) {
+                console.warn(`No scores list found in category: ${category}`);
+                return;
+              }
+
+              // Add new items
+              scoresList.innerHTML = scores.map((entry, index) => {
+                let scoreClass = 'leaderboard-score';
+                if (index === 0) scoreClass += ' first-place';
+                else if (index === 1) scoreClass += ' second-place';
+                else if (index === 2) scoreClass += ' third-place';
+                
+                return `
+                  <div class="${scoreClass}">
+                    <span class="leaderboard-rank">${index + 1}.</span>
+                    <span class="leaderboard-name">${entry.name || 'Unknown'}</span>
+                    <span class="leaderboard-score-value">${entry.score || 0}</span>
+                    ${entry.date ? `<span class="leaderboard-date">${entry.date}</span>` : ''}
+                  </div>
+                `;
+              }).join('');
+            });
+            return;
+          }
+
+          // If we get here, the data format is not recognized
+          console.error('Unexpected leaderboard data format:', data);
+          if (window.DEFAULT_LEADERBOARD) {
+            console.log('Falling back to default leaderboard data');
+            updateLeaderboardUI(window.DEFAULT_LEADERBOARD);
+          }
+        } catch (error) {
+          console.error('Error updating leaderboard UI:', error);
+          if (window.DEFAULT_LEADERBOARD) {
+            console.log('Falling back to default leaderboard data after error');
+            updateLeaderboardUI(window.DEFAULT_LEADERBOARD);
+          }
+        }
                 
                 // Remove highlight after animation
                 setTimeout(() => {
@@ -2835,7 +2852,7 @@
           const responseTime = Date.now() - startTime;
           console.log(`[Leaderboard] Fetched in ${responseTime}ms`);
           
-          const leaderboardData = await response.json();
+          const responseData = await response.json();
           
           // Update backend health status
           localStorage.setItem('backendHealth', JSON.stringify({
@@ -2846,11 +2863,29 @@
           
           // Format the data for the UI
           const formattedData = {};
-          formattedData[category] = leaderboardData.map(entry => ({
-            name: entry.username,
-            score: entry.score,
-            date: new Date(entry.date).toISOString().split('T')[0]
-          }));
+          
+          // Ensure we have valid leaderboard data
+          if (Array.isArray(responseData)) {
+            // If response is an array of entries
+            formattedData[category] = responseData.map(entry => ({
+              name: entry.username || 'Unknown',
+              score: entry.score || 0,
+              date: entry.date ? new Date(entry.date).toISOString().split('T')[0] : 'Unknown'
+            }));
+          } else if (responseData && typeof responseData === 'object') {
+            // If response is an object with category as key
+            const categoryData = responseData[category] || [];
+            formattedData[category] = Array.isArray(categoryData) 
+              ? categoryData.map(entry => ({
+                  name: entry.username || 'Unknown',
+                  score: entry.score || 0,
+                  date: entry.date ? new Date(entry.date).toISOString().split('T')[0] : 'Unknown'
+                }))
+              : [];
+          } else {
+            console.error('Unexpected leaderboard data format:', responseData);
+            throw new Error('Invalid leaderboard data format received');
+          }
           
           // Update the UI with the fetched data
           updateLeaderboardUI(formattedData);

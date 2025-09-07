@@ -3,6 +3,10 @@
   <head>
     <link rel="icon" href="favicon.ico" type="image/x-icon">
     <script>
+      // Set the backend API URL
+      window.BACKEND_API = 'https://capstone-project-production-3cce.up.railway.app/api/v1';
+    </script>
+    <script>
       // Optimized font loading with Font Loading API and fallback
       document.documentElement.classList.add('font-loading');
       
@@ -2761,8 +2765,13 @@
           const controller = new AbortController();
           const timeoutId = setTimeout(() => controller.abort(), 2000); // 2 second timeout
           
-          const response = await fetch(`/api/leaderboard/${category}`, {
-            signal: controller.signal
+          const response = await fetch(`${window.BACKEND_API || ''}/leaderboard/${category}`, {
+            signal: controller.signal,
+            credentials: 'include',
+            headers: {
+              'Accept': 'application/json',
+              'Content-Type': 'application/json'
+            }
           }).catch(error => {
             // Mark API as unavailable for future calls
             window.apiUnavailable = true;

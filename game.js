@@ -48,24 +48,38 @@ async function fetchWithLogging(url, options = {}) {
     });
     
     const responseTime = Date.now() - startTime;
-    const responseData = await response.clone().json().catch(() => ({}));
     
-    console.log(`[${requestId}] ${response.status} (${response.statusText}) in ${responseTime}ms`, {
-      url,
-      status: response.status,
-      statusText: response.statusText,
-      response: responseData,
-      headers: Object.fromEntries([...response.headers.entries()])
-    });
+    // Clone the response for logging purposes
+    const responseClone = response.clone();
     
+    // Log response details
+    const logResponse = async () => {
+      try {
+        const responseData = await responseClone.json();
+        console.log(`[${requestId}] ${response.status} (${response.statusText}) in ${responseTime}ms`, {
+          url,
+          status: response.status,
+          statusText: response.statusText,
+          response: responseData,
+          headers: Object.fromEntries([...response.headers.entries()])
+        });
+      } catch (e) {
+        console.warn(`[${requestId}] Could not parse response as JSON`);
+      }
+    };
+    
+    // Log response in the background
+    logResponse().catch(console.error);
+    
+    // For non-2xx responses, throw an error
     if (!response.ok) {
       const error = new Error(`HTTP error! status: ${response.status}`);
       error.response = response;
-      error.responseData = responseData;
       throw error;
     }
     
-    return responseData;
+    // Return the original response for the caller to consume
+    return response;
   } catch (error) {
     const errorTime = Date.now() - startTime;
     const errorDetails = {

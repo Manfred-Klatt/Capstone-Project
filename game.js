@@ -173,11 +173,6 @@ class LeaderboardManager {
         
         clearTimeout(timeoutId);
         
-        // First check if the response is OK
-        if (!response.ok) {
-          throw new Error(`HTTP error! status: ${response.status}`);
-        }
-        
         // Try to parse as JSON, but handle non-JSON responses
         let data;
         const contentType = response.headers.get('content-type');
@@ -191,7 +186,7 @@ class LeaderboardManager {
         }
         
         // Consider the service healthy if we get any 2xx response
-        const isHealthy = response.status >= 200 && response.status < 300;
+        const isHealthy = response.ok || (response.status >= 200 && response.status < 300);
         
         if (isHealthy) {
           console.log('[LeaderboardManager] Backend health check successful:', data);

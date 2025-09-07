@@ -173,8 +173,12 @@ class LeaderboardManager {
         
         clearTimeout(timeoutId);
         
-        if (response.ok) {
-          const data = await response.json();
+        const data = await response.json();
+        
+        // Check if the response indicates the service is healthy
+        const isHealthy = response.ok && data && (data.status === 'success' || data.status === 'ok' || data.healthy === true);
+        
+        if (isHealthy) {
           console.log('[LeaderboardManager] Backend health check successful:', data);
           
           // Cache the successful health status
@@ -192,7 +196,7 @@ class LeaderboardManager {
           
           return true;
         } else {
-          throw new Error(`Health check failed with status: ${response.status}`);
+          throw new Error(`Service unhealthy. Status: ${response.status}, Response: ${JSON.stringify(data)}`);
         }
       } catch (error) {
         console.error('[LeaderboardManager] Health check failed:', error);

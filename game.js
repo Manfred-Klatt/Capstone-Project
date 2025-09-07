@@ -173,10 +173,25 @@ class LeaderboardManager {
         
         clearTimeout(timeoutId);
         
-        const data = await response.json();
+        // First check if the response is OK
+        if (!response.ok) {
+          throw new Error(`HTTP error! status: ${response.status}`);
+        }
         
-        // Check if the response indicates the service is healthy
-        const isHealthy = response.ok && data && (data.status === 'success' || data.status === 'ok' || data.healthy === true);
+        // Try to parse as JSON, but handle non-JSON responses
+        let data;
+        const contentType = response.headers.get('content-type');
+        const isJson = contentType && contentType.includes('application/json');
+        
+        try {
+          data = isJson ? await response.json() : await response.text();
+        } catch (e) {
+          console.warn('Could not parse response as JSON, treating as text:', e);
+          data = await response.text();
+        }
+        
+        // Consider the service healthy if we get any 2xx response
+        const isHealthy = response.status >= 200 && response.status < 300;
         
         if (isHealthy) {
           console.log('[LeaderboardManager] Backend health check successful:', data);

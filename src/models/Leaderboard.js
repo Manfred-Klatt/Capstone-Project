@@ -59,11 +59,15 @@ const leaderboardEntrySchema = new mongoose.Schema({
   timestamps: true
 });
 
-// Compound index for efficient leaderboard queries
-leaderboardEntrySchema.index({ category: 1, score: -1, timestamp: -1 });
+// Add indexes for common queries
+leaderboardEntrySchema.index({ category: 1, score: -1, timestamp: -1 }); // For leaderboard queries
+leaderboardEntrySchema.index({ userId: 1, category: 1, score: -1 }); // For user's best score queries
 
-// Index for user's personal scores
-leaderboardEntrySchema.index({ userId: 1, category: 1, score: -1 });
+// Add compound index for better performance on leaderboard queries
+leaderboardEntrySchema.index(
+  { category: 1, score: -1, timestamp: -1 },
+  { name: 'leaderboard_ranking' }
+);
 
 // Static method to get top scores for a category
 leaderboardEntrySchema.statics.getTopScores = async function(category, limit = 10) {

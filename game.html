@@ -2608,14 +2608,37 @@
                   else if (index === 1) scoreClass += ' second-place';
                   else if (index === 2) scoreClass += ' third-place';
                   
-                  return `
-                    <div class="${scoreClass}">
-                      <span class="leaderboard-rank">${index + 1}.</span>
-                      <span class="leaderboard-name">${entry.name || 'Unknown'}</span>
-                      <span class="leaderboard-score-value">${entry.score || 0}</span>
-                      ${entry.date ? `<span class="leaderboard-date">${entry.date}</span>` : ''}
-                    </div>
-                  `;
+                  // Create score div
+                  const scoreDiv = document.createElement('div');
+                  scoreDiv.className = scoreClass;
+                  
+                  // Create name and score spans
+                  const rankSpan = document.createElement('span');
+                  rankSpan.className = 'leaderboard-rank';
+                  rankSpan.textContent = `${index + 1}.`;
+                  
+                  const nameSpan = document.createElement('span');
+                  nameSpan.className = 'leaderboard-name';
+                  nameSpan.textContent = entry.name || 'Unknown';
+                  
+                  const scoreValue = document.createElement('span');
+                  scoreValue.className = 'leaderboard-score-value';
+                  scoreValue.textContent = entry.score || 0;
+                  
+                  // Append elements to score div
+                  scoreDiv.appendChild(rankSpan);
+                  scoreDiv.appendChild(nameSpan);
+                  scoreDiv.appendChild(scoreValue);
+                  
+                  // Add date if available
+                  if (entry.date) {
+                    const dateSpan = document.createElement('span');
+                    dateSpan.className = 'leaderboard-date';
+                    dateSpan.textContent = entry.date;
+                    scoreDiv.appendChild(dateSpan);
+                  }
+                  
+                  return scoreDiv.outerHTML;
                 }).join('');
               }
             }
@@ -2649,14 +2672,37 @@
                 else if (index === 1) scoreClass += ' second-place';
                 else if (index === 2) scoreClass += ' third-place';
                 
-                return `
-                  <div class="${scoreClass}">
-                    <span class="leaderboard-rank">${index + 1}.</span>
-                    <span class="leaderboard-name">${entry.name || 'Unknown'}</span>
-                    <span class="leaderboard-score-value">${entry.score || 0}</span>
-                    ${entry.date ? `<span class="leaderboard-date">${entry.date}</span>` : ''}
-                  </div>
-                `;
+                // Create score div
+                const scoreDiv = document.createElement('div');
+                scoreDiv.className = scoreClass;
+                
+                // Create name and score spans
+                const rankSpan = document.createElement('span');
+                rankSpan.className = 'leaderboard-rank';
+                rankSpan.textContent = `${index + 1}.`;
+                
+                const nameSpan = document.createElement('span');
+                nameSpan.className = 'leaderboard-name';
+                nameSpan.textContent = entry.name || 'Unknown';
+                
+                const scoreValue = document.createElement('span');
+                scoreValue.className = 'leaderboard-score-value';
+                scoreValue.textContent = entry.score || 0;
+                
+                // Append elements to score div
+                scoreDiv.appendChild(rankSpan);
+                scoreDiv.appendChild(nameSpan);
+                scoreDiv.appendChild(scoreValue);
+                
+                // Add date if available
+                if (entry.date) {
+                  const dateSpan = document.createElement('span');
+                  dateSpan.className = 'leaderboard-date';
+                  dateSpan.textContent = entry.date;
+                  scoreDiv.appendChild(dateSpan);
+                }
+                
+                return scoreDiv.outerHTML;
               }).join('');
             });
             return;
@@ -2675,20 +2721,7 @@
             updateLeaderboardUI(window.DEFAULT_LEADERBOARD);
           }
         }
-                
-                // Remove highlight after animation
-                setTimeout(() => {
-                  scoreDiv.style.backgroundColor = 'transparent';
-                }, 2000);
-              }
-              
-              // Assemble the score entry
-              scoreDiv.appendChild(nameSpan);
-              scoreDiv.appendChild(divider);
-              scoreDiv.appendChild(scoreSpan);
-              
-              // Add to leaderboard
-              scoresElement.appendChild(scoreDiv);
+      }
       
       // Default leaderboard data
       const DEFAULT_LEADERBOARD = {

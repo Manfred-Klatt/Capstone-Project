@@ -2442,12 +2442,13 @@
           const controller = new AbortController();
           const timeoutId = setTimeout(() => controller.abort(), 2000); // 2 second timeout
           
-          const response = await fetch('/api/save-score', {
+          const response = await fetch('https://capstone-project-production-3cce.up.railway.app/api/v1/leaderboard', {
             method: 'POST',
             headers: headers,
             body: JSON.stringify({
               category: category,
-              score: finalScore
+              score: finalScore,
+              name: playerName || 'Guest'
             }),
             signal: controller.signal
           }).catch(error => {

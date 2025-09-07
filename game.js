@@ -163,12 +163,25 @@ class LeaderboardManager {
       const timeoutId = setTimeout(() => controller.abort(), this.healthCheckTimeout);
       
       try {
-        const response = await fetchWithLogging(`${BACKEND_API}/health`, { 
+        const healthCheckUrl = `${BACKEND_API}/health`;
+        console.log('[Debug] Attempting to fetch:', healthCheckUrl);
+        
+        const response = await fetchWithLogging(healthCheckUrl, { 
           method: 'GET',
-          headers: { 'Accept': 'application/json' },
+          headers: { 
+            'Accept': 'application/json',
+            'Content-Type': 'application/json'
+          },
           mode: 'cors',
-          credentials: 'same-origin',
+          credentials: 'include',
           signal: controller.signal
+        }).catch(error => {
+          console.error('[Debug] Fetch error details:', {
+            name: error.name,
+            message: error.message,
+            stack: error.stack
+          });
+          throw error;
         });
         
         clearTimeout(timeoutId);
@@ -185,8 +198,9 @@ class LeaderboardManager {
           data = await response.text();
         }
         
-        // Consider the service healthy if we get any 2xx response
-        const isHealthy = response.ok || (response.status >= 200 && response.status < 300);
+        // Check if the response indicates the service is healthy
+        const isHealthy = (response.ok || (response.status >= 200 && response.status < 300)) && 
+                         (data?.status === 'success' || data?.database?.status === 'connected');
         
         if (isHealthy) {
           console.log('[LeaderboardManager] Backend health check successful:', data);
@@ -194,7 +208,8 @@ class LeaderboardManager {
           // Cache the successful health status
           localStorage.setItem('backendHealth', JSON.stringify({
             status: 'available',
-            timestamp: Date.now()
+            timestamp: Date.now(),
+            data: data // Store the full response for debugging
           }));
           
           this.initialized = true;

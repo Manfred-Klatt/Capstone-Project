@@ -15,47 +15,76 @@
         const nextBtn = document.querySelector('.next-btn');
         let currentSlide = 0;
         
-        // Only initialize carousel if we have slides
+        // Only initialize carousel if we have slides and controls
         if (slides.length > 0) {
           // Show initial slide
           showSlide(currentSlide);
+          
+          // Add event listeners if elements exist
+          if (nextBtn) {
+            nextBtn.addEventListener('click', nextSlide);
+          }
+          
+          if (prevBtn) {
+            prevBtn.addEventListener('click', prevSlide);
+          }
+          
+          if (dots.length > 0) {
+            dots.forEach((dot, index) => {
+              if (dot) {
+                dot.addEventListener('click', () => goToSlide(index));
+              }
+            });
+          }
         }
         
         // Next/previous controls
         function nextSlide() {
-          currentSlide = (currentSlide + 1) % slides.length;
-          showSlide(currentSlide);
+          if (slides.length > 0) {
+            currentSlide = (currentSlide + 1) % slides.length;
+            showSlide(currentSlide);
+          }
         }
         
         function prevSlide() {
-          currentSlide = (currentSlide - 1 + slides.length) % slides.length;
-          showSlide(currentSlide);
+          if (slides.length > 0) {
+            currentSlide = (currentSlide - 1 + slides.length) % slides.length;
+            showSlide(currentSlide);
+          }
         }
         
         // Dot controls
         function goToSlide(index) {
-          currentSlide = index;
-          showSlide(currentSlide);
+          if (index >= 0 && index < slides.length) {
+            currentSlide = index;
+            showSlide(currentSlide);
+          }
         }
         
         // Show current slide and update dots
         function showSlide(index) {
-          // Hide all slides
-          slides.forEach(slide => slide.classList.remove('active'));
-          dots.forEach(dot => dot.classList.remove('active'));
+          // Hide all slides and remove active class from dots
+          slides.forEach(slide => {
+            if (slide && slide.classList) {
+              slide.classList.remove('active');
+            }
+          });
           
-          // Show current slide and update dot
-          slides[index].classList.add('active');
-          dots[index].classList.add('active');
+          dots.forEach(dot => {
+            if (dot && dot.classList) {
+              dot.classList.remove('active');
+            }
+          });
+          
+          // Show current slide and update dot if they exist
+          if (slides[index] && slides[index].classList) {
+            slides[index].classList.add('active');
+          }
+          
+          if (dots[index] && dots[index].classList) {
+            dots[index].classList.add('active');
+          }
         }
-        
-        // Event listeners
-        nextBtn.addEventListener('click', nextSlide);
-        prevBtn.addEventListener('click', prevSlide);
-        
-        dots.forEach((dot, index) => {
-          dot.addEventListener('click', () => goToSlide(index));
-        });
         
         // Update time in the status bar
         function updateTime() {
@@ -124,20 +153,25 @@
 
       // Initialize leaderboard when DOM is ready
       document.addEventListener('DOMContentLoaded', function() {
-        initializeLeaderboard();
+        // First try to load from server
+        initializeLeaderboard().catch(error => {
+          console.error('Failed to load leaderboard from server, using default data:', error);
+          // Fall back to default data
+          LEADERBOARD_CONFIG.categories.forEach(category => {
+            const defaultData = LEADERBOARD_CONFIG.defaultData[category];
+            if (defaultData) {
+              updateLeaderboardUI(category, defaultData);
+            }
+          });
+        });
       });
 
-      function initializeLeaderboard() {
-        console.log('[Leaderboard] Initializing leaderboard...');
-        
-        // Load data for each category
-        LEADERBOARD_CONFIG.categories.forEach(category => {
-          loadLeaderboardData(category);
-        });
-      }
-
-      async function loadLeaderboardData(category) {
-        const apiUrl = `${window.BACKEND_API}/leaderboard/${category}`;
+      // Track loading states to prevent duplicate requests
+      const loadingStates = new Map();
+      
+      // Function to update the leaderboard UI
+      function updateLeaderboardUI(category, data) {
+        console.log(`[Leaderboard] Updating UI for ${category}`, data);
         const element = document.getElementById(`${category}-scores`);
         
         if (!element) {
@@ -145,36 +179,157 @@
           return;
         }
         
-        // Show loading state
-        element.innerHTML = '<div class="loading">Loading...</div>';
+        // Handle different response formats
+        let leaderboardData = [];
+        
+        if (data && data.data && Array.isArray(data.data)) {
+          // Handle API response format: { status: 'success', data: [...] }
+          leaderboardData = data.data;
+        } else if (Array.isArray(data)) {
+          // Handle direct array format
+          leaderboardData = data;
+        } else if (data && data.leaderboard && Array.isArray(data.leaderboard)) {
+          // Handle alternative API format: { leaderboard: [...] }
+          leaderboardData = data.leaderboard;
+        }
+        
+        if (!leaderboardData || leaderboardData.length === 0) {
+          console.log('No valid data provided, using default leaderboard');
+          const defaultData = LEADERBOARD_CONFIG.defaultData[category];
+          if (defaultData && Array.isArray(defaultData) && defaultData.length > 0) {
+            updateLeaderboardUI(category, defaultData);
+            return;
+          } else {
+            console.log('No default leaderboard data available');
+            element.innerHTML = `
+              <div class="no-data">
+                <p>No ${category} leaderboard data available</p>
+                <button class="retry-button" onclick="loadLeaderboardData('${category}')">
+                  <i class="fas fa-sync-alt"></i> Try Again
+                </button>
+              </div>`;
+            return;
+          }
+        }
         
         try {
-          // Get guest token from localStorage or use a default one
-          const guestToken = localStorage.getItem('guestToken') || 'guest_default_token';
+          // Generate HTML for the leaderboard
+          let html = '<ol class="leaderboard-list">';
+          
+          if (leaderboardData.length === 0) {
+            html += '<li class="no-scores">No scores yet. Be the first to play!</li>';
+          } else {
+            leaderboardData.slice(0, 10).forEach((entry, index) => {
+              const isCurrentUser = entry.isCurrentUser || false;
+              const rank = index + 1;
+              const score = entry.score || 0;
+              const name = (entry.name || 'Anonymous').substring(0, 15); // Limit name length
+              
+              html += `
+                <li class="leaderboard-item ${isCurrentUser ? 'current-user' : ''}">
+                  <span class="rank">${rank}.</span>
+                  <span class="name" title="${name}">${name}</span>
+                  <span class="score">${score.toLocaleString()}</span>
+                </li>
+              `;
+            });
+          }
+          
+          html += '</ol>';
+          element.innerHTML = html;
+          console.log(`[Leaderboard] Updated ${category} with ${leaderboardData.length} entries`);
+          
+        } catch (error) {
+          console.error(`[Leaderboard] Error updating UI for ${category}:`, error);
+          element.innerHTML = `
+            <div class="error-message">
+              <p>Error loading leaderboard data</p>
+              <button class="retry-button" onclick="loadLeaderboardData('${category}')">
+                <i class="fas fa-sync-alt"></i> Try Again
+              </button>
+            </div>`;
+        }
+      }
+      
+      async function initializeLeaderboard() {
+        console.log('[Leaderboard] Initializing leaderboard...');
+        
+        // Load data for each category sequentially to avoid rate limiting
+        for (const category of LEADERBOARD_CONFIG.categories) {
+          // Skip if already loading this category
+          if (loadingStates.get(category)) {
+            console.log(`[Leaderboard] Already loading ${category}, skipping duplicate request`);
+            continue;
+          }
+          
+          try {
+            loadingStates.set(category, true);
+            await loadLeaderboardData(category);
+          } catch (error) {
+            console.error(`[Leaderboard] Error initializing ${category}:`, error);
+          } finally {
+            loadingStates.set(category, false);
+          }
+          
+          // Small delay between requests to avoid rate limiting
+          await new Promise(resolve => setTimeout(resolve, 200));
+        }
+      }
+
+      async function loadLeaderboardData(category, retryCount = 0) {
+        const apiUrl = `${window.BACKEND_API}/leaderboard/${category}`;
+        const element = document.getElementById(`${category}-scores`);
+        const maxRetries = 2;
+        
+        if (!element) {
+          console.error(`[Leaderboard] Element not found for category: ${category}`);
+          return;
+        }
+        
+        // Show loading state with a subtle animation
+        element.innerHTML = `
+          <div class="loading">
+            <div class="loading-spinner"></div>
+            <div>Loading ${category} leaderboard...</div>
+          </div>`;
+          
+        // If we've retried too many times, show error and use default data
+        if (retryCount > maxRetries) {
+          console.warn(`[Leaderboard] Max retries (${maxRetries}) reached for ${category}, using default data`);
+          updateLeaderboardUI(category, LEADERBOARD_CONFIG.defaultData[category] || []);
+          return;
+        }
+        
+        // Use a static guest token that matches server expectations
+        const GUEST_TOKEN = 'guest_leaderboard_token';
+        const guestToken = GUEST_TOKEN;
+        
+        try {
+          // Use the static guest token
+          const guestToken = GUEST_TOKEN;
           
           const response = await fetch(apiUrl, {
             method: 'GET',
             headers: {
-              'Authorization': `Bearer ${guestToken}`,
               'Content-Type': 'application/json',
               'Accept': 'application/json',
-              'X-Requested-With': 'XMLHttpRequest'
+              'x-guest-token': guestToken
             },
-            credentials: 'same-origin',
+            credentials: 'include',
             mode: 'cors'
           });
           
           if (!response.ok) {
-            // If unauthorized, try to refresh the token
+            // If unauthorized, use default data
             if (response.status === 401) {
-              console.log('Token expired, attempting to refresh...');
-              // Generate a new guest token
-              const newToken = 'guest_' + Math.random().toString(36).substr(2, 9);
-              localStorage.setItem('guestToken', newToken);
-              
-              // Retry the request with the new token
-              return loadLeaderboardData(category);
+              console.warn('Invalid guest token, using default data');
+              updateLeaderboardUI(category, LEADERBOARD_CONFIG.defaultData[category] || []);
+              return;
             }
+            
+            // If we've already retried or got a different error, throw
+            const errorText = await response.text();
+            console.error(`[Leaderboard] Error loading ${category}:`, response.status, errorText);
             throw new Error(`HTTP error! status: ${response.status}`);
           }
           
@@ -183,7 +338,28 @@
           updateLeaderboardUI(category, data);
           
         } catch (error) {
-          console.warn(`[Leaderboard] Using default data for ${category}:`, error.message);
+          console.warn(`[Leaderboard] Error loading ${category}:`, error);
+          
+          // Show error message to user
+          if (retryCount === 0) {
+            element.innerHTML = `
+              <div class="error-message">
+                <p>Couldn't load ${category} leaderboard.</p>
+                <button class="retry-button" data-category="${category}">
+                  <i class="fas fa-sync-alt"></i> Try Again
+                </button>
+              </div>`;
+              
+            // Add event listener to retry button
+            const retryButton = element.querySelector('.retry-button');
+            if (retryButton) {
+              retryButton.addEventListener('click', () => {
+                loadLeaderboardData(category, retryCount + 1);
+              });
+            }
+          }
+          
+          // Fall back to default data
           updateLeaderboardUI(category, LEADERBOARD_CONFIG.defaultData[category] || []);
         }
       }
@@ -1101,13 +1277,66 @@
         display: none;
       }
       
-      /* Leaderboard Styles */
-      .leaderboards-container {
-        width: 100%;
+      /* Leaderboard styles */
+      .leaderboard-container {
         max-width: 800px;
         margin: 0 auto;
-        padding: 0 20px;
-        box-sizing: border-box;
+        padding: 20px;
+      }
+      
+      /* Loading and error states */
+      .loading {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        padding: 2rem;
+        color: #666;
+        text-align: center;
+      }
+      
+      .loading-spinner {
+        width: 40px;
+        height: 40px;
+        border: 4px solid rgba(0, 0, 0, 0.1);
+        border-radius: 50%;
+        border-top-color: #3498db;
+        animation: spin 1s ease-in-out infinite;
+        margin-bottom: 1rem;
+      }
+      
+      .error-message {
+        padding: 1.5rem;
+        background-color: #f8d7da;
+        color: #721c24;
+        border-radius: 4px;
+        text-align: center;
+        margin: 1rem 0;
+      }
+      
+      .error-message p {
+        margin: 0 0 1rem 0;
+      }
+      
+      .retry-button {
+        background-color: #f8d7da;
+        color: #721c24;
+        border: 1px solid #f5c6cb;
+        border-radius: 4px;
+        padding: 0.5rem 1rem;
+        cursor: pointer;
+        display: inline-flex;
+        align-items: center;
+        gap: 0.5rem;
+        transition: background-color 0.2s;
+      }
+      
+      .retry-button:hover {
+        background-color: #f1b0b7;
+      }
+      
+      @keyframes spin {
+        to { transform: rotate(360deg); }
       }
       
       .category-leaderboard {
@@ -3248,7 +3477,6 @@
           const headers = {
             'Content-Type': 'application/json',
             'Accept': 'application/json',
-            'X-Requested-With': 'XMLHttpRequest',
             'x-guest-token': guestToken
           };
           
@@ -3269,15 +3497,17 @@
               score: finalScore,
               playerName: playerName || 'Guest',
               gameData: {
-                correctAnswers: finalScore,  // Using finalScore instead of score
-                totalQuestions: 10,          // Should match your game's total questions
-                timeTaken: 15,               // Using a default value, replace with actual time if available
-                difficulty: 'medium'          // Default difficulty
+                correctAnswers: finalScore,
+                totalQuestions: 10,
+                timeTaken: 15,
+                difficulty: 'medium'
               }
             }),
+            credentials: 'include',
+            mode: 'cors',
             signal: controller.signal
           }).catch(error => {
-            // Mark API as unavailable for future calls
+            console.error('Network error:', error);
             window.apiUnavailable = true;
             throw error;
           });
@@ -3412,132 +3642,28 @@
       // Helper function to show placement message
       function showPlacementMessage(placement) {
         const placementMessage = document.getElementById('placementMessage');
+        if (!placementMessage) return;
+        
         if (placement === 1) {
-            placementMessage.innerHTML = '<p style="color: #ffd700; font-weight: bold;">You achieved 1st place! 🏆</p>';
+          placementMessage.innerHTML = '<p style="color: #ffd700; font-weight: bold;">You achieved 1st place! 🏆</p>';
         } else if (placement === 2) {
-            placementMessage.innerHTML = '<p style="color: #c0c0c0; font-weight: bold;">You achieved 2nd place! 🥈</p>';
+          placementMessage.innerHTML = '<p style="color: #c0c0c0; font-weight: bold;">You achieved 2nd place! 🥈</p>';
         } else if (placement === 3) {
-            placementMessage.innerHTML = '<p style="color: #cd7f32; font-weight: bold;">You achieved 3rd place! 🥉</p>';
+          placementMessage.innerHTML = '<p style="color: #cd7f32; font-weight: bold;">You achieved 3rd place! 🥉</p>';
+        } else if (placement <= 10) {
+          placementMessage.innerHTML = `<p>You made it to the top 10! (${placement}${getOrdinalSuffix(placement)})</p>`;
+        } else {
+          placementMessage.innerHTML = `<p>Your rank: ${placement}${getOrdinalSuffix(placement)}</p>`;
         }
       }
       
-      function updateLeaderboardUI(category, data) {
-        try {
-          console.log(`[Leaderboard] Updating UI for ${category}`, data);
-          
-          // If no data is provided, try to use default leaderboard
-          if (!data) {
-            console.warn('No data provided, using default leaderboard');
-            if (window.DEFAULT_LEADERBOARD && window.DEFAULT_LEADERBOARD[category]) {
-              updateLeaderboardUI(category, window.DEFAULT_LEADERBOARD[category]);
-            } else {
-              console.error('No default leaderboard data available');
-              const listElement = document.getElementById(`${category}-scores`);
-              if (listElement) {
-                listElement.innerHTML = '<div class="no-scores">No scores available</div>';
-              }
-            }
-            return;
-          }
-          
-          const listElement = document.getElementById(`${category}-scores`);
-          
-          if (!listElement) {
-            console.error(`[Leaderboard] Could not find element for category: ${category}`);
-            return;
-          }
-          
-          // Clear existing items
-          listElement.innerHTML = '';
-          
-          // If data is not an array, try to handle it as an object with category keys
-          if (!Array.isArray(data)) {
-            if (typeof data === 'object' && data !== null) {
-              // If data is an object with category keys, extract the correct category
-              if (data[category] && Array.isArray(data[category])) {
-                data = data[category];
-              } else {
-                // If no matching category, try to use the first array found
-                const firstArray = Object.values(data).find(Array.isArray);
-                if (firstArray) {
-                  data = firstArray;
-                } else {
-                  throw new Error('No valid array data found in the provided object');
-                }
-              }
-            } else {
-              throw new Error('Invalid data format: expected array or object with array values');
-            }
-          }
-          
-          // If still no valid data, show message
-          if (!data || !Array.isArray(data) || data.length === 0) {
-            console.warn('No valid leaderboard data provided for', category);
-            listElement.innerHTML = '<div class="no-scores">No scores yet. Be the first!</div>';
-            return;
-          }
-          
-          // Sort data by score (highest first) and take top 10
-          const sortedData = [...data]
-            .sort((a, b) => (b.score || 0) - (a.score || 0))
-            .slice(0, 10); // Only take top 10 scores
-          
-          // Add each score to the list
-          sortedData.forEach((entry, index) => {
-            const scoreDiv = document.createElement('div');
-            scoreDiv.className = 'leaderboard-score';
-            
-            // Add rank class for top 3
-            if (index === 0) scoreDiv.classList.add('first-place');
-            else if (index === 1) scoreDiv.classList.add('second-place');
-            else if (index === 2) scoreDiv.classList.add('third-place');
-            
-            // Create rank, name, and score elements
-            const rankSpan = document.createElement('span');
-            rankSpan.className = 'leaderboard-rank';
-            rankSpan.textContent = `${index + 1}.`;
-            
-            const nameSpan = document.createElement('span');
-            nameSpan.className = 'leaderboard-name';
-            nameSpan.textContent = entry.name || 'Anonymous';
-            
-            const scoreValue = document.createElement('span');
-            scoreValue.className = 'leaderboard-score-value';
-            scoreValue.textContent = entry.score || 0;
-            
-            // Append elements
-            scoreDiv.appendChild(rankSpan);
-            scoreDiv.appendChild(nameSpan);
-            scoreDiv.appendChild(scoreValue);
-            
-            // Add date if available
-            if (entry.date) {
-              const dateSpan = document.createElement('span');
-              dateSpan.className = 'leaderboard-date';
-              dateSpan.textContent = entry.date;
-              scoreDiv.appendChild(dateSpan);
-            }
-            
-            listElement.appendChild(scoreDiv);
-          });
-          
-          console.log(`[Leaderboard] Updated ${category} with ${data.length} entries`);
-          
-        } catch (error) {
-          console.error(`[Leaderboard] Error updating UI for ${category}:`, error);
-          const listElement = document.getElementById(`${category}-scores`);
-          if (listElement) {
-            listElement.innerHTML = '<div class="error">Error loading scores</div>';
-          }
-          
-          // Fall back to default leaderboard if available
-          if (window.DEFAULT_LEADERBOARD && window.DEFAULT_LEADERBOARD[category]) {
-            console.log('Falling back to default leaderboard data after error');
-            updateLeaderboardUI(category, window.DEFAULT_LEADERBOARD[category]);
-          } else {
-            console.error('No default leaderboard data available for fallback');
-          }
-        }
+      // Helper function to get ordinal suffix (1st, 2nd, 3rd, etc.)
+      function getOrdinalSuffix(num) {
+        const j = num % 10, k = num % 100;
+        if (j === 1 && k !== 11) return 'st';
+        if (j === 2 && k !== 12) return 'nd';
+        if (j === 3 && k !== 13) return 'rd';
+        return 'th';
       }
       
       // Default leaderboard data

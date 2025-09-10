@@ -7,30 +7,142 @@
       window.BACKEND_API = 'https://capstone-project-production-3cce.up.railway.app/api/v1';
     </script>
     <script>
-      // Optimized font loading with Font Loading API and fallback
-      document.documentElement.classList.add('font-loading');
-      
-      // Load custom font asynchronously
-      async function loadCustomFont() {
-        try {
-          const font = new FontFace('CustomFont', 
-            'url(fonts/customfont.woff2) format("woff2"), ' +
-            'url(fonts/customfont.otf) format("opentype")',
-            { display: 'swap' }
-          );
-          
-          // Load the font
-          await font.load();
-          document.fonts.add(font);
-          
-          // Apply the font
-          document.documentElement.classList.remove('font-loading');
-          document.documentElement.classList.add('font-loaded');
-        } catch (e) {
-          console.warn('Failed to load custom font, using fallback', e);
-          document.documentElement.classList.remove('font-loading');
+      // Carousel functionality
+      document.addEventListener('DOMContentLoaded', function() {
+        const slides = document.querySelectorAll('.leaderboard-slide');
+        const dots = document.querySelectorAll('.dot');
+        const prevBtn = document.querySelector('.prev-btn');
+        const nextBtn = document.querySelector('.next-btn');
+        let currentSlide = 0;
+        
+        // Show initial slide
+        showSlide(currentSlide);
+        
+        // Next/previous controls
+        function nextSlide() {
+          currentSlide = (currentSlide + 1) % slides.length;
+          showSlide(currentSlide);
         }
+        
+        function prevSlide() {
+          currentSlide = (currentSlide - 1 + slides.length) % slides.length;
+          showSlide(currentSlide);
+        }
+        
+        // Dot controls
+        function goToSlide(index) {
+          currentSlide = index;
+          showSlide(currentSlide);
+        }
+        
+        // Show current slide and update dots
+        function showSlide(index) {
+          // Hide all slides
+          slides.forEach(slide => slide.classList.remove('active'));
+          dots.forEach(dot => dot.classList.remove('active'));
+          
+          // Show current slide and update dot
+          slides[index].classList.add('active');
+          dots[index].classList.add('active');
+        }
+        
+        // Event listeners
+        nextBtn.addEventListener('click', nextSlide);
+        prevBtn.addEventListener('click', prevSlide);
+        
+        dots.forEach((dot, index) => {
+          dot.addEventListener('click', () => goToSlide(index));
+        });
+        
+        // Update time in the status bar
+        function updateTime() {
+          const now = new Date();
+          const timeString = now.toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit', hour12: true });
+          document.querySelector('.nook-time').textContent = timeString;
+        }
+        
+        // Update time every minute
+        updateTime();
+        setInterval(updateTime, 60000);
+      });
+    </script>
+    <script>
+      // Leaderboard data and functionality
+      const LEADERBOARD_CONFIG = {
+        categories: ['fish', 'bugs', 'sea', 'villagers'],
+        icons: {
+          fish: '<img src="images/Fish_Icon.png" alt="Fish" style="width: 24px; height: 24px; vertical-align: middle;">',
+          bugs: '<img src="images/Bug_Icon.png" alt="Bugs" style="width: 24px; height: 24px; vertical-align: middle;">',
+          sea: '<img src="images/Sea_Creature_Icon.png" alt="Sea Creatures" style="width: 24px; height: 24px; vertical-align: middle;">',
+          villagers: '<img src="images/Cat_Silhouette.png" alt="Villagers" style="width: 24px; height: 24px; vertical-align: middle;">'
+        },
+        defaultData: {
+          fish: [
+            { name: 'Tom Nook', score: 1000 },
+            { name: 'Isabelle', score: 900 },
+            { name: 'Player', score: 800 }
+          ],
+          bugs: [
+            { name: 'Flick', score: 1200 },
+            { name: 'Player', score: 950 },
+            { name: 'Tom Nook', score: 700 }
+          ],
+          sea: [
+            { name: 'Pascal', score: 1100 },
+            { name: 'Player', score: 850 },
+            { name: 'Isabelle', score: 750 }
+          ],
+          villagers: [
+            { name: 'Isabelle', score: 1500 },
+            { name: 'Tom Nook', score: 1200 },
+            { name: 'Player', score: 1000 }
+          ]
+        }
+      };
+
+      // Initialize leaderboard when DOM is ready
+      document.addEventListener('DOMContentLoaded', function() {
+        initializeLeaderboard();
+      });
+
+      function initializeLeaderboard() {
+        console.log('[Leaderboard] Initializing leaderboard...');
+        
+        // Load data for each category
+        LEADERBOARD_CONFIG.categories.forEach(category => {
+          loadLeaderboardData(category);
+        });
       }
+
+      function loadLeaderboardData(category) {
+        const apiUrl = `${window.BACKEND_API}/leaderboard/${category}`;
+        const element = document.getElementById(`${category}-scores`);
+        
+        if (!element) {
+          console.error(`[Leaderboard] Element not found for category: ${category}`);
+          return;
+        }
+        
+        // Show loading state
+        element.innerHTML = '<div class="loading">Loading...</div>';
+        
+        // Try to fetch from API first
+        fetch(apiUrl)
+          .then(response => {
+            if (!response.ok) throw new Error('Network response was not ok');
+            return response.json();
+          })
+          .then(data => {
+            console.log(`[Leaderboard] Loaded ${category} data:`, data);
+            updateLeaderboardUI(category, data);
+          })
+          .catch(error => {
+            console.warn(`[Leaderboard] Using default data for ${category}:`, error.message);
+            updateLeaderboardUI(category, LEADERBOARD_CONFIG.defaultData[category] || []);
+          });
+      }
+
+      
       
       // Start loading the font
       if ('fonts' in document) {
@@ -42,7 +154,7 @@
     </script>
     <script type="module" src="game.js"></script>
     <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0, minimum-scale=1.0, user-scalable=yes, viewport-fit=cover" />
     <!-- Preload sound effects -->
     <audio id="correct-sound" preload="auto">
       <source src="sounds/correct.ogg" type="audio/ogg">
@@ -324,11 +436,11 @@
       }
       
       #game-container {
-        width: 95%;
+        width: 100%;
         max-width: 1100px;
         margin: 0 auto 30px;
         padding: 15px;
-        background-color: #fff9e6; /* Warm yellow that complements the Animal Crossing theme */
+        background-color: #fff9e6;
         border-radius: 10px;
         border: 2px solid var(--border-color, #8b4513);
         box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
@@ -338,27 +450,315 @@
         flex-direction: column;
         align-items: center;
         justify-content: center;
+        position: relative;
+        overflow: hidden;
+        transform-origin: top center;
+        will-change: transform;
       }
 
-      #leaderboard {
-        font-size: 16px;
-        font-weight: bold;
+        #leaderboard {
+          font-size: 16px;
+          font-weight: bold;
+          background-color: #f5f5dc;
+          border: 2px solid #8b7355;
+          border-radius: 10px;
+          padding: 15px;
+          max-width: 100%;
+          margin: 15px auto;
+          box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+          overflow: hidden;
+        }
+        
+        .leaderboard-message {
+          text-align: center;
+          padding: 20px;
+          color: #5a3d2b;
+          font-size: 1.1em;
+          line-height: 1.5;
+        }
+        
+        .leaderboard-message p {
+          margin: 10px 0;
+        }
+        
+        /* Leaderboard Carousel */
+      .leaderboard-carousel {
+        height: 100%;
+        display: flex;
+        flex-direction: column;
+        position: relative;
+        overflow: hidden;
+        flex-grow: 1;
       }
       
-      /* Leaderboard container */
-      .leaderboards-container {
-        display: grid;
-        grid-template-columns: repeat(2, minmax(250px, 1fr));
-        gap: 20px;
-        margin: 0 auto 40px;
+      .carousel-container {
+        display: flex;
+        transition: transform 0.3s ease-in-out;
+        height: 100%;
         width: 100%;
-        max-width: 900px;
-        padding: 0 15px;
-        box-sizing: border-box;
-        align-items: start; /* Align items to the top */
-        justify-content: center;
+        position: relative;
       }
+      
+      .leaderboard-slide {
+        position: absolute;
+        width: 100%;
+        height: 100%;
+        transition: transform 0.3s ease-in-out, opacity 0.3s ease-in-out;
+        padding: 10px;
+        box-sizing: border-box;
+        top: 0;
+        left: 0;
+        opacity: 0;
+        pointer-events: none;
+      }
+      
+      .leaderboard-slide.active {
+        position: relative;
+        opacity: 1;
+        pointer-events: auto;
+      }
+      
+      .leaderboard-scores {
+        max-height: 300px;
+        overflow-y: auto;
+        scrollbar-width: thin;
+        scrollbar-color: #8b7355 #f5f5dc;
+      }
+      
+      .leaderboard-scores::-webkit-scrollbar {
+        width: 6px;
+      }
+      
+      .leaderboard-scores::-webkit-scrollbar-track {
+        background: #f5f5dc;
+      }
+      
+      .leaderboard-scores::-webkit-scrollbar-thumb {
+        background-color: #8b7355;
+        border-radius: 3px;
+      }
+      
+      .leaderboard-category {
+        text-align: center;
+        margin: 10px 0 20px;
+        color: #2a1e13;
+        font-size: 1.5rem;
+        text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.1);
+      }
+      
+      .carousel-nav {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: 10px 20px;
+        position: absolute;
+        bottom: 10px;
+        left: 0;
+        right: 0;
+      }
+      
+      .nav-btn {
+        background: #4a90e2;
+        border: none;
+        border-radius: 50%;
+        width: 36px;
+        height: 36px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: white;
+        font-size: 1.2rem;
+        cursor: pointer;
+        box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
+        transition: all 0.2s ease;
+      }
+      
+      .nav-btn:hover {
+        background: #357abd;
+        transform: scale(1.1);
+      }
+      
+      .nav-dots {
+        display: flex;
+        justify-content: center;
+        margin: 15px 0;
+        gap: 10px;
+      }
+      
+      .dot {
+        width: 12px;
+        height: 12px;
+        border-radius: 50%;
+        background-color: #e0e0e0;
+        cursor: pointer;
+        transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        border: 2px solid transparent;
+        box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+      }
+      
+      .dot:hover {
+        transform: scale(1.2);
+      }
+      
+      .dot.active {
+        transform: scale(1.3);
+        box-shadow: 0 0 8px rgba(0, 0, 0, 0.2);
+        border-color: rgba(255, 255, 255, 0.8);
+      }
+      
+      /* Dark mode support */
+      .dark-mode .dot:not(.active) {
+        background-color: #555;
+      }
+      
+      @keyframes fadeIn {
+        from { opacity: 0.5; }
+        to { opacity: 1; }
+      }
+      
+      /* Nook Phone Container */
+      .nook-phone {
+        width: 300px;  /* Fixed width */
+        aspect-ratio: 4/9; /* 4:9 aspect ratio */
+        min-height: 675px; /* Minimum height */
+        margin: 30px auto;
+        background: #f8f8f8;
+        border-radius: 40px;
+        padding: 20px;
+        box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+        border: 10px solid #333;
+        display: flex;
+        flex-direction: column;
+        position: relative;
+        overflow: hidden;
+      }
+        
+        .nook-phone-screen {
+          background: #f8f8f8;
+          border-radius: 30px;
+          overflow: hidden;
+          height: 100%;
+          display: flex;
+          flex-direction: column;
+        }
+        
+        .nook-nav {
+          display: flex;
+          justify-content: space-between;
+          padding: 10px 20px;
+          font-size: 0.9rem;
+          color: #333;
+          font-weight: 600;
+        }
+        
+        .nook-header {
+          text-align: center;
+          padding: 10px 0 20px;
+          position: relative;
+        }
+        
+        .nook-notch {
+          width: 40%;
+          height: 20px;
+          background: #333;
+          margin: 0 auto 10px;
+          border-bottom-left-radius: 10px;
+          border-bottom-right-radius: 10px;
+        }
+        
+        .nook-title {
+          color: #333;
+          margin: 0;
+          font-size: 1.5rem;
+        }
+        
+        /* Leaderboard container */
+        .leaderboards-container {
+          display: grid;
+          grid-template-columns: 1fr 1fr;
+          gap: 15px;
+          padding: 0 15px 60px;
+          flex-grow: 1;
+          overflow-y: auto;
+          max-height: 500px;
+        }
+        
+        .nook-app {
+          background: white;
+          border-radius: 15px;
+          padding: 15px;
+          text-align: center;
+          box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+          transition: transform 0.2s, box-shadow 0.2s;
+          cursor: pointer;
+          position: relative;
+          overflow: hidden;
+        }
+        
+        .nook-app:hover {
+          transform: translateY(-3px);
+          box-shadow: 0 5px 15px rgba(0, 0, 0, 0.15);
+        }
+        
+        .app-icon {
+          font-size: 2rem;
+          margin-bottom: 5px;
+        }
+        
+        .app-title {
+          font-weight: 600;
+          margin-bottom: 10px;
+          color: #333;
+        }
+        
+        .nook-home-indicator {
+          width: 30%;
+          height: 5px;
+          background: #333;
+          border-radius: 10px;
+          margin: 15px auto 5px;
+        }
+        
+        /* Scrollbar styling */
+        .leaderboards-container::-webkit-scrollbar {
+          width: 6px;
+        }
+        
+        .leaderboards-container::-webkit-scrollbar-track {
+          background: #f1f1f1;
+          border-radius: 10px;
+        }
+        
+        .leaderboards-container::-webkit-scrollbar-thumb {
+          background: #888;
+          border-radius: 10px;
+        }
+        
+        .leaderboards-container::-webkit-scrollbar-thumb:hover {
+          background: #555;
+        }
+        
+        .leaderboards-container {
+          padding: 0 15px;
+          box-sizing: border-box;
+          align-items: start; /* Align items to the top */
+          justify-content: center;
+        }
 
+        .category-leaderboard {
+          background-color: #fff9f0;
+          padding: 15px;
+          border-radius: 12px;
+          box-shadow: 0 0 12px rgba(0, 0, 0, 0.1);
+          border: 2px solid #8b4513;
+          width: 100%;
+          box-sizing: border-box;
+          display: flex;
+          flex-direction: column;
+          align-items: center;
+          height: auto; /* Let content determine height */
+          margin: 0 auto;
+        }
       .category-leaderboard {
         background-color: #fff9f0;
         padding: 15px;
@@ -740,44 +1140,197 @@
       
       .leaderboard-score {
         display: flex;
-        justify-content: space-between;
         align-items: center;
-        padding: 10px 15px;
+        justify-content: space-between;
+        padding: 10px 16px;
         margin: 4px 0;
-        background-color: rgba(255, 255, 255, 0.9);
+        background-color: #ffffff;
         border-radius: 6px;
-        border-left: 4px solid transparent;
+        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.08);
+        font-size: 0.95rem;
+        color: #2a1e13;
         transition: all 0.2s ease;
-        color: #3a2a1b;
-        font-weight: 500;
+        position: relative;
+        overflow: hidden;
+        border-left: 4px solid transparent;
+      }
+      
+      /* Animation for top 3 scores */
+      @keyframes rainbowGlow {
+        0% { background-position: 0% 50%; }
+        50% { background-position: 100% 50%; }
+        100% { background-position: 0% 50%; }
+      }
+      
+      .first-place {
+        position: relative;
+        z-index: 3;
+        background: linear-gradient(
+          90deg, 
+          #ff9a9e, #fad0c4, #fad0c4, 
+          #ffd1ff, #ffd1ff, #a8edea, 
+          #c4e0e5, #d4fc79, #96e6a1
+        ) !important;
+        background-size: 300% 300% !important;
+        animation: rainbowGlow 8s ease infinite;
+        transform: scale(1.02);
+        box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+      }
+      
+      .second-place {
+        position: relative;
+        z-index: 2;
+        background: linear-gradient(
+          90deg, 
+          #a1c4fd, #c2e9fb, #f6d365, 
+          #fda085, #f6d365, #c2e9fb
+        ) !important;
+        background-size: 200% 200% !important;
+        animation: rainbowGlow 10s ease infinite;
+        transform: scale(1.01);
+        box-shadow: 0 3px 10px rgba(0, 0, 0, 0.1);
+      }
+      
+      .third-place {
+        position: relative;
+        z-index: 1;
+        background: linear-gradient(
+          90deg, 
+          #f6d365, #fda085, #f6d365, 
+          #ffefba, #ffffff, #ffefba
+        ) !important;
+        background-size: 200% 200% !important;
+        animation: rainbowGlow 12s ease infinite;
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+      }
+      
+      /* Fish category */
+      .fish-score {
+        border-left-color: #4a90e2;
+        background: linear-gradient(90deg, rgba(234, 244, 255, 0.3) 0%, #ffffff 20%);
+      }
+      .fish-score .leaderboard-rank::before {
+        content: '🐟 ';
+      }
+      
+      /* Bugs category */
+      .bugs-score {
+        border-left-color: #8bc34a;
+        background: linear-gradient(90deg, rgba(235, 248, 225, 0.3) 0%, #ffffff 20%);
+      }
+      .bugs-score .leaderboard-rank::before {
+        content: '🐞 ';
+      }
+      
+      /* Sea creatures category */
+      .sea-score {
+        border-left-color: #00bcd4;
+        background: linear-gradient(90deg, rgba(224, 247, 250, 0.3) 0%, #ffffff 20%);
+      }
+      .sea-score .leaderboard-rank::before {
+        content: '🐚 ';
+      }
+      
+      /* Villagers category */
+      .villagers-score {
+        border-left-color: #ff9800;
+        background: linear-gradient(90deg, rgba(255, 243, 224, 0.3) 0%, #ffffff 20%);
+      }
+      .villagers-score .leaderboard-rank::before {
+        content: '🏡 ';
+      }
+      
+      .leaderboard-score > div {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+      }
+      
+      .leaderboard-score:hover {
+        transform: translateY(-1px);
+        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+        z-index: 1;
       }
       
       .leaderboard-score .name {
-        flex: 1;
         min-width: 0;
         overflow: hidden;
         text-overflow: ellipsis;
         white-space: nowrap;
-        font-weight: 500;
-        padding: 0 15px 0 8px;
+        padding: 4px 8px;
         text-align: left;
-        font-size: 1.05rem;
-        color: inherit;
+        font-size: 1rem;
+        font-weight: 500;
+        color: #2c3e50;
+        letter-spacing: 0.2px;
+        background: rgba(255, 255, 255, 0.3);
+        border-radius: 4px;
+        margin-right: auto;
+        position: relative;
+        padding-left: 12px;
+        transition: all 0.2s ease;
+      }
+      
+      .leaderboard-score .name::before {
+        content: '';
+        position: absolute;
+        left: 0;
+        top: 50%;
+        transform: translateY(-50%);
+        width: 4px;
+        height: 60%;
+        background: #8b5a2b;
+        border-radius: 0 2px 2px 0;
+        opacity: 0.6;
+        transition: all 0.2s ease;
+      }
+      
+      .leaderboard-score:hover .name {
+        background: rgba(255, 255, 255, 0.5);
+      }
+      
+      .leaderboard-score:hover .name::before {
+        opacity: 0.9;
+        height: 80%;
+      }
+      
+      .leaderboard-rank {
+        font-weight: 700;
+        color: #777;
+        min-width: 24px;
+        text-align: left;
+        font-size: 0.95rem;
+        flex-shrink: 0;
       }
       
       .leaderboard-score .score {
-        flex: 0 0 auto;
+        display: flex;
+        align-items: center;
+        justify-content: flex-end;
         min-width: 60px;
-        text-align: right;
-        font-weight: 600;
+        padding: 4px 8px;
+        background: rgba(255, 255, 255, 0.7);
+        border-radius: 12px;
+        font-weight: 700;
+        font-size: 1rem;
         color: #2c3e50;
         white-space: nowrap;
-        padding: 4px 10px;
-        background: rgba(255, 255, 255, 0.4);
-        border-radius: 4px;
-        font-size: 1.05rem;
         border: 1px solid rgba(0, 0, 0, 0.1);
         box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
+        transition: all 0.2s ease;
+        position: relative;
+        overflow: hidden;
+      }
+      
+      .leaderboard-score .score::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        background: linear-gradient(90deg, transparent 0%, rgba(0,0,0,0.03) 100%);
+        pointer-events: none;
       }
       
       .leaderboard-score.is-new {
@@ -785,22 +1338,34 @@
       }
       
       .dark-mode .leaderboard-score {
-        background-color: rgba(50, 50, 55, 0.9);
+        background-color: rgba(40, 40, 50, 0.95);
         color: #f0f0f0;
-        border-left: 3px solid #8b5a2b;
-        transition: all 0.2s ease;
+        border-left: 2px solid #8b5a2b;
       }
       
       .dark-mode .leaderboard-score:hover {
-        background-color: rgba(60, 60, 70, 0.95);
-        transform: translateX(3px);
+        background-color: rgba(50, 50, 60, 0.95);
+        transform: translateY(-1px);
+      }
+      
+      .dark-mode .leaderboard-score .name {
+        color: #f0f0f0;
+        background: rgba(255, 255, 255, 0.1);
+      }
+      
+      .dark-mode .leaderboard-score .name::before {
+        background: #d4a76a;
       }
       
       .dark-mode .leaderboard-score .score {
-        background-color: rgba(255, 255, 255, 0.15);
+        background-color: rgba(0, 0, 0, 0.3);
         color: #ffffff;
         border-color: rgba(255, 255, 255, 0.1);
-        box-shadow: 0 1px 2px rgba(0, 0, 0, 0.2);
+        box-shadow: 0 1px 3px rgba(0, 0, 0, 0.3);
+      }
+      
+      .dark-mode .leaderboard-score .score::before {
+        background: linear-gradient(90deg, transparent 0%, rgba(255,255,255,0.05) 100%);
       }
       
       .dark-mode .leaderboard-score:nth-child(4),
@@ -829,17 +1394,35 @@
       }
       
       /* Responsive adjustments */
+      @media (max-width: 1100px) {
+        #game-container {
+          width: 95%;
+          margin: 0 auto 20px;
+          padding: 10px;
+        }
+      }
+      
       @media (max-width: 768px) {
+        #game-container {
+          width: 98%;
+          margin: 0 auto 15px;
+          padding: 8px;
+          border-radius: 8px;
+        }
+        
         .category-leaderboard h3 {
           font-size: 1.1rem;
         }
         
         .leaderboard-score {
           font-size: 0.9rem;
+          padding: 6px 10px;
         }
         
         .leaderboard-score .score {
-          min-width: 50px;
+          min-width: 45px;
+          padding: 3px 8px;
+          font-size: 0.95rem;
         }
       }
       
@@ -1372,9 +1955,40 @@
     <div style="width:100%; height:85px;" id="header-spacer"></div>
     
     <script>
+      // Define API URLs
+      const API_URL = 'https://capstone-project-production-3cce.up.railway.app';
+      const BACKEND_API = API_URL;
+      
+      // Function to detect if we're running in standalone mode (without a server)
+      function isStandaloneMode() {
+        // If we have a valid backend API URL and no explicit force_standalone flag
+        if (window.BACKEND_API) {
+          // Check if we have a recent successful health check
+          const healthCheck = localStorage.getItem('backendHealth');
+          if (healthCheck) {
+            try {
+              const { status, timestamp } = JSON.parse(healthCheck);
+              const lastCheck = new Date(timestamp);
+              const now = new Date();
+              const minutesSinceLastCheck = (now - lastCheck) / (1000 * 60);
+              
+              // If we have a recent successful health check, we're not in standalone mode
+              if (status === 'available' && minutesSinceLastCheck < 5) {
+                return false;
+              }
+            } catch (e) {
+              console.error('Error parsing health check data:', e);
+            }
+          }
+        }
+        
+        // Check if force_standalone is set in localStorage
+        return localStorage.getItem('force_standalone') === 'true' || 
+               window.location.search.includes('standalone=1');
+      }
+
       // Function to check if the server is available
       async function checkServerAvailable() {
-        const API_URL = 'http://localhost:3002';
         try {
           console.log('Checking server availability at:', API_URL);
           const controller = new AbortController();
@@ -1446,22 +2060,19 @@
         }
       }
       
-      // Mobile navigation buttons event listeners
-      document.addEventListener('DOMContentLoaded', function() {
-        // Initialize standalone mode status
-        window.standaloneMode = isStandaloneMode();
-        
-        // Check server connection when the page loads
-        document.addEventListener('DOMContentLoaded', async function() {
-          // Update welcome message
-          updateWelcomeMessage();
-          
-          // Check if we're already in standalone mode
-          if (window.standaloneMode) {
-            updateStandaloneModeIndicator();
-            return;
-          }
-          
+      // Wrap in IIFE to handle async/await at top level
+      (async () => {
+        try {
+          const response = await fetch(`${API_URL}/health`, {
+            method: 'GET',
+            signal: controller.signal,
+            mode: 'cors',
+            headers: {
+              'Accept': 'application/json'
+            },
+            credentials: 'include'
+          });
+              
           // Try to check server connection
           if (typeof checkServerAvailable === 'function') {
             const serverAvailable = await checkServerAvailable();
@@ -1484,7 +2095,12 @@
             // Fallback if checkServerAvailable isn't available
             updateStandaloneModeIndicator();
           }
-        });
+        } catch (error) {
+          console.error('Error checking server health:', error);
+          // Update standalone mode indicator in case of error
+          updateStandaloneModeIndicator();
+        }
+      })();
         
         // Admin toggle button for mobile with secret activation pattern
         const adminToggleBtnMobile = document.getElementById('admin-toggle-btn-mobile');
@@ -1641,9 +2257,6 @@
             }
           });
         }
-        
-
-      });
     </script>
     
     <!-- Desktop Buttons (hidden on mobile) -->
@@ -1881,25 +2494,171 @@
     </div>
 
     </div>
-    <!-- Leaderboards-->
-    <div class="leaderboards-container">
-    <div class="category-leaderboard" id="fish-leaderboard">
-      <h3>Fish</h3>
-      <div id="fish-scores" class="leaderboard-list"></div>
+    
+    <!-- Leaderboards Container -->
+    <div id="leaderboards-container" style="display: flex; flex-wrap: wrap; justify-content: center; gap: 25px; margin: 20px auto; max-width: 1400px; padding: 10px;">
+      <!-- Fish Leaderboard -->
+      <div class="leaderboard-card fish-leaderboard">
+        <div class="leaderboard-header">
+          <span class="category-icon"><img src="images/Fish_Icon.png" alt="Fish" style="width: 48px; height: 48px; vertical-align: middle; margin-right: 5px;"></span>
+          <h3 class="leaderboard-category"></h3>
+        </div>
+        <div id="fish-scores" class="leaderboard-scores"></div>
+      </div>
+      
+      <!-- Bugs Leaderboard -->
+      <div class="leaderboard-card bugs-leaderboard">
+        <div class="leaderboard-header">
+          <span class="category-icon"><img src="images/Bug_Icon.png" alt="Bugs" style="width: 48px; height: 48px; vertical-align: middle; margin-right: 5px;"></span>
+          <h3 class="leaderboard-category"></h3>
+        </div>
+        <div id="bugs-scores" class="leaderboard-scores"></div>
+      </div>
+      
+      <!-- Sea Creatures Leaderboard -->
+      <div class="leaderboard-card sea-leaderboard">
+        <div class="leaderboard-header">
+          <span class="category-icon"><img src="images/Sea_Creature_Icon.png" alt="Sea Creatures" style="width: 48px; height: 48px; vertical-align: middle; margin-right: 5px;"></span>
+          <h3 class="leaderboard-category"></h3>
+        </div>
+        <div id="sea-scores" class="leaderboard-scores"></div>
+      </div>
+      
+      <!-- Villagers Leaderboard -->
+      <div class="leaderboard-card villagers-leaderboard">
+        <div class="leaderboard-header">
+          <span class="category-icon"><img src="images/Cat_Silhouette.png" alt="Villagers" style="width: 36px; height: 36px; vertical-align: middle; margin-right: 5px;"></span>
+          <h3 class="leaderboard-category"></h3>
+        </div>
+        <div id="villagers-scores" class="leaderboard-scores"></div>
+      </div>
     </div>
-    <div class="category-leaderboard" id="bugs-leaderboard">
-      <h3>Bugs</h3>
-      <div id="bugs-scores" class="leaderboard-list"></div>
-    </div>
-    <div class="category-leaderboard" id="sea-leaderboard">
-      <h3>Sea Creatures</h3>
-      <div id="sea-scores" class="leaderboard-list"></div>
-    </div>
-    <div class="category-leaderboard" id="villagers-leaderboard">
-      <h3>Villagers</h3>
-      <div id="villagers-scores" class="leaderboard-list"></div>
-    </div>
-    </div>
+
+    <style>
+      /* Leaderboard Styles */
+      .leaderboard-card {
+        flex: 1;
+        min-width: 280px;
+        max-width: 320px;
+        background: rgba(255, 255, 255, 0.9);
+        border-radius: 16px;
+        padding: 15px;
+        box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+        transition: transform 0.3s ease, box-shadow 0.3s ease;
+        position: relative;
+        overflow: hidden;
+        border: 3px solid;
+      }
+
+      .leaderboard-card::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        height: 8px;
+        background: linear-gradient(90deg, transparent 0%, rgba(255,255,255,0.7) 50%, transparent 100%);
+      }
+
+      .leaderboard-card:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 8px 25px rgba(0, 0, 0, 0.15);
+      }
+
+      .leaderboard-header {
+        display: flex;
+        align-items: center;
+        margin-bottom: 15px;
+        padding-bottom: 10px;
+        border-bottom: 2px dashed;
+      }
+
+      .category-icon {
+        font-size: 28px;
+        margin-right: 12px;
+        filter: drop-shadow(0 2px 3px rgba(0,0,0,0.2));
+      }
+
+      .leaderboard-category {
+        margin: 0;
+        font-size: 20px;
+        font-weight: bold;
+        color: #2c3e50;
+        text-shadow: 1px 1px 2px rgba(0,0,0,0.1);
+      }
+
+      .leaderboard-scores {
+        max-height: 400px;
+        overflow-y: auto;
+        padding-right: 5px;
+      }
+
+      /* Custom styles for each category */
+      .fish-leaderboard {
+        border-color: #4a90e2;
+        background: linear-gradient(145deg, #f0f8ff, #e1f0ff);
+      }
+      .fish-leaderboard .leaderboard-header {
+        border-color: #4a90e2;
+      }
+
+      .bugs-leaderboard {
+        border-color: #8bc34a;
+        background: linear-gradient(145deg, #f1f8e9, #e8f5e9);
+      }
+      .bugs-leaderboard .leaderboard-header {
+        border-color: #8bc34a;
+      }
+
+      .sea-leaderboard {
+        border-color: #00bcd4;
+        background: linear-gradient(145deg, #e0f7fa, #b2ebf2);
+      }
+      .sea-leaderboard .leaderboard-header {
+        border-color: #00bcd4;
+      }
+
+      .villagers-leaderboard {
+        border-color: #ff9800;
+        background: linear-gradient(145deg, #fff3e0, #ffe0b2);
+      }
+      .villagers-leaderboard .leaderboard-header {
+        border-color: #ff9800;
+      }
+
+      /* Custom scrollbar */
+      .leaderboard-scores::-webkit-scrollbar {
+        width: 6px;
+      }
+
+      .leaderboard-scores::-webkit-scrollbar-track {
+        background: rgba(0,0,0,0.05);
+        border-radius: 3px;
+      }
+
+      .leaderboard-scores::-webkit-scrollbar-thumb {
+        background: rgba(0,0,0,0.2);
+        border-radius: 3px;
+      }
+
+      .leaderboard-scores::-webkit-scrollbar-thumb:hover {
+        background: rgba(0,0,0,0.3);
+      }
+
+      /* Responsive adjustments */
+      @media (max-width: 1200px) {
+        .leaderboard-card {
+          min-width: calc(50% - 30px);
+        }
+      }
+
+      @media (max-width: 768px) {
+        .leaderboard-card {
+          min-width: 100%;
+          max-width: 100%;
+        }
+      }
+    </style>
     <!-- High Score Modal -->
     <div id="highScoreModal" class="modal">
       <div class="modal-content">
@@ -1955,11 +2714,10 @@
         }
       }
 
-    // Add event listener for admin tools toggle with secret activation pattern
-    let clickCount = 0;
-    let clickTimer = null;
+    // Admin tools toggle with secret activation pattern
     const requiredClicks = 5;
     const timeWindow = 3000; // 3 seconds in milliseconds
+    let clickCount = 0;
     
     adminToggleBtn.addEventListener("click", () => {
       // Increment click counter
@@ -2467,7 +3225,9 @@
           clearTimeout(timeoutId);
           
           if (!response.ok) {
-            throw new Error(`Failed to save score: ${response.status}`);
+            const errorText = await response.text();
+            console.error('Server error response:', errorText);
+            throw new Error(`Failed to save score: ${response.status} - ${errorText}`);
           }
           
           const result = await response.json();
@@ -2476,33 +3236,46 @@
           const leaderboardController = new AbortController();
           const leaderboardTimeoutId = setTimeout(() => leaderboardController.abort(), 2000);
           
-          const leaderboardResponse = await fetch(`/api/leaderboard/${category}`, {
-            signal: leaderboardController.signal
-          }).catch(error => {
-            window.apiUnavailable = true;
-            throw error;
-          });
-          
-          clearTimeout(leaderboardTimeoutId);
-          
-          if (!leaderboardResponse.ok) {
-            throw new Error(`Failed to fetch leaderboard: ${leaderboardResponse.status}`);
+          try {
+            const leaderboardResponse = await fetch(`https://capstone-project-production-3cce.up.railway.app/api/v1/leaderboard/${category}`, {
+              headers: {
+                'Content-Type': 'application/json',
+                'x-guest-token': 'a7b9c2d5e8f3g6h1j4k7m2n5p8r3t6v9'
+              },
+              signal: leaderboardController.signal
+            });
+            
+            clearTimeout(leaderboardTimeoutId);
+            
+            if (!leaderboardResponse.ok) {
+              const errorText = await leaderboardResponse.text();
+              console.error('Leaderboard fetch error:', errorText);
+              throw new Error(`Failed to fetch leaderboard: ${leaderboardResponse.status}`);
+            }
+            
+            const leaderboardData = await leaderboardResponse.json();
+            
+            // Find the placement of the new score
+            const placement = leaderboardData.findIndex(entry => 
+              (entry.username === username || entry.name === username) && 
+              entry.score === finalScore
+            ) + 1;
+            
+            // Show placement message
+            showPlacementMessage(placement);
+            
+            // Close the modal
+            closeHighScoreModal();
+            
+            // Update the displayed leaderboard
+            updateLeaderboardUI(currentCategory);
+            
+          } catch (error) {
+            console.error('Error fetching leaderboard after submission:', error);
+            // Still close the modal even if we can't get the leaderboard
+            closeHighScoreModal();
+            updateLeaderboardUI(currentCategory);
           }
-          
-          const leaderboardData = await leaderboardResponse.json();
-          
-          // Find the placement of the new score
-          const placement = leaderboardData.findIndex(entry => entry.username === username && entry.score === finalScore) + 1;
-          
-          // Show placement message
-          showPlacementMessage(placement);
-          
-          // Close the modal
-          closeHighScoreModal();
-          
-          // Update the displayed leaderboard
-          updateLeaderboard();
-          
         } catch (error) {
           console.log('Error with server, falling back to local storage');
           
@@ -2577,159 +3350,121 @@
         }
       }
       
-      function updateLeaderboardUI(data) {
+      function updateLeaderboardUI(category, data) {
         try {
-          // Clear existing leaderboard items
-          document.querySelectorAll('.leaderboard-list').forEach(list => {
-            if (list && list.innerHTML) {
-              list.innerHTML = '';
-            }
-          });
-
-          // If no data, use default leaderboard
+          console.log(`[Leaderboard] Updating UI for ${category}`, data);
+          
+          // If no data is provided, try to use default leaderboard
           if (!data) {
-            console.warn('No leaderboard data provided, using default');
-            if (window.DEFAULT_LEADERBOARD) {
-              updateLeaderboardUI(window.DEFAULT_LEADERBOARD);
+            console.warn('No data provided, using default leaderboard');
+            if (window.DEFAULT_LEADERBOARD && window.DEFAULT_LEADERBOARD[category]) {
+              updateLeaderboardUI(category, window.DEFAULT_LEADERBOARD[category]);
             } else {
               console.error('No default leaderboard data available');
+              const listElement = document.getElementById(`${category}-scores`);
+              if (listElement) {
+                listElement.innerHTML = '<div class="no-scores">No scores available</div>';
+              }
             }
             return;
           }
           
-          // Ensure data is in the correct format
-          if (typeof data !== 'object' || (Array.isArray(data) && data.length === 0)) {
-            console.warn('Invalid leaderboard data format, using default');
-            if (window.DEFAULT_LEADERBOARD) {
-              updateLeaderboardUI(window.DEFAULT_LEADERBOARD);
-            }
+          const listElement = document.getElementById(`${category}-scores`);
+          
+          if (!listElement) {
+            console.error(`[Leaderboard] Could not find element for category: ${category}`);
             return;
           }
-
-          // Handle case where data is an array (direct scores)
-          if (Array.isArray(data)) {
-            const defaultCategory = document.querySelector('.leaderboard-category');
-            if (defaultCategory) {
-              const scoresList = defaultCategory.querySelector('.leaderboard-list');
-              if (scoresList) {
-                scoresList.innerHTML = data.map((entry, index) => {
-                  // Add special styling for top 3 positions
-                  let scoreClass = 'leaderboard-score';
-                  if (index === 0) scoreClass += ' first-place';
-                  else if (index === 1) scoreClass += ' second-place';
-                  else if (index === 2) scoreClass += ' third-place';
-                  
-                  // Create score div
-                  const scoreDiv = document.createElement('div');
-                  scoreDiv.className = scoreClass;
-                  
-                  // Create name and score spans
-                  const rankSpan = document.createElement('span');
-                  rankSpan.className = 'leaderboard-rank';
-                  rankSpan.textContent = `${index + 1}.`;
-                  
-                  const nameSpan = document.createElement('span');
-                  nameSpan.className = 'leaderboard-name';
-                  nameSpan.textContent = entry.name || 'Unknown';
-                  
-                  const scoreValue = document.createElement('span');
-                  scoreValue.className = 'leaderboard-score-value';
-                  scoreValue.textContent = entry.score || 0;
-                  
-                  // Append elements to score div
-                  scoreDiv.appendChild(rankSpan);
-                  scoreDiv.appendChild(nameSpan);
-                  scoreDiv.appendChild(scoreValue);
-                  
-                  // Add date if available
-                  if (entry.date) {
-                    const dateSpan = document.createElement('span');
-                    dateSpan.className = 'leaderboard-date';
-                    dateSpan.textContent = entry.date;
-                    scoreDiv.appendChild(dateSpan);
-                  }
-                  
-                  return scoreDiv.outerHTML;
-                }).join('');
-              }
-            }
-            return;
-          }
-
-          // Handle case where data is an object with category keys
-          if (typeof data === 'object') {
-            Object.entries(data).forEach(([category, scores]) => {
-              if (!scores || !Array.isArray(scores)) {
-                console.warn(`Invalid scores data for category ${category}:`, scores);
-                return;
-              }
-
-              const categoryElement = document.getElementById(`${category}-leaderboard`);
-              if (!categoryElement) {
-                console.warn(`No element found for category: ${category}`);
-                return;
-              }
-
-              const scoresList = categoryElement.querySelector('.leaderboard-list');
-              if (!scoresList) {
-                console.warn(`No scores list found in category: ${category}`);
-                return;
-              }
-
-              // Add new items
-              scoresList.innerHTML = scores.map((entry, index) => {
-                let scoreClass = 'leaderboard-score';
-                if (index === 0) scoreClass += ' first-place';
-                else if (index === 1) scoreClass += ' second-place';
-                else if (index === 2) scoreClass += ' third-place';
-                
-                // Create score div
-                const scoreDiv = document.createElement('div');
-                scoreDiv.className = scoreClass;
-                
-                // Create name and score spans
-                const rankSpan = document.createElement('span');
-                rankSpan.className = 'leaderboard-rank';
-                rankSpan.textContent = `${index + 1}.`;
-                
-                const nameSpan = document.createElement('span');
-                nameSpan.className = 'leaderboard-name';
-                nameSpan.textContent = entry.name || 'Unknown';
-                
-                const scoreValue = document.createElement('span');
-                scoreValue.className = 'leaderboard-score-value';
-                scoreValue.textContent = entry.score || 0;
-                
-                // Append elements to score div
-                scoreDiv.appendChild(rankSpan);
-                scoreDiv.appendChild(nameSpan);
-                scoreDiv.appendChild(scoreValue);
-                
-                // Add date if available
-                if (entry.date) {
-                  const dateSpan = document.createElement('span');
-                  dateSpan.className = 'leaderboard-date';
-                  dateSpan.textContent = entry.date;
-                  scoreDiv.appendChild(dateSpan);
+          
+          // Clear existing items
+          listElement.innerHTML = '';
+          
+          // If data is not an array, try to handle it as an object with category keys
+          if (!Array.isArray(data)) {
+            if (typeof data === 'object' && data !== null) {
+              // If data is an object with category keys, extract the correct category
+              if (data[category] && Array.isArray(data[category])) {
+                data = data[category];
+              } else {
+                // If no matching category, try to use the first array found
+                const firstArray = Object.values(data).find(Array.isArray);
+                if (firstArray) {
+                  data = firstArray;
+                } else {
+                  throw new Error('No valid array data found in the provided object');
                 }
-                
-                return scoreDiv.outerHTML;
-              }).join('');
-            });
+              }
+            } else {
+              throw new Error('Invalid data format: expected array or object with array values');
+            }
+          }
+          
+          // If still no valid data, show message
+          if (!data || !Array.isArray(data) || data.length === 0) {
+            console.warn('No valid leaderboard data provided for', category);
+            listElement.innerHTML = '<div class="no-scores">No scores yet. Be the first!</div>';
             return;
           }
-
-          // If we get here, the data format is not recognized
-          console.error('Unexpected leaderboard data format:', data);
-          if (window.DEFAULT_LEADERBOARD) {
-            console.log('Falling back to default leaderboard data');
-            updateLeaderboardUI(window.DEFAULT_LEADERBOARD);
-          }
+          
+          // Sort data by score (highest first) and take top 10
+          const sortedData = [...data]
+            .sort((a, b) => (b.score || 0) - (a.score || 0))
+            .slice(0, 10); // Only take top 10 scores
+          
+          // Add each score to the list
+          sortedData.forEach((entry, index) => {
+            const scoreDiv = document.createElement('div');
+            scoreDiv.className = 'leaderboard-score';
+            
+            // Add rank class for top 3
+            if (index === 0) scoreDiv.classList.add('first-place');
+            else if (index === 1) scoreDiv.classList.add('second-place');
+            else if (index === 2) scoreDiv.classList.add('third-place');
+            
+            // Create rank, name, and score elements
+            const rankSpan = document.createElement('span');
+            rankSpan.className = 'leaderboard-rank';
+            rankSpan.textContent = `${index + 1}.`;
+            
+            const nameSpan = document.createElement('span');
+            nameSpan.className = 'leaderboard-name';
+            nameSpan.textContent = entry.name || 'Anonymous';
+            
+            const scoreValue = document.createElement('span');
+            scoreValue.className = 'leaderboard-score-value';
+            scoreValue.textContent = entry.score || 0;
+            
+            // Append elements
+            scoreDiv.appendChild(rankSpan);
+            scoreDiv.appendChild(nameSpan);
+            scoreDiv.appendChild(scoreValue);
+            
+            // Add date if available
+            if (entry.date) {
+              const dateSpan = document.createElement('span');
+              dateSpan.className = 'leaderboard-date';
+              dateSpan.textContent = entry.date;
+              scoreDiv.appendChild(dateSpan);
+            }
+            
+            listElement.appendChild(scoreDiv);
+          });
+          
+          console.log(`[Leaderboard] Updated ${category} with ${data.length} entries`);
+          
         } catch (error) {
-          console.error('Error updating leaderboard UI:', error);
-          if (window.DEFAULT_LEADERBOARD) {
+          console.error(`[Leaderboard] Error updating UI for ${category}:`, error);
+          const listElement = document.getElementById(`${category}-scores`);
+          if (listElement) {
+            listElement.innerHTML = '<div class="error">Error loading scores</div>';
+          }
+          
+          // Fall back to default leaderboard if available
+          if (window.DEFAULT_LEADERBOARD && window.DEFAULT_LEADERBOARD[category]) {
             console.log('Falling back to default leaderboard data after error');
-            updateLeaderboardUI(window.DEFAULT_LEADERBOARD);
+            updateLeaderboardUI(category, window.DEFAULT_LEADERBOARD[category]);
+          } else {
+            console.error('No default leaderboard data available for fallback');
           }
         }
       }
@@ -2758,213 +3493,39 @@
           { name: "Redd", score: 4 },
           { name: "Mabel", score: 3 },
           { name: "Saharah", score: 2 },
-          { name: "Wisp", score: 1 }
+          { name: "Gulliver", score: 1 }
         ],
         sea: [
-          { name: "Gulliver", score: 10 },
-          { name: "JJ", score: 9 },
-          { name: "Redd", score: 8 },
-          { name: "Kapp'n", score: 7 },
-          { name: "Flick", score: 6 },
-          { name: "Cyrus", score: 5 },
-          { name: "Kicks", score: 4 },
-          { name: "Mabel", score: 3 },
-          { name: "Saharah", score: 2 },
-          { name: "Wisp", score: 1 }
-        ],
-        villagers: [
-          { name: "K.K. Slider", score: 10 },
+          { name: "Pascal", score: 10 },
           { name: "Kapp'n", score: 9 },
-          { name: "Tom Nook", score: 8 },
+          { name: "Leif", score: 8 },
           { name: "Cyrus", score: 7 },
           { name: "Kicks", score: 6 },
           { name: "Redd", score: 5 },
           { name: "Mabel", score: 4 },
           { name: "Saharah", score: 3 },
           { name: "Gulliver", score: 2 },
-          { name: "Harvey", score: 1 }
+          { name: "Wisp", score: 1 }
+        ],
+        villagers: [
+          { name: "Tom Nook", score: 10 },
+          { name: "Isabelle", score: 9 },
+          { name: "Blathers", score: 8 },
+          { name: "Celeste", score: 7 },
+          { name: "Brewster", score: 6 },
+          { name: "K.K. Slider", score: 5 },
+          { name: "Sable", score: 4 },
+          { name: "Label", score: 3 },
+          { name: "Reese", score: 2 },
+          { name: "Cyrus", score: 1 }
         ]
       };
-
-      // Function to detect if we're running in standalone mode (without a server)
-      function isStandaloneMode() {
-        // If we have a valid backend API URL and no explicit force_standalone flag
-        if (window.BACKEND_API) {
-          // Check if we have a recent successful health check
-          const healthData = localStorage.getItem('backendHealth');
-          if (healthData) {
-            try {
-              const { status, timestamp } = JSON.parse(healthData);
-              // Consider health check valid if it's less than 5 minutes old
-              const isRecent = Date.now() - new Date(timestamp).getTime() < 5 * 60 * 1000;
-              if (status === 'available' && isRecent) {
-                return false; // Backend is available, don't use standalone mode
-              }
-            } catch (e) {
-              console.warn('Error parsing backend health data', e);
-            }
-          }
-        }
-        
-        // Check if running via file:// protocol
-        const isFileProtocol = window.location.protocol === 'file:';
-        
-        // Check if API has been marked as unavailable in this session
-        const apiUnavailable = window.apiUnavailable === true;
-        
-        // Check if force_standalone is set in localStorage
-        const forceStandalone = localStorage.getItem('force_standalone') === 'true';
-        
-        // Check URL parameters (for testing purposes only)
-        const urlParams = new URLSearchParams(window.location.search);
-        const guestParam = urlParams.get('guest');
-        
-        // In production, ignore the guest parameter unless explicitly in file:// protocol
-        if (window.location.hostname !== 'localhost' && !isFileProtocol) {
-          return apiUnavailable || forceStandalone;
-        }
-        
-        // For local development, respect the guest parameter
-        return guestParam === 'true' || isFileProtocol || apiUnavailable || forceStandalone;
-      }
       
-      async function updateLeaderboard() {
-        const category = categorySelector?.value || 'fish';
-        console.log(`[Leaderboard] Fetching ${category} leaderboard from ${window.BACKEND_API}`);
-        
-        // Function to use default leaderboard data
-        const useDefaultLeaderboard = () => {
-          console.log('[Leaderboard] Using default leaderboard data');
-          updateLeaderboardUI(DEFAULT_LEADERBOARD);
-        };
-        
-        // Check if we're in standalone mode
-        if (isStandaloneMode()) {
-          console.log('[Leaderboard] Running in standalone mode, using local data');
-          // Use local data if available
-          try {
-            const savedLeaderboard = localStorage.getItem('leaderboard');
-            if (savedLeaderboard) {
-              const parsed = JSON.parse(savedLeaderboard);
-              // Ensure we have valid data
-              if (parsed && Object.keys(parsed).length > 0) {
-                updateLeaderboardUI(parsed);
-                return;
-              }
-            }
-            useDefaultLeaderboard();
-          } catch (e) {
-            console.error('Error parsing saved leaderboard:', e);
-            useDefaultLeaderboard();
-          }
-          return;
-        }
-        
-        // If not in standalone mode, try to fetch from server
-        try {
-          // Fetch leaderboard data from the server with a timeout
-          const controller = new AbortController();
-          const timeoutId = setTimeout(() => controller.abort(), 5000); // 5 second timeout
-          
-          const startTime = Date.now();
-          const headers = {
-            'Accept': 'application/json',
-            'Content-Type': 'application/json',
-            'x-guest-token': 'a7b9c2d5e8f3g6h1j4k7m2n5p8r3t6v9' // Default guest token from backend
-          };
-          
-          // Add authorization header if user is logged in
-          const token = localStorage.getItem('token') || sessionStorage.getItem('token');
-          if (token) {
-            headers['Authorization'] = `Bearer ${token}`;
-          }
-          
-          let response;
-          try {
-            response = await fetch(`https://capstone-project-production-3cce.up.railway.app/api/v1/leaderboard/${category}`, {
-              method: 'GET',
-              headers: headers,
-              signal: controller.signal
-            });
-          } catch (error) {
-            if (error.name === 'AbortError') {
-              console.warn('[Leaderboard] Request timed out');
-            } else {
-              console.error('[Leaderboard] Fetch error:', error);
-            }
-            window.apiUnavailable = true;
-            useDefaultLeaderboard();
-            return;
-          }
-          
-          clearTimeout(timeoutId);
-          
-          if (!response.ok) {
-            const errorText = await response.text();
-            console.error(`[Leaderboard] Server error: ${response.status} ${errorText}`);
-            window.apiUnavailable = true;
-            useDefaultLeaderboard();
-            return;
-          }
-          
-          const responseTime = Date.now() - startTime;
-          console.log(`[Leaderboard] Fetched in ${responseTime}ms`);
-          
-          const responseData = await response.json();
-          
-          // Update backend health status
-          localStorage.setItem('backendHealth', JSON.stringify({
-            status: 'available',
-            timestamp: new Date().toISOString(),
-            responseTime
-          }));
-          
-          // Format the data for the UI
-          const formattedData = {};
-          
-          // Ensure we have valid leaderboard data
-          if (Array.isArray(responseData)) {
-            // If response is an array of entries
-            formattedData[category] = responseData.map(entry => ({
-              name: entry.username || 'Unknown',
-              score: entry.score || 0,
-              date: entry.date ? new Date(entry.date).toISOString().split('T')[0] : 'Unknown'
-            }));
-          } else if (responseData && typeof responseData === 'object') {
-            // If response is an object with category as key
-            const categoryData = responseData[category] || [];
-            formattedData[category] = Array.isArray(categoryData) 
-              ? categoryData.map(entry => ({
-                  name: entry.username || 'Unknown',
-                  score: entry.score || 0,
-                  date: entry.date ? new Date(entry.date).toISOString().split('T')[0] : 'Unknown'
-                }))
-              : [];
-          } else {
-            console.error('Unexpected leaderboard data format:', responseData);
-            throw new Error('Invalid leaderboard data format received');
-          }
-          
-          // Update the UI with the fetched data
-          updateLeaderboardUI(formattedData);
-        } catch (error) {
-          console.log('Using local leaderboard data:', error);
-          // Fall back to local data if server request fails
-          const savedLeaderboard = localStorage.getItem('leaderboard');
-          if (savedLeaderboard) {
-            try {
-              const data = JSON.parse(savedLeaderboard);
-              updateLeaderboardUI(data);
-            } catch (e) {
-              console.error('Error parsing saved leaderboard:', e);
-              // If all else fails, use default data
-              updateLeaderboardUI(DEFAULT_LEADERBOARD);
-            }
-          } else {
-            updateLeaderboardUI(DEFAULT_LEADERBOARD);
-          }
-        }
-      }
+      // Make it globally available
+      window.DEFAULT_LEADERBOARD = DEFAULT_LEADERBOARD;
+      
+      // Initialize leaderboard with default data
+      updateLeaderboardUI(DEFAULT_LEADERBOARD);
 
 
       async function initGame(isInitialLoad = false) {
@@ -3232,7 +3793,6 @@
 
       // Track the current loading state to prevent multiple simultaneous operations
       let isLoadingItem = false;
-      let lastLoadTimestamp = 0;
       
       async function displayItem(item) {
         return new Promise(async (resolve, reject) => {
@@ -4096,7 +4656,8 @@
           highScoreElement.textContent = `Personal Best: ${currentHighScore}`;
         }
 
-        updateLeaderboard();
+        // Update the leaderboard UI with the current category
+        updateLeaderboardUI(categorySelector.value);
         
         // Don't load any images until the game starts
         

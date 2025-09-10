@@ -101,17 +101,29 @@
       });
     </script>
     <script>
-      // Simple font loading without font files
+      // Font loading with proper font face definition
       function loadCustomFont() {
         try {
-          // Just remove the loading class without trying to load any fonts
-          document.documentElement.classList.remove('font-loading');
-          console.log('Using system font fallback');
+          const font = new FontFace('FOT-RodinBokutohPro', 'url(./fonts/customfont.otf) format("opentype"), url(./fonts/customfont.woff2) format("woff2")');
+          
+          font.load().then(() => {
+            document.fonts.add(font);
+            document.documentElement.classList.remove('font-loading');
+            console.log('Custom font loaded successfully');
+          }).catch(error => {
+            console.warn('Failed to load custom font:', error);
+            document.documentElement.classList.remove('font-loading');
+          });
         } catch (e) {
           console.warn('Error in font loading:', e);
           document.documentElement.classList.remove('font-loading');
         }
       }
+      
+      // Load the font when the page loads
+      document.addEventListener('DOMContentLoaded', () => {
+        loadCustomFont();
+      });
       
       // Generate a random guest token if not exists
       if (!localStorage.getItem('guestToken')) {
@@ -254,9 +266,20 @@
       async function initializeLeaderboard() {
         console.log('[Leaderboard] Initializing leaderboard...');
         
+        // Ensure we have valid categories
+        if (!Array.isArray(LEADERBOARD_CONFIG?.categories)) {
+          console.error('[Leaderboard] Invalid or missing categories in config');
+          return;
+        }
+        
         // Load data for each category sequentially to avoid rate limiting
         for (const category of LEADERBOARD_CONFIG.categories) {
-          // Skip if already loading this category
+          // Skip if already loading this category or invalid category
+          if (!category || typeof category !== 'string') {
+            console.warn('[Leaderboard] Skipping invalid category:', category);
+            continue;
+          }
+          
           if (loadingStates.get(category)) {
             console.log(`[Leaderboard] Already loading ${category}, skipping duplicate request`);
             continue;
@@ -264,9 +287,15 @@
           
           try {
             loadingStates.set(category, true);
+            console.log(`[Leaderboard] Loading data for category: ${category}`);
             await loadLeaderboardData(category);
           } catch (error) {
             console.error(`[Leaderboard] Error initializing ${category}:`, error);
+            // Fall back to default data on error
+            const defaultData = LEADERBOARD_CONFIG.defaultData?.[category];
+            if (defaultData) {
+              updateLeaderboardUI(category, defaultData);
+            }
           } finally {
             loadingStates.set(category, false);
           }
@@ -277,8 +306,18 @@
       }
 
       async function loadLeaderboardData(category, retryCount = 0) {
-        const apiUrl = `${window.BACKEND_API}/leaderboard/${category}`;
-        const element = document.getElementById(`${category}-scores`);
+        // Ensure category is a string
+        const categoryName = typeof category === 'object' && category.name ? category.name : category;
+        const apiUrl = `${window.BACKEND_API}/leaderboard/${categoryName}`;
+        
+        // Get guest token from localStorage or generate a new one
+        let guestToken = localStorage.getItem('guestToken');
+        if (!guestToken) {
+          guestToken = 'guest_' + Math.random().toString(36).substr(2, 9);
+          localStorage.setItem('guestToken', guestToken);
+        }
+        
+        const element = document.getElementById(`${categoryName}-scores`);
         const maxRetries = 2;
         
         if (!element) {
@@ -300,42 +339,40 @@
           return;
         }
         
-        // Use a static guest token that matches server expectations
-        const GUEST_TOKEN = 'guest_leaderboard_token';
-        const guestToken = GUEST_TOKEN;
+        // Use the guest token from localStorage
         
         try {
-          // Use the static guest token
-          const guestToken = GUEST_TOKEN;
-          
           const response = await fetch(apiUrl, {
             method: 'GET',
             headers: {
               'Content-Type': 'application/json',
-              'Accept': 'application/json',
-              'x-guest-token': guestToken
+              'Authorization': `Bearer ${guestToken}`,
+              'X-Guest-Token': guestToken
             },
             credentials: 'include',
             mode: 'cors'
           });
           
-          if (!response.ok) {
-            // If unauthorized, use default data
-            if (response.status === 401) {
-              console.warn('Invalid guest token, using default data');
-              updateLeaderboardUI(category, LEADERBOARD_CONFIG.defaultData[category] || []);
-              return;
+          if (response.ok) {
+            const data = await response.json();
+            updateLeaderboardUI(categoryName, data);
+          } else if (response.status === 401) {
+            // Handle unauthorized - try with a new guest token
+            localStorage.removeItem('guestToken');
+            if (retryCount < maxRetries) {
+              return loadLeaderboardData(categoryName, retryCount + 1);
             }
-            
+            console.warn('Invalid guest token, using default data');
+            updateLeaderboardUI(category, LEADERBOARD_CONFIG.defaultData[category] || []);
+            return;
+          } else {
             // If we've already retried or got a different error, throw
             const errorText = await response.text();
             console.error(`[Leaderboard] Error loading ${category}:`, response.status, errorText);
             throw new Error(`HTTP error! status: ${response.status}`);
           }
           
-          const data = await response.json();
-          console.log(`[Leaderboard] Loaded ${category} data:`, data);
-          updateLeaderboardUI(category, data);
+          // Data is already processed in the response.ok block
           
         } catch (error) {
           console.warn(`[Leaderboard] Error loading ${category}:`, error);
@@ -2962,10 +2999,8 @@
       const guessInput = document.getElementById("guess-input");
       const submitButton = document.getElementById("submit-guess");
       const nextButton = document.getElementById("next-btn");
-      const feedbackElement = document.getElementById("feedback");
       const scoreElement = document.getElementById("score");
       const highScoreElement = document.getElementById("high-score");
-      const categorySelector = document.getElementById("category");
       const difficultySelector = document.getElementById("difficulty");
       const logoutBtn = document.getElementById("logoutBtn");
       const adminToggleBtn = document.getElementById("admin-toggle-btn");
@@ -3308,31 +3343,63 @@
       }
 
       async function getRandomItem(category) {
-        if (!category) return null;
-
-        if (!allItems[category]) {
-          return loadCategoryItems(category).then(() => getRandomItem(category));
+        if (!category || typeof category !== 'string') {
+          console.error('Invalid category:', category);
+          return null;
         }
 
-        const available = getAvailableItems(category);
-        
-        if (available.length === 0) {
-          // Reset shown items when all items have been shown
-          shownItems[category] = [];
-          localStorage.setItem(`shown_items_${category}`, JSON.stringify([]));
-          return getRandomItem(category);
-        }
+        try {
+          // If we don't have items for this category, try to load them first
+          if (!allItems[category] || !Array.isArray(allItems[category])) {
+            console.log(`Loading items for category: ${category}`);
+            await loadCategoryItems(category);
+            
+            // If still no items after loading, use fallback data
+            if (!allItems[category] || !Array.isArray(allItems[category])) {
+              console.error(`Failed to load items for category: ${category}`);
+              return null;
+            }
+          }
 
-        // Get a random item from the available items
-        const randomIndex = Math.floor(Math.random() * available.length);
-        const item = available[randomIndex];
+          // Get available items that haven't been shown yet
+          const available = getAvailableItems(category);
+          
+          // If no items available, reset the shown items and try again
+          if (available.length === 0) {
+            console.log(`No available items for ${category}, resetting shown items`);
+            shownItems[category] = [];
+            localStorage.setItem(`shown_items_${category}`, JSON.stringify([]));
+            
+            // Get fresh available items after reset
+            const freshAvailable = getAvailableItems(category);
+            if (freshAvailable.length === 0) {
+              console.error('No items available even after reset');
+              return null;
+            }
+            return freshAvailable[0]; // Return the first available item
+          }
 
-        // Add this item to the shown items list
-        if (!shownItems[category]) {
-          shownItems[category] = [];
+          // Get a random item from the available items
+          const randomIndex = Math.floor(Math.random() * available.length);
+          const item = available[randomIndex];
+
+          if (!item) {
+            console.error('No valid item found in available items:', available);
+            return null;
+          }
+
+          // Add this item to the shown items list
+          if (!shownItems[category]) {
+            shownItems[category] = [];
+          }
+          shownItems[category].push(item.name);
+          localStorage.setItem(`shown_items_${category}`, JSON.stringify(shownItems[category]));
+          
+          return item;
+        } catch (error) {
+          console.error('Error in getRandomItem:', error);
+          return null;
         }
-        shownItems[category].push(item.name);
-        localStorage.setItem(`shown_items_${category}`, JSON.stringify(shownItems[category]));
 
         try {
           // First try to use the image URL from the item object if it exists
@@ -3725,24 +3792,18 @@
       updateLeaderboardUI(DEFAULT_LEADERBOARD);
 
 
-      async function initGame(isInitialLoad = false) {
-        // Prevent multiple initializations
-        if (isLoadingItem) {
-          console.log('Game initialization already in progress, waiting...');
-          return;
-        }
+      async function initGame(category, isInitialLoad = false) {
+        console.log(`Initializing game for category: ${category}`);
+        let lastLoadTimestamp = 0; // Initialize lastLoadTimestamp
         
         try {
-          const category = categorySelector.value;
-          console.log(`Initializing game for category: ${category}`);
-          
-          // Reset score only if changing categories
-          if (currentCategory !== category) {
-            console.log(`Category changed from ${currentCategory} to ${category}, resetting score`);
-            score = 0;
-            currentCategory = category;
+          // Prevent multiple initializations
+          if (isLoadingItem) {
+            return;
           }
           
+          // Update current category
+          currentCategory = category;
           localStorage.setItem("acnh_last_category", category);
           
           // Only show loading message if not the initial page load
@@ -3760,45 +3821,42 @@
             console.log(`Using recently loaded item: ${currentItem.name} instead of loading a new one in initGame`);
             // Just update the UI with the current item
             displayItem(currentItem);
-            feedbackElement.textContent = '';
-            scoreElement.textContent = `Score: ${score}`;
             return;
           }
-
-          const item = await getRandomItem(category);
           
+          // Load a new item
+          const item = await getRandomItem(category);
           if (item) {
             // Set the current item and display it
             currentItem = item;
-            await displayItem(item);
+            displayItem(item);
             feedbackElement.textContent = '';
             scoreElement.textContent = `Score: ${score}`;
-            
-            // Re-enable input
-            guessInput.disabled = false;
-            submitButton.disabled = false;
           } else {
-            console.error('No item returned from getRandomItem');
-            feedbackElement.textContent = 'Failed to load game items. Please try again.';
-            feedbackElement.className = 'wrong';
+            throw new Error('No item returned from getRandomItem');
           }
+          
         } catch (error) {
           console.error('Error in initGame:', error);
-          feedbackElement.textContent = 'An error occurred while initializing the game. Please try again.';
-          feedbackElement.className = 'wrong';
+          feedbackElement.textContent = 'Failed to load game items. Please try again.';
+          feedbackElement.className = 'error';
           
           // Try to recover by resetting the category
           try {
-            const category = categorySelector.value;
-            if (allItems[category]) {
+            const recoveryCategory = categorySelector?.value || 'fish'; // Default to fish if selector not available
+            if (recoveryCategory && allItems[recoveryCategory]) {
               console.log('Attempting to reset category data');
-              delete allItems[category];
-              await loadCategoryItems(category);
-              await initGame();
+              delete allItems[recoveryCategory];
+              await loadCategoryItems(recoveryCategory);
+              await initGame(recoveryCategory, true);
             }
           } catch (recoveryError) {
             console.error('Recovery failed:', recoveryError);
           }
+        } finally {
+          // Re-enable input
+          guessInput.disabled = false;
+          submitButton.disabled = false;
         }
       }
 
@@ -3992,260 +4050,137 @@
       let isLoadingItem = false;
       
       async function displayItem(item) {
-        return new Promise(async (resolve, reject) => {
-          try {
-            if (!item || !item.name) {
-              showPlaceholder('Invalid item data');
+        // Validate input parameters
+        if (!item || !item.name) {
+          console.error('Invalid item data:', item);
+          showPlaceholder('Invalid item data');
+          return false;
+        }
+        
+        // Check if we're already displaying this item to prevent duplicate calls
+        if (currentlyDisplayingItem === item.name) {
+          console.log(`Already displaying ${item.name}, skipping duplicate load`);
+          return true;
+        }
+        
+        // Set the currently displaying item to prevent race conditions
+        currentlyDisplayingItem = item.name;
+        
+        // Get UI elements
+        const imageDisplay = document.getElementById('imageDisplay');
+        const loadingLeaf = document.querySelector('.loading-leaf');
+        
+        if (!imageDisplay) {
+          console.error('Image display element not found');
+          return false;
+        }
+        
+        // Show loading indicator
+        if (loadingLeaf) loadingLeaf.style.display = 'block';
+        imageDisplay.style.display = 'none';
+        
+        // Helper function to try loading an image
+        const tryLoadImage = (url) => {
+          return new Promise((resolve) => {
+            if (!url) return resolve(false);
+            
+            const img = new Image();
+            const timeout = setTimeout(() => {
+              img.onload = img.onerror = null;
               resolve(false);
-              return;
-            }
+            }, 5000); // 5 second timeout
             
-            // Check if we're already displaying this item to prevent duplicate calls
-            if (currentlyDisplayingItem === item.name) {
-              return resolve(true);
-            }
-            
-            // Set the currently displaying item to prevent race conditions
-            currentlyDisplayingItem = item.name;
-            
-            // Get UI elements
-            const loadingLeaf = document.querySelector('.loading-leaf');
-            const placeholder = document.querySelector(".image-placeholder");
-            
-            // Hide any existing placeholder
-            if (placeholder) {
-              placeholder.style.display = "none";
-            }
-            
-            // Reset image display
-            imageDisplay.src = '';
-            imageDisplay.style.display = "none";
-            imageDisplay.classList.remove('loaded');
-            
-            // Show loading indicator
-            if (loadingLeaf) {
-              loadingLeaf.style.display = 'block';
-            }
-            
-            // Helper function to load an image with a timeout
-            const loadImage = (url, timeout = 5000) => {
-              return new Promise((resolveImg, rejectImg) => {
-                if (!url) {
-                  return rejectImg(new Error('No image URL provided'));
-                }
-                
-                const img = new Image();
-                const timer = setTimeout(() => {
-                  img.onload = img.onerror = null;
-                  rejectImg(new Error(`Image load timed out: ${url}`));
-                }, timeout);
-                
-                img.onload = () => {
-                  clearTimeout(timer);
-                  resolveImg(url);
-                };
-                
-                img.onerror = () => {
-                  clearTimeout(timer);
-                  rejectImg(new Error(`Failed to load image: ${url}`));
-                };
-                
-                img.src = url;
-              });
-            };
-            
-            // Track if we're already trying the fallback image to prevent infinite loops
-            let isTryingFallback = false;
-            
-            // Function to try the fallback image
-            const tryFallbackImage = async () => {
-              // Prevent recursive calls that could cause infinite loops
-              if (isTryingFallback) {
-                // Show text placeholder as last resort
-                imageDisplay.style.display = 'none';
-                showPlaceholder(`${item.name} (Image unavailable)`);
-                if (loadingLeaf) loadingLeaf.style.display = 'none';
-                resolve(false);
-                return;
-              }
-              
-              // Set the flag to prevent recursive calls
-              isTryingFallback = true;
-              
-              const fallbackUrl = item.fallback_image_url || 
-                               (currentCategory ? `images/${currentCategory}/placeholder.svg` : null);
-              
-              if (fallbackUrl) {
-                try {
-                  await loadImage(fallbackUrl);
-                  
-                  // Set the fallback image source and wait for it to load
-                  imageDisplay.onload = () => {
-                    imageDisplay.style.display = 'block';
-                    imageDisplay.classList.add('loaded');
-                    if (loadingLeaf) loadingLeaf.style.display = 'none';
-                    console.log(`Successfully displayed fallback image for ${item.name}`);
-                    
-                    // Start the timer now that the fallback image is successfully loaded
-                    if (!gameOver) {
-                      // Reset timer with current difficulty
-                      const difficulty = parseInt(document.getElementById('difficulty').value) / 1000;
-                      timeLeft = difficulty;
-                      maxTime = difficulty;
-                      timerDisplay.textContent = `Time: ${timeLeft}`;
-                      timerDisplay.classList.remove('warning', 'expired');
-                      
-                      // Start the timer
-                      startTimer();
-                    }
-                    
-                    resolve(true);
-                  };
-                  
-                  imageDisplay.onerror = () => {
-                    console.error(`Error displaying fallback image for ${item.name}`);
-                    // Show text placeholder as last resort
-                    imageDisplay.style.display = 'none';
-                    showPlaceholder(`${item.name} (Image unavailable)`);
-                    if (loadingLeaf) loadingLeaf.style.display = 'none';
-                    resolve(false);
-                  };
-                  
-                  imageDisplay.src = fallbackUrl;
-                } catch (error) {
-                  console.error(`All image attempts failed for ${item.name}`);
-                  // Show text placeholder if all image attempts fail
-                  imageDisplay.style.display = 'none';
-                  showPlaceholder(`${item.name} (Image unavailable)`);
-                  if (loadingLeaf) loadingLeaf.style.display = 'none';
-                  resolve(false);
-                }
+            img.onload = () => {
+              clearTimeout(timeout);
+              // Verify the image loaded correctly
+              if (img.complete && img.naturalWidth > 0) {
+                resolve(true);
               } else {
-                // No fallback URL available
-                imageDisplay.style.display = 'none';
-                showPlaceholder(`${item.name} (Image unavailable)`);
-                if (loadingLeaf) loadingLeaf.style.display = 'none';
                 resolve(false);
               }
             };
             
-            // Try primary image first
-            if (item.image_url) {
-              try {
-                await loadImage(item.image_url);
-                
-                // Set timeout to handle cases where onload/onerror might not fire
-                const imageTimeout = setTimeout(() => {
-                  // Check if this is still the current item we want to display
-                  if (currentlyDisplayingItem !== item.name) {
-                    return;
-                  }
-                  
-                  // Remove the event handlers to prevent them from firing again
-                  imageDisplay.onload = null;
-                  imageDisplay.onerror = null;
-                  
-                  // Try the fallback image instead, but only if we haven't already
-                  if (!isTryingFallback) {
-                    tryFallbackImage();
-                  } else {
-                    // If we're already trying the fallback, just show a placeholder
-                    imageDisplay.style.display = 'none';
-                    showPlaceholder(`${item.name} (Image unavailable)`);
-                    if (loadingLeaf) loadingLeaf.style.display = 'none';
-                    resolve(false);
-                  }
-                }, 5000);
-                
-                // Set the image source and wait for it to load
-                imageDisplay.onload = () => {
-                  // Check if this is still the current item we want to display
-                  if (currentlyDisplayingItem !== item.name) {
-                    return;
-                  }
-                  
-                  // Clear the timeout to prevent it from triggering
-                  clearTimeout(imageTimeout);
-                  
-                  imageDisplay.style.display = 'block';
-                  imageDisplay.classList.add('loaded');
-                  if (loadingLeaf) loadingLeaf.style.display = 'none';
-                  
-                  // Start the timer now that the image is successfully loaded
-                  if (!gameOver) {
-                    // Reset timer with current difficulty
-                    const difficulty = parseInt(document.getElementById('difficulty').value) / 1000;
-                    timeLeft = difficulty;
-                    maxTime = difficulty;
-                    timerDisplay.textContent = `Time: ${timeLeft}`;
-                    timerDisplay.classList.remove('warning', 'expired');
-                    
-                    // Start the timer
-                    startTimer();
-                  }
-                  
-                  resolve(true);
-                };
-                
-                imageDisplay.onerror = () => {
-                  // Check if this is still the current item we want to display
-                  if (currentlyDisplayingItem !== item.name) {
-                    return;
-                  }
-                  
-                  // Clear the timeout to prevent it from triggering
-                  clearTimeout(imageTimeout);
-                  
-                  // Remove the event handlers to prevent them from firing again
-                  imageDisplay.onload = null;
-                  imageDisplay.onerror = null;
-                  
-                  // Clear the image source
-                  imageDisplay.src = '';
-                  
-                  // Try the fallback image instead, but only if we haven't already
-                  if (!isTryingFallback) {
-                    tryFallbackImage();
-                  } else {
-                    // If we're already trying the fallback, just show a placeholder
-                    imageDisplay.style.display = 'none';
-                    showPlaceholder(`${item.name} (Image unavailable)`);
-                    if (loadingLeaf) loadingLeaf.style.display = 'none';
-                    resolve(false);
-                  }
-                };
-                
-                imageDisplay.src = item.image_url;
-              } catch (error) {
-                console.warn(`Primary image failed for ${item.name}, trying fallback`);
-                // Continue to fallback if primary image fails
-                tryFallbackImage();
+            img.onerror = () => {
+              clearTimeout(timeout);
+              resolve(false);
+            };
+            
+            img.src = url;
+          });
+        };
+        
+        // Helper function to get fallback image path
+        const getFallbackPath = () => {
+          if (!item.name) return null;
+          const safeName = item.name.toLowerCase().replace(/[^a-z0-9]/g, '');
+          return `images/${currentCategory}/${safeName}.png`;
+        };
+            
+        try {
+          let success = false;
+          
+          // Try primary image URL first if available
+          if (item.image_url) {
+            console.log(`Loading primary image: ${item.image_url}`);
+            success = await tryLoadImage(item.image_url);
+            
+            if (success) {
+              imageDisplay.src = item.image_url;
+            }
+          }
+          
+          // If primary image failed, try fallback
+          if (!success) {
+            const fallbackPath = getFallbackPath();
+            if (fallbackPath) {
+              console.log(`Trying fallback image: ${fallbackPath}`);
+              success = await tryLoadImage(fallbackPath);
+              
+              if (success) {
+                imageDisplay.src = fallbackPath;
               }
-            } else {
-              // No primary image URL, try fallback directly
-              tryFallbackImage();
+            }
+          }
+          
+          // If we successfully loaded an image
+          if (success) {
+            imageDisplay.style.display = 'block';
+            imageDisplay.alt = item.name;
+            imageDisplay.title = item.name;
+            imageDisplay.classList.add('loaded');
+            
+            // Start the timer now that the image is successfully loaded
+            if (!gameOver) {
+              const difficulty = parseInt(document.getElementById('difficulty').value) / 1000;
+              timeLeft = difficulty;
+              maxTime = difficulty;
+              timerDisplay.textContent = `Time: ${timeLeft}`;
+              timerDisplay.classList.remove('warning', 'expired');
+              startTimer();
             }
             
-          } catch (error) {
-            console.error('Unexpected error in displayItem:', error);
-            
-            // Clean up and show error message
-            imageDisplay.style.display = 'none';
-            showPlaceholder(`Error loading image`);
-            
-            const loadingLeaf = document.querySelector('.loading-leaf');
-            if (loadingLeaf) loadingLeaf.style.display = 'none';
-            
-            // Reset the currently displaying item
-            currentlyDisplayingItem = null;
-            
-            // Resolve with false instead of rejecting to prevent unhandled promise rejections
-            resolve(false);
-          } finally {
-            // Make sure we release any locks if needed
-            // We don't reset currentlyDisplayingItem here because we want to keep track of what's displayed
+            return true;
           }
-        });
+          
+          // If we get here, all image loading attempts failed
+          console.error(`Failed to load any image for: ${item.name}`);
+          showPlaceholder(`${item.name} (Image unavailable)`);
+          return false;
+          
+        } catch (error) {
+          console.error('Error in displayItem:', error);
+          showPlaceholder('Error loading image');
+          return false;
+          
+        } finally {
+          // Always hide loading indicator
+          if (loadingLeaf) loadingLeaf.style.display = 'none';
+          
+          // If we're no longer displaying this item, clear the flag
+          if (currentlyDisplayingItem === item.name) {
+            currentlyDisplayingItem = null;
+          }
+        }
       }
 
       function showPlaceholder(text) {
@@ -4747,78 +4682,7 @@
           });
         }
 
-        // Flag to prevent duplicate category change handling
-        let isHandlingCategoryChange = false;
-        
-        // Event listener for category change
-        categorySelector.addEventListener('change', async function(e) {
-          if (isHandlingCategoryChange) return; // Prevent multiple simultaneous category changes
-          
-          isHandlingCategoryChange = true;
-          const category = e.target.value;
-          
-          try {
-            // Don't reset the game state with resetGame() as it loads images
-            // Instead, just stop the timer and reset the score
-            stopTimer();
-            
-            // Make sure the timer is completely stopped
-            if (timerInterval) {
-              cancelAnimationFrame(timerInterval);
-              timerInterval = null;
-            }
-            
-            // Reset game over flag to ensure timer can start again
-            gameOver = false;
-            
-            // Reset timer display
-            const difficulty = parseInt(document.getElementById('difficulty').value) / 1000;
-            timeLeft = difficulty;
-            maxTime = difficulty;
-            timerDisplay.textContent = `Time: ${timeLeft}`;
-            timerDisplay.classList.remove('warning', 'expired', 'running');
-            
-            score = 0;
-            scoreElement.textContent = `Score: ${score}`;
-            
-            // Update high score for the selected category
-            const categoryKey = `acnh_high_score_${category}`;
-            const currentHighScore = parseInt(localStorage.getItem(categoryKey) || '0', 10);
-            highScoreElement.textContent = `Personal Best: ${currentHighScore}`;
-            
-            // Save selected category to localStorage
-            localStorage.setItem("acnh_last_category", category);
-            
-            // Load new category items but don't start the game yet
-            if (!isLoadingItems) {
-              // Wait for items to load before continuing
-              await loadCategoryItems(category);
-            } else {
-              console.log('Waiting for previous category load to complete...');
-              // Wait for loading to complete and then try again
-              await new Promise(resolve => {
-                const checkLoading = setInterval(() => {
-                  if (!isLoadingItems) {
-                    clearInterval(checkLoading);
-                    resolve();
-                  }
-                }, 100);
-              });
-              await loadCategoryItems(category);
-            }
-            
-            // Show the Start Game button
-            const startGameButton = document.getElementById('start-game-btn');
-            if (startGameButton) {
-              startGameButton.style.display = 'inline-block';
-            }
-          } catch (error) {
-            console.error('Error changing category:', error);
-            feedbackElement.textContent = 'Error loading category. Please try again.';
-          } finally {
-            isHandlingCategoryChange = false; // Reset the flag when done
-          }
-        });
+        // Category change handling is now in the other event listener
         
         // Event listener for difficulty change
         difficultySelector.addEventListener('change', function() {
@@ -5047,57 +4911,40 @@
           });
         });
         
-        function startGame() {
-         
-          // Add event listener for sound toggle
-          soundToggleBtn.addEventListener('click', () => {
-            soundEnabled = !soundEnabled;
-            soundToggleBtn.style.backgroundColor = soundEnabled ? '#4a90e2' : '#cccccc';
-          });
-          
-          const startGameBtn = document.getElementById('start-game-btn');
-          startGameBtn.addEventListener('click', () => {
-            // Hide the start button
-            startGameBtn.style.display = 'none';
-            
-            // Show the end game button
-            document.getElementById('end-game-btn').style.display = 'inline-block';
-            
-            // Enable the guess input and submit button
-            guessInput.disabled = false;
-            guessInput.style.display = 'inline-block';
-            submitButton.style.display = 'inline-block';
-            submitButton.disabled = false;
-            
-            // Focus on the input
-            guessInput.focus();
-            
-            // Reset score
-            score = 0;
-            scoreElement.textContent = `Score: ${score}`;
-            
-            // Clear any feedback
-            feedbackElement.textContent = '';
-            feedbackElement.className = '';
-            
-            // Play new round sound
-            playSound(startGameSound);
-            
-            // Start the timer after a short delay to ensure UI is ready
-            setTimeout(() => {
-              stopTimer(); // Clear any existing timer first
-              startTimer();
-              setupNewRound();
-            }, 100);
-          });  
-        }
-        
-        // Store the current category change promise to prevent race conditions
+        // Category initialization is now handled after the function definition
+      }); // Close the DOMContentLoaded event listener
+      
+      // Store the current category change promise to prevent race conditions
       let categoryChangePromise = null;
       let isCategoryLoading = false;
       
-      categorySelector.addEventListener("change", async (e) => {
-        const category = e.target.value;
+      // Get DOM elements
+      const categorySelector = document.getElementById('category');
+      const feedbackElement = document.getElementById('feedback');
+    </script>
+    
+    <script>
+      // Function to handle category changes
+      const handleCategoryChange = async (category) => {
+        console.log('Category changed to:', category);
+        
+        // Ensure category is a valid string
+        if (typeof category !== 'string' || !['fish', 'bugs', 'sea', 'villagers'].includes(category)) {
+          console.warn('Invalid category, defaulting to fish:', category);
+          category = 'fish';
+          if (categorySelector) categorySelector.value = category;
+        }
+        
+        // Store the last selected category
+        localStorage.setItem('acnh_last_category', category);
+        
+        // Validate the category
+        if (typeof category !== 'string' || !['fish', 'bugs', 'sea', 'villagers'].includes(category)) {
+          console.error('Invalid category selected:', category);
+          feedbackElement.textContent = 'Invalid category selected. Please try again.';
+          feedbackElement.className = 'wrong';
+          return;
+        }
         
         // If we're already changing categories, wait for that to complete
         if (isCategoryLoading) {
@@ -5114,7 +4961,9 @@
           stopTimer();
           
           // Reset timer variables
-          timeLeft = 15;
+          const difficulty = parseInt(document.getElementById('difficulty').value) / 1000;
+          timeLeft = difficulty;
+          maxTime = difficulty;
           timerDisplay.textContent = `Time: ${timeLeft}`;
           timerDisplay.className = 'timer';
           
@@ -5128,12 +4977,14 @@
             console.log(`Category changed from ${currentCategory} to ${category}, resetting score`);
             score = 0;
             currentCategory = category;
-            // Don't call initGame() here, wait for Start Game button
+            
+            // Save selected category to localStorage
+            localStorage.setItem("acnh_last_category", category);
             
             // Show the Start Game button
-            const startGameButton = document.getElementById('start-game-btn');
-            if (startGameButton) {
-              startGameButton.style.display = 'inline-block';
+            const startGameBtn = document.getElementById('start-game-btn');
+            if (startGameBtn) {
+              startGameBtn.style.display = 'inline-block';
             }
           }
           
@@ -5150,8 +5001,30 @@
           isCategoryLoading = false;
           feedbackElement.textContent = '';
         }
-      });
-      });
+      };
+      
+      // Set up the event listener for category changes
+      if (categorySelector) {
+        categorySelector.addEventListener("change", (e) => {
+          const newCategory = e.target.value;
+          console.log('Category selector changed to:', newCategory);
+          handleCategoryChange(newCategory);
+        });
+        
+        // Initialize with saved category or default
+        const savedCategory = localStorage.getItem('acnh_last_category');
+        const initialCategory = savedCategory || 'fish';
+        categorySelector.value = initialCategory;
+        
+        // Initialize the game with the selected category
+        console.log('Initializing with category:', initialCategory);
+        handleCategoryChange(initialCategory);
+      }
+    </script>
+    
+    <!-- Game Scripts -->
+    <script>
+      // Add any additional game scripts here
     </script>
   </body>
 </html>

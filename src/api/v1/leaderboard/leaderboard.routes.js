@@ -4,7 +4,8 @@ const {
   getLeaderboard,
   getAllLeaderboards,
   getUserStats,
-  getUserHistory
+  getUserHistory,
+  resetAllLeaderboards
 } = require('./leaderboard.controller');
 const { protect } = require('../../../../middleware/authMiddleware');
 const { validateLeaderboardSubmission } = require('../../../../middleware/validation');
@@ -22,5 +23,17 @@ router.use(protect);
 router.post('/submit', validateLeaderboardSubmission, submitScore);
 router.get('/user/stats', getUserStats);
 router.get('/user/history/:category', getUserHistory);
+
+// Admin-only route to reset all leaderboards
+router.post('/reset-all', protect, (req, res, next) => {
+  // Check if user is admin
+  if (req.user.role !== 'admin') {
+    return res.status(403).json({
+      status: 'error',
+      message: 'Only administrators can reset leaderboards'
+    });
+  }
+  next();
+}, resetAllLeaderboards);
 
 module.exports = router;

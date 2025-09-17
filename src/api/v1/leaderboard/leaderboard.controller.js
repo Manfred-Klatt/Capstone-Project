@@ -197,10 +197,18 @@ const getUserHistory = catchAsync(async (req, res, next) => {
   });
 });
 
+// Reset all leaderboards
+const resetAllLeaderboards = catchAsync(async (req, res, next) => {
+  await Leaderboard.deleteMany({});
+
+  successResponse(res, 200, 'All leaderboards reset successfully');
+});
+
 module.exports = {
   submitScore,
   getLeaderboard,
   getAllLeaderboards,
   getUserStats,
-  getUserHistory
+  getUserHistory,
+  resetAllLeaderboards
 };

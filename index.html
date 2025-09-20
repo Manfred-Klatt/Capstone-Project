@@ -283,20 +283,35 @@
       // API URL - automatically detect environment
       const API_URL = (() => {
         const hostname = window.location.hostname;
+        const protocol = window.location.protocol;
         
-        // Production environment (blathers.app) - always use full URL to avoid CORS issues
+        // Production environment (blathers.app) - try multiple options
         if (hostname === 'blathers.app' || hostname.includes('blathers')) {
-          return 'https://blathers.app'; // Base URL without /api/v1 prefix
+          // First try: Use the same origin as the current page (API and frontend on same domain)
+          // This is the most likely configuration for production
+          console.log('Using same origin for API URL on blathers.app domain');
+          return window.location.origin;
         }
         
         // Local development
         if (hostname === 'localhost' || hostname === '127.0.0.1') {
+          console.log('Using localhost API URL');
           return 'http://localhost:8000'; // Base URL without /api/v1 prefix
         }
         
-        // Production backend on Railway
+        // Production backend on Railway (fallback)
+        console.log('Using Railway API URL');
         return 'https://capstone-project-production-3cce.up.railway.app'; // Base URL without /api/v1 prefix
       })();
+      
+      // Store alternate API URLs to try if the primary one fails
+      const ALTERNATE_API_URLS = [
+        'https://capstone-project-production-3cce.up.railway.app',
+        'https://api.blathers.app'
+      ];
+      
+      console.log('Primary API URL:', API_URL);
+      console.log('Alternate API URLs available:', ALTERNATE_API_URLS.length);
 
       // Check if we're running in standalone mode (file:// protocol)
       function isStandaloneMode() {
@@ -307,15 +322,41 @@
       
       // Function to check if the server is available
       async function checkServerAvailable() {
+        // First try the primary API URL
+        const isAvailable = await tryServerUrl(API_URL);
+        if (isAvailable) {
+          console.log('Primary API URL is available:', API_URL);
+          return true;
+        }
+        
+        // If primary URL fails, try alternate URLs
+        console.log('Primary API URL failed, trying alternates...');
+        for (const altUrl of ALTERNATE_API_URLS) {
+          console.log('Trying alternate API URL:', altUrl);
+          const altAvailable = await tryServerUrl(altUrl);
+          if (altAvailable) {
+            console.log('Found working alternate API URL:', altUrl);
+            // Update the global API_URL to use the working alternate
+            window.API_URL = altUrl;
+            console.log('Switched to alternate API URL:', altUrl);
+            return true;
+          }
+        }
+        
+        console.log('All API URLs failed, server is unavailable');
+        return false;
+      }
+      
+      // Helper function to check if a specific server URL is available
+      async function tryServerUrl(url) {
         try {
-          console.log('Checking server availability at:', API_URL);
+          console.log('Checking server availability at:', url);
           const controller = new AbortController();
-          const timeoutId = setTimeout(() => controller.abort(), 5000); // 5 second timeout
+          const timeoutId = setTimeout(() => controller.abort(), 3000); // 3 second timeout (reduced from 5s)
           
-          // Try health endpoint (at /health)
+          // Try health endpoint first (at /health)
           try {
-            // Use the base URL to ensure we're hitting the correct endpoint
-            const response = await fetch(`${API_URL}/health`, {
+            const response = await fetch(`${url}/health`, {
               method: 'GET',
               signal: controller.signal,
               mode: 'cors',
@@ -326,29 +367,57 @@
             
             clearTimeout(timeoutId);
             if (response.ok) {
-              console.log('Server is available at /health');
+              console.log(`Server health check passed at ${url}/health`);
               return true;
             }
             console.log(`Health check failed with status: ${response.status}`);
           } catch (healthError) {
-            console.log('Health check failed:', healthError.message);
+            console.log(`Health check failed at ${url}:`, healthError.message);
           }
           
-          // If health check fails, try root endpoint
-          const rootResponse = await fetch(API_URL, {
-            method: 'GET',
-            signal: controller.signal,
-            mode: 'cors',
-            headers: {
-              'Accept': 'application/json'
+          // If health check fails, try API health endpoint
+          try {
+            const apiResponse = await fetch(`${url}/api/v1/health`, {
+              method: 'GET',
+              signal: controller.signal,
+              mode: 'cors',
+              headers: {
+                'Accept': 'application/json'
+              }
+            });
+            
+            if (apiResponse.ok) {
+              console.log(`API health check passed at ${url}/api/v1/health`);
+              return true;
             }
-          });
+            console.log(`API health check failed with status: ${apiResponse.status}`);
+          } catch (apiError) {
+            console.log(`API health check failed at ${url}:`, apiError.message);
+          }
           
-          clearTimeout(timeoutId);
-          console.log('Root endpoint check result:', rootResponse.ok);
-          return rootResponse.ok;
+          // If both health checks fail, try root endpoint as last resort
+          try {
+            const rootResponse = await fetch(url, {
+              method: 'GET',
+              signal: controller.signal,
+              mode: 'cors',
+              headers: {
+                'Accept': 'application/json'
+              }
+            });
+            
+            if (rootResponse.ok) {
+              console.log(`Root endpoint check passed at ${url}`);
+              return true;
+            }
+            console.log(`Root endpoint check failed with status: ${rootResponse.status}`);
+          } catch (rootError) {
+            console.log(`Root endpoint check failed at ${url}:`, rootError.message);
+          }
+          
+          return false;
         } catch (error) {
-          console.error('Server availability check failed:', error);
+          console.error(`Server availability check failed for ${url}:`, error);
           return false;
         }
       }
@@ -611,155 +680,183 @@
         });
 
       // Event listener for signup form
-      document
-        .getElementById("signupForm")
-        .addEventListener("submit", async function (e) {
-          e.preventDefault();
-          clearErrors();
+      document.getElementById('signupForm').addEventListener('submit', async function(e) {
+        e.preventDefault();
+        clearErrors();
+        
+        const username = document.getElementById('signupUsername').value;
+        const email = document.getElementById('signupEmail').value;
+        const password = document.getElementById('signupPassword').value;
+        const passwordConfirm = document.getElementById('signupPasswordConfirm').value;
+        
+        // Validate form
+        if (!username || !email || !password || !passwordConfirm) {
+          showError('signupError', 'Please fill in all fields');
+          return;
+        }
+        
+        if (password !== passwordConfirm) {
+          showError('signupError', 'Passwords do not match');
+          return;
+        }
+        
+        // Show loading state
+        const submitBtn = document.querySelector('#signupForm button[type="submit"]');
+        const originalBtnText = submitBtn.textContent;
+        submitBtn.textContent = 'Signing up...';
+        submitBtn.disabled = true;
+        
+        // Check if server is available
+        console.log('Checking server availability before signup...');
+        const serverAvailable = await checkServerAvailable();
+        
+        if (!serverAvailable) {
+          // Server is not available, offer standalone mode
+          console.log('Server unavailable, offering standalone mode');
+          showError('signupError', 'Server is not available. Would you like to play in standalone mode?');
           
-          const username = document.getElementById('signupUsername').value.trim();
-          const email = document.getElementById('signupEmail').value.trim();
-          const password = document.getElementById('signupPassword').value;
-          const passwordConfirm = document.getElementById('signupPasswordConfirm').value;
+          // Reset button
+          submitBtn.textContent = originalBtnText;
+          submitBtn.disabled = false;
           
-          // Validate fields
-          if (!username || !email || !password || !passwordConfirm) {
-            showError('signupError', 'Please fill in all fields');
-            return;
-          }
+          const standaloneBtn = document.createElement('button');
+          standaloneBtn.textContent = 'Play in Standalone Mode';
+          standaloneBtn.className = 'standalone-btn';
+          standaloneBtn.onclick = function() {
+            localStorage.setItem('standalone_confirmed_this_session', 'true');
+            localStorage.setItem('force_standalone', 'true');
+            window.location.href = 'game.html';
+          };
           
-          if (password.length < 6) {
-            showError('signupError', 'Password must be at least 6 characters');
-            return;
-          }
+          // Add the button to the form
+          document.getElementById('signupForm').appendChild(standaloneBtn);
+          return;
+        }
+        
+        try {
+          console.log('Server is available. Sending signup request...', { username, email });
           
-          if (password !== passwordConfirm) {
-            showError('signupError', 'Passwords do not match');
-            return;
-          }
+          // Create AbortController for timeout
+          const controller = new AbortController();
+          const timeoutId = setTimeout(() => controller.abort(), 10000); // 10 second timeout
           
+          // The auth routes are mounted at /api/v1/auth in the backend
+          const response = await fetch(`${API_URL}/api/v1/auth/signup`, {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+              'Accept': 'application/json'
+            },
+            body: JSON.stringify({ username, email, password, passwordConfirm }),
+            signal: controller.signal
+          });
+          
+          clearTimeout(timeoutId);
+          
+          // Log response status
+          console.log(`Signup response status: ${response.status} ${response.statusText}`);
+          
+          // Try to parse response as JSON
+          let data;
           try {
-            // Check if we're in standalone mode
-            if (isStandaloneMode()) {
-              // In standalone mode, prompt user to play in standalone mode
-              showError('signupError', 'Server is not available. Would you like to play in standalone mode?');
-              
-              // Create a temporary button for standalone mode
-              const standaloneBtn = document.createElement('button');
-              standaloneBtn.textContent = 'Play in Standalone Mode';
-              standaloneBtn.style.marginTop = '10px';
-              standaloneBtn.onclick = function() {
-                localStorage.setItem('acnh_username', username);
-                localStorage.setItem('acnh_guest', 'true');
-                localStorage.setItem('force_standalone', 'true');
-                window.location.href = "game.html?guest=true";
+            data = await response.json();
+            console.log('Signup response data:', data);
+          } catch (jsonError) {
+            console.error('Error parsing JSON response:', jsonError);
+            data = { status: 'error', message: 'Invalid server response' };
+          }
+          
+          if (response.ok) {
+            console.log('Signup successful');
+            
+            // Save auth token
+            saveAuthToken(data.token, username);
+            
+            // Show success message briefly before redirect
+            showError('signupError', 'Signup successful! Redirecting...', 'success');
+            
+            // Redirect to game page after a short delay
+            setTimeout(() => {
+              window.location.href = 'game.html';
+            }, 1000);
+          } else {
+            console.error('Signup failed:', data);
+            
+            // Reset button
+            submitBtn.textContent = originalBtnText;
+            submitBtn.disabled = false;
+            
+            // Show error message
+            showError('signupError', data.message || `Signup failed (${response.status})`);
+            
+            // If the account is inactive, offer reactivation
+            if (data.status === 'fail' && data.message && data.message.includes('inactive')) {
+              const reactivateBtn = document.createElement('button');
+              reactivateBtn.textContent = 'Reactivate Account';
+              reactivateBtn.className = 'reactivate-btn';
+              reactivateBtn.onclick = async function() {
+                try {
+                  // Call reactivate endpoint
+                  console.log('Sending reactivation request for email:', email);
+                  const reactivateResponse = await fetch(`${API_URL}/api/v1/auth/reactivate-account`, {
+                    method: 'POST',
+                    headers: {
+                      'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({ email })
+                  });
+                  
+                  const reactivateData = await reactivateResponse.json();
+                  console.log('Reactivation response:', reactivateData);
+                  
+                  if (reactivateResponse.ok) {
+                    showError('signupError', 'Account reactivated! Please log in.', 'success');
+                  } else {
+                    showError('signupError', reactivateData.message || 'Failed to reactivate account');
+                  }
+                } catch (reactivateError) {
+                  console.error('Reactivation error:', reactivateError);
+                  showError('signupError', 'An error occurred during reactivation');
+                }
               };
               
               // Add the button to the form
-              document.getElementById('signupForm').appendChild(standaloneBtn);
-              return;
-            }
-            
-            // Add a timeout to the fetch request
-            const controller = new AbortController();
-            const timeoutId = setTimeout(() => controller.abort(), 3000); // 3 second timeout
-            
-            console.log('Sending signup request...', { username, email });
-            
-            // The auth routes are mounted at /api/v1/auth in the backend
-            const response = await fetch(`${API_URL}/api/v1/auth/signup`, {
-              method: 'POST',
-              headers: {
-                'Content-Type': 'application/json',
-                'Accept': 'application/json'
-              },
-              body: JSON.stringify({ 
-                username, 
-                email, 
-                password, 
-                passwordConfirm 
-              }),
-              signal: controller.signal,
-              credentials: 'include' // Include cookies in the request
-            });
-            
-            clearTimeout(timeoutId);
-            
-            console.log('Received response status:', response.status);
-            
-            let data;
-            try {
-              const contentType = response.headers.get('content-type');
-              console.log('Response content type:', contentType);
-              
-              const responseText = await response.text();
-              console.log('Raw response text:', responseText);
-              
-              if (contentType && contentType.includes('application/json')) {
-                data = JSON.parse(responseText);
-              } else {
-                throw new Error(`Unexpected response format: ${responseText}`);
-              }
-            } catch (parseError) {
-              console.error('Error parsing response:', parseError);
-              throw new Error(`Invalid response from server: ${parseError.message}`);
-            }
-            
-            console.log('Parsed response data:', data);
-            
-            if (!response.ok) {
-              console.error('Server error response:', data);
-              const errorMessage = data?.message || 
-                                data?.error?.message || 
-                                data?.error || 
-                                response.statusText || 
-                                `Registration failed (${response.status})`;
-              throw new Error(errorMessage);
-            }
-            
-            // Save auth token and redirect to game
-            saveAuthToken(data.token, data.username);
-            localStorage.removeItem('acnh_guest');
-            window.location.href = "game.html";
-          } catch (error) {
-            console.error('Registration error:', {
-              name: error.name,
-              message: error.message,
-              stack: error.stack,
-              ...(error.response && { response: error.response })
-            });
-            
-            // Show detailed error message to the user
-            let errorMessage = 'An error occurred during registration. ';
-            
-            if (error.name === 'AbortError') {
-              errorMessage += 'Request timed out. Please check your connection and try again.';
-            } else if (error.message.includes('Failed to fetch')) {
-              errorMessage += 'Unable to connect to the server. ';
-            } else {
-              errorMessage += error.message || 'Please try again later.';
-            }
-            
-            showError('signupError', errorMessage);
-            
-            // Only show standalone mode option if it's a connection error
-            if (error.name === 'AbortError' || error.message.includes('Failed to fetch')) {
-              // Create a temporary button for standalone mode
-              const standaloneBtn = document.createElement('button');
-              standaloneBtn.textContent = 'Play in Standalone Mode';
-              standaloneBtn.style.marginTop = '10px';
-              standaloneBtn.onclick = function() {
-                localStorage.setItem('acnh_username', username);
-                localStorage.setItem('acnh_guest', 'true');
-                localStorage.setItem('force_standalone', 'true');
-                window.location.href = "game.html?guest=true";
-              };
-              
-              // Add the button to the form
-              document.getElementById('signupForm').appendChild(standaloneBtn);
+              document.getElementById('signupForm').appendChild(reactivateBtn);
             }
           }
-        });
+        } catch (error) {
+          console.error('Signup error:', error);
+          
+          // Reset button
+          submitBtn.textContent = originalBtnText;
+          submitBtn.disabled = false;
+          
+          // Show specific error message for timeout
+          let errorMessage = 'An error occurred during signup: ';
+          if (error.name === 'AbortError') {
+            errorMessage = 'Request timed out. The server might be overloaded.';
+          } else if (error.message && error.message.includes('Failed to fetch')) {
+            errorMessage = 'Unable to connect to the server. Please try again later.';
+          } else {
+            errorMessage += error.message || 'Please try again later.';
+          }
+          
+          showError('signupError', errorMessage);
+          
+          // Offer standalone mode for network errors
+          const standaloneBtn = document.createElement('button');
+          standaloneBtn.textContent = 'Play in Standalone Mode';
+          standaloneBtn.className = 'standalone-btn';
+          standaloneBtn.onclick = function() {
+            localStorage.setItem('standalone_confirmed_this_session', 'true');
+            localStorage.setItem('force_standalone', 'true');
+            window.location.href = 'game.html';
+          };
+          
+          // Add the button to the form
+          document.getElementById('signupForm').appendChild(standaloneBtn);
+        }
+      });
 
       // Server status monitoring removed
       document.addEventListener('DOMContentLoaded', function() {

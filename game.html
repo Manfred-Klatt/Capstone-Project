@@ -127,6 +127,33 @@
       document.addEventListener('DOMContentLoaded', () => {
         loadCustomFont();
         
+        // Update welcome message with username
+        updateWelcomeMessage();
+        
+        // Add event listener for auth changes
+        window.addEventListener('storage', function(e) {
+          // Listen for changes in auth-related storage
+          if (e.key && (e.key.includes('token') || e.key.includes('username') || e.key === null)) {
+            updateWelcomeMessage();
+          }
+        });
+        
+        // Listen for custom auth_changed events from secureTokenManager
+        window.addEventListener('auth_changed', function(e) {
+          console.log('Auth state changed:', e.detail.action);
+          updateWelcomeMessage();
+          
+          // Show a temporary notification for login/logout
+          const action = e.detail.action;
+          const username = e.detail.username || '';
+          
+          if (action === 'login' && username) {
+            showNotification(`Welcome back, ${username}!`, 'success');
+          } else if (action === 'logout') {
+            showNotification('You have been logged out', 'info');
+          }
+        });
+        
         // Verify font loading after a delay
         setTimeout(() => {
           const fontLoaded = document.fonts.check('1em CustomFont');
@@ -546,6 +573,17 @@
       
       #imageDisplay.loaded {
         opacity: 1;
+      }
+      
+      /* Villager image sizing - 50% on desktop */
+      #imageDisplay.villager-image {
+        width: 50%;
+        height: auto;
+        object-fit: contain;
+        display: block;
+        margin-left: auto;
+        margin-right: auto;
+        transition: width 0.3s ease-in-out, height 0.3s ease-in-out;
       }
       
       .image-placeholder {
@@ -1909,6 +1947,12 @@
           margin: 5px auto !important;
         }
         
+        /* Villager image sizing - 30% on mobile */
+        #imageDisplay.villager-image {
+          width: 30% !important;
+          height: auto !important;
+        }
+        
         #feedback {
           margin: 5px !important;
           min-height: 20px !important;
@@ -2116,36 +2160,65 @@
     </style>
     <script>
       // Helper function to show notifications
-      function showNotification(message) {
+      function showNotification(message, type = 'default') {
         const notification = document.createElement('div');
         notification.textContent = message;
         notification.style.position = 'fixed';
-        notification.style.top = '50px';
-        notification.style.left = '50%';
-        notification.style.transform = 'translateX(-50%)';
-        notification.style.backgroundColor = '#4a90e2';
-        notification.style.color = 'white';
+        notification.style.bottom = '20px';
+        notification.style.right = '20px';
         notification.style.padding = '10px 20px';
         notification.style.borderRadius = '5px';
         notification.style.zIndex = '9999';
-        notification.style.opacity = '0';
-        notification.style.transition = 'opacity 0.3s ease';
+        notification.style.transition = 'opacity 0.5s';
+        notification.style.boxShadow = '0 2px 10px rgba(0, 0, 0, 0.2)';
+        
+        // Set styles based on notification type
+        switch(type) {
+          case 'success':
+            notification.style.backgroundColor = '#4CAF50'; // Green
+            notification.style.color = 'white';
+            notification.style.borderLeft = '5px solid #2E7D32';
+            break;
+          case 'error':
+            notification.style.backgroundColor = '#F44336'; // Red
+            notification.style.color = 'white';
+            notification.style.borderLeft = '5px solid #B71C1C';
+            break;
+          case 'warning':
+            notification.style.backgroundColor = '#FF9800'; // Orange
+            notification.style.color = 'white';
+            notification.style.borderLeft = '5px solid #E65100';
+            break;
+          case 'info':
+            notification.style.backgroundColor = '#2196F3'; // Blue
+            notification.style.color = 'white';
+            notification.style.borderLeft = '5px solid #0D47A1';
+            break;
+          default:
+            notification.style.backgroundColor = 'rgba(0, 0, 0, 0.7)'; // Dark gray
+            notification.style.color = 'white';
+            notification.style.borderLeft = '5px solid #333';
+        }
+        
         document.body.appendChild(notification);
         
-        // Show and then fade out the notification
+        // Auto-remove after 3 seconds
         setTimeout(() => {
-          notification.style.opacity = '1';
+          notification.style.opacity = '0';
           setTimeout(() => {
-            notification.style.opacity = '0';
-            setTimeout(() => {
+            if (notification.parentNode) {
               document.body.removeChild(notification);
-            }, 300);
-          }, 2000);
-        }, 10);
+            }
+          }, 500);
+        }, 3000);
       }
     </script>
   </head>
   <body>
+    <script>
+      // Update welcome message immediately when page loads
+      updateWelcomeMessage();
+    </script>
     <!-- Passcode Modal -->
     <div id="passcode-modal">
       <div id="passcode-container">
@@ -2406,10 +2479,32 @@
       
       // Function to update the welcome message with the username
       function updateWelcomeMessage() {
-        const username = localStorage.getItem('username') || sessionStorage.getItem('username') || 'Guest';
+        let username = 'Guest';
+        
+        // Try to get username from secure token manager first
+        if (window.secureTokenManager && typeof window.secureTokenManager.getUserData === 'function') {
+          const userData = window.secureTokenManager.getUserData();
+          if (userData && userData.username) {
+            username = userData.username;
+          }
+        }
+        
+        // Fall back to localStorage/sessionStorage if needed
+        if (username === 'Guest') {
+          username = localStorage.getItem('username') || sessionStorage.getItem('username') || 'Guest';
+        }
+        
+        // Update the display
         const usernameDisplay = document.getElementById('username-display');
         if (usernameDisplay) {
           usernameDisplay.textContent = username;
+        }
+        
+        // Update the welcome message style if user is logged in
+        const welcomeMessage = document.getElementById('welcome-message');
+        if (welcomeMessage && username !== 'Guest') {
+          welcomeMessage.style.backgroundColor = '#e6f7ff'; // Light blue background for logged-in users
+          welcomeMessage.style.border = '1px solid #91d5ff'; // Blue border
         }
       }
       
@@ -2557,7 +2652,7 @@
                     adminToolsContainer.style.display = 'block';
                     passcodeModal.style.display = 'none';
                     passcodeInput.value = ''; // Clear the input
-                    showNotification('Admin Mode Activated');
+                    showNotification('Admin Mode Activated', 'info');
                   } else {
                     alert('Incorrect passcode');
                     passcodeInput.value = ''; // Clear the input
@@ -2599,7 +2694,7 @@
               }
               
               // Show notification for admin mode activation
-              showNotification('Admin Mode Deactivated');
+              showNotification('Admin Mode Deactivated', 'info');
             }
           });
         }
@@ -4242,6 +4337,19 @@
             imageDisplay.alt = item.name;
             imageDisplay.title = item.name;
             imageDisplay.classList.add('loaded');
+            
+            // Set villager images to 50% size on desktop and 30% on mobile
+            if (currentCategory === 'villagers') {
+              // Reset any previous inline styles first
+              imageDisplay.style.width = '';
+              imageDisplay.style.height = '';
+              
+              // Add villager-image class for specific styling
+              imageDisplay.classList.add('villager-image');
+            } else {
+              // Remove villager-image class if not a villager
+              imageDisplay.classList.remove('villager-image');
+            }
             
             // Start the timer now that the image is successfully loaded
             if (!gameOver) {

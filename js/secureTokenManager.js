@@ -42,6 +42,13 @@ class SecureTokenManager {
             this.setSecureCookie('auth_session', 'active', 24 * 60 * 60 * 1000);
 
             console.log('✅ Token stored securely');
+            
+            // Dispatch custom event for auth change
+            const authEvent = new CustomEvent('auth_changed', { 
+                detail: { action: 'login', username: username }
+            });
+            window.dispatchEvent(authEvent);
+            
             return true;
         } catch (error) {
             console.error('❌ Failed to store token securely:', error);
@@ -114,6 +121,12 @@ class SecureTokenManager {
             this.deleteSecureCookie('auth_session');
             
             console.log('✅ Authentication data cleared');
+            
+            // Dispatch custom event for auth change
+            const authEvent = new CustomEvent('auth_changed', { 
+                detail: { action: 'logout' }
+            });
+            window.dispatchEvent(authEvent);
         } catch (error) {
             console.error('❌ Failed to clear token:', error);
         }

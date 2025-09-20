@@ -249,6 +249,11 @@
     <!-- Server Status Indicators removed -->
 
     <main class="container" id="container">
+      <!-- Notification banner for local auth server -->
+      <div id="localAuthNotification" style="display: none; background-color: #4CAF50; color: white; text-align: center; padding: 10px; margin-bottom: 15px; border-radius: 5px; font-size: 14px;">
+        Using local authentication server. Your account will be stored locally.
+      </div>
+      
       <h1>🌿 Welcome to the Blathers App Portal! 🌿</h1>
       <p>Play as a guest or sign in to track your progress</p>
       <button id="playAsGuest" aria-label="Play as Guest">Play as Guest</button>
@@ -283,6 +288,7 @@
       // API URL and path configuration - automatically detect environment
       let API_BASE_URL;
       let API_PATH_PREFIX = '/api/v1';
+      let USE_LOCAL_AUTH_SERVER = false;
       
       // Determine base URL based on hostname
       const determineApiBaseUrl = () => {
@@ -298,7 +304,7 @@
         // Local development
         if (hostname === 'localhost' || hostname === '127.0.0.1') {
           console.log('Using localhost API URL');
-          return 'http://localhost:8000';
+          return 'http://localhost:8000'; // Base URL without /api/v1 prefix
         }
         
         // Production backend on Railway (fallback)
@@ -312,7 +318,8 @@
       // Store alternate API URLs to try if the primary one fails
       const ALTERNATE_API_URLS = [
         'https://capstone-project-production-3cce.up.railway.app',
-        'https://api.blathers.app'
+        'https://api.blathers.app',
+        'http://localhost:3000' // Local authentication server
       ];
       
       // Store possible API path prefixes to try
@@ -328,6 +335,12 @@
         // Make sure endpoint starts with a slash if it's not empty
         if (endpoint && !endpoint.startsWith('/')) {
           endpoint = '/' + endpoint;
+        }
+        
+        // If using local auth server and this is an auth endpoint, use the local server
+        if (USE_LOCAL_AUTH_SERVER && endpoint.includes('/auth/')) {
+          console.log('Using local auth server for endpoint:', endpoint);
+          return `http://localhost:3000${API_PATH_PREFIX}${endpoint}`;
         }
         
         return `${API_BASE_URL}${API_PATH_PREFIX}${endpoint}`;
@@ -367,8 +380,40 @@
             API_BASE_URL = altUrl;
             API_PATH_PREFIX = altResult.pathPrefix;
             console.log(`Switched to API URL: ${API_BASE_URL}${API_PATH_PREFIX}`);
+            
+            // If we're using the local auth server, set the flag
+            if (altUrl === 'http://localhost:3000') {
+              console.log('Using local authentication server for auth endpoints');
+              USE_LOCAL_AUTH_SERVER = true;
+              // Show notification banner
+              document.getElementById('localAuthNotification').style.display = 'block';
+            }
+            
             return true;
           }
+        }
+        
+        // Special case: Try the local auth server specifically for auth endpoints
+        try {
+          console.log('Trying local auth server as last resort...');
+          const localAuthResponse = await fetch('http://localhost:3000/health', {
+            method: 'GET',
+            mode: 'cors',
+            headers: {
+              'Accept': 'application/json'
+            }
+          });
+          
+          if (localAuthResponse.ok) {
+            console.log('Local auth server is available. Will use it for auth endpoints only.');
+            USE_LOCAL_AUTH_SERVER = true;
+            // Show notification banner
+            document.getElementById('localAuthNotification').style.display = 'block';
+            // Keep the main API URL for non-auth endpoints
+            return true;
+          }
+        } catch (localAuthError) {
+          console.log('Local auth server is not available:', localAuthError.message);
         }
         
         console.log('All API URLs failed, server is unavailable');
@@ -426,8 +471,34 @@
               }
               
               // If we got here, the server is up but we couldn't find the API path
+              // Check if we should use the local auth server
+              if (baseUrl !== 'http://localhost:3000') {
+                console.log('Main server is up but auth endpoints are not available. Checking local auth server...');
+                
+                // Try to connect to the local auth server
+                try {
+                  const localAuthResponse = await fetch('http://localhost:3000/health', {
+                    method: 'GET',
+                    signal: controller.signal,
+                    mode: 'cors',
+                    headers: {
+                      'Accept': 'application/json'
+                    }
+                  });
+                  
+                  if (localAuthResponse.ok) {
+                    console.log('Local auth server is available. Will use it for auth endpoints.');
+                    USE_LOCAL_AUTH_SERVER = true;
+                    // Show notification banner
+                    document.getElementById('localAuthNotification').style.display = 'block';
+                  }
+                } catch (localAuthError) {
+                  console.log('Local auth server is not available:', localAuthError.message);
+                }
+              }
+              
               // Default to the first path in our list
-              console.log(`Server is up but couldn't determine API path, using default: ${POSSIBLE_API_PATHS[0]}`);
+              console.log(`Using default API path: ${POSSIBLE_API_PATHS[0]}`);
               return { available: true, pathPrefix: POSSIBLE_API_PATHS[0] };
             }
             console.log(`Health check failed with status: ${response.status}`);

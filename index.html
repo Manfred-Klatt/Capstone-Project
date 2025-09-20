@@ -647,17 +647,27 @@
             return;
           }
           
+          // Show loading state
+          const submitBtn = document.querySelector('#loginForm button[type="submit"]');
+          const originalBtnText = submitBtn.textContent;
+          submitBtn.textContent = 'Logging in...';
+          submitBtn.disabled = true;
+          
           // Check if we're in standalone mode
           if (isStandaloneMode()) {
             // In standalone mode, prompt user to play in standalone mode
             showError('loginError', 'Server is not available. Would you like to play in standalone mode?');
+            
+            // Reset button
+            submitBtn.textContent = originalBtnText;
+            submitBtn.disabled = false;
             
             // Create a temporary button for standalone mode
             const standaloneBtn = document.createElement('button');
             standaloneBtn.textContent = 'Play in Standalone Mode';
             standaloneBtn.style.marginTop = '10px';
             standaloneBtn.onclick = function() {
-              localStorage.setItem('acnh_username', username);
+              localStorage.setItem('acnh_username', email);
               localStorage.setItem('acnh_guest', 'true');
               localStorage.setItem('force_standalone', 'true');
               window.location.href = "game.html?guest=true";
@@ -667,6 +677,10 @@
             document.getElementById('loginForm').appendChild(standaloneBtn);
             return;
           }
+          
+          // Check if server is available
+          console.log('Checking server availability before login...');
+          const serverAvailable = await checkServerAvailable();
           
           // Add a timeout to the fetch request
           const controller = new AbortController();
@@ -722,11 +736,21 @@
             }
             
             // Save auth token and redirect to game
-            saveAuthToken(data.token, data.username);
+            saveAuthToken(data.token, data.data.user.username || email);
             localStorage.removeItem('acnh_guest');
-            window.location.href = "game.html";
+            
+            // Show success message briefly before redirect
+            showError('loginError', 'Login successful! Redirecting...', 'success');
+            
+            // Redirect to game page after a short delay
+            setTimeout(() => {
+              window.location.href = 'game.html';
+            }, 1000);
             
           } catch (error) {
+            // Reset button
+            submitBtn.textContent = originalBtnText;
+            submitBtn.disabled = false;
             console.error('Login error:', {
               name: error.name,
               message: error.message,

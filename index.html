@@ -319,9 +319,13 @@
       const ALTERNATE_API_URLS = [
         'https://capstone-project-production-3cce.up.railway.app',
         'https://api.blathers.app',
-        'https://acnh-auth-server.up.railway.app', // Railway-hosted auth server
-        'http://localhost:3000' // Local authentication server
+        'https://acnh-auth-server.up.railway.app', 
+        'https://railway.com/project/941586ce-f8c4-4d83-9a9d-800c00661611', 
+        'http://localhost:3000' 
       ];
+      
+      // Log available servers for debugging
+      console.log('Available API servers to try:', ALTERNATE_API_URLS);
       
       // Store possible API path prefixes to try
       const POSSIBLE_API_PATHS = [
@@ -361,12 +365,15 @@
       
       // Function to check if the server is available and detect the correct API path
       async function checkServerAvailable() {
+        console.log('==== SERVER AVAILABILITY CHECK STARTED ====');
+        console.log('Current time:', new Date().toISOString());
         // First try the primary API base URL with different path prefixes
         const result = await detectWorkingApiPath(API_BASE_URL);
         if (result.available) {
           console.log(`Primary API URL is available at ${API_BASE_URL} with path prefix ${result.pathPrefix}`);
           // Update the global path prefix with the one that works
           API_PATH_PREFIX = result.pathPrefix;
+          console.log('==== SERVER AVAILABILITY CHECK ENDED: SUCCESS ====');
           return true;
         }
         
@@ -390,6 +397,7 @@
               document.getElementById('localAuthNotification').style.display = 'block';
             }
             
+            console.log('==== SERVER AVAILABILITY CHECK ENDED: SUCCESS (ALTERNATE URL) ====');
             return true;
           }
         }
@@ -418,6 +426,7 @@
         }
         
         console.log('All API URLs failed, server is unavailable');
+        console.log('==== SERVER AVAILABILITY CHECK ENDED: FAILED ====');
         return false;
       }
       
@@ -426,7 +435,7 @@
         try {
           console.log('Checking server availability at:', baseUrl);
           const controller = new AbortController();
-          const timeoutId = setTimeout(() => controller.abort(), 3000); // 3 second timeout
+          const timeoutId = setTimeout(() => controller.abort(), 8000); // 8 second timeout - increased for slower connections
           
           // First check if the server is responding at all
           try {
@@ -691,7 +700,7 @@
           
           // Add a timeout to the fetch request
           const controller = new AbortController();
-          const timeoutId = setTimeout(() => controller.abort(), 3000); // 3 second timeout
+          const timeoutId = setTimeout(() => controller.abort(), 8000); // 8 second timeout - increased for slower connections
           
           console.log('Sending login request...', { email });
           

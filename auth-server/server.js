@@ -11,11 +11,19 @@ const app = express();
 // Middleware
 app.use(express.json());
 app.use(cors({
-  origin: ['http://localhost:3000', 'http://localhost:8000', 'https://blathers.app', 'https://www.blathers.app'],
+  origin: [
+    'http://localhost:3000', 
+    'http://localhost:8000', 
+    'https://blathers.app', 
+    'https://www.blathers.app',
+    'https://capstone-project-production-3cce.up.railway.app',
+    'https://acnh-auth-server.up.railway.app'
+  ],
   credentials: true
 }));
 
 // MongoDB Connection
+// Ensure we're using the correct database name 'acnh-quiz' in the connection string
 const MONGODB_URI = process.env.MONGODB_URI || 'mongodb+srv://manfredjklatt:ZLjT2en0MjBgjnkF@cluster0.vswiduv.mongodb.net/acnh-quiz?retryWrites=true&w=majority&appName=Cluster0';
 mongoose.connect(MONGODB_URI)
   .then(() => console.log('MongoDB connected'))
@@ -79,6 +87,11 @@ const User = mongoose.model('User', userSchema);
 // JWT Helper
 const JWT_SECRET = process.env.JWT_SECRET || 'acnh_quiz_production_secret_2024_secure_key_blathers_app';
 const JWT_EXPIRES_IN = process.env.JWT_EXPIRES_IN || '90d';
+
+// Warn if using default JWT secret in production
+if (process.env.NODE_ENV === 'production' && !process.env.JWT_SECRET) {
+  console.warn('WARNING: Using default JWT_SECRET in production is not secure!');
+}
 
 const signToken = (id) => {
   return jwt.sign({ id }, JWT_SECRET, {
@@ -289,9 +302,20 @@ app.post('/api/v1/auth/reactivate-account', async (req, res) => {
   }
 });
 
+// Health check endpoint
+app.get('/health', (req, res) => {
+  res.status(200).json({
+    status: 'success',
+    message: 'Auth server is running',
+    timestamp: new Date().toISOString(),
+    environment: process.env.NODE_ENV || 'development'
+  });
+});
+
 // Start server
 const PORT = process.env.PORT || 3000;
 app.listen(PORT, '0.0.0.0', () => {
   console.log(`Auth server running on port ${PORT}`);
   console.log(`MongoDB URI: ${MONGODB_URI ? 'is set' : 'is NOT set'}`);
+  console.log(`Server environment: ${process.env.NODE_ENV || 'development'}`);
 });

@@ -280,29 +280,34 @@
     </main>
 
     <script>
-      // API URL - automatically detect environment
-      const API_URL = (() => {
+      // API URL and path configuration - automatically detect environment
+      let API_BASE_URL;
+      let API_PATH_PREFIX = '/api/v1';
+      
+      // Determine base URL based on hostname
+      const determineApiBaseUrl = () => {
         const hostname = window.location.hostname;
         const protocol = window.location.protocol;
         
-        // Production environment (blathers.app) - try multiple options
+        // Production environment (blathers.app)
         if (hostname === 'blathers.app' || hostname.includes('blathers')) {
-          // First try: Use the same origin as the current page (API and frontend on same domain)
-          // This is the most likely configuration for production
-          console.log('Using same origin for API URL on blathers.app domain');
-          return window.location.origin;
+          console.log('Using blathers.app domain for API');
+          return window.location.origin; // Same origin as the current page
         }
         
         // Local development
         if (hostname === 'localhost' || hostname === '127.0.0.1') {
           console.log('Using localhost API URL');
-          return 'http://localhost:8000'; // Base URL without /api/v1 prefix
+          return 'http://localhost:8000';
         }
         
         // Production backend on Railway (fallback)
         console.log('Using Railway API URL');
-        return 'https://capstone-project-production-3cce.up.railway.app'; // Base URL without /api/v1 prefix
-      })();
+        return 'https://capstone-project-production-3cce.up.railway.app';
+      };
+      
+      // Initialize the base URL
+      API_BASE_URL = determineApiBaseUrl();
       
       // Store alternate API URLs to try if the primary one fails
       const ALTERNATE_API_URLS = [
@@ -310,8 +315,28 @@
         'https://api.blathers.app'
       ];
       
-      console.log('Primary API URL:', API_URL);
+      // Store possible API path prefixes to try
+      const POSSIBLE_API_PATHS = [
+        '/api/v1',
+        '/api',
+        '', // Empty string means no prefix
+        '/v1'
+      ];
+      
+      // Function to get the full API URL with the current path prefix
+      function getApiUrl(endpoint) {
+        // Make sure endpoint starts with a slash if it's not empty
+        if (endpoint && !endpoint.startsWith('/')) {
+          endpoint = '/' + endpoint;
+        }
+        
+        return `${API_BASE_URL}${API_PATH_PREFIX}${endpoint}`;
+      }
+      
+      console.log('Initial API base URL:', API_BASE_URL);
+      console.log('Initial API path prefix:', API_PATH_PREFIX);
       console.log('Alternate API URLs available:', ALTERNATE_API_URLS.length);
+      console.log('Possible API paths to try:', POSSIBLE_API_PATHS.length);
 
       // Check if we're running in standalone mode (file:// protocol)
       function isStandaloneMode() {
@@ -320,12 +345,14 @@
                localStorage.getItem('standalone_confirmed_this_session') === 'true';
       }
       
-      // Function to check if the server is available
+      // Function to check if the server is available and detect the correct API path
       async function checkServerAvailable() {
-        // First try the primary API URL
-        const isAvailable = await tryServerUrl(API_URL);
-        if (isAvailable) {
-          console.log('Primary API URL is available:', API_URL);
+        // First try the primary API base URL with different path prefixes
+        const result = await detectWorkingApiPath(API_BASE_URL);
+        if (result.available) {
+          console.log(`Primary API URL is available at ${API_BASE_URL} with path prefix ${result.pathPrefix}`);
+          // Update the global path prefix with the one that works
+          API_PATH_PREFIX = result.pathPrefix;
           return true;
         }
         
@@ -333,12 +360,13 @@
         console.log('Primary API URL failed, trying alternates...');
         for (const altUrl of ALTERNATE_API_URLS) {
           console.log('Trying alternate API URL:', altUrl);
-          const altAvailable = await tryServerUrl(altUrl);
-          if (altAvailable) {
-            console.log('Found working alternate API URL:', altUrl);
-            // Update the global API_URL to use the working alternate
-            window.API_URL = altUrl;
-            console.log('Switched to alternate API URL:', altUrl);
+          const altResult = await detectWorkingApiPath(altUrl);
+          if (altResult.available) {
+            console.log(`Found working alternate API URL: ${altUrl} with path prefix ${altResult.pathPrefix}`);
+            // Update the global variables to use the working alternate
+            API_BASE_URL = altUrl;
+            API_PATH_PREFIX = altResult.pathPrefix;
+            console.log(`Switched to API URL: ${API_BASE_URL}${API_PATH_PREFIX}`);
             return true;
           }
         }
@@ -347,16 +375,17 @@
         return false;
       }
       
-      // Helper function to check if a specific server URL is available
-      async function tryServerUrl(url) {
+      // Helper function to detect the correct API path for a given base URL
+      async function detectWorkingApiPath(baseUrl) {
         try {
-          console.log('Checking server availability at:', url);
+          console.log('Checking server availability at:', baseUrl);
           const controller = new AbortController();
-          const timeoutId = setTimeout(() => controller.abort(), 3000); // 3 second timeout (reduced from 5s)
+          const timeoutId = setTimeout(() => controller.abort(), 3000); // 3 second timeout
           
-          // Try health endpoint first (at /health)
+          // First check if the server is responding at all
           try {
-            const response = await fetch(`${url}/health`, {
+            // Try health endpoint first (at /health)
+            const response = await fetch(`${baseUrl}/health`, {
               method: 'GET',
               signal: controller.signal,
               mode: 'cors',
@@ -367,37 +396,48 @@
             
             clearTimeout(timeoutId);
             if (response.ok) {
-              console.log(`Server health check passed at ${url}/health`);
-              return true;
+              console.log(`Server health check passed at ${baseUrl}/health`);
+              // Server is up, now try to find the correct API path
+              for (const pathPrefix of POSSIBLE_API_PATHS) {
+                // Try the auth endpoint to see if it exists
+                const authEndpoint = `${baseUrl}${pathPrefix}/auth`;
+                console.log(`Testing API path: ${authEndpoint}`);
+                
+                try {
+                  const authResponse = await fetch(`${authEndpoint}`, {
+                    method: 'GET',
+                    signal: controller.signal,
+                    mode: 'cors',
+                    headers: {
+                      'Accept': 'application/json'
+                    }
+                  });
+                  
+                  // If we get any response other than 404, this path might be correct
+                  // Even a 401 Unauthorized is good because it means the endpoint exists
+                  if (authResponse.status !== 404) {
+                    console.log(`Found working API path: ${pathPrefix} (status: ${authResponse.status})`);
+                    return { available: true, pathPrefix: pathPrefix };
+                  }
+                  console.log(`API path ${pathPrefix} returned 404, trying next...`);
+                } catch (authError) {
+                  console.log(`Error testing API path ${pathPrefix}:`, authError.message);
+                }
+              }
+              
+              // If we got here, the server is up but we couldn't find the API path
+              // Default to the first path in our list
+              console.log(`Server is up but couldn't determine API path, using default: ${POSSIBLE_API_PATHS[0]}`);
+              return { available: true, pathPrefix: POSSIBLE_API_PATHS[0] };
             }
             console.log(`Health check failed with status: ${response.status}`);
           } catch (healthError) {
-            console.log(`Health check failed at ${url}:`, healthError.message);
+            console.log(`Health check failed at ${baseUrl}:`, healthError.message);
           }
           
-          // If health check fails, try API health endpoint
+          // If health check fails, try root endpoint as last resort
           try {
-            const apiResponse = await fetch(`${url}/api/v1/health`, {
-              method: 'GET',
-              signal: controller.signal,
-              mode: 'cors',
-              headers: {
-                'Accept': 'application/json'
-              }
-            });
-            
-            if (apiResponse.ok) {
-              console.log(`API health check passed at ${url}/api/v1/health`);
-              return true;
-            }
-            console.log(`API health check failed with status: ${apiResponse.status}`);
-          } catch (apiError) {
-            console.log(`API health check failed at ${url}:`, apiError.message);
-          }
-          
-          // If both health checks fail, try root endpoint as last resort
-          try {
-            const rootResponse = await fetch(url, {
+            const rootResponse = await fetch(baseUrl, {
               method: 'GET',
               signal: controller.signal,
               mode: 'cors',
@@ -407,18 +447,44 @@
             });
             
             if (rootResponse.ok) {
-              console.log(`Root endpoint check passed at ${url}`);
-              return true;
+              console.log(`Root endpoint check passed at ${baseUrl}`);
+              // Server is up, try to find API path
+              for (const pathPrefix of POSSIBLE_API_PATHS) {
+                // Try the auth endpoint
+                const authEndpoint = `${baseUrl}${pathPrefix}/auth`;
+                console.log(`Testing API path from root: ${authEndpoint}`);
+                
+                try {
+                  const authResponse = await fetch(`${authEndpoint}`, {
+                    method: 'GET',
+                    signal: controller.signal,
+                    mode: 'cors',
+                    headers: {
+                      'Accept': 'application/json'
+                    }
+                  });
+                  
+                  if (authResponse.status !== 404) {
+                    console.log(`Found working API path from root: ${pathPrefix}`);
+                    return { available: true, pathPrefix: pathPrefix };
+                  }
+                } catch (authError) {
+                  console.log(`Error testing API path ${pathPrefix} from root:`, authError.message);
+                }
+              }
+              
+              // Default to first path
+              return { available: true, pathPrefix: POSSIBLE_API_PATHS[0] };
             }
             console.log(`Root endpoint check failed with status: ${rootResponse.status}`);
           } catch (rootError) {
-            console.log(`Root endpoint check failed at ${url}:`, rootError.message);
+            console.log(`Root endpoint check failed at ${baseUrl}:`, rootError.message);
           }
           
-          return false;
+          return { available: false, pathPrefix: null };
         } catch (error) {
-          console.error(`Server availability check failed for ${url}:`, error);
-          return false;
+          console.error(`Server availability check failed for ${baseUrl}:`, error);
+          return { available: false, pathPrefix: null };
         }
       }
       
@@ -538,7 +604,11 @@
           console.log('Sending login request...', { email });
           
           try {
-            const response = await fetch(`${API_URL}/api/v1/auth/login`, {
+            // Use the detected API path for auth routes
+            const loginUrl = getApiUrl('/auth/login');
+            console.log('Sending login request to:', loginUrl);
+            
+            const response = await fetch(loginUrl, {
               method: 'POST',
               headers: {
                 'Content-Type': 'application/json',
@@ -626,7 +696,10 @@
                 
                 try {
                   console.log('Sending reactivation request for email:', email);
-                  const response = await fetch(`${API_URL}/api/v1/auth/reactivate-account`, {
+                  const reactivateUrl = getApiUrl('/auth/reactivate-account');
+                  console.log('Sending reactivation request to:', reactivateUrl);
+                  
+                  const response = await fetch(reactivateUrl, {
                     method: 'POST',
                     headers: {
                       'Content-Type': 'application/json',
@@ -740,8 +813,11 @@
           const controller = new AbortController();
           const timeoutId = setTimeout(() => controller.abort(), 10000); // 10 second timeout
           
-          // The auth routes are mounted at /api/v1/auth in the backend
-          const response = await fetch(`${API_URL}/api/v1/auth/signup`, {
+          // Use the detected API path for auth routes
+          const signupUrl = getApiUrl('/auth/signup');
+          console.log('Sending signup request to:', signupUrl);
+          
+          const response = await fetch(signupUrl, {
             method: 'POST',
             headers: {
               'Content-Type': 'application/json',
@@ -798,7 +874,10 @@
                 try {
                   // Call reactivate endpoint
                   console.log('Sending reactivation request for email:', email);
-                  const reactivateResponse = await fetch(`${API_URL}/api/v1/auth/reactivate-account`, {
+                  const reactivateUrl = getApiUrl('/auth/reactivate-account');
+                  console.log('Sending reactivation request to:', reactivateUrl);
+                  
+                  const reactivateResponse = await fetch(reactivateUrl, {
                     method: 'POST',
                     headers: {
                       'Content-Type': 'application/json'

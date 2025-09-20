@@ -112,13 +112,13 @@
             // Add the font-loaded class to apply the font
             document.documentElement.classList.add('font-loaded');
             document.documentElement.classList.remove('font-loading');
-            console.log('Custom font loaded successfully');
+            logger.debug('Custom font loaded successfully');
           }).catch(error => {
-            console.warn('Failed to load custom font:', error);
+            logger.warn('Failed to load custom font');
             document.documentElement.classList.remove('font-loading');
           });
         } catch (e) {
-          console.warn('Error in font loading:', e);
+          logger.warn('Error in font loading');
           document.documentElement.classList.remove('font-loading');
         }
       }
@@ -130,16 +130,16 @@
         // Verify font loading after a delay
         setTimeout(() => {
           const fontLoaded = document.fonts.check('1em CustomFont');
-          console.log('Font loaded verification:', fontLoaded ? 'Success' : 'Failed');
+          logger.debug(`Font loaded verification: ${fontLoaded ? 'Success' : 'Failed'}`);
           if (!fontLoaded) {
-            console.warn('Font verification failed, trying to load again...');
+            logger.warn('Font verification failed, trying to load again');
             loadCustomFont();
             
             // Add a fallback class in case font loading fails
             setTimeout(() => {
               if (!document.fonts.check('1em CustomFont')) {
                 document.documentElement.classList.add('font-fallback');
-                console.warn('Using system fallback fonts');
+                logger.warn('Using system fallback fonts');
               }
             }, 2000);
           }
@@ -188,7 +188,7 @@
       document.addEventListener('DOMContentLoaded', function() {
         // First try to load from server
         initializeLeaderboard().catch(error => {
-          console.error('Failed to load leaderboard from server, using default data:', error);
+          logger.error('Failed to load leaderboard from server, using default data');
           // Fall back to default data
           LEADERBOARD_CONFIG.categories.forEach(category => {
             const defaultData = LEADERBOARD_CONFIG.defaultData[category];
@@ -204,11 +204,14 @@
       
       // Function to update the leaderboard UI
       function updateLeaderboardUI(category, data) {
-        console.log(`[Leaderboard] Updating UI for ${category}`, data);
-        const element = document.getElementById(`${category}-scores`);
+        // Handle case where category is an object
+        const categoryName = typeof category === 'object' && category.name ? category.name : category;
+        
+        logger.debug(`Updating UI for ${categoryName}`);
+        const element = document.getElementById(`${categoryName}-scores`);
         
         if (!element) {
-          console.error(`[Leaderboard] Element not found for category: ${category}`);
+          logger.error(`Element not found for category: ${categoryName}`);
           return;
         }
         
@@ -227,17 +230,17 @@
         }
         
         if (!leaderboardData || leaderboardData.length === 0) {
-          console.log('No valid data provided, using default leaderboard');
-          const defaultData = LEADERBOARD_CONFIG.defaultData[category];
+          logger.debug('No valid data provided, using default leaderboard');
+          const defaultData = LEADERBOARD_CONFIG.defaultData[categoryName];
           if (defaultData && Array.isArray(defaultData) && defaultData.length > 0) {
-            updateLeaderboardUI(category, defaultData);
+            updateLeaderboardUI(categoryName, defaultData);
             return;
           } else {
-            console.log('No default leaderboard data available');
+            logger.debug('No default leaderboard data available');
             element.innerHTML = `
               <div class="no-data">
-                <p>No ${category} leaderboard data available</p>
-                <button class="retry-button" onclick="loadLeaderboardData('${category}')">
+                <p>No ${categoryName} leaderboard data available</p>
+                <button class="retry-button" onclick="loadLeaderboardData('${categoryName}')">
                   <i class="fas fa-sync-alt"></i> Try Again
                 </button>
               </div>`;
@@ -269,14 +272,14 @@
           
           html += '</ol>';
           element.innerHTML = html;
-          console.log(`[Leaderboard] Updated ${category} with ${leaderboardData.length} entries`);
+          logger.debug(`Updated ${categoryName} with ${leaderboardData.length} entries`);
           
         } catch (error) {
-          console.error(`[Leaderboard] Error updating UI for ${category}:`, error);
+          logger.error(`Error updating UI for ${categoryName}`);
           element.innerHTML = `
             <div class="error-message">
               <p>Error loading leaderboard data</p>
-              <button class="retry-button" onclick="loadLeaderboardData('${category}')">
+              <button class="retry-button" onclick="loadLeaderboardData('${categoryName}')">
                 <i class="fas fa-sync-alt"></i> Try Again
               </button>
             </div>`;
@@ -284,11 +287,22 @@
       }
       
       async function initializeLeaderboard() {
-        console.log('[Leaderboard] Initializing leaderboard...');
+        logger.debug('Initializing leaderboard');
         
         // Ensure we have valid categories
         if (!Array.isArray(LEADERBOARD_CONFIG?.categories)) {
-          console.error('[Leaderboard] Invalid or missing categories in config');
+          logger.error('Invalid or missing categories in config');
+          return;
+        }
+        
+        // Check if we're in offline mode first
+        if (isStandaloneMode()) {
+          logger.debug('In offline mode, using default data for all categories');
+          // Use default data for all categories
+          for (const category of LEADERBOARD_CONFIG.categories) {
+            if (!category || typeof category !== 'string') continue;
+            updateLeaderboardUI(category, LEADERBOARD_CONFIG.defaultData[category] || []);
+          }
           return;
         }
         
@@ -296,21 +310,21 @@
         for (const category of LEADERBOARD_CONFIG.categories) {
           // Skip if already loading this category or invalid category
           if (!category || typeof category !== 'string') {
-            console.warn('[Leaderboard] Skipping invalid category:', category);
+            logger.warn(`Skipping invalid category: ${category}`);
             continue;
           }
           
           if (loadingStates.get(category)) {
-            console.log(`[Leaderboard] Already loading ${category}, skipping duplicate request`);
+            logger.debug(`Already loading ${category}, skipping duplicate request`);
             continue;
           }
           
           try {
             loadingStates.set(category, true);
-            console.log(`[Leaderboard] Loading data for category: ${category}`);
+            logger.debug(`Loading data for category: ${category}`);
             await loadLeaderboardData(category);
           } catch (error) {
-            console.error(`[Leaderboard] Error initializing ${category}:`, error);
+            logger.error(`Error initializing ${category}`);
             // Fall back to default data on error
             const defaultData = LEADERBOARD_CONFIG.defaultData?.[category];
             if (defaultData) {
@@ -330,18 +344,12 @@
         const categoryName = typeof category === 'object' && category.name ? category.name : category;
         const apiUrl = `${window.BACKEND_API}/leaderboard/${categoryName}`;
         
-        // Get guest token from localStorage or generate a new one
-        let guestToken = localStorage.getItem('guestToken');
-        if (!guestToken) {
-          guestToken = 'guest_' + Math.random().toString(36).substr(2, 9);
-          localStorage.setItem('guestToken', guestToken);
-        }
-        
         const element = document.getElementById(`${categoryName}-scores`);
-        const maxRetries = 2;
+        // Reduce max retries to 1 to avoid excessive API calls
+        const maxRetries = 1;
         
         if (!element) {
-          console.error(`[Leaderboard] Element not found for category: ${category}`);
+          logger.error(`Element not found for category: ${categoryName}`);
           return;
         }
         
@@ -349,79 +357,94 @@
         element.innerHTML = `
           <div class="loading">
             <div class="loading-spinner"></div>
-            <div>Loading ${category} leaderboard...</div>
+            <div>Loading ${categoryName} leaderboard...</div>
           </div>`;
           
-        // If we've retried too many times, show error and use default data
+        // If we've retried too many times, use default data without additional API calls
         if (retryCount > maxRetries) {
-          console.warn(`[Leaderboard] Max retries (${maxRetries}) reached for ${category}, using default data`);
-          updateLeaderboardUI(category, LEADERBOARD_CONFIG.defaultData[category] || []);
+          logger.warn(`Max retries reached for ${categoryName}, using default data`);
+          updateLeaderboardUI(categoryName, LEADERBOARD_CONFIG.defaultData[categoryName] || []);
           return;
         }
         
-        // Use the guest token from localStorage
+        // Check if we're in offline mode or have recent failed auth attempts
+        if (isStandaloneMode() || localStorage.getItem('leaderboard_auth_failed') === 'true') {
+          logger.debug(`Using default data for ${categoryName} (offline mode or auth failed)`);
+          updateLeaderboardUI(categoryName, LEADERBOARD_CONFIG.defaultData[categoryName] || []);
+          return;
+        }
         
         try {
+          // Get guest token from localStorage or generate a new one
+          let guestToken = localStorage.getItem('guestToken');
+          if (!guestToken) {
+            guestToken = 'guest_' + Math.random().toString(36).substring(2, 11);
+            localStorage.setItem('guestToken', guestToken);
+          }
+          
+          logger.debug(`Fetching data for ${categoryName}`);
+          
+          const headers = {
+            'Content-Type': 'application/json',
+            'Accept': 'application/json'
+          };
+          
+          // Add authorization headers
+          if (guestToken) {
+            headers['Authorization'] = `Bearer ${guestToken}`;
+            headers['X-Guest-Token'] = guestToken;
+          }
+          
+          // Use AbortController to set a timeout
+          const controller = new AbortController();
+          const timeoutId = setTimeout(() => controller.abort(), 5000); // 5 second timeout
+          
           const response = await fetch(apiUrl, {
             method: 'GET',
-            headers: {
-              'Content-Type': 'application/json',
-              'Authorization': `Bearer ${guestToken}`,
-              'X-Guest-Token': guestToken
-            },
+            headers: headers,
             credentials: 'include',
-            mode: 'cors'
+            mode: 'cors',
+            signal: controller.signal
           });
           
+          clearTimeout(timeoutId);
+          
           if (response.ok) {
+            // Clear any auth failure flag
+            localStorage.removeItem('leaderboard_auth_failed');
+            
             const data = await response.json();
+            logger.debug(`Successfully loaded ${categoryName} data`);
             updateLeaderboardUI(categoryName, data);
           } else if (response.status === 401) {
-            // Handle unauthorized - try with a new guest token
-            localStorage.removeItem('guestToken');
-            if (retryCount < maxRetries) {
-              return loadLeaderboardData(categoryName, retryCount + 1);
-            }
-            console.warn('Invalid guest token, using default data');
-            updateLeaderboardUI(category, LEADERBOARD_CONFIG.defaultData[category] || []);
-            return;
-          } else {
-            // If we've already retried or got a different error, throw
-            const errorText = await response.text();
-            console.error(`[Leaderboard] Error loading ${category}:`, response.status, errorText);
-            throw new Error(`HTTP error! status: ${response.status}`);
-          }
-          
-          // Data is already processed in the response.ok block
-          
-        } catch (error) {
-          console.warn(`[Leaderboard] Error loading ${category}:`, error);
-          
-          // Show error message to user
-          if (retryCount === 0) {
-            element.innerHTML = `
-              <div class="error-message">
-                <p>Couldn't load ${category} leaderboard.</p>
-                <button class="retry-button" data-category="${category}">
-                  <i class="fas fa-sync-alt"></i> Try Again
-                </button>
-              </div>`;
+            // Handle unauthorized - generate a new guest token and retry once
+            logger.warn(`Unauthorized for ${categoryName}`);
+            
+            if (retryCount === 0) {
+              // Generate a new token and try once more
+              const newGuestToken = 'guest_' + Math.random().toString(36).substring(2, 11);
+              localStorage.setItem('guestToken', newGuestToken);
+              return loadLeaderboardData(categoryName, 1);
+            } else {
+              // If we've already retried, mark auth as failed and use default data
+              localStorage.setItem('leaderboard_auth_failed', 'true');
+              // Set a timeout to clear the auth failed flag after 5 minutes
+              setTimeout(() => localStorage.removeItem('leaderboard_auth_failed'), 5 * 60 * 1000);
               
-            // Add event listener to retry button
-            const retryButton = element.querySelector('.retry-button');
-            if (retryButton) {
-              retryButton.addEventListener('click', () => {
-                loadLeaderboardData(category, retryCount + 1);
-              });
+              updateLeaderboardUI(categoryName, LEADERBOARD_CONFIG.defaultData[categoryName] || []);
             }
+          } else {
+            // For other errors, use default data
+            logger.error(`Error loading ${categoryName}: ${response.status}`);
+            updateLeaderboardUI(categoryName, LEADERBOARD_CONFIG.defaultData[categoryName] || []);
           }
+        } catch (error) {
+          logger.warn(`Error loading ${categoryName}`);
           
-          // Fall back to default data
-          updateLeaderboardUI(category, LEADERBOARD_CONFIG.defaultData[category] || []);
+          // For network errors, use default data without retrying
+          updateLeaderboardUI(categoryName, LEADERBOARD_CONFIG.defaultData[categoryName] || []);
         }
       }
-
-      
       
       // Start loading the font
       if ('fonts' in document) {
@@ -2153,10 +2176,10 @@
         <div class="speech-bubble-tail" style="position: absolute; left: 79px; top: 50%; transform: translateY(-50%); width: 0; height: 0; border: 8px solid transparent; border-right-color: #ffffff; border-left: 0; border-bottom: 0; z-index: 1001;"></div>
       </div>
       
-      <!-- Center: Standalone Mode Indicator -->
+      <!-- Center: Offline Mode Indicator -->
       <div id="standalone-indicator-container" style="position: absolute; left: 50%; transform: translateX(-50%); top: 15px; display: none;">
         <button id="standalone-mode-btn" style="background: #ff9800; color: white; border: none; border-radius: 20px; padding: 8px 16px; font-family: 'CustomFont', sans-serif; font-size: 0.9rem; box-shadow: 0 2px 8px rgba(0,0,0,0.2); cursor: pointer;">
-          Standalone Mode
+          Offline Mode
         </button>
       </div>
       
@@ -2210,7 +2233,7 @@
             display: block !important;
           }
           
-          /* Hide standalone mode button on mobile */
+          /* Hide offline mode button on mobile */
           #standalone-indicator-container {
             display: none !important;
           }
@@ -2230,11 +2253,30 @@
     <div style="width:100%; height:85px;" id="header-spacer"></div>
     
     <script>
+      // Global debug flag - set to false to disable most console logs
+      const DEBUG = false;
+      
+      // Custom logger that respects the DEBUG flag
+      const logger = {
+        info: function(message, ...args) {
+          if (DEBUG) console.info(message, ...args);
+        },
+        warn: function(message, ...args) {
+          console.warn(message, ...args); // Always show warnings
+        },
+        error: function(message, ...args) {
+          console.error(message, ...args); // Always show errors
+        },
+        debug: function(message, ...args) {
+          if (DEBUG) console.debug(message, ...args);
+        }
+      };
+      
       // Define API URLs
       const API_URL = 'https://capstone-project-production-3cce.up.railway.app';
       const BACKEND_API = API_URL;
       
-      // Function to detect if we're running in standalone mode (without a server)
+      // Function to detect if we're running in offline mode (without a server)
       function isStandaloneMode() {
         // If we have a valid backend API URL and no explicit force_standalone flag
         if (window.BACKEND_API) {
@@ -2268,7 +2310,26 @@
         const timeoutId = setTimeout(() => controller.abort(), 5000); // 5 second timeout
         
         try {
-          console.log('Checking server availability at:', API_URL);
+          logger.debug('Checking server availability');
+          
+          // Get guest token from localStorage or generate a new one
+          let guestToken = localStorage.getItem('guestToken');
+          if (!guestToken) {
+            guestToken = 'guest_' + Math.random().toString(36).substring(2, 11);
+            localStorage.setItem('guestToken', guestToken);
+          }
+          
+          // Prepare headers with guest token
+          const headers = {
+            'Accept': 'application/json',
+            'Content-Type': 'application/json'
+          };
+          
+          // Add guest token to headers
+          if (guestToken) {
+            headers['Authorization'] = `Bearer ${guestToken}`;
+            headers['X-Guest-Token'] = guestToken;
+          }
           
           // Try direct health check first
           try {
@@ -2276,18 +2337,22 @@
               method: 'GET',
               signal: controller.signal,
               mode: 'cors',
-              headers: {
-                'Accept': 'application/json'
-              }
+              credentials: 'include',
+              headers: headers
             });
             
             clearTimeout(timeoutId);
             if (response.ok) {
-              console.log('Server is available');
+              logger.debug('Server health check: available');
+              // Store health status in localStorage
+              localStorage.setItem('backendHealth', JSON.stringify({
+                status: 'available',
+                timestamp: new Date().toISOString()
+              }));
               return true;
             }
           } catch (healthError) {
-            console.log('Health check failed, trying root endpoint');
+            logger.debug('Health endpoint failed, trying root endpoint');
           }
           
           // If health check fails, try root endpoint
@@ -2296,21 +2361,33 @@
             method: 'GET',
             signal: controller.signal,
             mode: 'cors',
-            headers: {
-              'Accept': 'application/json'
-            }
+            credentials: 'include',
+            headers: headers
           });
           
           clearTimeout(timeoutId);
-          console.log('Root endpoint check result:', rootResponse.ok);
+          
+          // Store health status in localStorage
+          localStorage.setItem('backendHealth', JSON.stringify({
+            status: rootResponse.ok ? 'available' : 'unavailable',
+            timestamp: new Date().toISOString()
+          }));
+          
           return rootResponse.ok;
         } catch (error) {
-          console.error('Server availability check failed:', error);
+          logger.error('Server availability check failed');
+          
+          // Store health status in localStorage
+          localStorage.setItem('backendHealth', JSON.stringify({
+            status: 'unavailable',
+            timestamp: new Date().toISOString()
+          }));
+          
           return false;
         }
       }
       
-      // Function to show or hide the standalone mode indicator
+      // Function to show or hide the offline mode indicator
       function updateStandaloneModeIndicator() {
         const standaloneContainer = document.getElementById('standalone-indicator-container');
         const standaloneBtn = document.getElementById('standalone-mode-btn');
@@ -2320,7 +2397,7 @@
           
           // Add click handler to show explanation when clicked
           standaloneBtn.onclick = function() {
-            alert('You are playing in standalone mode. Your scores are saved locally and not shared online.');
+            alert('You are playing in offline mode. Your scores are saved locally and not shared online.');
           };
         } else {
           standaloneContainer.style.display = 'none';
@@ -2338,44 +2415,74 @@
       
       // Check server health on page load
       async function initServerCheck() {
-        const controller = new AbortController();
-        const timeoutId = setTimeout(() => controller.abort(), 5000);
+        logger.debug('Initializing server health check');
         
         try {
-          const response = await fetch(`${API_URL}/health`, {
-            method: 'GET',
-            signal: controller.signal,
-            mode: 'cors',
-            headers: {
-              'Accept': 'application/json',
-              'Authorization': `Bearer ${localStorage.getItem('guestToken') || 'guest_default_token'}`
-            },
-            credentials: 'include'
-          });
+          // Get or generate guest token
+          let guestToken = localStorage.getItem('guestToken');
+          if (!guestToken) {
+            guestToken = 'guest_' + Math.random().toString(36).substring(2, 11);
+            localStorage.setItem('guestToken', guestToken);
+            logger.debug('Generated new guest token');
+          }
+          
+          // Check if we have a recent health check
+          const healthCheck = localStorage.getItem('backendHealth');
+          let skipHealthCheck = false;
+          
+          if (healthCheck) {
+            try {
+              const { status, timestamp } = JSON.parse(healthCheck);
+              const lastCheck = new Date(timestamp);
+              const now = new Date();
+              const minutesSinceLastCheck = (now - lastCheck) / (1000 * 60);
               
-          // Try to check server connection
-          if (typeof checkServerAvailable === 'function') {
-            const serverAvailable = await checkServerAvailable();
-            if (!serverAvailable && !localStorage.getItem('standalone_confirmed_this_session')) {
-              // Server is not available, offer standalone mode
-              if (confirm("Server connection unavailable. Your scores will be saved locally but not shared online. Continue in standalone mode?")) {
-                localStorage.setItem('force_standalone', 'true');
-                localStorage.setItem('standalone_confirmed_this_session', 'true');
-              } else {
-                // If they don't want to continue, redirect to home page
-                window.location.href = 'index.html';
-                return;
+              // If we have a recent health check (less than 1 minute ago), skip the check
+              if (minutesSinceLastCheck < 1) {
+                logger.debug('Using recent health check result');
+                skipHealthCheck = true;
+                
+                // If the last check showed server was unavailable, prompt for offline mode
+                if (status === 'unavailable' && !localStorage.getItem('standalone_confirmed_this_session')) {
+                  handleOfflineMode();
+                }
               }
+            } catch (e) {
+              logger.error('Error parsing health check data');
             }
           }
           
-          // Update the standalone mode indicator
+          // If we don't have a recent health check, perform one now
+          if (!skipHealthCheck) {
+            logger.debug('Performing fresh health check');
+            const serverAvailable = await checkServerAvailable();
+            
+            if (!serverAvailable && !localStorage.getItem('standalone_confirmed_this_session')) {
+              handleOfflineMode();
+            }
+          }
+          
+          // Update the offline mode indicator
           updateStandaloneModeIndicator();
           
         } catch (error) {
-          console.error('Error checking server health:', error);
-          // Update standalone mode indicator in case of error
+          logger.error('Error checking server health');
+          // Update offline mode indicator in case of error
           updateStandaloneModeIndicator();
+        }
+      }
+      
+      // Helper function to handle offline mode prompt
+      function handleOfflineMode() {
+        // Server is not available, offer offline mode
+        if (confirm("Server connection unavailable. Your scores will be saved locally but not shared online. Continue in offline mode?")) {
+          localStorage.setItem('force_standalone', 'true');
+          localStorage.setItem('standalone_confirmed_this_session', 'true');
+          logger.info('User confirmed offline mode');
+        } else {
+          // If they don't want to continue, redirect to home page
+          logger.info('User declined offline mode, redirecting to home');
+          window.location.href = 'index.html';
         }
       }
       
@@ -3020,7 +3127,7 @@
           sound.currentTime = 0;
           // Play the sound
           sound.play().catch(error => {
-            console.error('Error playing sound:', error);
+            logger.error('Error playing sound');
           });
         }
       }
@@ -3158,13 +3265,13 @@
       async function loadCategoryItems(category) {
         // If we've already loaded this category and have items, use them
         if (allItems[category]?.length > 0) {
-          console.log(`Using cached items for ${category}`);
+          logger.debug(`Using cached items for ${category}`);
           return allItems[category];
         }
         
         // If we're already loading this category, wait for it to complete
         if (isLoadingItems) {
-          console.log(`Already loading ${category}, waiting...`);
+          logger.debug(`Already loading ${category}, waiting...`);
           // Wait with multiple retries before timing out
           for (let i = 0; i < 10; i++) { // Try up to 10 times (1 second total)
             await new Promise(resolve => setTimeout(resolve, 100));
@@ -3173,7 +3280,7 @@
             }
           }
           // If we still don't have items after waiting, use fallback data
-          console.log(`Timeout waiting for ${category} to load, using fallback data`);
+          logger.debug(`Timeout waiting for ${category} to load, using fallback data`);
           return getFallbackData(category);
         }
         
@@ -3196,7 +3303,7 @@
             endpoint = "/villagers";
             break;
           default:
-            console.error("Invalid category:", category);
+            logger.error(`Invalid category: ${category}`);
             isLoadingItems = false;
             return [];
         }
@@ -3220,11 +3327,11 @@
             });
             
             if (!response || !response.length) {
-              console.log(`API returned empty data for ${category}, using fallback data`);
+              logger.debug(`API returned empty data for ${category}, using fallback data`);
               throw new Error(`API request failed or returned empty data`);
             }
             
-            console.log(`Loaded ${response.length} items for ${category} from API`);
+            logger.debug(`Loaded ${response.length} items for ${category} from API`);
             
             // Update last loaded category and clear loading flag
             lastLoadedCategory = category;
@@ -3254,17 +3361,17 @@
             
             return processedItems;
           } catch (error) {
-            console.error("Error fetching from API:", error);
+            logger.error("Error fetching from API");
             throw error; // Let the outer catch block handle it
           }
           
         } catch (error) {
-          console.error("Error loading items from API:", error);
+          logger.error("Error loading items from API");
           isLoadingItems = false; // Clear loading flag on error
           
           // Fallback to previously cached data if available
           if (allItems[category] && allItems[category].length > 0) {
-            console.log(`Using cached items for ${category} due to API error`);
+            logger.debug(`Using cached items for ${category} due to API error`);
             return allItems[category];
           }
           
@@ -3282,7 +3389,7 @@
       
       // Function to provide fallback data when API fails
       function getFallbackData(category) {
-        console.log(`Using fallback data for ${category}`);
+        logger.debug(`Using fallback data for ${category}`);
         // Store the fallback data in our global object so we don't try to fetch again
         if (!allItems[category]) {
           // Fallback to local data if API fails
@@ -3340,19 +3447,19 @@
 
       async function getRandomItem(category) {
         if (!category || typeof category !== 'string') {
-          console.error('Invalid category:', category);
+          logger.error('Invalid category');
           return null;
         }
 
         try {
           // If we don't have items for this category, try to load them first
           if (!allItems[category] || !Array.isArray(allItems[category])) {
-            console.log(`Loading items for category: ${category}`);
+            logger.debug(`Loading items for category: ${category}`);
             await loadCategoryItems(category);
             
             // If still no items after loading, use fallback data
             if (!allItems[category] || !Array.isArray(allItems[category])) {
-              console.error(`Failed to load items for category: ${category}`);
+              logger.error(`Failed to load items for category: ${category}`);
               return null;
             }
           }
@@ -3362,14 +3469,14 @@
           
           // If no items available, reset the shown items and try again
           if (available.length === 0) {
-            console.log(`No available items for ${category}, resetting shown items`);
+            logger.debug(`No available items for ${category}, resetting shown items`);
             shownItems[category] = [];
             localStorage.setItem(`shown_items_${category}`, JSON.stringify([]));
             
             // Get fresh available items after reset
             const freshAvailable = getAvailableItems(category);
             if (freshAvailable.length === 0) {
-              console.error('No items available even after reset');
+              logger.error('No items available even after reset');
               return null;
             }
             return freshAvailable[0]; // Return the first available item
@@ -3380,7 +3487,7 @@
           const item = available[randomIndex];
 
           if (!item) {
-            console.error('No valid item found in available items:', available);
+            logger.error('No valid item found in available items');
             return null;
           }
 
@@ -3393,7 +3500,7 @@
           
           return item;
         } catch (error) {
-          console.error('Error in getRandomItem:', error);
+          logger.error('Error in getRandomItem');
           return null;
         }
 
@@ -3437,7 +3544,7 @@
         const highScoreSound = document.getElementById('high-score-sound');
         if (highScoreSound) {
           highScoreSound.currentTime = 0;
-          highScoreSound.play().catch(e => console.log('Could not play high score sound:', e));
+          highScoreSound.play().catch(e => logger.warn('Could not play high score sound'));
         }
         
         // Set the final score in the modal
@@ -3487,16 +3594,13 @@
         document.getElementById('highScoreModal').style.display = 'none';
       }
       
-      async function submitHighScore(finalScore, category, playerName = null) {
-        // If playerName is not provided, get it from the input field
-        if (playerName === null) {
-          const playerNameInput = document.getElementById('playerName');
-          if (playerNameInput) {
-            playerName = playerNameInput.value.trim();
-            if (!playerName) {
-              alert('Please enter your name or click Skip');
-              return;
-            }
+      async function submitHighScore(playerName, finalScore, category) {
+        // Validate inputs
+        if (!playerName || typeof playerName !== 'string' || playerName.trim() === '') {
+          // Try to get a name from the input field
+          const nameInput = document.getElementById('playerName');
+          if (nameInput && nameInput.value && nameInput.value.trim() !== '') {
+            playerName = nameInput.value.trim();
           } else {
             // If no input field is found, use a default name
             playerName = 'Player';
@@ -3506,11 +3610,11 @@
         // Get the current username from localStorage or sessionStorage
         const username = localStorage.getItem('username') || sessionStorage.getItem('username') || playerName;
         
-        // Check if we're in standalone mode
+        // Check if we're in offline mode
         if (isStandaloneMode()) {
           // Always confirm before switching to standalone mode
           if (!localStorage.getItem('standalone_confirmed_this_session')) {
-            if (confirm("Server connection unavailable. Your scores will be saved locally but not shared online. Continue in standalone mode?")) {
+            if (confirm("Server connection unavailable. Your scores will be saved locally but not shared online. Continue in offline mode?")) {
               // Set a session flag to avoid multiple prompts in the same session
               localStorage.setItem('standalone_confirmed_this_session', 'true');
               localStorage.setItem('force_standalone', 'true');
@@ -3520,7 +3624,7 @@
               return;
             }
           }
-          console.log('Running in standalone mode, saving score to local storage only');
+          console.log('Running in offline mode, saving score to local storage only');
           saveScoreToLocalStorage(playerName, finalScore, category);
           return;
         }
@@ -3532,119 +3636,113 @@
           // Get guest token from localStorage or generate a new one
           let guestToken = localStorage.getItem('guestToken');
           if (!guestToken) {
-            guestToken = 'guest_' + Math.random().toString(36).substr(2, 9);
+            guestToken = 'guest_' + Math.random().toString(36).substring(2, 11);
             localStorage.setItem('guestToken', guestToken);
           }
           
-          // Prepare the headers
+          console.log(`Submitting score for ${category} with guest token: ${guestToken.substring(0, 5)}...`);
+          
+          // Prepare headers
           const headers = {
             'Content-Type': 'application/json',
-            'Accept': 'application/json',
-            'x-guest-token': guestToken
+            'Accept': 'application/json'
           };
           
-          // Add authorization header if token exists
+          // Add authorization if available
           if (token) {
             headers['Authorization'] = `Bearer ${token}`;
+          } else if (guestToken) {
+            headers['Authorization'] = `Bearer ${guestToken}`;
+            headers['X-Guest-Token'] = guestToken;
           }
           
-          // Submit the score to the server with a timeout
-          const controller = new AbortController();
-          const timeoutId = setTimeout(() => controller.abort(), 2000); // 2 second timeout
+          // Prepare the request body
+          const requestBody = {
+            name: playerName,
+            score: finalScore,
+            category: category
+          };
           
-          const response = await fetch(`${window.BACKEND_API}/leaderboard/submit`, {
+          // Submit the score
+          const response = await fetch(`${window.BACKEND_API}/submit-guest-score`, {
             method: 'POST',
             headers: headers,
-            body: JSON.stringify({
-              category: category,
-              score: finalScore,
-              playerName: playerName || 'Guest',
-              gameData: {
-                correctAnswers: finalScore,
-                totalQuestions: 10,
-                timeTaken: 15,
-                difficulty: 'medium'
-              }
-            }),
+            body: JSON.stringify(requestBody),
             credentials: 'include',
-            mode: 'cors',
-            signal: controller.signal
-          }).catch(error => {
-            console.error('Network error:', error);
-            window.apiUnavailable = true;
-            throw error;
+            mode: 'cors'
           });
           
-          clearTimeout(timeoutId);
-          
-          if (!response.ok) {
-            // If unauthorized and we have a guest token, try refreshing it
-            if (response.status === 401 && guestToken) {
-              console.log('Token expired, refreshing and retrying...');
-              // Generate a new guest token
-              const newToken = 'guest_' + Math.random().toString(36).substr(2, 9);
-              localStorage.setItem('guestToken', newToken);
-              
-              // Retry the request with the new token
-              return submitHighScore(finalScore, category, playerName);
-            }
+          if (response.ok) {
+            const data = await response.json();
+            console.log('Score submitted successfully:', data);
             
-            const errorText = await response.text();
-            console.error('Server error response:', errorText);
-            throw new Error(`Failed to save score: ${response.status} - ${errorText}`);
-          }
-          
-          const result = await response.json();
-          
-          // Get the placement by fetching the updated leaderboard
-          const leaderboardController = new AbortController();
-          const leaderboardTimeoutId = setTimeout(() => leaderboardController.abort(), 2000);
-          
-          try {
-            const leaderboardResponse = await fetch(`https://capstone-project-production-3cce.up.railway.app/api/v1/leaderboard/${category}`, {
-              headers: {
-                'Content-Type': 'application/json',
-                'x-guest-token': 'a7b9c2d5e8f3g6h1j4k7m2n5p8r3t6v9'
-              },
-              signal: leaderboardController.signal
-            });
-            
-            clearTimeout(leaderboardTimeoutId);
-            
-            if (!leaderboardResponse.ok) {
-              const errorText = await leaderboardResponse.text();
-              console.error('Leaderboard fetch error:', errorText);
-              throw new Error(`Failed to fetch leaderboard: ${leaderboardResponse.status}`);
-            }
-            
-            const leaderboardData = await leaderboardResponse.json();
-            
-            // Find the placement of the new score
-            const placement = leaderboardData.findIndex(entry => 
-              (entry.username === username || entry.name === username) && 
-              entry.score === finalScore
-            ) + 1;
-            
-            // Show placement message
-            showPlacementMessage(placement);
+            // Update the leaderboard
+            loadLeaderboardData(category);
             
             // Close the modal
             closeHighScoreModal();
             
-            // Update the displayed leaderboard
-            updateLeaderboardUI(currentCategory);
+            return data;
+          } else if (response.status === 401) {
+            // Handle unauthorized - generate a new guest token and retry once
+            console.warn('Unauthorized when submitting score, generating new guest token');
+            const newGuestToken = 'guest_' + Math.random().toString(36).substring(2, 11);
+            localStorage.setItem('guestToken', newGuestToken);
             
-          } catch (error) {
-            console.error('Error fetching leaderboard after submission:', error);
-            // Still close the modal even if we can't get the leaderboard
+            // Try one more time with the new token
+            console.log(`Retrying score submission with new token: ${newGuestToken.substring(0, 5)}...`);
+            
+            headers['Authorization'] = `Bearer ${newGuestToken}`;
+            headers['X-Guest-Token'] = newGuestToken;
+            
+            const retryResponse = await fetch(`${window.BACKEND_API}/submit-guest-score`, {
+              method: 'POST',
+              headers: headers,
+              body: JSON.stringify(requestBody),
+              credentials: 'include',
+              mode: 'cors'
+            });
+            
+            if (retryResponse.ok) {
+              const retryData = await retryResponse.json();
+              console.log('Score submitted successfully on retry:', retryData);
+              
+              // Update the leaderboard
+              loadLeaderboardData(category);
+              
+              // Close the modal
+              closeHighScoreModal();
+              
+              return retryData;
+            } else {
+              // If retry fails, save locally
+              console.warn('Retry failed, saving score to local storage');
+              saveScoreToLocalStorage(playerName, finalScore, category);
+              
+              // Close the modal
+              closeHighScoreModal();
+            }
+          } else {
+            // Handle other error responses
+            const errorText = await response.text();
+            console.error('Error submitting score:', response.status, errorText);
+            
+            // Save locally for any other errors
+            console.warn('API error, saving score to local storage');
+            saveScoreToLocalStorage(playerName, finalScore, category);
+            
+            // Close the modal
             closeHighScoreModal();
-            updateLeaderboardUI(currentCategory);
           }
         } catch (error) {
-          console.log('Error with server, falling back to local storage');
+          console.error('Error submitting score:', error);
           
-          // Fall back to local storage if server request fails
+          // Fall back to local storage
+          console.log('Falling back to local storage for score');
           saveScoreToLocalStorage(playerName, finalScore, category);
+          
+          // Close the modal
+          closeHighScoreModal();
         }
       }
       
@@ -3789,7 +3887,7 @@
 
 
       async function initGame(category, isInitialLoad = false) {
-        console.log(`Initializing game for category: ${category}`);
+        logger.debug(`Initializing game for category: ${category}`);
         let lastLoadTimestamp = 0; // Initialize lastLoadTimestamp
         
         try {
@@ -3814,7 +3912,7 @@
 
           // If setupNewRound has been called recently, don't load a new item
           if (Date.now() - lastLoadTimestamp < 500 && currentItem && currentItem.name) {
-            console.log(`Using recently loaded item: ${currentItem.name} instead of loading a new one in initGame`);
+            logger.debug(`Using recently loaded item: ${currentItem.name}`);
             // Just update the UI with the current item
             displayItem(currentItem);
             return;
@@ -3833,7 +3931,7 @@
           }
           
         } catch (error) {
-          console.error('Error in initGame:', error);
+          logger.error('Error in initGame');
           feedbackElement.textContent = 'Failed to load game items. Please try again.';
           feedbackElement.className = 'error';
           
@@ -3841,13 +3939,13 @@
           try {
             const recoveryCategory = categorySelector?.value || 'fish'; // Default to fish if selector not available
             if (recoveryCategory && allItems[recoveryCategory]) {
-              console.log('Attempting to reset category data');
+              logger.debug('Attempting to reset category data');
               delete allItems[recoveryCategory];
               await loadCategoryItems(recoveryCategory);
               await initGame(recoveryCategory, true);
             }
           } catch (recoveryError) {
-            console.error('Recovery failed:', recoveryError);
+            logger.error('Recovery failed');
           }
         } finally {
           // Re-enable input
@@ -3897,13 +3995,13 @@
           });
           clearTimeout(id);
           if (!response.ok) {
-            console.error(`Fetch failed with status: ${response.status}`);
+            logger.error(`Fetch failed with status: ${response.status}`);
             throw new Error(`Fetch failed with status: ${response.status}`);
           }
           return await response.json();
         } catch (error) {
           clearTimeout(id);
-          console.error(`Fetch error: ${error.message}`);
+          logger.error(`Fetch error: ${error.message}`);
           return null;
         }
       }
@@ -4048,14 +4146,14 @@
       async function displayItem(item) {
         // Validate input parameters
         if (!item || !item.name) {
-          console.error('Invalid item data:', item);
+          logger.error('Invalid item data');
           showPlaceholder('Invalid item data');
           return false;
         }
         
         // Check if we're already displaying this item to prevent duplicate calls
         if (currentlyDisplayingItem === item.name) {
-          console.log(`Already displaying ${item.name}, skipping duplicate load`);
+          logger.debug(`Already displaying ${item.name}, skipping duplicate load`);
           return true;
         }
         
@@ -4067,7 +4165,7 @@
         const loadingLeaf = document.querySelector('.loading-leaf');
         
         if (!imageDisplay) {
-          console.error('Image display element not found');
+          logger.error('Image display element not found');
           return false;
         }
         
@@ -4117,7 +4215,7 @@
           
           // Try primary image URL first if available
           if (item.image_url) {
-            console.log(`Loading primary image: ${item.image_url}`);
+            logger.debug(`Loading primary image for ${item.name}`);
             success = await tryLoadImage(item.image_url);
             
             if (success) {
@@ -4129,7 +4227,7 @@
           if (!success) {
             const fallbackPath = getFallbackPath();
             if (fallbackPath) {
-              console.log(`Trying fallback image: ${fallbackPath}`);
+              logger.debug(`Trying fallback image for ${item.name}`);
               success = await tryLoadImage(fallbackPath);
               
               if (success) {
@@ -4159,12 +4257,12 @@
           }
           
           // If we get here, all image loading attempts failed
-          console.error(`Failed to load any image for: ${item.name}`);
+          logger.error(`Failed to load any image for: ${item.name}`);
           showPlaceholder(`${item.name} (Image unavailable)`);
           return false;
           
         } catch (error) {
-          console.error('Error in displayItem:', error);
+          logger.error('Error in displayItem');
           showPlaceholder('Error loading image');
           return false;
           
@@ -4196,7 +4294,7 @@
         placeholder.textContent = text || "Image not available";
         placeholder.style.display = "block";
         
-        console.log('Showing placeholder with text:', text);
+        logger.debug(`Showing placeholder: ${text}`);
       }
 
       async function setupNewRound() {
@@ -4257,20 +4355,20 @@
           // Get the current category
           const category = categorySelector.value;
           if (!category) {
-            console.error('No category selected');
+            logger.error('No category selected');
             feedbackElement.textContent = 'Error: No category selected';
             isLoadingItem = false; // Release the lock
             return;
           }
           
-          console.log(`Setting up new round for category: ${category}`);
+          logger.debug(`Setting up new round for category: ${category}`);
           
           try {
             // Get a random item from the current category - await to ensure synchronization
             const item = await getRandomItem(category);
             
             if (item && item.name) {
-              console.log(`Got item for display: ${item.name}`);
+              logger.debug(`Got item for display: ${item.name}`);
               
               // Set the current item BEFORE displaying it to ensure consistency
               currentItem = item;
@@ -4288,13 +4386,13 @@
               submitButton.disabled = false;
               guessInput.focus();
               
-              console.log(`Ready for guessing. Current item is: ${currentItem.name}`);
+              logger.debug(`Ready for guessing. Current item is: ${currentItem.name}`);
             } else {
-              console.error('Invalid or missing item data');
+              logger.error('Invalid or missing item data');
               feedbackElement.textContent = 'Error loading item. Please try again.';
             }
           } catch (error) {
-            console.error('Error getting or displaying item:', error);
+            logger.error('Error getting or displaying item');
             feedbackElement.textContent = 'Error loading item. Please try again.';
           } finally {
             // Hide loading indicator
@@ -4309,14 +4407,14 @@
           // Timer will be started after image is successfully loaded - see displayItem function
 
         } catch (error) {
-          console.error('Error setting up new round:', error);
+          logger.error('Error setting up new round');
           feedbackElement.textContent = 'Error setting up new round. Please try again.';
         }
       }
 
       // Reset function for when categories are changed or Try Again is pressed
       async function resetGame() {
-        console.log('Resetting game...');
+        logger.debug('Resetting game');
         
         // Stop any current timer
         stopTimer();
@@ -4382,7 +4480,7 @@
           timerDisplay.classList.remove('warning', 'expired');
           timerDisplay.classList.add('running');
         } catch (error) {
-          console.error('Error resetting game:', error);
+          logger.error('Error resetting game');
           feedbackElement.textContent = 'Error resetting game. Please try again.';
         }
       }
@@ -4408,7 +4506,7 @@
           const correctSound = document.getElementById('correct-sound');
           if (correctSound) {
             correctSound.currentTime = 0;
-            correctSound.play().catch(e => console.log('Could not play sound:', e));
+            correctSound.play().catch(e => logger.warn('Could not play sound'));
             multiplier = 3;
           }
           
@@ -4445,14 +4543,14 @@
           
           // Make sure we release any loading locks before setting up a new round
           isLoadingItem = false;
-          console.log('Setting isLoadingItem to false in checkGuess before timeout');
+          logger.debug('Setting isLoadingItem to false before timeout');
           
           // Automatically load next item with reduced delay for faster image loading
           // Reduced from 1000ms to 500ms for faster transitions between rounds
           setTimeout(async () => {
             // Make sure we're not in a loading state before setting up a new round
             if (isLoadingItem) {
-              console.log('Resetting isLoadingItem flag before setting up new round');
+              logger.debug('Resetting isLoadingItem flag before setting up new round');
               isLoadingItem = false;
             }
             
@@ -4461,7 +4559,7 @@
             
             // Double-check we're not in a loading state
             if (isLoadingItem) {
-              console.warn('Still in loading state after delay, forcing reset');
+              logger.warn('Still in loading state after delay, forcing reset');
               isLoadingItem = false;
             }
             

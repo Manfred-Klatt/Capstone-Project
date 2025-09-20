@@ -662,9 +662,15 @@
             submitBtn.textContent = originalBtnText;
             submitBtn.disabled = false;
             
+            // Remove any existing action buttons
+            const loginForm = document.getElementById('loginForm');
+            const existingButtons = loginForm.querySelectorAll('button:not([type="submit"])');
+            existingButtons.forEach(btn => btn.remove());
+            
             // Create a temporary button for standalone mode
             const standaloneBtn = document.createElement('button');
             standaloneBtn.textContent = 'Play in Standalone Mode';
+            standaloneBtn.className = 'standalone-btn';
             standaloneBtn.style.marginTop = '10px';
             standaloneBtn.onclick = function() {
               localStorage.setItem('acnh_username', email);
@@ -674,7 +680,7 @@
             };
             
             // Add the button to the form
-            document.getElementById('loginForm').appendChild(standaloneBtn);
+            loginForm.appendChild(standaloneBtn);
             return;
           }
           
@@ -773,7 +779,7 @@
             showError('loginError', errorMessage);
             
             // Clear any existing buttons
-            const existingButtons = loginForm.querySelectorAll('button[data-type="action"]');
+            const existingButtons = loginForm.querySelectorAll('button:not([type="submit"])');
             existingButtons.forEach(btn => btn.remove());
             
             // Check if this is a deactivated account error
@@ -832,6 +838,7 @@
               // Create a button for standalone mode
               const standaloneBtn = document.createElement('button');
               standaloneBtn.textContent = 'Play in Standalone Mode';
+              standaloneBtn.className = 'standalone-btn';
               standaloneBtn.style.marginTop = '10px';
               standaloneBtn.setAttribute('data-type', 'action');
               standaloneBtn.onclick = function() {
@@ -887,6 +894,11 @@
           submitBtn.textContent = originalBtnText;
           submitBtn.disabled = false;
           
+          // Remove any existing action buttons
+          const signupForm = document.getElementById('signupForm');
+          const existingButtons = signupForm.querySelectorAll('button:not([type="submit"])');
+          existingButtons.forEach(btn => btn.remove());
+          
           const standaloneBtn = document.createElement('button');
           standaloneBtn.textContent = 'Play in Standalone Mode';
           standaloneBtn.className = 'standalone-btn';
@@ -897,7 +909,7 @@
           };
           
           // Add the button to the form
-          document.getElementById('signupForm').appendChild(standaloneBtn);
+          signupForm.appendChild(standaloneBtn);
           return;
         }
         
@@ -962,6 +974,11 @@
             
             // If the account is inactive, offer reactivation
             if (data.status === 'fail' && data.message && data.message.includes('inactive')) {
+              // Remove any existing action buttons first
+              const signupForm = document.getElementById('signupForm');
+              const existingButtons = signupForm.querySelectorAll('button:not([type="submit"])');
+              existingButtons.forEach(btn => btn.remove());
+              
               const reactivateBtn = document.createElement('button');
               reactivateBtn.textContent = 'Reactivate Account';
               reactivateBtn.className = 'reactivate-btn';
@@ -1017,6 +1034,11 @@
           
           showError('signupError', errorMessage);
           
+          // Remove any existing action buttons
+          const signupForm = document.getElementById('signupForm');
+          const existingButtons = signupForm.querySelectorAll('button:not([type="submit"])');
+          existingButtons.forEach(btn => btn.remove());
+          
           // Offer standalone mode for network errors
           const standaloneBtn = document.createElement('button');
           standaloneBtn.textContent = 'Play in Standalone Mode';
@@ -1028,7 +1050,7 @@
           };
           
           // Add the button to the form
-          document.getElementById('signupForm').appendChild(standaloneBtn);
+          signupForm.appendChild(standaloneBtn);
         }
       });
 

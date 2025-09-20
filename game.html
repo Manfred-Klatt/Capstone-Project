@@ -768,12 +768,14 @@
         background-color: #5a7c1f;
       }
       
+      /* Override mobile-container background for game container */
+      #game-container.mobile-container,
       #game-container {
         width: 100%;
         max-width: 1100px;
         margin: 0 auto 30px;
         padding: 15px;
-        background-color: #fff9e6;
+        background-color: #fff9e6 !important; /* Use !important to ensure it overrides other styles */
         border-radius: 10px;
         border: 2px solid var(--border-color, #8b4513);
         box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
@@ -1371,9 +1373,14 @@
       
       /* Leaderboard styles */
       .leaderboard-container {
-        max-width: 800px;
+        max-width: 1100px; /* Match game container */
+        width: 100%; /* Match game container */
         margin: 0 auto;
         padding: 20px;
+        display: grid;
+        grid-template-columns: repeat(2, 1fr); /* 2x2 grid on desktop */
+        grid-gap: 25px;
+        box-sizing: border-box;
       }
       
       /* Loading and error states */
@@ -1731,19 +1738,35 @@
       
       /* Responsive adjustments */
       @media (max-width: 1100px) {
-        #game-container {
+        #game-container,
+        .leaderboard-container {
           width: 95%;
           margin: 0 auto 20px;
           padding: 10px;
         }
+        
+        /* Ensure game container background is consistent */
+        #game-container.mobile-container,
+        #game-container {
+          background-color: #fff9e6 !important;
+        }
       }
       
       @media (max-width: 768px) {
-        #game-container {
-          width: 98%;
+        #game-container,
+        .leaderboard-container {
+          width: 95%;
           margin: 0 auto 15px;
           padding: 8px;
           border-radius: 8px;
+        }
+        
+        /* Additional game container styling for mobile */
+        #game-container.mobile-container,
+        #game-container {
+          padding: 15px 10px;
+          margin-top: 10px;
+          background-color: #fff9e6 !important; /* Ensure background color is consistent */
         }
         
         .category-leaderboard h3 {
@@ -1828,6 +1851,11 @@
         border: 2px solid var(--border-color);
         box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
         background-color: #e8f5e9; /* Soft mint green that complements the theme */
+      }
+      
+      /* Ensure game container overrides mobile-container background */
+      #game-container.mobile-container {  
+        background-color: #fff9e6 !important;
       }
       
       /* Ensure all containers have the same styling on mobile */
@@ -2042,10 +2070,8 @@
           display: none;
         }
         
-        #game-container {
-          padding: 15px 10px;
-          margin-top: 10px;
-        }
+        /* Additional game container styling for mobile */
+        /* Note: width is already set in the main mobile media query */
         
         .category-container {
           flex-direction: column;
@@ -2978,7 +3004,7 @@
     </div>
     
     <!-- Leaderboards Container -->
-    <div id="leaderboards-container" style="display: flex; flex-wrap: wrap; justify-content: center; gap: 25px; margin: 20px auto; max-width: 1400px; padding: 10px;">
+    <div id="leaderboards-container" class="leaderboard-container">
       <!-- Fish Leaderboard -->
       <div class="leaderboard-card fish-leaderboard">
         <div class="leaderboard-header">
@@ -3052,9 +3078,7 @@
       }
       
       .leaderboard-card {
-        flex: 1;
-        min-width: 280px;
-        max-width: 320px;
+        width: 100%; /* Fill the grid cell */
         background: rgba(255, 255, 255, 0.9);
         border-radius: 16px;
         padding: 15px;
@@ -3063,6 +3087,7 @@
         position: relative;
         overflow: hidden;
         border: 3px solid;
+        box-sizing: border-box;
       }
 
       .leaderboard-card::before {
@@ -3161,16 +3186,38 @@
       }
 
       /* Responsive adjustments */
-      @media (max-width: 1200px) {
-        .leaderboard-card {
-          min-width: calc(50% - 30px);
-        }
-      }
+      /* Desktop and tablet styles are handled by the grid layout */
+      
 
       @media (max-width: 768px) {
+        /* Change to 1x4 column layout on mobile */
+        .leaderboard-container {
+          display: grid;
+          grid-template-columns: 1fr; /* Single column */
+          grid-gap: 15px;
+          /* Width already set above */
+        }
+        
+        /* Leaderboard card styles for mobile */
         .leaderboard-card {
-          min-width: 100%;
-          max-width: 100%;
+          width: 100%;
+          border-radius: 8px;
+          margin-bottom: 0; /* Grid gap handles spacing */
+        }
+      }
+      
+      /* Extra small devices */
+      @media (max-width: 480px) {
+        #game-container,
+        .leaderboard-container {
+          width: 95%;
+          padding: 6px;
+        }
+        
+        /* Ensure game container background is consistent */
+        #game-container.mobile-container,
+        #game-container {
+          background-color: #fff9e6 !important;
         }
       }
     </style>

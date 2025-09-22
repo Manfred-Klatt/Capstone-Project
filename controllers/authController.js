@@ -1,9 +1,10 @@
-const User = require('../src/models/User');
+const User = require('../models/userModel');
 const AppError = require('../utils/appError');
 const catchAsync = require('../utils/catchAsync');
-const InputValidator = require('../utils/inputValidator');
 const jwt = require('jsonwebtoken');
 const { promisify } = require('util');
+
+// Remove InputValidator dependency as it's not used or not available
 
 const signToken = id => {
   return jwt.sign({ id }, process.env.JWT_SECRET, {
@@ -21,8 +22,21 @@ const createSendToken = (user, statusCode, req, res) => {
       id: user._id,
       username: user.username,
       email: user.email,
-      role: user.role
+      role: user.role,
+      highScores: user.highScores || {}
     };
+
+    // Set cookie options
+    const cookieOptions = {
+      expires: new Date(
+        Date.now() + process.env.JWT_COOKIE_EXPIRES_IN * 24 * 60 * 60 * 1000
+      ),
+      httpOnly: true,
+      secure: req && req.secure || req && req.headers['x-forwarded-proto'] === 'https'
+    };
+
+    // Set JWT as cookie
+    res.cookie('jwt', token, cookieOptions);
 
     console.log('Token created successfully');
     return res.status(statusCode).json({
@@ -34,6 +48,11 @@ const createSendToken = (user, statusCode, req, res) => {
     });
   } catch (error) {
     console.error('Error in createSendToken:', error);
+    console.error('Error details:', {
+      name: error.name,
+      message: error.message,
+      stack: error.stack
+    });
     return res.status(500).json({
       status: 'error',
       message: 'An error occurred while generating authentication token',
@@ -207,6 +226,13 @@ exports.login = async (req, res, next) => {
     createSendToken(user, 200, req, res);
   } catch (err) {
     console.error('Login error:', err);
+    console.error('Error details:', {
+      name: err.name,
+      message: err.message,
+      stack: err.stack,
+      code: err.code
+    });
+    
     if (next) {
       return next(err);
     }
@@ -227,40 +253,67 @@ exports.protect = async (req, res, next) => {
       req.headers.authorization.startsWith('Bearer')
     ) {
       token = req.headers.authorization.split(' ')[1];
-    } else if (req.cookies.jwt) {
+    } else if (req.cookies && req.cookies.jwt) {
       token = req.cookies.jwt;
     }
 
     if (!token) {
-      return next(
-        new AppError('You are not logged in! Please log in to get access.', 401)
-      );
+      const error = new AppError('You are not logged in! Please log in to get access.', 401);
+      if (next) return next(error);
+      return res.status(401).json({
+        status: 'error',
+        message: error.message
+      });
     }
 
     // 2) Verification token
-    const decoded = await promisify(jwt.verify)(token, process.env.JWT_SECRET);
+    try {
+      const decoded = await promisify(jwt.verify)(token, process.env.JWT_SECRET);
+      
+      // 3) Check if user still exists
+      const currentUser = await User.findById(decoded.id);
+      if (!currentUser) {
+        const error = new AppError('The user belonging to this token no longer exists.', 401);
+        if (next) return next(error);
+        return res.status(401).json({
+          status: 'error',
+          message: error.message
+        });
+      }
 
-    // 3) Check if user still exists
-    const currentUser = await User.findById(decoded.id);
-    if (!currentUser) {
-      return next(
-        new AppError('The user belonging to this token no longer exists.', 401)
-      );
+      // 4) Check if user changed password after the token was issued
+      if (currentUser.changedPasswordAfter && currentUser.changedPasswordAfter(decoded.iat)) {
+        const error = new AppError('User recently changed password! Please log in again.', 401);
+        if (next) return next(error);
+        return res.status(401).json({
+          status: 'error',
+          message: error.message
+        });
+      }
+
+      // GRANT ACCESS TO PROTECTED ROUTE
+      req.user = currentUser;
+      res.locals.user = currentUser;
+      next();
+    } catch (jwtError) {
+      console.error('JWT verification error:', jwtError);
+      const error = new AppError('Invalid token. Please log in again.', 401);
+      if (next) return next(error);
+      return res.status(401).json({
+        status: 'error',
+        message: error.message
+      });
     }
-
-    // 4) Check if user changed password after the token was issued
-    if (currentUser.changedPasswordAfter(decoded.iat)) {
-      return next(
-        new AppError('User recently changed password! Please log in again.', 401)
-      );
-    }
-
-    // GRANT ACCESS TO PROTECTED ROUTE
-    req.user = currentUser;
-    res.locals.user = currentUser;
-    next();
   } catch (err) {
-    next(err);
+    console.error('Protect middleware error:', err);
+    if (next) {
+      return next(err);
+    }
+    return res.status(500).json({
+      status: 'error',
+      message: 'An error occurred during authentication',
+      error: process.env.NODE_ENV === 'development' ? err.message : undefined
+    });
   }
 };
 

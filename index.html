@@ -281,6 +281,9 @@
           <div id="loginError" class="error-message"></div>
           <button type="submit">Log In</button>
         </form>
+        <div style="margin-top: 15px; text-align: center;">
+          <button id="forceStandaloneBtn" style="background-color: #ff9800; color: white; padding: 8px 12px; border: none; border-radius: 4px; cursor: pointer; font-size: 14px;">Play in Standalone Mode</button>
+        </div>
       </div>
     </main>
 
@@ -320,7 +323,7 @@
         'https://capstone-project-production-3cce.up.railway.app',
         'https://api.blathers.app',
         'https://acnh-auth-server.up.railway.app', 
-        'https://railway.com/project/941586ce-f8c4-4d83-9a9d-800c00661611', 
+        'https://acnh-auth-server-production.up.railway.app', 
         'http://localhost:3000' 
       ];
       
@@ -404,8 +407,10 @@
         
         // Special case: Try the local auth server specifically for auth endpoints
         try {
-          console.log('Trying local auth server as last resort...');
-          const localAuthResponse = await fetch('http://localhost:3000/health', {
+          console.log('%c[LOCAL AUTH] Trying local auth server as last resort...', 'color: orange; font-weight: bold');
+          const localAuthUrl = 'http://localhost:3000/health';
+          console.log('%c[LOCAL AUTH] Testing URL:', 'color: orange', localAuthUrl);
+          const localAuthResponse = await fetch(localAuthUrl, {
             method: 'GET',
             mode: 'cors',
             headers: {
@@ -440,7 +445,9 @@
           // First check if the server is responding at all
           try {
             // Try health endpoint first (at /health)
-            const response = await fetch(`${baseUrl}/health`, {
+            const healthUrl = `${baseUrl}/health`;
+            console.log('%c[API CHECK] Testing health endpoint:', 'color: green', healthUrl);
+            const response = await fetch(healthUrl, {
               method: 'GET',
               signal: controller.signal,
               mode: 'cors',
@@ -448,6 +455,7 @@
                 'Accept': 'application/json'
               }
             });
+            console.log('%c[API CHECK] Health response status:', 'color: green', response.status);
             
             clearTimeout(timeoutId);
             if (response.ok) {
@@ -456,9 +464,10 @@
               for (const pathPrefix of POSSIBLE_API_PATHS) {
                 // Try the auth endpoint to see if it exists
                 const authEndpoint = `${baseUrl}${pathPrefix}/auth`;
-                console.log(`Testing API path: ${authEndpoint}`);
+                console.log('%c[API PATH] Testing API path:', 'color: purple', authEndpoint);
                 
                 try {
+                  console.log('%c[API PATH] Sending request to:', 'color: purple', authEndpoint);
                   const authResponse = await fetch(`${authEndpoint}`, {
                     method: 'GET',
                     signal: controller.signal,
@@ -467,6 +476,7 @@
                       'Accept': 'application/json'
                     }
                   });
+                  console.log('%c[API PATH] Auth response status:', 'color: purple', authResponse.status);
                   
                   // If we get any response other than 404, this path might be correct
                   // Even a 401 Unauthorized is good because it means the endpoint exists
@@ -476,7 +486,8 @@
                   }
                   console.log(`API path ${pathPrefix} returned 404, trying next...`);
                 } catch (authError) {
-                  console.log(`Error testing API path ${pathPrefix}:`, authError.message);
+                  console.log('%c[API PATH] Error testing path:', 'color: red', pathPrefix, authError.message);
+                  console.error('Full error object:', authError);
                 }
               }
               
@@ -603,19 +614,7 @@
       document
         .getElementById("playAsGuest")
         .addEventListener("click", async function () {
-          // Clear any existing auth data
-          window.secureTokenManager.clearToken();
           localStorage.setItem('acnh_guest', 'true');
-          
-          // If we're already in standalone mode, prompt the user
-          if (isStandaloneMode()) {
-            if (confirm("Server connection unavailable. Your scores will be saved locally but not shared online. Continue in standalone mode?")) {
-              localStorage.setItem('force_standalone', 'true');
-              localStorage.setItem('standalone_confirmed_this_session', 'true');
-              window.location.href = "game.html?guest=true";
-            }
-            return;
-          }
           
           // Check if server is available
           const serverAvailable = await checkServerAvailable();
@@ -695,8 +694,9 @@
           }
           
           // Check if server is available
-          console.log('Checking server availability before login...');
+          console.log('%c[AUTH] Checking server availability before login...', 'color: blue; font-weight: bold');
           const serverAvailable = await checkServerAvailable();
+          console.log('%c[AUTH] Server available check result:', 'color: blue; font-weight: bold', serverAvailable);
           
           // Add a timeout to the fetch request
           const controller = new AbortController();
@@ -707,7 +707,7 @@
           try {
             // Use the detected API path for auth routes
             const loginUrl = getApiUrl('/auth/login');
-            console.log('Sending login request to:', loginUrl);
+            console.log('%c[LOGIN] Sending login request to:', 'color: blue; font-weight: bold', loginUrl);
             
             const response = await fetch(loginUrl, {
               method: 'POST',
@@ -764,10 +764,15 @@
             }, 1000);
             
           } catch (error) {
-            // Reset button
+            clearTimeout(timeoutId);
             submitBtn.textContent = originalBtnText;
             submitBtn.disabled = false;
-            console.error('Login error:', {
+            
+            console.error('%c[LOGIN ERROR] Login failed:', 'color: red; font-weight: bold', error);
+            console.error('Error name:', error.name);
+            console.error('Error message:', error.message);
+            console.error('Error stack:', error.stack);
+            console.error({
               name: error.name,
               message: error.message,
               stack: error.stack,
@@ -1067,6 +1072,15 @@
       // Server status monitoring removed
       document.addEventListener('DOMContentLoaded', function() {
         // Page initialization code
+        
+        // Event listener for force standalone mode button
+        document.getElementById("forceStandaloneBtn").addEventListener("click", function () {
+          console.log('%c[STANDALONE] Forcing standalone mode', 'color: orange; font-weight: bold');
+          localStorage.setItem('force_standalone', 'true');
+          localStorage.setItem('standalone_confirmed_this_session', 'true');
+          localStorage.setItem('acnh_guest', 'true');
+          window.location.href = "game.html?guest=true&standalone=true";
+        });
       });
     </script>
   </body>

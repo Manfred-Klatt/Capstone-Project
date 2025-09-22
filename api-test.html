@@ -1,0 +1,355 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>API Connection Test</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+            line-height: 1.6;
+        }
+        .result {
+            padding: 15px;
+            border-radius: 5px;
+            margin: 10px 0;
+        }
+        .success {
+            background-color: #d4edda;
+            color: #155724;
+            border: 1px solid #c3e6cb;
+        }
+        .error {
+            background-color: #f8d7da;
+            color: #721c24;
+            border: 1px solid #f5c6cb;
+        }
+        .info {
+            background-color: #e2f0fb;
+            color: #0c5460;
+            border: 1px solid #bee5eb;
+        }
+        button {
+            padding: 10px 15px;
+            background-color: #4CAF50;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            margin-right: 10px;
+            margin-bottom: 10px;
+        }
+        button:hover {
+            background-color: #45a049;
+        }
+        pre {
+            background-color: #f5f5f5;
+            padding: 10px;
+            border-radius: 5px;
+            overflow-x: auto;
+        }
+        input, select {
+            padding: 8px;
+            width: 100%;
+            margin-bottom: 10px;
+            box-sizing: border-box;
+        }
+    </style>
+</head>
+<body>
+    <h1>API Connection Test</h1>
+    
+    <div>
+        <h2>API URL</h2>
+        <select id="apiUrl">
+            <option value="https://capstone-project-production-3cce.up.railway.app">Railway Main API</option>
+            <option value="https://api.blathers.app">Blathers API</option>
+            <option value="https://acnh-auth-server.up.railway.app">Auth Server</option>
+            <option value="https://acnh-auth-server-production.up.railway.app">Auth Server (Production)</option>
+            <option value="http://localhost:3000">Local Auth Server</option>
+        </select>
+    </div>
+
+    <div>
+        <h2>API Path Prefix</h2>
+        <select id="apiPathPrefix">
+            <option value="/api/v1">/api/v1</option>
+            <option value="/api">/api</option>
+            <option value="">(empty)</option>
+            <option value="/v1">/v1</option>
+        </select>
+    </div>
+
+    <div>
+        <h2>Health Check</h2>
+        <button onclick="testHealth()">Test Health Endpoint</button>
+        <div id="healthResult" class="result"></div>
+    </div>
+
+    <div>
+        <h2>Auth Endpoint Test</h2>
+        <button onclick="testAuthEndpoint()">Test Auth Endpoint</button>
+        <div id="authResult" class="result"></div>
+    </div>
+
+    <div>
+        <h2>Login Test</h2>
+        <div>
+            <label for="email">Email:</label>
+            <input type="email" id="email" placeholder="Enter your email">
+        </div>
+        <div>
+            <label for="password">Password:</label>
+            <input type="password" id="password" placeholder="Enter your password">
+        </div>
+        <button onclick="testLogin()">Test Login</button>
+        <div id="loginResult" class="result"></div>
+    </div>
+
+    <div>
+        <h2>CORS Test</h2>
+        <button onclick="testCORS()">Test CORS Configuration</button>
+        <div id="corsResult" class="result"></div>
+    </div>
+
+    <script>
+        // Get the base URL and path prefix
+        function getBaseUrl() {
+            return document.getElementById('apiUrl').value;
+        }
+        
+        function getPathPrefix() {
+            return document.getElementById('apiPathPrefix').value;
+        }
+        
+        // Test the health endpoint
+        async function testHealth() {
+            const baseUrl = getBaseUrl();
+            const resultDiv = document.getElementById('healthResult');
+            
+            resultDiv.innerHTML = '<div class="info">Testing health endpoint...</div>';
+            
+            try {
+                // Test health endpoint
+                const healthUrl = `${baseUrl}/health`;
+                resultDiv.innerHTML += `<div class="info">Testing: ${healthUrl}</div>`;
+                
+                const response = await fetch(healthUrl, {
+                    method: 'GET',
+                    mode: 'cors',
+                    headers: {
+                        'Accept': 'application/json'
+                    }
+                });
+                
+                if (response.ok) {
+                    const data = await response.json();
+                    resultDiv.innerHTML += `<div class="success">Health endpoint is working! Status: ${response.status}</div>`;
+                    resultDiv.innerHTML += `<div class="info">Response: <pre>${JSON.stringify(data, null, 2)}</pre></div>`;
+                } else {
+                    resultDiv.innerHTML += `<div class="error">Health endpoint returned status: ${response.status}</div>`;
+                    try {
+                        const text = await response.text();
+                        resultDiv.innerHTML += `<div class="info">Response text: <pre>${text}</pre></div>`;
+                    } catch (e) {
+                        resultDiv.innerHTML += `<div class="error">Could not read response text</div>`;
+                    }
+                }
+            } catch (error) {
+                resultDiv.innerHTML += `<div class="error">Error: ${error.message}</div>`;
+                console.error('Health check error:', error);
+            }
+        }
+        
+        // Test the auth endpoint
+        async function testAuthEndpoint() {
+            const baseUrl = getBaseUrl();
+            const pathPrefix = getPathPrefix();
+            const resultDiv = document.getElementById('authResult');
+            
+            resultDiv.innerHTML = '<div class="info">Testing auth endpoint...</div>';
+            
+            try {
+                const authUrl = `${baseUrl}${pathPrefix}/auth`;
+                resultDiv.innerHTML += `<div class="info">Testing: ${authUrl}</div>`;
+                
+                const response = await fetch(authUrl, {
+                    method: 'GET',
+                    mode: 'cors',
+                    headers: {
+                        'Accept': 'application/json'
+                    }
+                });
+                
+                resultDiv.innerHTML += `<div class="info">Response status: ${response.status}</div>`;
+                
+                // Any response other than 404 might indicate a working endpoint
+                if (response.status !== 404) {
+                    resultDiv.innerHTML += `<div class="success">Auth endpoint might be working! Status: ${response.status}</div>`;
+                    
+                    try {
+                        const text = await response.text();
+                        resultDiv.innerHTML += `<div class="info">Response text: <pre>${text}</pre></div>`;
+                        
+                        try {
+                            const data = JSON.parse(text);
+                            resultDiv.innerHTML += `<div class="info">Parsed JSON: <pre>${JSON.stringify(data, null, 2)}</pre></div>`;
+                        } catch (e) {
+                            resultDiv.innerHTML += `<div class="info">Response is not valid JSON</div>`;
+                        }
+                    } catch (e) {
+                        resultDiv.innerHTML += `<div class="error">Could not read response text</div>`;
+                    }
+                } else {
+                    resultDiv.innerHTML += `<div class="error">Auth endpoint returned 404 Not Found</div>`;
+                }
+            } catch (error) {
+                resultDiv.innerHTML += `<div class="error">Error: ${error.message}</div>`;
+                console.error('Auth endpoint test error:', error);
+            }
+        }
+        
+        // Test login
+        async function testLogin() {
+            const baseUrl = getBaseUrl();
+            const pathPrefix = getPathPrefix();
+            const email = document.getElementById('email').value.trim();
+            const password = document.getElementById('password').value;
+            const resultDiv = document.getElementById('loginResult');
+            
+            if (!email || !password) {
+                resultDiv.innerHTML = '<div class="error">Please enter both email and password</div>';
+                return;
+            }
+            
+            resultDiv.innerHTML = '<div class="info">Testing login...</div>';
+            
+            try {
+                const loginUrl = `${baseUrl}${pathPrefix}/auth/login`;
+                resultDiv.innerHTML += `<div class="info">Testing login at: ${loginUrl}</div>`;
+                
+                const response = await fetch(loginUrl, {
+                    method: 'POST',
+                    mode: 'cors',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Accept': 'application/json'
+                    },
+                    body: JSON.stringify({ email, password }),
+                    credentials: 'include'
+                });
+                
+                resultDiv.innerHTML += `<div class="info">Response status: ${response.status}</div>`;
+                
+                try {
+                    const text = await response.text();
+                    resultDiv.innerHTML += `<div class="info">Raw response: <pre>${text}</pre></div>`;
+                    
+                    try {
+                        const data = JSON.parse(text);
+                        
+                        if (response.ok) {
+                            resultDiv.innerHTML += `<div class="success">Login successful!</div>`;
+                            resultDiv.innerHTML += `<div class="info">Response data: <pre>${JSON.stringify(data, null, 2)}</pre></div>`;
+                        } else {
+                            resultDiv.innerHTML += `<div class="error">Login failed: ${data.message || response.statusText}</div>`;
+                        }
+                    } catch (e) {
+                        resultDiv.innerHTML += `<div class="error">Could not parse JSON response: ${e.message}</div>`;
+                    }
+                } catch (e) {
+                    resultDiv.innerHTML += `<div class="error">Could not read response text: ${e.message}</div>`;
+                }
+            } catch (error) {
+                resultDiv.innerHTML += `<div class="error">Error: ${error.message}</div>`;
+                console.error('Login test error:', error);
+            }
+        }
+        
+        // Test CORS configuration
+        async function testCORS() {
+            const baseUrl = getBaseUrl();
+            const resultDiv = document.getElementById('corsResult');
+            
+            resultDiv.innerHTML = '<div class="info">Testing CORS configuration...</div>';
+            
+            try {
+                const corsUrl = `${baseUrl}/health`;
+                resultDiv.innerHTML += `<div class="info">Testing CORS with OPTIONS request to: ${corsUrl}</div>`;
+                
+                // First, check if the server responds to OPTIONS requests (preflight)
+                try {
+                    const optionsResponse = await fetch(corsUrl, {
+                        method: 'OPTIONS',
+                        mode: 'cors',
+                        headers: {
+                            'Access-Control-Request-Method': 'GET',
+                            'Access-Control-Request-Headers': 'Content-Type, Accept',
+                            'Origin': window.location.origin
+                        }
+                    });
+                    
+                    const corsHeaders = {
+                        'Access-Control-Allow-Origin': optionsResponse.headers.get('Access-Control-Allow-Origin'),
+                        'Access-Control-Allow-Methods': optionsResponse.headers.get('Access-Control-Allow-Methods'),
+                        'Access-Control-Allow-Headers': optionsResponse.headers.get('Access-Control-Allow-Headers'),
+                        'Access-Control-Allow-Credentials': optionsResponse.headers.get('Access-Control-Allow-Credentials')
+                    };
+                    
+                    resultDiv.innerHTML += `<div class="info">OPTIONS response status: ${optionsResponse.status}</div>`;
+                    resultDiv.innerHTML += `<div class="info">CORS headers: <pre>${JSON.stringify(corsHeaders, null, 2)}</pre></div>`;
+                    
+                    if (corsHeaders['Access-Control-Allow-Origin']) {
+                        resultDiv.innerHTML += `<div class="success">Server has CORS headers configured!</div>`;
+                        
+                        if (corsHeaders['Access-Control-Allow-Origin'] === '*') {
+                            resultDiv.innerHTML += `<div class="info">Server allows requests from any origin</div>`;
+                        } else if (corsHeaders['Access-Control-Allow-Origin'].includes(window.location.origin)) {
+                            resultDiv.innerHTML += `<div class="success">Server allows requests from this origin (${window.location.origin})</div>`;
+                        } else {
+                            resultDiv.innerHTML += `<div class="error">Server does not allow requests from this origin (${window.location.origin})</div>`;
+                        }
+                        
+                        if (corsHeaders['Access-Control-Allow-Credentials'] === 'true') {
+                            resultDiv.innerHTML += `<div class="success">Server allows credentials (cookies)</div>`;
+                        } else {
+                            resultDiv.innerHTML += `<div class="error">Server does not allow credentials (cookies)</div>`;
+                        }
+                    } else {
+                        resultDiv.innerHTML += `<div class="error">Server does not have CORS headers configured!</div>`;
+                    }
+                } catch (optionsError) {
+                    resultDiv.innerHTML += `<div class="error">OPTIONS request failed: ${optionsError.message}</div>`;
+                }
+                
+                // Now try a regular GET request
+                resultDiv.innerHTML += `<div class="info">Testing CORS with GET request to: ${corsUrl}</div>`;
+                
+                const getResponse = await fetch(corsUrl, {
+                    method: 'GET',
+                    mode: 'cors',
+                    headers: {
+                        'Accept': 'application/json'
+                    }
+                });
+                
+                if (getResponse.ok) {
+                    resultDiv.innerHTML += `<div class="success">GET request succeeded! CORS is working.</div>`;
+                } else {
+                    resultDiv.innerHTML += `<div class="error">GET request failed with status: ${getResponse.status}</div>`;
+                }
+            } catch (error) {
+                resultDiv.innerHTML += `<div class="error">CORS test error: ${error.message}</div>`;
+                console.error('CORS test error:', error);
+                
+                if (error.message.includes('CORS')) {
+                    resultDiv.innerHTML += `<div class="error">This is a CORS error. The server is not configured to allow requests from this origin (${window.location.origin})</div>`;
+                }
+            }
+        }
+    </script>
+</body>
+</html>

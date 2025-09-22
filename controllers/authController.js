@@ -3,6 +3,7 @@ const AppError = require('../utils/appError');
 const catchAsync = require('../utils/catchAsync');
 const InputValidator = require('../utils/inputValidator');
 const jwt = require('jsonwebtoken');
+const { promisify } = require('util');
 
 const signToken = id => {
   return jwt.sign({ id }, process.env.JWT_SECRET, {
@@ -12,6 +13,7 @@ const signToken = id => {
 
 const createSendToken = (user, statusCode, req, res) => {
   try {
+    console.log('Creating token for user:', user.email);
     const token = signToken(user._id);
     
     // Create a clean user object without sensitive data
@@ -22,6 +24,7 @@ const createSendToken = (user, statusCode, req, res) => {
       role: user.role
     };
 
+    console.log('Token created successfully');
     return res.status(statusCode).json({
       status: 'success',
       token,
@@ -33,7 +36,8 @@ const createSendToken = (user, statusCode, req, res) => {
     console.error('Error in createSendToken:', error);
     return res.status(500).json({
       status: 'error',
-      message: 'An error occurred while processing your request'
+      message: 'An error occurred while generating authentication token',
+      error: process.env.NODE_ENV === 'development' ? error.message : undefined
     });
   }
 };
@@ -143,36 +147,74 @@ exports.signup = async (req, res, next) => {
 exports.login = async (req, res, next) => {
   try {
     const { email, password } = req.body;
+    
+    console.log('Login attempt for email:', email);
 
     // 1) Check if email and password exist
     if (!email || !password) {
-      return next(new AppError('Please provide email and password!', 400));
+      const error = new AppError('Please provide email and password!', 400);
+      if (next) return next(error);
+      return res.status(400).json({
+        status: 'error',
+        message: error.message
+      });
     }
     
     // 2) Check if user exists (bypass the active filter)
-    const user = await User.findOne({ email })
+    console.log('Finding user in database...');
+    const user = await User.findOne({ email: email.toLowerCase() })
       .select('+password +active')
       .setOptions({ skipMiddleware: true });
 
-    // 3) Check if user exists and password is correct
+    console.log('User found:', user ? 'Yes' : 'No');
+
+    // 3) Check if user exists
     if (!user) {
-      return next(new AppError('No account found with this email address', 401));
+      const error = new AppError('No account found with this email address', 401);
+      if (next) return next(error);
+      return res.status(401).json({
+        status: 'error',
+        message: error.message
+      });
     }
 
     // 4) Check if account is active
     if (user.active === false) {
-      return next(new AppError('This account has been deactivated. Please contact support to reactivate your account.', 403));
+      const error = new AppError('This account has been deactivated. Please contact support to reactivate your account.', 403);
+      if (next) return next(error);
+      return res.status(403).json({
+        status: 'error',
+        message: error.message
+      });
     }
 
     // 5) Check if password is correct
-    if (!(await user.correctPassword(password, user.password))) {
-      return next(new AppError('Incorrect password', 401));
+    console.log('Verifying password...');
+    const isPasswordCorrect = await user.correctPassword(password, user.password);
+    console.log('Password correct:', isPasswordCorrect ? 'Yes' : 'No');
+    
+    if (!isPasswordCorrect) {
+      const error = new AppError('Incorrect password', 401);
+      if (next) return next(error);
+      return res.status(401).json({
+        status: 'error',
+        message: error.message
+      });
     }
 
     // 6) If everything ok, send token to client
+    console.log('Login successful, generating token...');
     createSendToken(user, 200, req, res);
   } catch (err) {
-    next(err);
+    console.error('Login error:', err);
+    if (next) {
+      return next(err);
+    }
+    return res.status(500).json({
+      status: 'error',
+      message: 'An error occurred during login',
+      error: process.env.NODE_ENV === 'development' ? err.message : undefined
+    });
   }
 };
 

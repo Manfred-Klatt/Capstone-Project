@@ -97,15 +97,17 @@
 
     <div>
         <h2>Login Test</h2>
-        <div>
-            <label for="email">Email:</label>
-            <input type="email" id="email" placeholder="Enter your email">
-        </div>
-        <div>
-            <label for="password">Password:</label>
-            <input type="password" id="password" placeholder="Enter your password">
-        </div>
-        <button onclick="testLogin()">Test Login</button>
+        <form id="loginTestForm" onsubmit="event.preventDefault(); testLogin();">
+            <div>
+                <label for="email">Email:</label>
+                <input type="email" id="email" placeholder="Enter your email" autocomplete="email">
+            </div>
+            <div>
+                <label for="password">Password:</label>
+                <input type="password" id="password" placeholder="Enter your password" autocomplete="current-password">
+            </div>
+            <button type="submit">Test Login</button>
+        </form>
         <div id="loginResult" class="result"></div>
     </div>
 
@@ -230,6 +232,11 @@
             try {
                 const loginUrl = `${baseUrl}${pathPrefix}/auth/login`;
                 resultDiv.innerHTML += `<div class="info">Testing login at: ${loginUrl}</div>`;
+                resultDiv.innerHTML += `<div class="info">Request payload: <pre>${JSON.stringify({ email, password: '********' }, null, 2)}</pre></div>`;
+                
+                // Add a timeout to the fetch request
+                const controller = new AbortController();
+                const timeoutId = setTimeout(() => controller.abort(), 10000); // 10 second timeout
                 
                 const response = await fetch(loginUrl, {
                     method: 'POST',
@@ -239,10 +246,14 @@
                         'Accept': 'application/json'
                     },
                     body: JSON.stringify({ email, password }),
-                    credentials: 'include'
+                    credentials: 'include',
+                    signal: controller.signal
                 });
                 
+                clearTimeout(timeoutId);
+                
                 resultDiv.innerHTML += `<div class="info">Response status: ${response.status}</div>`;
+                resultDiv.innerHTML += `<div class="info">Response headers: <pre>${formatHeaders(response.headers)}</pre></div>`;
                 
                 try {
                     const text = await response.text();
@@ -255,10 +266,14 @@
                             resultDiv.innerHTML += `<div class="success">Login successful!</div>`;
                             resultDiv.innerHTML += `<div class="info">Response data: <pre>${JSON.stringify(data, null, 2)}</pre></div>`;
                         } else {
-                            resultDiv.innerHTML += `<div class="error">Login failed: ${data.message || response.statusText}</div>`;
+                            resultDiv.innerHTML += `<div class="error">Login failed: ${data.message || data.error || response.statusText}</div>`;
+                            if (data.error) {
+                                resultDiv.innerHTML += `<div class="info">Error details: ${data.error}</div>`;
+                            }
                         }
                     } catch (e) {
                         resultDiv.innerHTML += `<div class="error">Could not parse JSON response: ${e.message}</div>`;
+                        resultDiv.innerHTML += `<div class="info">Raw response content: <pre>${text}</pre></div>`;
                     }
                 } catch (e) {
                     resultDiv.innerHTML += `<div class="error">Could not read response text: ${e.message}</div>`;
@@ -266,7 +281,21 @@
             } catch (error) {
                 resultDiv.innerHTML += `<div class="error">Error: ${error.message}</div>`;
                 console.error('Login test error:', error);
+                
+                if (error.name === 'AbortError') {
+                    resultDiv.innerHTML += `<div class="error">Request timed out after 10 seconds</div>`;
+                    resultDiv.innerHTML += `<div class="info">This could indicate a server issue or slow connection</div>`;
+                }
             }
+        }
+        
+        // Helper function to format response headers
+        function formatHeaders(headers) {
+            const headersObj = {};
+            headers.forEach((value, key) => {
+                headersObj[key] = value;
+            });
+            return JSON.stringify(headersObj, null, 2);
         }
         
         // Test CORS configuration

@@ -1,5 +1,5 @@
 const Leaderboard = require('../../../models/Leaderboard');
-const User = require('../../../models/User');
+const User = require('../../../../models/userModel');
 const catchAsync = require('../../../utils/catchAsync');
 const AppError = require('../../../utils/appError');
 const { successResponse } = require('../../../utils/response');

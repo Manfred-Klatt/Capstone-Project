@@ -1,5 +1,5 @@
 const Game = require('../models/Game');
-const User = require('../models/User');
+const User = require('../../models/userModel');
 const AppError = require('../utils/appError');
 
 // Helper function to generate questions (mock implementation)

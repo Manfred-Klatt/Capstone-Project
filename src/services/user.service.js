@@ -1,4 +1,4 @@
-const User = require('../models/User');
+const User = require('../../models/userModel');
 const AppError = require('../utils/appError');
 
 // Get all users (admin only)

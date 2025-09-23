@@ -217,7 +217,7 @@
             }
         }
         
-        // Test login
+        // Test login with enhanced error handling
         async function testLogin() {
             const baseUrl = getBaseUrl();
             const pathPrefix = getPathPrefix();
@@ -232,6 +232,44 @@
             
             resultDiv.innerHTML = '<div class="info">Testing login...</div>';
             
+            // First check the health endpoint
+            try {
+                resultDiv.innerHTML += `<div class="info">Checking server health...</div>`;
+                const healthResponse = await fetch(`${baseUrl}/health`, {
+                    method: 'GET',
+                    headers: {
+                        'Accept': 'application/json'
+                    }
+                });
+                
+                resultDiv.innerHTML += `<div class="info">Health check status: ${healthResponse.status}</div>`;
+                
+                try {
+                    const healthText = await healthResponse.text();
+                    try {
+                        const healthData = JSON.parse(healthText);
+                        resultDiv.innerHTML += `<div class="info">Health check data: <pre>${JSON.stringify(healthData, null, 2)}</pre></div>`;
+                        
+                        // Check database status
+                        if (healthData.database && healthData.database.status) {
+                            if (healthData.database.status === 'connected') {
+                                resultDiv.innerHTML += `<div class="success">Database is connected!</div>`;
+                            } else {
+                                resultDiv.innerHTML += `<div class="error">Database status: ${healthData.database.status}</div>`;
+                            }
+                        }
+                    } catch (e) {
+                        resultDiv.innerHTML += `<div class="info">Raw health response: <pre>${healthText}</pre></div>`;
+                    }
+                } catch (e) {
+                    resultDiv.innerHTML += `<div class="error">Could not read health response: ${e.message}</div>`;
+                }
+            } catch (healthError) {
+                resultDiv.innerHTML += `<div class="error">Health check error: ${healthError.message}</div>`;
+                // Continue with login test even if health check fails
+            }
+            
+            // Now test the login endpoint
             try {
                 const loginUrl = `${baseUrl}${pathPrefix}/auth/login`;
                 resultDiv.innerHTML += `<div class="info">Testing login at: ${loginUrl}</div>`;
@@ -239,7 +277,7 @@
                 
                 // Add a timeout to the fetch request
                 const controller = new AbortController();
-                const timeoutId = setTimeout(() => controller.abort(), 10000); // 10 second timeout
+                const timeoutId = setTimeout(() => controller.abort(), 15000); // 15 second timeout
                 
                 const response = await fetch(loginUrl, {
                     method: 'POST',
@@ -268,15 +306,43 @@
                         if (response.ok) {
                             resultDiv.innerHTML += `<div class="success">Login successful!</div>`;
                             resultDiv.innerHTML += `<div class="info">Response data: <pre>${JSON.stringify(data, null, 2)}</pre></div>`;
+                            
+                            // Display token information
+                            if (data.token) {
+                                const tokenParts = data.token.split('.');
+                                if (tokenParts.length === 3) {
+                                    try {
+                                        const header = JSON.parse(atob(tokenParts[0]));
+                                        const payload = JSON.parse(atob(tokenParts[1]));
+                                        
+                                        resultDiv.innerHTML += `<div class="info">Token header: <pre>${JSON.stringify(header, null, 2)}</pre></div>`;
+                                        resultDiv.innerHTML += `<div class="info">Token payload: <pre>${JSON.stringify(payload, null, 2)}</pre></div>`;
+                                    } catch (tokenError) {
+                                        resultDiv.innerHTML += `<div class="error">Could not decode token: ${tokenError.message}</div>`;
+                                    }
+                                }
+                            }
                         } else {
                             resultDiv.innerHTML += `<div class="error">Login failed: ${data.message || data.error || response.statusText}</div>`;
                             if (data.error) {
                                 resultDiv.innerHTML += `<div class="info">Error details: ${data.error}</div>`;
                             }
+                            
+                            // Provide troubleshooting suggestions
+                            if (response.status === 401) {
+                                resultDiv.innerHTML += `<div class="info">Troubleshooting: This could be due to incorrect credentials or the user not existing in the database.</div>`;
+                            } else if (response.status === 500) {
+                                resultDiv.innerHTML += `<div class="info">Troubleshooting: This is a server-side error. Check the server logs for more details. Common issues include database connection problems or JWT configuration issues.</div>`;
+                            }
                         }
                     } catch (e) {
                         resultDiv.innerHTML += `<div class="error">Could not parse JSON response: ${e.message}</div>`;
                         resultDiv.innerHTML += `<div class="info">Raw response content: <pre>${text}</pre></div>`;
+                        
+                        // Check for HTML error pages
+                        if (text.includes('<!DOCTYPE html>') || text.includes('<html>')) {
+                            resultDiv.innerHTML += `<div class="error">Received HTML instead of JSON. This could indicate a server error page or proxy issue.</div>`;
+                        }
                     }
                 } catch (e) {
                     resultDiv.innerHTML += `<div class="error">Could not read response text: ${e.message}</div>`;
@@ -286,8 +352,11 @@
                 console.error('Login test error:', error);
                 
                 if (error.name === 'AbortError') {
-                    resultDiv.innerHTML += `<div class="error">Request timed out after 10 seconds</div>`;
+                    resultDiv.innerHTML += `<div class="error">Request timed out after 15 seconds</div>`;
                     resultDiv.innerHTML += `<div class="info">This could indicate a server issue or slow connection</div>`;
+                } else if (error.name === 'TypeError' && error.message.includes('NetworkError')) {
+                    resultDiv.innerHTML += `<div class="error">Network error: Could not connect to the server</div>`;
+                    resultDiv.innerHTML += `<div class="info">This could be due to CORS issues, server being down, or network connectivity problems</div>`;
                 }
             }
         }

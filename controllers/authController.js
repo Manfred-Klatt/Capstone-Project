@@ -133,7 +133,7 @@ exports.signup = async (req, res, next) => {
     newUser.active = undefined;
 
     // Send response with token
-    createSendToken(newUser, 201, res);
+    createSendToken(newUser, 201, req, res);
     
   } catch (err) {
     // Handle validation errors
@@ -209,15 +209,37 @@ exports.login = async (req, res, next) => {
 
     // 5) Check if password is correct
     console.log('Verifying password...');
-    const isPasswordCorrect = await user.correctPassword(password, user.password);
-    console.log('Password correct:', isPasswordCorrect ? 'Yes' : 'No');
-    
-    if (!isPasswordCorrect) {
-      const error = new AppError('Incorrect password', 401);
+    try {
+      // Make sure user.password exists
+      if (!user.password) {
+        console.error('Password field is missing from user object');
+        const error = new AppError('Internal server error during authentication', 500);
+        if (next) return next(error);
+        return res.status(500).json({
+          status: 'error',
+          message: 'Internal server error during authentication'
+        });
+      }
+      
+      const isPasswordCorrect = await user.correctPassword(password, user.password);
+      console.log('Password correct:', isPasswordCorrect ? 'Yes' : 'No');
+      
+      if (!isPasswordCorrect) {
+        const error = new AppError('Incorrect password', 401);
+        if (next) return next(error);
+        return res.status(401).json({
+          status: 'error',
+          message: error.message
+        });
+      }
+    } catch (passwordError) {
+      console.error('Error during password verification:', passwordError);
+      const error = new AppError('Error verifying password', 500);
       if (next) return next(error);
-      return res.status(401).json({
+      return res.status(500).json({
         status: 'error',
-        message: error.message
+        message: 'Error verifying password',
+        details: process.env.NODE_ENV === 'development' ? passwordError.message : undefined
       });
     }
 

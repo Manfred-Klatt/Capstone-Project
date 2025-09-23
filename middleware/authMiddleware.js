@@ -1,16 +1,18 @@
 const { promisify } = require('util');
 const jwt = require('jsonwebtoken');
-const User = require('../src/models/User');
+const User = require('../models/userModel');
 const AppError = require('../utils/appError');
 
-const signToken = id => {
+// Export the signToken function for use in other modules
+exports.signToken = id => {
   return jwt.sign({ id }, process.env.JWT_SECRET, {
     expiresIn: process.env.JWT_EXPIRES_IN
   });
 };
 
-const createSendToken = (user, statusCode, req, res) => {
-  const token = signToken(user._id);
+// Export the createSendToken function for use in other modules
+exports.createSendToken = (user, statusCode, req, res) => {
+  const token = exports.signToken(user._id);
   
   // Remove password from output
   user.password = undefined;
@@ -33,7 +35,7 @@ exports.signup = async (req, res, next) => {
       passwordConfirm: req.body.passwordConfirm
     });
 
-    createSendToken(newUser, 201, req, res);
+    exports.createSendToken(newUser, 201, req, res);
   } catch (err) {
     next(err);
   }
@@ -56,7 +58,7 @@ exports.login = async (req, res, next) => {
     }
 
     // 3) If everything ok, send token to client
-    createSendToken(user, 200, req, res);
+    exports.createSendToken(user, 200, req, res);
   } catch (err) {
     next(err);
   }
@@ -135,7 +137,7 @@ exports.updatePassword = async (req, res, next) => {
     await user.save();
 
     // 4) Log user in, send JWT
-    createSendToken(user, 200, req, res);
+    exports.createSendToken(user, 200, req, res);
   } catch (err) {
     next(err);
   }

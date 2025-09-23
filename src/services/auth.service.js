@@ -1,4 +1,4 @@
-const User = require('../models/User');
+const User = require('../../models/userModel');
 const { signToken } = require('../../middleware/authMiddleware');
 const AppError = require('../utils/appError');
 const { promisify } = require('util');

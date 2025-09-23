@@ -9,6 +9,15 @@ const config = {
   database: {
     // Ensure database name is included in the connection string
     url: (() => {
+      // Check for Railway MongoDB environment variables first
+      if (process.env.MONGO_URL || process.env.MONGO_PUBLIC_URL) {
+        const railwayUrl = process.env.MONGO_URL || process.env.MONGO_PUBLIC_URL;
+        console.log('Using Railway MongoDB URL');
+        // Add database name to Railway MongoDB URL
+        return `${railwayUrl}/acnh-quiz`;
+      }
+      
+      // Fall back to MONGODB_URI or local MongoDB
       const uri = process.env.MONGODB_URI || 'mongodb://localhost:27017/acnh-quiz';
       
       // For MongoDB Atlas URLs, ensure database name is included

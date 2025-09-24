@@ -3,7 +3,7 @@
   "build": {
     "builder": "NIXPACKS",
     "nixpacksVersion": "1.17.0",
-    "buildCommand": "npm ci --only=production --no-audit --no-optional"
+    "buildCommand": "chmod +x ./railway-build.sh && ./railway-build.sh"
   },
   "deploy": {
     "numReplicas": 1,

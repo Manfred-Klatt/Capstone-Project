@@ -84,13 +84,31 @@ const connectDB = async (retryCount = 0) => {
     logger.error('❌ Configuration Error', error.message);
     throw error;
   }
-
   try {
     // Parse connection URL for better error messages
     let url, dbName, authSource;
     try {
       url = new URL(connectionUrl);
+      
+      // Extract database name from the URL
+      // For Railway MongoDB, the database name is typically included in the URL
+      // For MongoDB Atlas, we ensure it's 'acnh-quiz' if not specified
       dbName = url.pathname.replace(/^\/+|\/+$/g, '') || 'acnh-quiz';
+      
+      // If no database name in the URL, append it
+      if (!dbName && !connectionUrl.includes('/' + 'acnh-quiz')) {
+        // Add database name before query parameters
+        if (connectionUrl.includes('?')) {
+          connectionUrl = connectionUrl.replace('?', `/acnh-quiz?`);
+        } else {
+          connectionUrl = `${connectionUrl}/acnh-quiz`;
+        }
+        
+        // Update the URL object with the new connection string
+        url = new URL(connectionUrl);
+        dbName = 'acnh-quiz';
+      }
+      
       authSource = url.searchParams.get('authSource') || 'admin';
       
       logger.info('🔍 Connection Details', {

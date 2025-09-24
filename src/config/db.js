@@ -18,7 +18,36 @@ const connectDB = async () => {
     const DATABASE_NAME = 'acnh-quiz';
     
     // Handle different URL formats to ensure database name is included
-    if (connectionUrl.includes('mongodb+srv://')) {
+    
+    // Check if we're using Railway's MongoDB
+    const isRailwayMongoDB = process.env.RAILWAY_ENVIRONMENT_NAME && 
+                            connectionUrl && 
+                            !connectionUrl.includes('mongodb+srv://');
+    
+    if (isRailwayMongoDB) {
+      // Railway MongoDB typically includes the database name already
+      // But we'll check to make sure
+      console.log('Using Railway MongoDB connection');
+      
+      try {
+        const mongoUrl = new URL(connectionUrl);
+        const pathParts = mongoUrl.pathname.split('/').filter(Boolean);
+        
+        if (pathParts.length === 0) {
+          // No database specified, add our database name
+          if (connectionUrl.includes('?')) {
+            connectionUrl = connectionUrl.replace('?', `/${DATABASE_NAME}?`);
+          } else {
+            connectionUrl = `${connectionUrl}/${DATABASE_NAME}`;
+          }
+          console.log(`Added database name '${DATABASE_NAME}' to Railway MongoDB URL`);
+        } else {
+          console.log(`Using database '${pathParts[0]}' from Railway MongoDB URL`);
+        }
+      } catch (urlError) {
+        console.warn('Could not parse Railway MongoDB URL:', urlError.message);
+      }
+    } else if (connectionUrl.includes('mongodb+srv://')) {
       // MongoDB Atlas URL
       if (!connectionUrl.includes(`/${DATABASE_NAME}?`) && !connectionUrl.includes(`/${DATABASE_NAME}/`)) {
         // Add database name before query parameters

@@ -1,6 +1,8 @@
-# Simplified single-stage build to avoid timeout issues on Railway
-# Using a specific version tag to avoid authentication issues
-FROM node:20.11.1-alpine3.19
+# Using a basic Alpine image to avoid Docker Hub authentication issues
+FROM alpine:3.19
+
+# Install Node.js and npm
+RUN apk add --no-cache nodejs npm
 
 WORKDIR /app
 

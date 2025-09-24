@@ -25,7 +25,8 @@
     "format": "prettier --write \"**/*.{js,jsx,ts,tsx,json,md}\"",
     "seed": "node scripts/seed.js",
     "docs": "node scripts/generate-docs.js",
-    "serve:docs": "npx http-server docs -o /docs/openapi.json"
+    "serve:docs": "npx http-server docs -o /docs/openapi.json",
+    "railway:start": "node src/app.js"
   },
   "dependencies": {
     "@types/react": "^19.1.12",

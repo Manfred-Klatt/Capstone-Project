@@ -1,0 +1,11 @@
+[phases.setup]
+nixPkgs = ["nodejs", "nodejs.npm"]
+
+[phases.install]
+cmds = ["npm ci --omit=dev --no-fund --no-audit"]
+
+[phases.build]
+cmds = ["mkdir -p /app/uploads"]
+
+[start]
+cmd = "node src/app.js"

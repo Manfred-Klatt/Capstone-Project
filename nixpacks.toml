@@ -1,7 +1,7 @@
 # Custom Nixpacks configuration for Railway
 
 [phases.setup]
-nixPkgs = ["nodejs", "nodejs.npm"]
+nixPkgs = ["nodejs"]
 
 [phases.install]
 # Skip the default npm ci command

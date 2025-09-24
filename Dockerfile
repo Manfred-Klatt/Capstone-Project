@@ -1,5 +1,6 @@
 # Simplified single-stage build to avoid timeout issues on Railway
-FROM node:20-alpine
+# Using a specific version tag to avoid authentication issues
+FROM node:20.11.1-alpine3.19
 
 WORKDIR /app
 

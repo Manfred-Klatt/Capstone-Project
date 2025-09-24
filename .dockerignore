@@ -2,6 +2,11 @@
 node_modules
 npm-debug.log
 
+# Cache directories that cause EBUSY errors
+node_modules/.cache
+.cache
+.npm
+
 # Environment
 .env
 .env.*

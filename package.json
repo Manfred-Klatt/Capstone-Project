@@ -5,7 +5,7 @@
   "main": "src/app.js",
   "type": "commonjs",
   "engines": {
-    "node": ">=16.0.0",
+    "node": ">=16.0.0 <=22.x",
     "npm": ">=8.0.0"
   },
   "engineStrict": false,
@@ -27,7 +27,8 @@
     "seed": "node scripts/seed.js",
     "docs": "node scripts/generate-docs.js",
     "serve:docs": "npx http-server docs -o /docs/openapi.json",
-    "railway:start": "node src/app.js"
+    "railway:start": "node src/app.js",
+    "railway:build": "npm cache clean --force && npm ci --omit=dev --no-fund --no-audit"
   },
   "dependencies": {
     "@types/react": "^19.1.12",

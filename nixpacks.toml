@@ -1,0 +1,19 @@
+# Custom Nixpacks configuration for Railway
+
+[phases.setup]
+nixPkgs = ["nodejs", "nodejs.npm"]
+
+[phases.install]
+# Skip the default npm ci command
+cmds = []
+
+[phases.build]
+# Use our custom build script
+cmds = ["npm run railway:build"]
+
+[start]
+cmd = "node src/app.js"
+
+# Disable caching to avoid EBUSY errors
+[cache]
+enable = false

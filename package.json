@@ -28,9 +28,7 @@
     "docs": "node scripts/generate-docs.js",
     "serve:docs": "npx http-server docs -o /docs/openapi.json",
     "railway:start": "node src/app.js",
-    "railway:build": "npm cache clean --force && npm ci --omit=dev --no-fund --no-audit",
-    "railway:clean": "rm -rf node_modules/.cache || true",
-    "railway:deploy": "npm run railway:clean && npm run railway:build && npm run railway:start"
+    "postinstall": "echo 'Dependencies installed successfully'"
   },
   "dependencies": {
     "@types/react": "^19.1.12",

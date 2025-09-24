@@ -1,6 +1,5 @@
 [build]
 builder = "NIXPACKS"
-buildCommand = "npm run railway:clean && npm ci --omit=dev --no-fund --no-audit"
 
 [deploy]
 startCommand = "node src/app.js"

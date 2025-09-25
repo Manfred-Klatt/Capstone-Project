@@ -1,5 +1,5 @@
 const cors = require('cors');
-const config = require('./src/config');
+const config = require('../src/config');
 
 // Custom CORS middleware to handle preflight requests properly
 const customCorsMiddleware = (req, res, next) => {

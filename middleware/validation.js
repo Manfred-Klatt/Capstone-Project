@@ -1,4 +1,4 @@
-const AppError = require('./src/utils/appError');
+const AppError = require('../utils/appError');
 
 /**
  * Validation middleware for leaderboard submission

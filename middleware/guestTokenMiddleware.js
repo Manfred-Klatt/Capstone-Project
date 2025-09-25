@@ -5,7 +5,7 @@
  * for authentication instead of requiring a full user login.
  */
 
-const AppError = require('./src/utils/appError');
+const AppError = require('../utils/appError');
 
 /**
  * Middleware to authenticate requests using guest tokens

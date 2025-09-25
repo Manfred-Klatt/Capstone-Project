@@ -1,5 +1,5 @@
 const csrf = require('csurf');
-const AppError = require('../src/utils/appError');
+const AppError = require('./src/utils/appError');
 
 // Configure CSRF protection
 const csrfProtection = csrf({

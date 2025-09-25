@@ -49,4 +49,4 @@ This document outlines the security measures implemented in the Animal Crossing 
 
 ## Reporting Security Issues
 
-If you discover any security vulnerabilities, please report them to [your-email@example.com](mailto:your-email@example.com). All security vulnerabilities will be promptly addressed.
+If you discover any security vulnerabilities, please report them to [email@manfredklatt.dev](mailto:email@manfredklatt.dev). All security vulnerabilities will be promptly addressed.

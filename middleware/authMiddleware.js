@@ -1,7 +1,7 @@
 const { promisify } = require('util');
 const jwt = require('jsonwebtoken');
-const User = require('../models/userModel');
-const AppError = require('../utils/appError');
+const User = require('../src/models/userModel');
+const AppError = require('../src/utils/appError');
 
 // Export the signToken function for use in other modules
 exports.signToken = id => {

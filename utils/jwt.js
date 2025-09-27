@@ -2,7 +2,7 @@ const jwt = require('jsonwebtoken');
 const { promisify } = require('util');
 const User = require('../models/userModel');
 const AppError = require('./appError');
-const config = require('../config/config');
+const config = require('../src/config');
 
 const signToken = (id) => {
   return jwt.sign({ id }, config.jwt.secret, {

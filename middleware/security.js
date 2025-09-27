@@ -6,7 +6,7 @@ const rateLimit = require('express-rate-limit');
 const { rateLimit: redisRateLimit } = require('express-rate-limit');
 const RedisStore = require('rate-limit-redis');
 const redis = require('redis');
-const config = require('../config/config');
+const config = require('../src/config');
 
 // Initialize Redis client if available
 let redisClient;

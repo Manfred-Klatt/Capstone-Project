@@ -3,12 +3,9 @@ const jwt = require('jsonwebtoken');
 const User = require('../models/userModel');
 const AppError = require('../utils/appError');
 
-// Export the signToken function for use in other modules
-exports.signToken = id => {
-  return jwt.sign({ id }, process.env.JWT_SECRET, {
-    expiresIn: process.env.JWT_EXPIRES_IN
-  });
-};
+// Import signToken from utils/jwt.js to avoid duplication
+const { signToken } = require('../utils/jwt');
+exports.signToken = signToken;
 
 // Import createSendToken from utils/jwt.js to avoid duplication
 const { createSendToken } = require('../utils/jwt');

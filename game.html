@@ -3943,8 +3943,8 @@
         // Close the modal
         closeHighScoreModal();
         
-        // Update the displayed leaderboard
-        updateLeaderboardUI(leaderboardData);
+        // Update the displayed leaderboard for the current category
+        updateLeaderboardUI(category, leaderboardData[category]);
       }
       
       // Helper function to show placement message
@@ -4029,8 +4029,10 @@
       // Make it globally available
       window.DEFAULT_LEADERBOARD = DEFAULT_LEADERBOARD;
       
-      // Initialize leaderboard with default data
-      updateLeaderboardUI(DEFAULT_LEADERBOARD);
+      // Initialize leaderboard with default data for all categories
+      Object.keys(DEFAULT_LEADERBOARD).forEach(category => {
+        updateLeaderboardUI(category, DEFAULT_LEADERBOARD[category]);
+      });
 
 
       async function initGame(category, isInitialLoad = false) {
@@ -4816,8 +4818,8 @@
             // Save updated leaderboard to localStorage
             localStorage.setItem('acnh_leaderboard', JSON.stringify(leaderboardData));
             
-            // Update UI
-            updateLeaderboardUI(leaderboardData);
+            // Update UI for the specific category
+            updateLeaderboardUI(category, leaderboardData[category]);
             alert(`${category.charAt(0).toUpperCase() + category.slice(1)} leaderboard has been reset.`);
           } catch (e) {
             console.error('Error resetting leaderboard category:', e);
@@ -4827,7 +4829,7 @@
           // If no leaderboard exists yet, create an empty one
           leaderboardData = { fish: [], bugs: [], sea: [], villagers: [] };
           localStorage.setItem('acnh_leaderboard', JSON.stringify(leaderboardData));
-          updateLeaderboardUI(leaderboardData);
+          updateLeaderboardUI(category, leaderboardData[category]);
           alert(`${category.charAt(0).toUpperCase() + category.slice(1)} leaderboard has been reset.`);
         }
       }
@@ -4843,8 +4845,10 @@
         // Save to localStorage
         localStorage.setItem('acnh_leaderboard', JSON.stringify(emptyLeaderboard));
         
-        // Update the UI
-        updateLeaderboardUI(emptyLeaderboard);
+        // Update the UI for all categories
+        Object.keys(emptyLeaderboard).forEach(category => {
+          updateLeaderboardUI(category, emptyLeaderboard[category]);
+        });
         
         alert('All leaderboards have been reset.');
       }
@@ -4866,8 +4870,10 @@
             // Save the default data to localStorage
             localStorage.setItem('acnh_leaderboard', JSON.stringify(defaultData));
             
-            // Update the UI
-            updateLeaderboardUI(defaultData);
+            // Update the UI for all categories
+            Object.keys(defaultData).forEach(category => {
+              updateLeaderboardUI(category, defaultData[category]);
+            });
             
             alert('Leaderboards have been reset to default values.');
           })

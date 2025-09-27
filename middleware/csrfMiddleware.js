@@ -51,7 +51,8 @@ const exemptFromCSRF = (req, res, next) => {
   // Skip CSRF for other public API endpoints
   if (req.path.startsWith('/api/v1/leaderboard') || 
       req.path.startsWith('/api/v1/game') ||
-      req.path.startsWith('/api/v1/health')) {
+      req.path.startsWith('/api/v1/health') ||
+      req.path === '/api/v1/submit-guest-score') {
     return next();
   }
   

@@ -111,6 +111,7 @@
                 Default test credentials: test@example.com / Test1234!
             </div>
             <button type="submit">Test Login</button>
+            <button type="button" id="reactivateBtn" onclick="reactivateAccount()" style="display: none; margin-left: 10px; background-color: #ff9800;">Reactivate Account</button>
         </form>
         <div id="loginResult" class="result"></div>
     </div>
@@ -353,6 +354,9 @@
                             resultDiv.innerHTML += `<div class="success">Login successful!</div>`;
                             resultDiv.innerHTML += `<div class="info">Response data: <pre>${JSON.stringify(data, null, 2)}</pre></div>`;
                             
+                            // Hide reactivate button on successful login
+                            document.getElementById('reactivateBtn').style.display = 'none';
+                            
                             // Display token information
                             if (data.token) {
                                 const tokenParts = data.token.split('.');
@@ -372,6 +376,15 @@
                             resultDiv.innerHTML += `<div class="error">Login failed: ${data.message || data.error || response.statusText}</div>`;
                             if (data.error) {
                                 resultDiv.innerHTML += `<div class="info">Error details: ${data.error}</div>`;
+                            }
+                            
+                            // Check if this is a deactivated account error
+                            if (data.message && data.message.includes('deactivated')) {
+                                resultDiv.innerHTML += `<div class="info">💡 This account has been deactivated. You can reactivate it using the button below.</div>`;
+                                document.getElementById('reactivateBtn').style.display = 'inline-block';
+                            } else {
+                                // Hide reactivate button for other errors
+                                document.getElementById('reactivateBtn').style.display = 'none';
                             }
                             
                             // Provide troubleshooting suggestions
@@ -464,6 +477,85 @@
                 }
             } catch (error) {
                 resultDiv.innerHTML += `<div class="error">Login test error: ${error.message}</div>`;
+            }
+        }
+        
+        // Reactivate a deactivated account
+        async function reactivateAccount() {
+            const email = document.getElementById('email').value.trim();
+            const resultDiv = document.getElementById('loginResult');
+            const reactivateBtn = document.getElementById('reactivateBtn');
+            
+            if (!email) {
+                resultDiv.innerHTML += '<div class="error">Please enter an email address first</div>';
+                return;
+            }
+            
+            // Disable button and show loading state
+            reactivateBtn.disabled = true;
+            reactivateBtn.textContent = 'Reactivating...';
+            
+            try {
+                const baseUrl = getBaseUrl();
+                const pathPrefix = getPathPrefix();
+                const reactivateUrl = `${baseUrl}${pathPrefix}/auth/reactivate-account`;
+                
+                resultDiv.innerHTML += `<div class="info">🔄 Attempting to reactivate account: ${email}</div>`;
+                resultDiv.innerHTML += `<div class="info">Reactivation URL: ${reactivateUrl}</div>`;
+                
+                const response = await fetch(reactivateUrl, {
+                    method: 'POST',
+                    mode: 'cors',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Accept': 'application/json'
+                    },
+                    body: JSON.stringify({ email }),
+                    credentials: 'include'
+                });
+                
+                const text = await response.text();
+                resultDiv.innerHTML += `<div class="info">Reactivation response status: ${response.status}</div>`;
+                
+                try {
+                    const data = JSON.parse(text);
+                    
+                    if (response.ok) {
+                        resultDiv.innerHTML += `<div class="success">✅ Account reactivated successfully!</div>`;
+                        resultDiv.innerHTML += `<div class="success">🎉 You can now try logging in again.</div>`;
+                        
+                        if (data.data?.user) {
+                            resultDiv.innerHTML += `<div class="info">Reactivated user: ${data.data.user.username} (${data.data.user.email})</div>`;
+                        }
+                        
+                        // Hide the reactivate button after success
+                        reactivateBtn.style.display = 'none';
+                        
+                        // Suggest trying login again
+                        resultDiv.innerHTML += `<div class="info">💡 Try clicking "Test Login" again to verify the account is working.</div>`;
+                    } else {
+                        resultDiv.innerHTML += `<div class="error">❌ Reactivation failed: ${data.message || response.statusText}</div>`;
+                        
+                        // Re-enable button for retry
+                        reactivateBtn.disabled = false;
+                        reactivateBtn.textContent = 'Try Reactivate Again';
+                    }
+                    
+                    resultDiv.innerHTML += `<div class="info">Reactivation response: <pre>${JSON.stringify(data, null, 2)}</pre></div>`;
+                } catch (e) {
+                    resultDiv.innerHTML += `<div class="error">Could not parse reactivation response: ${e.message}</div>`;
+                    resultDiv.innerHTML += `<div class="info">Raw response: <pre>${text}</pre></div>`;
+                    
+                    // Re-enable button for retry
+                    reactivateBtn.disabled = false;
+                    reactivateBtn.textContent = 'Try Reactivate Again';
+                }
+            } catch (error) {
+                resultDiv.innerHTML += `<div class="error">Reactivation error: ${error.message}</div>`;
+                
+                // Re-enable button for retry
+                reactivateBtn.disabled = false;
+                reactivateBtn.textContent = 'Try Reactivate Again';
             }
         }
         

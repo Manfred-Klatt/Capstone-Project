@@ -12,21 +12,8 @@ const signToken = (id) => {
   });
 };
 
-// Create and send JWT token in cookie
-const createSendToken = (user, statusCode, req, res) => {
-  const token = signToken(user._id);
-  
-  // Remove password from output
-  user.password = undefined;
-
-  res.status(statusCode).json({
-    status: 'success',
-    token,
-    data: {
-      user,
-    },
-  });
-};
+// Import createSendToken from utils/jwt.js to avoid duplication
+const { createSendToken } = require('../../utils/jwt');
 
 /**
  * Middleware to verify JWT token and attach user to request

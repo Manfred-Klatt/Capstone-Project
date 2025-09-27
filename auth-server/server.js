@@ -2,6 +2,9 @@
 // This is an independent auth server for testing/development
 // Main production app uses src/app.js with integrated auth
 // This server runs on a different port and can be used for auth testing
+//
+// NOTE: This may be redundant since main app has auth built-in
+// Consider removing if not actively used as a separate service
 
 const express = require('express');
 const mongoose = require('mongoose');

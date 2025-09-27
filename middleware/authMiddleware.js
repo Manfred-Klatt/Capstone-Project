@@ -10,21 +10,9 @@ exports.signToken = id => {
   });
 };
 
-// Export the createSendToken function for use in other modules
-exports.createSendToken = (user, statusCode, req, res) => {
-  const token = exports.signToken(user._id);
-  
-  // Remove password from output
-  user.password = undefined;
-
-  res.status(statusCode).json({
-    status: 'success',
-    token,
-    data: {
-      user
-    }
-  });
-};
+// Import createSendToken from utils/jwt.js to avoid duplication
+const { createSendToken } = require('../utils/jwt');
+exports.createSendToken = createSendToken;
 
 exports.signup = async (req, res, next) => {
   try {

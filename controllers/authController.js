@@ -12,6 +12,9 @@ const signToken = id => {
   });
 };
 
+// Import createSendToken from utils/jwt.js to avoid duplication
+const { createSendToken: baseCreateSendToken } = require('../utils/jwt');
+
 const createSendToken = (user, statusCode, req, res) => {
   try {
     console.log('Creating token for user:', user.email);
@@ -22,66 +25,8 @@ const createSendToken = (user, statusCode, req, res) => {
       throw new Error('Invalid user object provided to createSendToken');
     }
     
-    // Check JWT_SECRET
-    if (!process.env.JWT_SECRET) {
-      console.error('JWT_SECRET is not defined in environment variables');
-      throw new Error('JWT_SECRET is not defined');
-    }
-    
-    // Generate token
-    const token = signToken(user._id);
-    if (!token) {
-      console.error('Failed to generate token');
-      throw new Error('Token generation failed');
-    }
-    
-    // Create a clean user object without sensitive data
-    const userData = {
-      id: user._id,
-      username: user.username || 'unknown',
-      email: user.email || 'unknown',
-      role: user.role || 'user',
-      highScores: user.highScores || {}
-    };
-
-    // Check JWT_COOKIE_EXPIRES_IN
-    if (!process.env.JWT_COOKIE_EXPIRES_IN) {
-      console.warn('JWT_COOKIE_EXPIRES_IN is not defined, using default value of 90 days');
-    }
-    
-    // Set cookie options with fallback values
-    const cookieExpiresIn = process.env.JWT_COOKIE_EXPIRES_IN || 90; // Default to 90 days
-    const cookieOptions = {
-      expires: new Date(
-        Date.now() + cookieExpiresIn * 24 * 60 * 60 * 1000
-      ),
-      httpOnly: true,
-      secure: req && req.secure || req && req.headers && req.headers['x-forwarded-proto'] === 'https'
-    };
-
-    console.log('Cookie options:', {
-      expires: cookieOptions.expires,
-      httpOnly: cookieOptions.httpOnly,
-      secure: cookieOptions.secure
-    });
-
-    // Set JWT as cookie
-    try {
-      res.cookie('jwt', token, cookieOptions);
-      console.log('JWT cookie set successfully');
-    } catch (cookieError) {
-      console.error('Error setting cookie:', cookieError);
-      // Continue even if cookie setting fails
-    }
-
-    console.log('Token created successfully');
-    return res.status(statusCode).json({
-      status: 'success',
-      token,
-      data: {
-        user: userData
-      }
-    });
+    // Use the centralized implementation with logging
+    return baseCreateSendToken(user, statusCode, req, res);
   } catch (error) {
     console.error('========== CREATE SEND TOKEN ERROR ==========');
     console.error('Error in createSendToken:', error);
@@ -99,30 +44,10 @@ const createSendToken = (user, statusCode, req, res) => {
       hasRole: user && !!user.role
     });
     
-    // Log request object (safely)
-    console.error('Request details:', {
-      hasReq: !!req,
-      isSecure: req && req.secure,
-      hasXForwardedProto: req && req.headers && !!req.headers['x-forwarded-proto'],
-      xForwardedProto: req && req.headers ? req.headers['x-forwarded-proto'] : 'undefined'
-    });
-    
-    // Log environment variables (safely)
-    console.error('Environment variables:', {
-      nodeEnv: process.env.NODE_ENV,
-      hasJwtSecret: !!process.env.JWT_SECRET,
-      jwtSecretLength: process.env.JWT_SECRET ? process.env.JWT_SECRET.length : 0,
-      jwtExpiresIn: process.env.JWT_EXPIRES_IN,
-      jwtCookieExpiresIn: process.env.JWT_COOKIE_EXPIRES_IN
-    });
-    console.error('===========================================');
-    
+    // Fallback error response
     return res.status(500).json({
       status: 'error',
-      message: 'An error occurred while generating authentication token',
-      errorType: error.name,
-      errorMessage: error.message,
-      error: process.env.NODE_ENV === 'development' ? error.message : undefined
+      message: 'Token creation failed'
     });
   }
 };

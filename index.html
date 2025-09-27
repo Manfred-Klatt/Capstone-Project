@@ -790,7 +790,8 @@
             
             // Redirect to game page after a short delay
             setTimeout(() => {
-              window.location.href = 'game.html';
+              const username = data.data?.user?.username || email.split('@')[0];
+              window.location.href = `game.html?username=${encodeURIComponent(username)}`;
             }, 1000);
             
           } catch (error) {
@@ -1011,7 +1012,7 @@
             
             // Redirect to game page after a short delay
             setTimeout(() => {
-              window.location.href = 'game.html';
+              window.location.href = `game.html?username=${encodeURIComponent(username)}`;
             }, 1000);
           } else {
             console.error('Signup failed:', data);

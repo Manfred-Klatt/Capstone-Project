@@ -3378,6 +3378,15 @@
 
       const urlParams = new URLSearchParams(window.location.search);
       const isGuest = urlParams.get("guest") === "true";
+      const usernameParam = urlParams.get("username");
+
+      // If username is passed via URL parameter, update the welcome message
+      if (usernameParam && usernameParam !== 'Guest') {
+        // Store the username for the session
+        sessionStorage.setItem('username', usernameParam);
+        // Update the welcome message immediately
+        updateWelcomeMessage();
+      }
 
       if (isGuest) {
         logoutBtn.textContent = "Back to Home";

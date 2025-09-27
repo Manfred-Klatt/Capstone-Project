@@ -2242,8 +2242,7 @@
   </head>
   <body>
     <script>
-      // Update welcome message immediately when page loads
-      updateWelcomeMessage();
+      // Update welcome message will be called after the function is defined
     </script>
     <!-- Passcode Modal -->
     <div id="passcode-modal">
@@ -2533,6 +2532,9 @@
           welcomeMessage.style.border = '1px solid #91d5ff'; // Blue border
         }
       }
+      
+      // Call updateWelcomeMessage now that it's defined
+      updateWelcomeMessage();
       
       // Check server health on page load
       async function initServerCheck() {
@@ -4348,6 +4350,12 @@
         // Helper function to get fallback image path
         const getFallbackPath = () => {
           if (!item.name) return null;
+          
+          // For villagers, use a generic placeholder since individual villager images may not exist locally
+          if (currentCategory === 'villagers') {
+            return 'images/Cat_Silhouette.png'; // Use the villager icon as fallback
+          }
+          
           const safeName = item.name.toLowerCase().replace(/[^a-z0-9]/g, '');
           return `images/${currentCategory}/${safeName}.png`;
         };

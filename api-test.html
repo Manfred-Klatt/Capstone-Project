@@ -117,10 +117,11 @@
 
     <div>
         <h2>User Registration Test</h2>
+        <p><strong>📋 Combined Test:</strong> This will test registration and then automatically test login with the new user!</p>
         <form id="registrationTestForm" onsubmit="event.preventDefault(); testRegistration();">
             <div>
                 <label for="regUsername">Username:</label>
-                <input type="text" id="regUsername" placeholder="Enter username" autocomplete="username" value="">
+                <input type="text" id="regUsername" placeholder="Enter username (max 20 chars)" autocomplete="username" value="">
             </div>
             <div>
                 <label for="regEmail">Email:</label>
@@ -134,7 +135,7 @@
                 <label for="regPasswordConfirm">Confirm Password:</label>
                 <input type="password" id="regPasswordConfirm" placeholder="Confirm password" autocomplete="new-password" value="Test1234!">
             </div>
-            <button type="submit">Test Registration</button>
+            <button type="submit">Test Registration + Login</button>
             <button type="button" onclick="generateRandomUser()">Generate Random User</button>
         </form>
         <div id="registrationResult" class="result"></div>
@@ -406,6 +407,66 @@
             }
         }
         
+        // Test login with registered user credentials (called after successful registration)
+        async function testLoginWithRegisteredUser(email, password) {
+            const baseUrl = getBaseUrl();
+            const pathPrefix = getPathPrefix();
+            const resultDiv = document.getElementById('loginResult');
+            
+            // Clear previous login results and add separator
+            resultDiv.innerHTML = '<div class="info">🔐 <strong>AUTOMATIC LOGIN TEST</strong> (after successful registration)</div>';
+            
+            try {
+                const loginUrl = `${baseUrl}${pathPrefix}/auth/login`;
+                resultDiv.innerHTML += `<div class="info">Testing login at: ${loginUrl}</div>`;
+                resultDiv.innerHTML += `<div class="info">Using registered credentials: ${email}</div>`;
+                
+                const response = await fetch(loginUrl, {
+                    method: 'POST',
+                    mode: 'cors',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Accept': 'application/json'
+                    },
+                    body: JSON.stringify({ email, password }),
+                    credentials: 'include'
+                });
+                
+                const text = await response.text();
+                resultDiv.innerHTML += `<div class="info">Response status: ${response.status}</div>`;
+                
+                try {
+                    const data = JSON.parse(text);
+                    
+                    if (response.ok) {
+                        resultDiv.innerHTML += `<div class="success">✅ Login successful!</div>`;
+                        resultDiv.innerHTML += `<div class="success">🎉 Complete registration → login flow works!</div>`;
+                        
+                        if (data.token) {
+                            resultDiv.innerHTML += `<div class="success">JWT token received from login!</div>`;
+                            // Update the auth token field with the login token
+                            document.getElementById('authToken').value = data.token;
+                            resultDiv.innerHTML += `<div class="info">Login token updated in leaderboard test section</div>`;
+                        }
+                        
+                        if (data.data?.user) {
+                            resultDiv.innerHTML += `<div class="info">Logged in as: ${data.data.user.username} (${data.data.user.email})</div>`;
+                        }
+                    } else {
+                        resultDiv.innerHTML += `<div class="error">❌ Login failed: ${data.message || response.statusText}</div>`;
+                        resultDiv.innerHTML += `<div class="error">This indicates an issue with the login process after registration</div>`;
+                    }
+                    
+                    resultDiv.innerHTML += `<div class="info">Login response: <pre>${JSON.stringify(data, null, 2)}</pre></div>`;
+                } catch (e) {
+                    resultDiv.innerHTML += `<div class="error">Could not parse login response: ${e.message}</div>`;
+                    resultDiv.innerHTML += `<div class="info">Raw response: <pre>${text}</pre></div>`;
+                }
+            } catch (error) {
+                resultDiv.innerHTML += `<div class="error">Login test error: ${error.message}</div>`;
+            }
+        }
+        
         // Helper function to format response headers
         function formatHeaders(headers) {
             const headersObj = {};
@@ -559,6 +620,17 @@
                             document.getElementById('authToken').value = data.token;
                             resultDiv.innerHTML += `<div class="info">Token automatically filled in leaderboard test section</div>`;
                         }
+                        
+                        // Auto-fill login form with the registered user credentials
+                        document.getElementById('email').value = email;
+                        document.getElementById('password').value = password;
+                        resultDiv.innerHTML += `<div class="info">Login form auto-filled with registered user credentials</div>`;
+                        
+                        // Automatically test login after successful registration
+                        resultDiv.innerHTML += `<div class="info">🔄 Now testing login with the newly registered user...</div>`;
+                        setTimeout(() => {
+                            testLoginWithRegisteredUser(email, password);
+                        }, 1000); // Small delay to let user see the registration success
                     } else {
                         resultDiv.innerHTML += `<div class="error">Registration failed: ${data.message || response.statusText}</div>`;
                         if (response.status === 409) {

@@ -533,6 +533,10 @@
                         
                         // Suggest trying login again
                         resultDiv.innerHTML += `<div class="info">💡 Try clicking "Test Login" again to verify the account is working.</div>`;
+                        
+                        // Add a monitoring function to check if the account stays active
+                        resultDiv.innerHTML += `<div class="info">🔍 Monitoring account status for 30 seconds...</div>`;
+                        monitorAccountStatus(email, 30);
                     } else {
                         resultDiv.innerHTML += `<div class="error">❌ Reactivation failed: ${data.message || response.statusText}</div>`;
                         
@@ -557,6 +561,54 @@
                 reactivateBtn.disabled = false;
                 reactivateBtn.textContent = 'Try Reactivate Again';
             }
+        }
+        
+        // Monitor account status after reactivation
+        async function monitorAccountStatus(email, durationSeconds) {
+            const resultDiv = document.getElementById('loginResult');
+            const baseUrl = getBaseUrl();
+            const pathPrefix = getPathPrefix();
+            const loginUrl = `${baseUrl}${pathPrefix}/auth/login`;
+            
+            let checks = 0;
+            const maxChecks = Math.floor(durationSeconds / 5); // Check every 5 seconds
+            
+            const checkStatus = async () => {
+                checks++;
+                try {
+                    const response = await fetch(loginUrl, {
+                        method: 'POST',
+                        mode: 'cors',
+                        headers: {
+                            'Content-Type': 'application/json',
+                            'Accept': 'application/json'
+                        },
+                        body: JSON.stringify({ email, password: 'dummy' }), // Use dummy password to just check account status
+                        credentials: 'include'
+                    });
+                    
+                    const data = await response.json();
+                    const isDeactivated = data.message && data.message.includes('deactivated');
+                    
+                    if (isDeactivated) {
+                        resultDiv.innerHTML += `<div class="error">⚠️ Check ${checks}: Account is DEACTIVATED again after ${checks * 5} seconds!</div>`;
+                        return; // Stop monitoring
+                    } else {
+                        resultDiv.innerHTML += `<div class="success">✅ Check ${checks}: Account still ACTIVE after ${checks * 5} seconds</div>`;
+                    }
+                    
+                    if (checks < maxChecks) {
+                        setTimeout(checkStatus, 5000); // Check again in 5 seconds
+                    } else {
+                        resultDiv.innerHTML += `<div class="info">🏁 Monitoring complete. Account remained active for ${durationSeconds} seconds.</div>`;
+                    }
+                } catch (error) {
+                    resultDiv.innerHTML += `<div class="error">❌ Monitoring error at check ${checks}: ${error.message}</div>`;
+                }
+            };
+            
+            // Start monitoring after 5 seconds
+            setTimeout(checkStatus, 5000);
         }
         
         // Helper function to format response headers

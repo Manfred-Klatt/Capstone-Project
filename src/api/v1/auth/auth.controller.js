@@ -208,6 +208,14 @@ exports.reactivateAccount = catchAsync(async (req, res, next) => {
     
     await user.save({ validateBeforeSave: false });
     
+    // Verify the save worked by re-querying
+    const verifyUser = await User.findOne({ email: email.toLowerCase() })
+      .setOptions({ skipMiddleware: true });
+    logger.debug('Verification after save:', { 
+      savedActive: verifyUser.active,
+      updatedAt: verifyUser.updatedAt 
+    });
+    
     logger.info('Account reactivated successfully', { 
       userId: user._id, 
       email: user.email 

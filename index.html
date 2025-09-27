@@ -695,8 +695,14 @@
           
           // Check if server is available
           console.log('%c[AUTH] Checking server availability before login...', 'color: blue; font-weight: bold');
-          const serverAvailable = await checkServerAvailable();
+          let serverAvailable = await checkServerAvailable();
           console.log('%c[AUTH] Server available check result:', 'color: blue; font-weight: bold', serverAvailable);
+          
+          // If server check fails, try a direct login attempt anyway (fallback)
+          if (!serverAvailable) {
+            console.log('%c[AUTH] Server check failed, but attempting login anyway as fallback...', 'color: orange; font-weight: bold');
+            serverAvailable = true; // Force proceed with login attempt
+          }
           
           // Add a timeout to the fetch request
           const controller = new AbortController();
@@ -898,7 +904,13 @@
         
         // Check if server is available
         console.log('Checking server availability before signup...');
-        const serverAvailable = await checkServerAvailable();
+        let serverAvailable = await checkServerAvailable();
+        
+        // If server check fails, try a direct signup attempt anyway (fallback)
+        if (!serverAvailable) {
+          console.log('%c[SIGNUP] Server check failed, but attempting signup anyway as fallback...', 'color: orange; font-weight: bold');
+          serverAvailable = true; // Force proceed with signup attempt
+        }
         
         if (!serverAvailable) {
           // Server is not available, offer standalone mode

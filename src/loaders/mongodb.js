@@ -60,6 +60,16 @@ const connectDB = async (retryCount = 0) => {
     return mongoose.connection;
   }
 
+  // Debug environment variables
+  console.log('🔍 Environment Debug:', {
+    NODE_ENV: process.env.NODE_ENV,
+    RAILWAY_ENVIRONMENT_NAME: process.env.RAILWAY_ENVIRONMENT_NAME,
+    MONGODB_URI_SET: !!process.env.MONGODB_URI,
+    MONGO_URL_SET: !!process.env.MONGO_URL,
+    MONGO_PUBLIC_URL_SET: !!process.env.MONGO_PUBLIC_URL,
+    CONFIG_DB_URL_SET: !!config.database.url
+  });
+
   // Get connection URL from environment variables or config
   const connectionUrl = process.env.MONGODB_URI || config.database.url;
   

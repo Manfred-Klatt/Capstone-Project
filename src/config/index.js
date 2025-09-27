@@ -17,8 +17,14 @@ const config = {
         return `${railwayUrl}/acnh-quiz`;
       }
       
-      // Fall back to MONGODB_URI or local MongoDB
-      const uri = process.env.MONGODB_URI || 'mongodb://localhost:27017/acnh-quiz';
+      // Fall back to MONGODB_URI - DO NOT fall back to localhost in production
+      const uri = process.env.MONGODB_URI;
+      
+      if (!uri) {
+        console.error('❌ MONGODB_URI environment variable is not set!');
+        console.error('Available environment variables:', Object.keys(process.env).filter(key => key.includes('MONGO')));
+        throw new Error('MONGODB_URI environment variable is required for database connection');
+      }
       
       // For MongoDB Atlas URLs, ensure database name is included
       if (uri.includes('mongodb+srv://') && !uri.includes('/acnh-quiz')) {

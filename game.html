@@ -3714,7 +3714,8 @@
             // Allow Enter key to submit
             playerNameInput.onkeypress = function(e) {
               if (e.key === 'Enter') {
-                submitHighScore(finalScore, category);
+                const playerName = playerNameInput.value.trim() || 'Player';
+                submitHighScore(playerName, finalScore, category);
               }
             };
           }
@@ -3723,7 +3724,9 @@
           const submitButton = document.getElementById('submitScore');
           if (submitButton) {
             submitButton.onclick = function() {
-              submitHighScore(finalScore, category);
+              const playerNameInput = document.getElementById('playerName');
+              const playerName = playerNameInput ? playerNameInput.value.trim() || 'Player' : 'Player';
+              submitHighScore(playerName, finalScore, category);
             };
           }
           
@@ -4634,8 +4637,11 @@
         
         // Load a new item
         try {
+          // Get the current category from the selector
+          const currentCategory = categorySelector?.value || 'fish';
+          
           // Initialize the game with a new item
-          await initGame();
+          await initGame(currentCategory);
           
           // Timer will be started after the image is successfully loaded in displayItem
           

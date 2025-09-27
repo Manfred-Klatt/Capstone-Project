@@ -65,8 +65,8 @@ router.get('/health', (req, res) => {
 
 // Guest score submission endpoint (for backward compatibility)
 const { submitGuestScore } = require('./leaderboard/leaderboard.controller');
-const { allowWithGuestToken } = require('../../middleware/guestTokenMiddleware');
-const { validateLeaderboardSubmission } = require('../../middleware/validation');
+const { allowWithGuestToken } = require('../../../middleware/guestTokenMiddleware');
+const { validateLeaderboardSubmission } = require('../../../middleware/validation');
 
 router.post('/submit-guest-score', 
   allowWithGuestToken('leaderboard'), 

@@ -1,3 +1,8 @@
+// DEPRECATED: This is a legacy standalone server file
+// The main application now uses src/app.js with proper middleware architecture
+// This file is kept for reference but should NOT be used for deployment
+// Railway deployment should use: node src/app.js
+
 const express = require('express');
 const mongoose = require('mongoose');
 const bcrypt = require('bcryptjs');

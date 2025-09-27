@@ -1,3 +1,8 @@
+// AUTH SERVER: Separate authentication microservice
+// This is an independent auth server for testing/development
+// Main production app uses src/app.js with integrated auth
+// This server runs on a different port and can be used for auth testing
+
 const express = require('express');
 const mongoose = require('mongoose');
 const bcrypt = require('bcryptjs');

@@ -65,10 +65,11 @@
     <div>
         <h2>API URL</h2>
         <select id="apiUrl">
-            <option value="https://capstone-project-production-3cce.up.railway.app">Railway Main API</option>
+            <option value="https://capstone-project-production-3cce.up.railway.app" selected>Railway Main API (Current)</option>
             <option value="https://api.blathers.app">Blathers API</option>
             <option value="https://acnh-auth-server.up.railway.app">Auth Server</option>
             <option value="https://acnh-auth-server-production.up.railway.app">Auth Server (Production)</option>
+            <option value="http://localhost:8000">Local Development</option>
             <option value="http://localhost:3000">Local Auth Server</option>
         </select>
     </div>
@@ -112,6 +113,50 @@
             <button type="submit">Test Login</button>
         </form>
         <div id="loginResult" class="result"></div>
+    </div>
+
+    <div>
+        <h2>User Registration Test</h2>
+        <form id="registrationTestForm" onsubmit="event.preventDefault(); testRegistration();">
+            <div>
+                <label for="regUsername">Username:</label>
+                <input type="text" id="regUsername" placeholder="Enter username" value="">
+            </div>
+            <div>
+                <label for="regEmail">Email:</label>
+                <input type="email" id="regEmail" placeholder="Enter email" value="">
+            </div>
+            <div>
+                <label for="regPassword">Password:</label>
+                <input type="password" id="regPassword" placeholder="Enter password" value="Test1234!">
+            </div>
+            <div>
+                <label for="regPasswordConfirm">Confirm Password:</label>
+                <input type="password" id="regPasswordConfirm" placeholder="Confirm password" value="Test1234!">
+            </div>
+            <button type="submit">Test Registration</button>
+            <button type="button" onclick="generateRandomUser()">Generate Random User</button>
+        </form>
+        <div id="registrationResult" class="result"></div>
+    </div>
+
+    <div>
+        <h2>Leaderboard Test</h2>
+        <div>
+            <label for="authToken">Auth Token (from login):</label>
+            <input type="text" id="authToken" placeholder="Paste JWT token here">
+        </div>
+        <button onclick="testLeaderboard()">Test Leaderboard (Fish)</button>
+        <button onclick="testLeaderboardGuest()">Test Leaderboard (Guest Token)</button>
+        <button onclick="testAllLeaderboards()">Test All Leaderboards</button>
+        <div id="leaderboardResult" class="result"></div>
+    </div>
+
+    <div>
+        <h2>Game Endpoints Test</h2>
+        <button onclick="testGameCategories()">Test Game Categories</button>
+        <button onclick="testGameItem()">Test Random Game Item</button>
+        <div id="gameResult" class="result"></div>
     </div>
 
     <div>
@@ -451,6 +496,302 @@
                 }
             }
         }
+        
+        // Generate random user for testing
+        function generateRandomUser() {
+            const timestamp = Date.now();
+            document.getElementById('regUsername').value = `testuser${timestamp}`;
+            document.getElementById('regEmail').value = `test${timestamp}@example.com`;
+        }
+        
+        // Test user registration
+        async function testRegistration() {
+            const baseUrl = getBaseUrl();
+            const pathPrefix = getPathPrefix();
+            const username = document.getElementById('regUsername').value.trim();
+            const email = document.getElementById('regEmail').value.trim();
+            const password = document.getElementById('regPassword').value;
+            const passwordConfirm = document.getElementById('regPasswordConfirm').value;
+            const resultDiv = document.getElementById('registrationResult');
+            
+            if (!username || !email || !password || !passwordConfirm) {
+                resultDiv.innerHTML = '<div class="error">Please fill in all fields</div>';
+                return;
+            }
+            
+            if (password !== passwordConfirm) {
+                resultDiv.innerHTML = '<div class="error">Passwords do not match</div>';
+                return;
+            }
+            
+            resultDiv.innerHTML = '<div class="info">Testing registration...</div>';
+            
+            try {
+                const registrationUrl = `${baseUrl}${pathPrefix}/auth/signup`;
+                resultDiv.innerHTML += `<div class="info">Testing registration at: ${registrationUrl}</div>`;
+                
+                const response = await fetch(registrationUrl, {
+                    method: 'POST',
+                    mode: 'cors',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Accept': 'application/json'
+                    },
+                    body: JSON.stringify({ username, email, password, passwordConfirm }),
+                    credentials: 'include'
+                });
+                
+                const text = await response.text();
+                resultDiv.innerHTML += `<div class="info">Response status: ${response.status}</div>`;
+                
+                try {
+                    const data = JSON.parse(text);
+                    
+                    if (response.ok) {
+                        resultDiv.innerHTML += `<div class="success">Registration successful!</div>`;
+                        resultDiv.innerHTML += `<div class="info">User created: ${data.data?.user?.username} (${data.data?.user?.email})</div>`;
+                        
+                        if (data.token) {
+                            resultDiv.innerHTML += `<div class="success">JWT token received!</div>`;
+                            document.getElementById('authToken').value = data.token;
+                            resultDiv.innerHTML += `<div class="info">Token automatically filled in leaderboard test section</div>`;
+                        }
+                    } else {
+                        resultDiv.innerHTML += `<div class="error">Registration failed: ${data.message || response.statusText}</div>`;
+                        if (response.status === 409) {
+                            resultDiv.innerHTML += `<div class="info">User already exists. Try generating a new random user.</div>`;
+                        }
+                    }
+                    
+                    resultDiv.innerHTML += `<div class="info">Full response: <pre>${JSON.stringify(data, null, 2)}</pre></div>`;
+                } catch (e) {
+                    resultDiv.innerHTML += `<div class="error">Could not parse JSON response: ${e.message}</div>`;
+                    resultDiv.innerHTML += `<div class="info">Raw response: <pre>${text}</pre></div>`;
+                }
+            } catch (error) {
+                resultDiv.innerHTML += `<div class="error">Registration error: ${error.message}</div>`;
+            }
+        }
+        
+        // Test leaderboard with authentication
+        async function testLeaderboard() {
+            const baseUrl = getBaseUrl();
+            const pathPrefix = getPathPrefix();
+            const token = document.getElementById('authToken').value.trim();
+            const resultDiv = document.getElementById('leaderboardResult');
+            
+            if (!token) {
+                resultDiv.innerHTML = '<div class="error">Please provide an auth token (login first or paste token)</div>';
+                return;
+            }
+            
+            resultDiv.innerHTML = '<div class="info">Testing leaderboard with authentication...</div>';
+            
+            try {
+                const leaderboardUrl = `${baseUrl}${pathPrefix}/leaderboard/fish`;
+                resultDiv.innerHTML += `<div class="info">Testing: ${leaderboardUrl}</div>`;
+                
+                const response = await fetch(leaderboardUrl, {
+                    method: 'GET',
+                    mode: 'cors',
+                    headers: {
+                        'Accept': 'application/json',
+                        'Authorization': `Bearer ${token}`
+                    },
+                    credentials: 'include'
+                });
+                
+                const text = await response.text();
+                resultDiv.innerHTML += `<div class="info">Response status: ${response.status}</div>`;
+                
+                try {
+                    const data = JSON.parse(text);
+                    
+                    if (response.ok) {
+                        resultDiv.innerHTML += `<div class="success">Leaderboard fetch successful!</div>`;
+                        resultDiv.innerHTML += `<div class="info">Entries found: ${data.data?.length || 0}</div>`;
+                        
+                        if (data.data && data.data.length > 0) {
+                            const sample = data.data.slice(0, 3);
+                            resultDiv.innerHTML += `<div class="info">Sample entries: <pre>${JSON.stringify(sample, null, 2)}</pre></div>`;
+                        }
+                    } else {
+                        resultDiv.innerHTML += `<div class="error">Leaderboard fetch failed: ${data.message || response.statusText}</div>`;
+                    }
+                } catch (e) {
+                    resultDiv.innerHTML += `<div class="error">Could not parse JSON response: ${e.message}</div>`;
+                    resultDiv.innerHTML += `<div class="info">Raw response: <pre>${text}</pre></div>`;
+                }
+            } catch (error) {
+                resultDiv.innerHTML += `<div class="error">Leaderboard error: ${error.message}</div>`;
+            }
+        }
+        
+        // Test leaderboard with guest token
+        async function testLeaderboardGuest() {
+            const baseUrl = getBaseUrl();
+            const pathPrefix = getPathPrefix();
+            const resultDiv = document.getElementById('leaderboardResult');
+            
+            resultDiv.innerHTML = '<div class="info">Testing leaderboard with guest token...</div>';
+            
+            try {
+                const leaderboardUrl = `${baseUrl}${pathPrefix}/leaderboard/fish`;
+                resultDiv.innerHTML += `<div class="info">Testing: ${leaderboardUrl}</div>`;
+                
+                const response = await fetch(leaderboardUrl, {
+                    method: 'GET',
+                    mode: 'cors',
+                    headers: {
+                        'Accept': 'application/json',
+                        'X-Guest-Token': 'a7b9c2d5e8f3g6h1j4k7m2n5p8r3t6v9'
+                    }
+                });
+                
+                const text = await response.text();
+                resultDiv.innerHTML += `<div class="info">Response status: ${response.status}</div>`;
+                
+                try {
+                    const data = JSON.parse(text);
+                    
+                    if (response.ok) {
+                        resultDiv.innerHTML += `<div class="success">Guest leaderboard access successful!</div>`;
+                        resultDiv.innerHTML += `<div class="info">Entries found: ${data.data?.length || 0}</div>`;
+                    } else {
+                        resultDiv.innerHTML += `<div class="error">Guest leaderboard access failed: ${data.message || response.statusText}</div>`;
+                    }
+                } catch (e) {
+                    resultDiv.innerHTML += `<div class="error">Could not parse JSON response: ${e.message}</div>`;
+                    resultDiv.innerHTML += `<div class="info">Raw response: <pre>${text}</pre></div>`;
+                }
+            } catch (error) {
+                resultDiv.innerHTML += `<div class="error">Guest leaderboard error: ${error.message}</div>`;
+            }
+        }
+        
+        // Test all leaderboards
+        async function testAllLeaderboards() {
+            const baseUrl = getBaseUrl();
+            const pathPrefix = getPathPrefix();
+            const resultDiv = document.getElementById('leaderboardResult');
+            
+            resultDiv.innerHTML = '<div class="info">Testing all leaderboards...</div>';
+            
+            const categories = ['fish', 'bugs', 'sea', 'fossils'];
+            
+            for (const category of categories) {
+                try {
+                    const leaderboardUrl = `${baseUrl}${pathPrefix}/leaderboard/${category}`;
+                    resultDiv.innerHTML += `<div class="info">Testing ${category}: ${leaderboardUrl}</div>`;
+                    
+                    const response = await fetch(leaderboardUrl, {
+                        method: 'GET',
+                        mode: 'cors',
+                        headers: {
+                            'Accept': 'application/json',
+                            'X-Guest-Token': 'a7b9c2d5e8f3g6h1j4k7m2n5p8r3t6v9'
+                        }
+                    });
+                    
+                    if (response.ok) {
+                        const data = await response.json();
+                        resultDiv.innerHTML += `<div class="success">${category} leaderboard: ${data.data?.length || 0} entries</div>`;
+                    } else {
+                        resultDiv.innerHTML += `<div class="error">${category} leaderboard failed: ${response.status}</div>`;
+                    }
+                } catch (error) {
+                    resultDiv.innerHTML += `<div class="error">${category} leaderboard error: ${error.message}</div>`;
+                }
+            }
+        }
+        
+        // Test game categories
+        async function testGameCategories() {
+            const baseUrl = getBaseUrl();
+            const pathPrefix = getPathPrefix();
+            const resultDiv = document.getElementById('gameResult');
+            
+            resultDiv.innerHTML = '<div class="info">Testing game categories...</div>';
+            
+            try {
+                const categoriesUrl = `${baseUrl}${pathPrefix}/game/categories`;
+                resultDiv.innerHTML += `<div class="info">Testing: ${categoriesUrl}</div>`;
+                
+                const response = await fetch(categoriesUrl, {
+                    method: 'GET',
+                    mode: 'cors',
+                    headers: {
+                        'Accept': 'application/json'
+                    }
+                });
+                
+                const text = await response.text();
+                resultDiv.innerHTML += `<div class="info">Response status: ${response.status}</div>`;
+                
+                try {
+                    const data = JSON.parse(text);
+                    
+                    if (response.ok) {
+                        resultDiv.innerHTML += `<div class="success">Game categories fetch successful!</div>`;
+                        resultDiv.innerHTML += `<div class="info">Categories: <pre>${JSON.stringify(data.data, null, 2)}</pre></div>`;
+                    } else {
+                        resultDiv.innerHTML += `<div class="error">Game categories fetch failed: ${data.message || response.statusText}</div>`;
+                    }
+                } catch (e) {
+                    resultDiv.innerHTML += `<div class="error">Could not parse JSON response: ${e.message}</div>`;
+                    resultDiv.innerHTML += `<div class="info">Raw response: <pre>${text}</pre></div>`;
+                }
+            } catch (error) {
+                resultDiv.innerHTML += `<div class="error">Game categories error: ${error.message}</div>`;
+            }
+        }
+        
+        // Test random game item
+        async function testGameItem() {
+            const baseUrl = getBaseUrl();
+            const pathPrefix = getPathPrefix();
+            const resultDiv = document.getElementById('gameResult');
+            
+            resultDiv.innerHTML = '<div class="info">Testing random game item...</div>';
+            
+            try {
+                const itemUrl = `${baseUrl}${pathPrefix}/game/fish/random`;
+                resultDiv.innerHTML += `<div class="info">Testing: ${itemUrl}</div>`;
+                
+                const response = await fetch(itemUrl, {
+                    method: 'GET',
+                    mode: 'cors',
+                    headers: {
+                        'Accept': 'application/json'
+                    }
+                });
+                
+                const text = await response.text();
+                resultDiv.innerHTML += `<div class="info">Response status: ${response.status}</div>`;
+                
+                try {
+                    const data = JSON.parse(text);
+                    
+                    if (response.ok) {
+                        resultDiv.innerHTML += `<div class="success">Random game item fetch successful!</div>`;
+                        resultDiv.innerHTML += `<div class="info">Item: <pre>${JSON.stringify(data.data, null, 2)}</pre></div>`;
+                    } else {
+                        resultDiv.innerHTML += `<div class="error">Random game item fetch failed: ${data.message || response.statusText}</div>`;
+                    }
+                } catch (e) {
+                    resultDiv.innerHTML += `<div class="error">Could not parse JSON response: ${e.message}</div>`;
+                    resultDiv.innerHTML += `<div class="info">Raw response: <pre>${text}</pre></div>`;
+                }
+            } catch (error) {
+                resultDiv.innerHTML += `<div class="error">Random game item error: ${error.message}</div>`;
+            }
+        }
+        
+        // Auto-fill token from login response
+        document.addEventListener('DOMContentLoaded', function() {
+            // Generate random user on page load
+            generateRandomUser();
+        });
     </script>
 </body>
 </html>

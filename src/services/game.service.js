@@ -21,7 +21,7 @@ const generateQuestions = (category, difficulty, count = 10) => {
 // Get game categories
 const getCategories = () => {
   return {
-    categories: ['villagers', 'fish', 'bugs', 'fossils', 'art', 'mixed'],
+    categories: ['villagers', 'fish', 'bugs', 'sea', 'art', 'mixed'],
     difficulties: ['easy', 'medium', 'hard'],
   };
 };

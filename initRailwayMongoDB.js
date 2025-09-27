@@ -7,8 +7,8 @@
  * - leaderboards
  * - fish_leaderboard
  * - bug_leaderboard
- * - fossil_leaderboard
  * - sea_creature_leaderboard
+ * - villagers_leaderboard
  * 
  * Usage:
  * node initRailwayMongoDB.js
@@ -24,8 +24,8 @@ const COLLECTIONS = [
   'leaderboards',
   'fish_leaderboard',
   'bug_leaderboard',
-  'fossil_leaderboard',
-  'sea_creature_leaderboard'
+  'sea_creature_leaderboard',
+  'villagers_leaderboard'
 ];
 
 // Initialize collections
@@ -65,7 +65,7 @@ async function initializeCollections() {
     }
     
     // Leaderboard indexes
-    for (const leaderboard of ['fish_leaderboard', 'bug_leaderboard', 'fossil_leaderboard', 'sea_creature_leaderboard']) {
+    for (const leaderboard of ['fish_leaderboard', 'bug_leaderboard', 'sea_creature_leaderboard', 'villagers_leaderboard']) {
       if (existingCollectionNames.includes(leaderboard)) {
         await conn.connection.db.collection(leaderboard).createIndex({ score: -1 });
         await conn.connection.db.collection(leaderboard).createIndex({ username: 1 });

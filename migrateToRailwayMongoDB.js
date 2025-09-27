@@ -26,8 +26,8 @@ const COLLECTIONS = [
   'leaderboards',
   'fish_leaderboard',
   'bug_leaderboard',
-  'fossil_leaderboard',
-  'sea_creature_leaderboard'
+  'sea_creature_leaderboard',
+  'villagers_leaderboard'
 ];
 
 // Migrate data

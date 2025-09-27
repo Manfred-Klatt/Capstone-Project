@@ -10,7 +10,7 @@ const gameSchema = new mongoose.Schema(
     category: {
       type: String,
       required: [true, 'Please provide a category'],
-      enum: ['villagers', 'fish', 'bugs', 'fossils', 'art', 'mixed'],
+      enum: ['villagers', 'fish', 'bugs', 'sea', 'art', 'mixed'],
     },
     difficulty: {
       type: String,

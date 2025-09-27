@@ -52,27 +52,45 @@ exports.signup = catchAsync(async (req, res, next) => {
     logger.warn(`User with this ${field} already exists`, { [field]: existingUser[field] });
     return next(new AppError(`User with this ${field} already exists`, 409));
   }
-  
   try {
     const { user, token } = await authService.signup({
       username,
       email,
       password,
-      passwordConfirm,
+      passwordConfirm
     });
 
-    logger.info('User created successfully', { 
+    // Immediately verify the user's active status after creation
+    const verifyUser = await User.findById(user._id).setOptions({ skipMiddleware: true });
+    logger.info('User signup successful - immediate verification', { 
       userId: user._id, 
-      email: user.email 
+      email: user.email,
+      username: user.username,
+      activeStatus: verifyUser.active,
+      createdAt: verifyUser.createdAt
     });
-    
+
+    // Schedule a delayed check to see if account gets deactivated
+    setTimeout(async () => {
+      try {
+        const delayedCheck = await User.findById(user._id).setOptions({ skipMiddleware: true });
+        logger.info('Delayed user status check (5 seconds after creation)', {
+          userId: user._id,
+          email: user.email,
+          activeStatus: delayedCheck.active,
+          updatedAt: delayedCheck.updatedAt
+        });
+      } catch (err) {
+        logger.error('Error in delayed user status check', { error: err.message });
+      }
+    }, 5000);
+
     res.status(201).json({
       status: 'success',
       token,
       data: {
         user: {
           id: user._id,
-          username: user.username,
           email: user.email,
           role: user.role
         }

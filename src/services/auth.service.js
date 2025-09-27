@@ -60,6 +60,13 @@ exports.signup = async (userData) => {
       passwordConfirm: userData.passwordConfirm,
     });
 
+    // Explicitly ensure the user is active (workaround for deactivation issue)
+    if (newUser.active !== true) {
+      console.log('User created with inactive status, forcing active...');
+      newUser.active = true;
+      await newUser.save({ validateBeforeSave: false });
+    }
+
     // Remove password from output
     newUser.password = undefined;
 

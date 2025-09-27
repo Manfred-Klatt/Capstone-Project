@@ -1110,14 +1110,17 @@
       document.addEventListener('DOMContentLoaded', function() {
         // Page initialization code
         
-        // Event listener for force standalone mode button
-        document.getElementById("forceStandaloneBtn").addEventListener("click", function () {
-          console.log('%c[STANDALONE] Forcing standalone mode', 'color: orange; font-weight: bold');
-          localStorage.setItem('force_standalone', 'true');
-          localStorage.setItem('standalone_confirmed_this_session', 'true');
-          localStorage.setItem('acnh_guest', 'true');
-          window.location.href = "game.html?guest=true&standalone=true";
-        });
+        // Event listener for force standalone mode button (if it exists)
+        const forceStandaloneBtn = document.getElementById("forceStandaloneBtn");
+        if (forceStandaloneBtn) {
+          forceStandaloneBtn.addEventListener("click", function () {
+            console.log('%c[STANDALONE] Forcing standalone mode', 'color: orange; font-weight: bold');
+            localStorage.setItem('force_standalone', 'true');
+            localStorage.setItem('standalone_confirmed_this_session', 'true');
+            localStorage.setItem('acnh_guest', 'true');
+            window.location.href = "game.html?guest=true&standalone=true";
+          });
+        }
       });
     </script>
   </body>

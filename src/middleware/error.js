@@ -102,10 +102,16 @@ const sendErrorProd = (err, req, res) => {
       });
     }
     // B) Programming or other unknown error: don't leak error details
+    // Temporarily show more details for debugging
     return res.status(500).json({
       status: 'error',
       message: 'Something went very wrong!',
       requestId: req.id,
+      debug: process.env.NODE_ENV === 'production' ? {
+        error: err.message,
+        name: err.name,
+        stack: err.stack?.split('\n').slice(0, 5).join('\n') // First 5 lines of stack
+      } : undefined
     });
   }
 

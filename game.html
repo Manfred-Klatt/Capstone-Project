@@ -3227,7 +3227,7 @@
     <div id="highScoreModal" class="modal">
       <div class="modal-content">
         <h2 style="color: #2c3e50;">New High Score!</h2>
-        <p style="color: #34495e;">🎉 Congratulations! You scored <span id="finalScore" style="font-weight: bold; color: #2c3e50;"></span> points! 🎉</p>
+        <p style="color: #34495e;">🎉 Congratulations! You scored <span id="finalScore" style="font-weight: bold; color: #2c3e50;"></span> points in <span id="categoryName" style="font-weight: bold; color: #2c3e50; text-transform: capitalize;"></span>! 🎉</p>
         <div id="placementMessage"></div>
         <p style="color: #2c3e50; font-weight: 500; margin-top: 15px;">🏆 Enter your name for the leaderboard:</p>
         <input type="text" id="playerName" placeholder="Your name" maxlength="10" style="width: 150px; padding: 8px; font-size: 14px;" />
@@ -3706,6 +3706,19 @@
           finalScoreElement.textContent = finalScore;
         }
         
+        // Set the category name in the modal
+        const categoryNameElement = document.getElementById('categoryName');
+        if (categoryNameElement) {
+          // Convert category names to display format
+          const categoryDisplayNames = {
+            'fish': 'Fish',
+            'bugs': 'Bugs', 
+            'sea': 'Sea Creatures',
+            'villagers': 'Villagers'
+          };
+          categoryNameElement.textContent = categoryDisplayNames[category] || category;
+        }
+        
         // Show the modal
         const modal = document.getElementById('highScoreModal');
         if (modal) {
@@ -3986,52 +3999,52 @@
       // Default leaderboard data
       const DEFAULT_LEADERBOARD = {
         fish: [
-          { name: "Kapp'n", score: 10 },
-          { name: "Leif", score: 9 },
-          { name: "Cyrus", score: 8 },
-          { name: "Kicks", score: 7 },
-          { name: "Redd", score: 6 },
-          { name: "Mabel", score: 5 },
-          { name: "Saharah", score: 4 },
-          { name: "Gulliver", score: 3 },
-          { name: "Wisp", score: 2 },
-          { name: "Harvey", score: 1 }
+          { name: "Kapp'n", score: 2850 },
+          { name: "Leif", score: 2720 },
+          { name: "Cyrus", score: 2590 },
+          { name: "Kicks", score: 2460 },
+          { name: "Redd", score: 2330 },
+          { name: "Mabel", score: 2200 },
+          { name: "Saharah", score: 2070 },
+          { name: "Gulliver", score: 1940 },
+          { name: "Wisp", score: 1810 },
+          { name: "Harvey", score: 1680 }
         ],
         bugs: [
-          { name: "Flick", score: 10 },
-          { name: "Cube", score: 9 },
-          { name: "Kapp'n", score: 8 },
-          { name: "Kiki", score: 7 },
-          { name: "Cyrus", score: 6 },
-          { name: "Kicks", score: 5 },
-          { name: "Redd", score: 4 },
-          { name: "Mabel", score: 3 },
-          { name: "Saharah", score: 2 },
-          { name: "Gulliver", score: 1 }
+          { name: "Flick", score: 3200 },
+          { name: "Cube", score: 3050 },
+          { name: "Kapp'n", score: 2900 },
+          { name: "Kiki", score: 2750 },
+          { name: "Cyrus", score: 2600 },
+          { name: "Kicks", score: 2450 },
+          { name: "Redd", score: 2300 },
+          { name: "Mabel", score: 2150 },
+          { name: "Saharah", score: 2000 },
+          { name: "Gulliver", score: 1850 }
         ],
         sea: [
-          { name: "Pascal", score: 10 },
-          { name: "Kapp'n", score: 9 },
-          { name: "Leif", score: 8 },
-          { name: "Cyrus", score: 7 },
-          { name: "Kicks", score: 6 },
-          { name: "Redd", score: 5 },
-          { name: "Mabel", score: 4 },
-          { name: "Saharah", score: 3 },
-          { name: "Gulliver", score: 2 },
-          { name: "Wisp", score: 1 }
+          { name: "Pascal", score: 2950 },
+          { name: "Kapp'n", score: 2800 },
+          { name: "Leif", score: 2650 },
+          { name: "Cyrus", score: 2500 },
+          { name: "Kicks", score: 2350 },
+          { name: "Redd", score: 2200 },
+          { name: "Mabel", score: 2050 },
+          { name: "Saharah", score: 1900 },
+          { name: "Gulliver", score: 1750 },
+          { name: "Wisp", score: 1600 }
         ],
         villagers: [
-          { name: "Tom Nook", score: 10 },
-          { name: "Isabelle", score: 9 },
-          { name: "Blathers", score: 8 },
-          { name: "Celeste", score: 7 },
-          { name: "Brewster", score: 6 },
-          { name: "K.K. Slider", score: 5 },
-          { name: "Sable", score: 4 },
-          { name: "Label", score: 3 },
-          { name: "Reese", score: 2 },
-          { name: "Cyrus", score: 1 }
+          { name: "Tom Nook", score: 3100 },
+          { name: "Isabelle", score: 2970 },
+          { name: "Blathers", score: 2840 },
+          { name: "Celeste", score: 2710 },
+          { name: "Brewster", score: 2580 },
+          { name: "K.K. Slider", score: 2450 },
+          { name: "Sable", score: 2320 },
+          { name: "Label", score: 2190 },
+          { name: "Reese", score: 2060 },
+          { name: "Cyrus", score: 1930 }
         ]
       };
       
@@ -5052,7 +5065,15 @@
         document.getElementById('simulate-score-btn').addEventListener('click', () => {
           const categories = ['fish', 'bugs', 'sea', 'villagers'];
           const randomCategory = categories[Math.floor(Math.random() * categories.length)];
-          const testScore = Math.floor(Math.random() * 371) + 130; // Random score between 130-500
+          
+          // Get the current top score for this category to ensure we beat it
+          let topScore = 0;
+          if (DEFAULT_LEADERBOARD[randomCategory] && DEFAULT_LEADERBOARD[randomCategory].length > 0) {
+            topScore = DEFAULT_LEADERBOARD[randomCategory][0].score;
+          }
+          
+          // Generate a score that's guaranteed to be 1st place (top score + random amount)
+          const testScore = topScore + Math.floor(Math.random() * 500) + 100; // Beat top score by 100-599 points
           
           // Directly show the high score modal for the test score
           showHighScoreModal(testScore, randomCategory);

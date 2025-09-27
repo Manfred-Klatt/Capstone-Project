@@ -35,11 +35,23 @@ const exemptFromCSRF = (req, res, next) => {
     return next();
   }
   
+  // Skip CSRF for auth endpoints (login, signup, etc.) - these don't have tokens yet
+  if (req.path.startsWith('/api/v1/auth/')) {
+    return next();
+  }
+  
   // Skip CSRF for public endpoints that use guest tokens
   if (
     req.path.startsWith('/api/leaderboard') && 
     (req.headers['x-guest-token'] || req.query.token)
   ) {
+    return next();
+  }
+  
+  // Skip CSRF for other public API endpoints
+  if (req.path.startsWith('/api/v1/leaderboard') || 
+      req.path.startsWith('/api/v1/game') ||
+      req.path.startsWith('/api/v1/health')) {
     return next();
   }
   

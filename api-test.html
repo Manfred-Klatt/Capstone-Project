@@ -499,9 +499,12 @@
         
         // Generate random user for testing
         function generateRandomUser() {
-            const timestamp = Date.now();
-            document.getElementById('regUsername').value = `testuser${timestamp}`;
-            document.getElementById('regEmail').value = `test${timestamp}@example.com`;
+            // Generate a shorter random ID to stay within 20 character limit
+            const randomId = Math.random().toString(36).substring(2, 8); // 6 characters
+            const username = `test${randomId}`; // 4 + 6 = 10 characters (well under 20)
+            
+            document.getElementById('regUsername').value = username;
+            document.getElementById('regEmail').value = `${username}@example.com`;
         }
         
         // Test user registration

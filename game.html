@@ -241,8 +241,18 @@
         
         if (!leaderboardData || leaderboardData.length === 0) {
           logger.debug('No valid data provided, showing empty leaderboard');
-          // Show empty leaderboard instead of placeholder data
-          updateLeaderboardUI(categoryName, []);
+          // Render empty state directly to avoid recursion
+          try {
+            const emptyHtml = `
+              <ol class="leaderboard-list">
+                <li class="no-scores">No scores yet. Be the first to play!</li>
+              </ol>
+            `;
+            element.innerHTML = emptyHtml;
+            logger.debug(`Updated ${categoryName} with 0 entries`);
+          } catch (e) {
+            logger.error(`Error rendering empty state for ${categoryName}`);
+          }
           return;
         }
         

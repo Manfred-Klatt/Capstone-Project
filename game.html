@@ -375,46 +375,56 @@
       async function loadLeaderboardData(category, retryCount = 0) {
         // Ensure category is a string
         const categoryName = typeof category === 'object' && category.name ? category.name : category;
-        const apiUrl = `${window.BACKEND_API}/leaderboard/${categoryName}`;
-        console.log(`🌐 Loading leaderboard from: ${apiUrl}`);
         
-        const element = document.getElementById(`${categoryName}-scores`);
-        // Reduce max retries to 1 to avoid excessive API calls
-        const maxRetries = 1;
-        
-        if (!element) {
-          logger.error(`Element not found for category: ${categoryName}`);
+        // Check if already loading this category to prevent duplicates
+        if (loadingStates.get(categoryName)) {
+          console.log(`⏳ Already loading ${categoryName}, skipping duplicate request`);
           return;
         }
         
-        // Show loading state with a subtle animation
-        element.innerHTML = `
-          <div class="loading">
-            <div class="loading-spinner"></div>
-            <div>Loading ${categoryName} leaderboard...</div>
-          </div>`;
-          
-        // If we've retried too many times, use default data without additional API calls
-        if (retryCount > maxRetries) {
-          logger.warn(`Max retries reached for ${categoryName}, using default data`);
-          updateLeaderboardUI(categoryName, LEADERBOARD_CONFIG.defaultData[categoryName] || []);
-          return;
-        }
-        
-        // Check if we're in offline mode or have recent failed auth attempts
-        const isOffline = isStandaloneMode();
-        const authFailed = localStorage.getItem('leaderboard_auth_failed') === 'true';
-        console.log(`🔍 Offline mode: ${isOffline}, Auth failed: ${authFailed}`);
-        
-        if (isOffline || authFailed) {
-          console.log(`⚠️ Using default data for ${categoryName} (offline: ${isOffline}, auth failed: ${authFailed})`);
-          const defaultData = LEADERBOARD_CONFIG.defaultData[categoryName];
-          console.log(`📋 Default data for ${categoryName}:`, defaultData);
-          updateLeaderboardUI(categoryName, defaultData || []);
-          return;
-        }
+        // Set loading state
+        loadingStates.set(categoryName, true);
         
         try {
+          const apiUrl = `${window.BACKEND_API}/leaderboard/${categoryName}`;
+          console.log(`🌐 Loading leaderboard from: ${apiUrl}`);
+        
+          const element = document.getElementById(`${categoryName}-scores`);
+          // Reduce max retries to 1 to avoid excessive API calls
+          const maxRetries = 1;
+          
+          if (!element) {
+            logger.error(`Element not found for category: ${categoryName}`);
+            return;
+          }
+        
+          // Show loading state with a subtle animation
+          element.innerHTML = `
+            <div class="loading">
+              <div class="loading-spinner"></div>
+              <div>Loading ${categoryName} leaderboard...</div>
+            </div>`;
+          
+          // If we've retried too many times, use default data without additional API calls
+          if (retryCount > maxRetries) {
+            logger.warn(`Max retries reached for ${categoryName}, using default data`);
+            updateLeaderboardUI(categoryName, LEADERBOARD_CONFIG.defaultData[categoryName] || []);
+            return;
+          }
+        
+          // Check if we're in offline mode or have recent failed auth attempts
+          const isOffline = isStandaloneMode();
+          const authFailed = localStorage.getItem('leaderboard_auth_failed') === 'true';
+          console.log(`🔍 Offline mode: ${isOffline}, Auth failed: ${authFailed}`);
+          
+          if (isOffline || authFailed) {
+            console.log(`⚠️ Using default data for ${categoryName} (offline: ${isOffline}, auth failed: ${authFailed})`);
+            const defaultData = LEADERBOARD_CONFIG.defaultData[categoryName];
+            console.log(`📋 Default data for ${categoryName}:`, defaultData);
+            updateLeaderboardUI(categoryName, defaultData || []);
+            return;
+          }
+        
           logger.debug(`Fetching data for ${categoryName}`);
           
           const headers = {
@@ -519,6 +529,9 @@
           
           // For network errors, use default data without retrying
           updateLeaderboardUI(categoryName, LEADERBOARD_CONFIG.defaultData[categoryName] || []);
+        } finally {
+          // Always clear loading state when done
+          loadingStates.set(categoryName, false);
         }
       }
       
@@ -2486,8 +2499,13 @@
         return !!token;
       }
       
-      // Call debug function on page load
-      window.addEventListener('load', debugAuthStatus);
+      // Call debug function on page load and clear auth failed flag
+      window.addEventListener('load', () => {
+        debugAuthStatus();
+        // Clear the auth failed flag on page load to allow fresh attempts
+        localStorage.removeItem('leaderboard_auth_failed');
+        console.log('🧹 Cleared leaderboard auth failed flag on page load');
+      });
       
       // Custom logger that respects the DEBUG flag
       const logger = {

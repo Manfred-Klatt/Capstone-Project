@@ -187,28 +187,8 @@
           sea: '<img src="images/Sea_Creature_Icon.png" alt="Sea Creatures" style="width: 24px; height: 24px; vertical-align: middle;">',
           villagers: '<img src="images/Cat_Silhouette.png" alt="Villagers" style="width: 24px; height: 24px; vertical-align: middle;">'
         },
-        defaultData: {
-          fish: [
-            { name: 'Tom Nook', score: 1000 },
-            { name: 'Isabelle', score: 900 },
-            { name: 'Player', score: 800 }
-          ],
-          bugs: [
-            { name: 'Flick', score: 1200 },
-            { name: 'Player', score: 950 },
-            { name: 'Tom Nook', score: 700 }
-          ],
-          sea: [
-            { name: 'Pascal', score: 1100 },
-            { name: 'Player', score: 850 },
-            { name: 'Isabelle', score: 750 }
-          ],
-          villagers: [
-            { name: 'Isabelle', score: 1500 },
-            { name: 'Tom Nook', score: 1200 },
-            { name: 'Player', score: 1000 }
-          ]
-        }
+        // Placeholder data removed - leaderboards now show empty state when no data available
+        defaultData: {}
       };
 
       // Initialize leaderboard when DOM is ready
@@ -216,12 +196,9 @@
         // First try to load from server
         initializeLeaderboard().catch(error => {
           logger.error('Failed to load leaderboard from server, using default data');
-          // Fall back to default data
+          // Show empty state for all categories
           LEADERBOARD_CONFIG.categories.forEach(category => {
-            const defaultData = LEADERBOARD_CONFIG.defaultData[category];
-            if (defaultData) {
-              updateLeaderboardUI(category, defaultData);
-            }
+            updateLeaderboardUI(category, []);
           });
         });
       });
@@ -259,26 +236,14 @@
           // Handle alternative API format: { leaderboard: [...] }
           leaderboardData = data.leaderboard;
         } else {
-          console.log('🔍 Unknown data format:', data);
+          console.log('Unknown data format:', data);
         }
         
         if (!leaderboardData || leaderboardData.length === 0) {
-          logger.debug('No valid data provided, using default leaderboard');
-          const defaultData = LEADERBOARD_CONFIG.defaultData[categoryName];
-          if (defaultData && Array.isArray(defaultData) && defaultData.length > 0) {
-            updateLeaderboardUI(categoryName, defaultData);
-            return;
-          } else {
-            logger.debug('No default leaderboard data available');
-            element.innerHTML = `
-              <div class="no-data">
-                <p>No ${categoryName} leaderboard data available</p>
-                <button class="retry-button" onclick="loadLeaderboardData('${categoryName}')">
-                  <i class="fas fa-sync-alt"></i> Try Again
-                </button>
-              </div>`;
-            return;
-          }
+          logger.debug('No valid data provided, showing empty leaderboard');
+          // Show empty leaderboard instead of placeholder data
+          updateLeaderboardUI(categoryName, []);
+          return;
         }
         
         try {
@@ -331,10 +296,10 @@
         // Check if we're in offline mode first
         if (isStandaloneMode()) {
           logger.debug('In offline mode, using default data for all categories');
-          // Use default data for all categories
+          // Show empty state for all categories
           for (const category of LEADERBOARD_CONFIG.categories) {
             if (!category || typeof category !== 'string') continue;
-            updateLeaderboardUI(category, LEADERBOARD_CONFIG.defaultData[category] || []);
+            updateLeaderboardUI(category, []);
           }
           return;
         }
@@ -358,11 +323,8 @@
             await loadLeaderboardData(category);
           } catch (error) {
             logger.error(`Error initializing ${category}`);
-            // Fall back to default data on error
-            const defaultData = LEADERBOARD_CONFIG.defaultData?.[category];
-            if (defaultData) {
-              updateLeaderboardUI(category, defaultData);
-            }
+            // Show empty state on error
+            updateLeaderboardUI(category, []);
           } finally {
             loadingStates.set(category, false);
           }
@@ -408,7 +370,7 @@
           // If we've retried too many times, use default data without additional API calls
           if (retryCount > maxRetries) {
             logger.warn(`Max retries reached for ${categoryName}, using default data`);
-            updateLeaderboardUI(categoryName, LEADERBOARD_CONFIG.defaultData[categoryName] || []);
+            updateLeaderboardUI(categoryName, []);
             return;
           }
         
@@ -418,10 +380,8 @@
           console.log(`🔍 Offline mode: ${isOffline}, Auth failed: ${authFailed}`);
           
           if (isOffline || authFailed) {
-            console.log(`⚠️ Using default data for ${categoryName} (offline: ${isOffline}, auth failed: ${authFailed})`);
-            const defaultData = LEADERBOARD_CONFIG.defaultData[categoryName];
-            console.log(`📋 Default data for ${categoryName}:`, defaultData);
-            updateLeaderboardUI(categoryName, defaultData || []);
+            console.log(`⚠️ Showing empty state for ${categoryName} (offline: ${isOffline}, auth failed: ${authFailed})`);
+            updateLeaderboardUI(categoryName, []);
             return;
           }
         
@@ -515,20 +475,20 @@
               // Set a timeout to clear the auth failed flag after 5 minutes
               setTimeout(() => localStorage.removeItem('leaderboard_auth_failed'), 5 * 60 * 1000);
               
-              updateLeaderboardUI(categoryName, LEADERBOARD_CONFIG.defaultData[categoryName] || []);
+              updateLeaderboardUI(categoryName, []);
             }
           } else {
             // For other errors, use default data
             console.error(`❌ Error loading ${categoryName}: ${response.status} ${response.statusText}`);
             const errorText = await response.text();
             console.error(`❌ Error response body:`, errorText);
-            updateLeaderboardUI(categoryName, LEADERBOARD_CONFIG.defaultData[categoryName] || []);
+            updateLeaderboardUI(categoryName, []);
           }
         } catch (error) {
           console.error(`❌ Network error loading ${categoryName}:`, error);
           
-          // For network errors, use default data without retrying
-          updateLeaderboardUI(categoryName, LEADERBOARD_CONFIG.defaultData[categoryName] || []);
+          // For network errors, show empty state
+          updateLeaderboardUI(categoryName, []);
         } finally {
           // Always clear loading state when done
           loadingStates.set(categoryName, false);
@@ -2445,6 +2405,18 @@
         console.log('🧹 Cleared leaderboard auth failed flag');
       }
       
+      // Function to refresh a specific leaderboard
+      function refreshLeaderboard(category) {
+        console.log(`🔄 Manually refreshing ${category} leaderboard`);
+        
+        // Clear any auth failed flags to allow fresh attempts
+        localStorage.removeItem('leaderboard_auth_failed');
+        
+        // Force reload the leaderboard data
+        loadingStates.set(category, false); // Clear any existing loading state
+        loadLeaderboardData(category);
+      }
+      
       // Function to get current username
       function getCurrentUsername() {
         let username = null;
@@ -3167,6 +3139,9 @@
         <div class="leaderboard-header">
           <span class="category-icon"><img src="images/Fish_Icon.png" alt="Fish" style="width: 48px; height: 48px; vertical-align: middle; margin-right: 5px;"></span>
           <h3 class="leaderboard-category"></h3>
+          <button class="refresh-btn" onclick="refreshLeaderboard('fish')" title="Refresh Fish Leaderboard">
+            <i class="fas fa-sync-alt"></i>
+          </button>
         </div>
         <div id="fish-scores" class="leaderboard-scores"></div>
       </div>
@@ -3176,6 +3151,9 @@
         <div class="leaderboard-header">
           <span class="category-icon"><img src="images/Bug_Icon.png" alt="Bugs" style="width: 48px; height: 48px; vertical-align: middle; margin-right: 5px;"></span>
           <h3 class="leaderboard-category"></h3>
+          <button class="refresh-btn" onclick="refreshLeaderboard('bugs')" title="Refresh Bugs Leaderboard">
+            <i class="fas fa-sync-alt"></i>
+          </button>
         </div>
         <div id="bugs-scores" class="leaderboard-scores"></div>
       </div>
@@ -3185,6 +3163,9 @@
         <div class="leaderboard-header">
           <span class="category-icon"><img src="images/Sea_Creature_Icon.png" alt="Sea Creatures" style="width: 48px; height: 48px; vertical-align: middle; margin-right: 5px;"></span>
           <h3 class="leaderboard-category"></h3>
+          <button class="refresh-btn" onclick="refreshLeaderboard('sea')" title="Refresh Sea Creatures Leaderboard">
+            <i class="fas fa-sync-alt"></i>
+          </button>
         </div>
         <div id="sea-scores" class="leaderboard-scores"></div>
       </div>
@@ -3194,6 +3175,9 @@
         <div class="leaderboard-header">
           <span class="category-icon"><img src="images/Cat_Silhouette.png" alt="Villagers" style="width: 36px; height: 36px; vertical-align: middle; margin-right: 5px; filter: invert(1);"></span>
           <h3 class="leaderboard-category"></h3>
+          <button class="refresh-btn" onclick="refreshLeaderboard('villagers')" title="Refresh Villagers Leaderboard">
+            <i class="fas fa-sync-alt"></i>
+          </button>
         </div>
         <div id="villagers-scores" class="leaderboard-scores">
           <ul class="leaderboard-list">
@@ -3265,9 +3249,41 @@
       .leaderboard-header {
         display: flex;
         align-items: center;
+        justify-content: space-between;
         margin-bottom: 15px;
         padding-bottom: 10px;
         border-bottom: 2px dashed;
+      }
+      
+      .refresh-btn {
+        background: linear-gradient(135deg, #4CAF50, #45a049);
+        border: none;
+        border-radius: 50%;
+        width: 32px;
+        height: 32px;
+        color: white;
+        cursor: pointer;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 14px;
+        transition: all 0.3s ease;
+        box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+        margin-left: auto;
+      }
+      
+      .refresh-btn:hover {
+        background: linear-gradient(135deg, #45a049, #4CAF50);
+        transform: rotate(180deg) scale(1.1);
+        box-shadow: 0 4px 8px rgba(0,0,0,0.3);
+      }
+      
+      .refresh-btn:active {
+        transform: rotate(180deg) scale(0.95);
+      }
+      
+      .refresh-btn i {
+        transition: transform 0.3s ease;
       }
 
       .category-icon {

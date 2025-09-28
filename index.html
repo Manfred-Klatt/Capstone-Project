@@ -458,9 +458,9 @@
               }
               
               // If we got here, the server is up but we couldn't find the API path
-              // Default to the first path in our list
-              console.log(`Using default API path: ${POSSIBLE_API_PATHS[0]}`);
-              return { available: true, pathPrefix: POSSIBLE_API_PATHS[0] };
+              // This means the server doesn't have the required auth endpoints
+              console.log(`Server is up but auth endpoints not found at ${baseUrl}`);
+              return { available: false, pathPrefix: null };
             }
             console.log(`Health check failed with status: ${response.status}`);
           } catch (healthError) {

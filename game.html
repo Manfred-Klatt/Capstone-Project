@@ -245,7 +245,11 @@
         // Handle different response formats
         let leaderboardData = [];
         
-        if (data && data.data && Array.isArray(data.data)) {
+        if (data && data.data && data.data.entries && Array.isArray(data.data.entries)) {
+          // Handle API response format: { status: 'success', data: { entries: [...] } }
+          leaderboardData = data.data.entries;
+          console.log(`📊 Loaded ${leaderboardData.length} entries for ${categoryName}`);
+        } else if (data && data.data && Array.isArray(data.data)) {
           // Handle API response format: { status: 'success', data: [...] }
           leaderboardData = data.data;
         } else if (Array.isArray(data)) {
@@ -254,6 +258,8 @@
         } else if (data && data.leaderboard && Array.isArray(data.leaderboard)) {
           // Handle alternative API format: { leaderboard: [...] }
           leaderboardData = data.leaderboard;
+        } else {
+          console.log('🔍 Unknown data format:', data);
         }
         
         if (!leaderboardData || leaderboardData.length === 0) {
@@ -402,13 +408,6 @@
         }
         
         try {
-          // Get guest token from localStorage or generate a new one
-          let guestToken = localStorage.getItem('guestToken');
-          if (!guestToken) {
-            guestToken = 'guest_' + Math.random().toString(36).substring(2, 11);
-            localStorage.setItem('guestToken', guestToken);
-          }
-          
           logger.debug(`Fetching data for ${categoryName}`);
           
           const headers = {
@@ -416,10 +415,51 @@
             'Accept': 'application/json'
           };
           
+          // Check for authentication token first
+          let token = null;
+          
+          // Try to get JWT token (same logic as score submission)
+          if (window.secureTokenManager) {
+            try {
+              token = window.secureTokenManager.getToken();
+            } catch (e) {
+              // Ignore errors
+            }
+          }
+          
+          if (!token) {
+            token = localStorage.getItem('token') || sessionStorage.getItem('token');
+          }
+          
+          if (!token) {
+            try {
+              const secureTokenData = sessionStorage.getItem('acnh_secure_token');
+              if (secureTokenData) {
+                const parsed = JSON.parse(secureTokenData);
+                if (parsed.token && Date.now() < parsed.expires) {
+                  token = parsed.token;
+                }
+              }
+            } catch (e) {
+              // Ignore errors
+            }
+          }
+          
           // Add authorization headers
-          if (guestToken) {
+          if (token) {
+            // Authenticated user
+            headers['Authorization'] = `Bearer ${token}`;
+            console.log(`🔑 Loading leaderboard as authenticated user for ${categoryName}`);
+          } else {
+            // Guest user - use guest token
+            let guestToken = localStorage.getItem('guestToken');
+            if (!guestToken) {
+              guestToken = 'guest_' + Math.random().toString(36).substring(2, 11);
+              localStorage.setItem('guestToken', guestToken);
+            }
             headers['Authorization'] = `Bearer ${guestToken}`;
             headers['X-Guest-Token'] = guestToken;
+            console.log(`👤 Loading leaderboard as guest user for ${categoryName}`);
           }
           
           // Use AbortController to set a timeout
@@ -441,7 +481,7 @@
             localStorage.removeItem('leaderboard_auth_failed');
             
             const data = await response.json();
-            logger.debug(`Successfully loaded ${categoryName} data`);
+            console.log(`✅ Successfully loaded ${categoryName} data:`, data);
             updateLeaderboardUI(categoryName, data);
           } else if (response.status === 401) {
             // Handle unauthorized - generate a new guest token and retry once

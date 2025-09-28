@@ -3800,40 +3800,62 @@
         
         try {
           // Get the JWT token for authentication
-          const token = localStorage.getItem('token') || sessionStorage.getItem('token');
+          let token = null;
           
-          // Get guest token from localStorage or generate a new one
-          let guestToken = localStorage.getItem('guestToken');
-          if (!guestToken) {
-            guestToken = 'guest_' + Math.random().toString(36).substring(2, 11);
-            localStorage.setItem('guestToken', guestToken);
+          // Try to get token from secure token manager first
+          if (window.secureTokenManager && typeof window.secureTokenManager.getToken === 'function') {
+            token = window.secureTokenManager.getToken();
           }
           
-          console.log(`Submitting score for ${category} with guest token: ${guestToken.substring(0, 5)}...`);
+          // Fallback to localStorage/sessionStorage
+          if (!token) {
+            token = localStorage.getItem('token') || sessionStorage.getItem('token');
+          }
           
-          // Prepare headers
-          const headers = {
-            'Content-Type': 'application/json',
-            'Accept': 'application/json'
-          };
+          let endpoint, headers, requestBody;
           
-          // Add authorization if available
           if (token) {
-            headers['Authorization'] = `Bearer ${token}`;
-          } else if (guestToken) {
-            headers['Authorization'] = `Bearer ${guestToken}`;
-            headers['X-Guest-Token'] = guestToken;
+            // Authenticated user - use the proper leaderboard endpoint
+            console.log(`Submitting score for ${category} as authenticated user`);
+            endpoint = `${window.BACKEND_API}/leaderboard/submit`;
+            headers = {
+              'Content-Type': 'application/json',
+              'Accept': 'application/json',
+              'Authorization': `Bearer ${token}`
+            };
+            requestBody = {
+              category: category,
+              score: finalScore,
+              gameData: {
+                playerName: playerName,
+                timestamp: new Date().toISOString()
+              }
+            };
+          } else {
+            // Guest user - use guest endpoint
+            let guestToken = localStorage.getItem('guestToken');
+            if (!guestToken) {
+              guestToken = 'guest_' + Math.random().toString(36).substring(2, 11);
+              localStorage.setItem('guestToken', guestToken);
+            }
+            
+            console.log(`Submitting score for ${category} with guest token: ${guestToken.substring(0, 5)}...`);
+            endpoint = `${window.BACKEND_API}/submit-guest-score`;
+            headers = {
+              'Content-Type': 'application/json',
+              'Accept': 'application/json',
+              'Authorization': `Bearer ${guestToken}`,
+              'X-Guest-Token': guestToken
+            };
+            requestBody = {
+              name: playerName,
+              score: finalScore,
+              category: category
+            };
           }
-          
-          // Prepare the request body
-          const requestBody = {
-            name: playerName,
-            score: finalScore,
-            category: category
-          };
           
           // Submit the score
-          const response = await fetch(`${window.BACKEND_API}/submit-guest-score`, {
+          const response = await fetch(endpoint, {
             method: 'POST',
             headers: headers,
             body: JSON.stringify(requestBody),
@@ -3852,8 +3874,8 @@
             closeHighScoreModal();
             
             return data;
-          } else if (response.status === 401) {
-            // Handle unauthorized - generate a new guest token and retry once
+          } else if (response.status === 401 && !token) {
+            // Handle unauthorized for guest users only - generate a new guest token and retry once
             console.warn('Unauthorized when submitting score, generating new guest token');
             const newGuestToken = 'guest_' + Math.random().toString(36).substring(2, 11);
             localStorage.setItem('guestToken', newGuestToken);
@@ -3864,7 +3886,7 @@
             headers['Authorization'] = `Bearer ${newGuestToken}`;
             headers['X-Guest-Token'] = newGuestToken;
             
-            const retryResponse = await fetch(`${window.BACKEND_API}/submit-guest-score`, {
+            const retryResponse = await fetch(endpoint, {
               method: 'POST',
               headers: headers,
               body: JSON.stringify(requestBody),
@@ -3891,6 +3913,16 @@
               // Close the modal
               closeHighScoreModal();
             }
+          } else if (response.status === 401 && token) {
+            // Authenticated user got 401 - token might be expired
+            console.error('Authentication failed for logged-in user. Token may be expired.');
+            alert('Your session has expired. Please log in again.');
+            
+            // Clear the expired token and redirect to login
+            localStorage.removeItem('token');
+            sessionStorage.removeItem('token');
+            window.location.href = 'index.html';
+            return;
           } else {
             // Handle other error responses
             const errorText = await response.text();

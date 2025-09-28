@@ -7,15 +7,15 @@ const {
   getUserHistory,
   resetAllLeaderboards
 } = require('./leaderboard.controller');
-const { protect } = require('../../../../middleware/authMiddleware');
+const { protect, optionalAuth } = require('../../../../middleware/authMiddleware');
 const { validateLeaderboardSubmission } = require('../../../../middleware/validation');
 const { allowWithGuestToken } = require('../../../../middleware/guestTokenMiddleware');
 
 const router = express.Router();
 
-// Public routes with guest token authentication option
-router.get('/all', allowWithGuestToken('leaderboard'), getAllLeaderboards);
-router.get('/:category', allowWithGuestToken('leaderboard'), getLeaderboard);
+// Public routes with optional JWT auth + guest token fallback
+router.get('/all', optionalAuth, allowWithGuestToken('leaderboard'), getAllLeaderboards);
+router.get('/:category', optionalAuth, allowWithGuestToken('leaderboard'), getLeaderboard);
 
 // Protected routes (require authentication)
 router.use(protect);

@@ -95,6 +95,51 @@ exports.protect = async (req, res, next) => {
   }
 };
 
+// Optional authentication - sets req.user if token is valid, but doesn't fail if no token
+exports.optionalAuth = async (req, res, next) => {
+  try {
+    // 1) Getting token and check if it's there
+    let token;
+    if (
+      req.headers.authorization &&
+      req.headers.authorization.startsWith('Bearer')
+    ) {
+      token = req.headers.authorization.split(' ')[1];
+    } else if (req.cookies.jwt) {
+      token = req.cookies.jwt;
+    }
+
+    // If no token, just continue without setting req.user
+    if (!token) {
+      return next();
+    }
+
+    // 2) Verification token
+    const decoded = await promisify(jwt.verify)(token, process.env.JWT_SECRET);
+
+    // 3) Check if user still exists
+    const currentUser = await User.findById(decoded.id);
+    if (!currentUser) {
+      // Token is invalid, but don't fail - just continue without req.user
+      return next();
+    }
+
+    // 4) Check if user changed password after the token was issued
+    if (currentUser.changedPasswordAfter(decoded.iat)) {
+      // Password changed, but don't fail - just continue without req.user
+      return next();
+    }
+
+    // Set user if everything is valid
+    req.user = currentUser;
+    res.locals.user = currentUser;
+    next();
+  } catch (err) {
+    // If any error occurs, just continue without req.user (don't fail)
+    next();
+  }
+};
+
 exports.restrictTo = (...roles) => {
   return (req, res, next) => {
     if (!roles.includes(req.user.role)) {

@@ -376,6 +376,7 @@
         // Ensure category is a string
         const categoryName = typeof category === 'object' && category.name ? category.name : category;
         const apiUrl = `${window.BACKEND_API}/leaderboard/${categoryName}`;
+        console.log(`🌐 Loading leaderboard from: ${apiUrl}`);
         
         const element = document.getElementById(`${categoryName}-scores`);
         // Reduce max retries to 1 to avoid excessive API calls
@@ -502,11 +503,13 @@
             }
           } else {
             // For other errors, use default data
-            logger.error(`Error loading ${categoryName}: ${response.status}`);
+            console.error(`❌ Error loading ${categoryName}: ${response.status} ${response.statusText}`);
+            const errorText = await response.text();
+            console.error(`❌ Error response body:`, errorText);
             updateLeaderboardUI(categoryName, LEADERBOARD_CONFIG.defaultData[categoryName] || []);
           }
         } catch (error) {
-          logger.warn(`Error loading ${categoryName}`);
+          console.error(`❌ Network error loading ${categoryName}:`, error);
           
           // For network errors, use default data without retrying
           updateLeaderboardUI(categoryName, LEADERBOARD_CONFIG.defaultData[categoryName] || []);
@@ -3925,6 +3928,7 @@
             alert(`🎉 High score submitted successfully! You scored ${finalScore} points in ${category}!`);
             
             // Update the leaderboard
+            console.log(`🔄 Refreshing leaderboard for category: ${category}`);
             loadLeaderboardData(category);
             
             // Close the modal

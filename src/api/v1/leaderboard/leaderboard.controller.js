@@ -35,6 +35,7 @@ const submitScore = catchAsync(async (req, res, next) => {
   const displayName = playerName || user.username;
 
   // Create leaderboard entry
+  console.log(`💾 Creating leaderboard entry: ${displayName}, ${score} points in ${category}`);
   const leaderboardEntry = new Leaderboard({
     userId,
     username: displayName,
@@ -43,6 +44,7 @@ const submitScore = catchAsync(async (req, res, next) => {
   });
 
   await leaderboardEntry.save();
+  console.log(`✅ Saved leaderboard entry with ID: ${leaderboardEntry._id}`);
 
   // Get user's new rank
   const rank = await Leaderboard.getUserRank(userId, category);
@@ -75,7 +77,9 @@ const getLeaderboard = catchAsync(async (req, res, next) => {
   }
 
   try {
+    console.log(`🔍 Getting leaderboard for category: ${category}, limit: ${limit}`);
     const leaderboard = await Leaderboard.getTopScores(category, limit);
+    console.log(`📊 Found ${leaderboard.length} entries for ${category}`);
 
     // Add rank to each entry
     const leaderboardWithRanks = leaderboard.map((entry, index) => ({
@@ -86,6 +90,7 @@ const getLeaderboard = catchAsync(async (req, res, next) => {
       timestamp: entry.timestamp
     }));
 
+    console.log(`✅ Returning ${leaderboardWithRanks.length} ranked entries for ${category}`);
     successResponse(res, 200, 'Leaderboard retrieved successfully', {
       category,
       entries: leaderboardWithRanks,

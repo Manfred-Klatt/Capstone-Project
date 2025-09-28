@@ -50,7 +50,7 @@ exports.updateUser = catchAsync(async (req, res, next) => {
   });
 });
 
-// Delete user (mark as inactive)
+// Delete user (permanently remove)
 exports.deleteUser = catchAsync(async (req, res, next) => {
   await userService.deleteUser(req.params.id);
   

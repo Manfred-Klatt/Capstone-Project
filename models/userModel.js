@@ -76,15 +76,7 @@ userSchema.pre('save', function(next) {
   next();
 });
 
-// Query middleware
-userSchema.pre(/^find/, function(next) {
-  // Skip the active filter if explicitly requested
-  if (this.getOptions().skipMiddleware) {
-    return next();
-  }
-  this.find({ active: { $ne: false } });
-  next();
-});
+// Query middleware removed - all accounts are always active
 
 // Create indexes for leaderboard queries
 userSchema.index({ 'highScores.fish': -1, lastPlayed: -1 });

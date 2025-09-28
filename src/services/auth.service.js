@@ -104,12 +104,7 @@ exports.login = async (email, password) => {
       throw new AppError('Incorrect email or password', 401);
     }
 
-    // 3) Check if user is active
-    if (!user.active) {
-      throw new AppError('This account has been deactivated', 401);
-    }
-
-    // 4) If everything ok, send token to client
+    // 3) If everything ok, send token to client
     const token = signToken(user._id);
 
     // Remove password from output

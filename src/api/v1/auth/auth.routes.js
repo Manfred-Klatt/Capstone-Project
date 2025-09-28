@@ -10,7 +10,7 @@ router.post('/signup', catchAsync(authController.signup));
 router.post('/login', catchAsync(authController.login));
 router.post('/forgot-password', catchAsync(authController.forgotPassword));
 router.patch('/reset-password/:token', catchAsync(authController.resetPassword));
-router.post('/reactivate-account', catchAsync(authController.reactivateAccount));
+// Account reactivation removed - accounts are always active
 
 // Protected routes (require authentication)
 router.use(authMiddleware.protect);

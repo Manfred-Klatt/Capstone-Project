@@ -55,14 +55,10 @@ exports.updateUser = async (userId, updateData) => {
   }
 };
 
-// Delete user (mark as inactive)
+// Delete user (permanently remove)
 exports.deleteUser = async (userId) => {
   try {
-    const user = await User.findByIdAndUpdate(
-      userId,
-      { active: false },
-      { new: true }
-    );
+    const user = await User.findByIdAndDelete(userId);
 
     if (!user) {
       throw new AppError('No user found with that ID', 404);

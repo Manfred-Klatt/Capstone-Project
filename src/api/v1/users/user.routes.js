@@ -39,7 +39,7 @@ router.get('/:id', catchAsync(userController.getUser));
 // Update user by ID
 router.patch('/:id', catchAsync(userController.updateUser));
 
-// Delete user (mark as inactive)
+// Delete user (permanently remove)
 router.delete('/:id', catchAsync(userController.deleteUser));
 
 module.exports = router;

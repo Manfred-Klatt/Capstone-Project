@@ -165,8 +165,8 @@ class InputValidator {
                 errors.push('Score must be a valid number');
             } else if (numScore < 0) {
                 errors.push('Score cannot be negative');
-            } else if (numScore > 1000000) {
-                errors.push('Score is too high');
+            } else if (numScore > 100000000) {
+                errors.push('Score is unreasonably high');
             } else {
                 sanitized = Math.floor(numScore); // Ensure integer
             }

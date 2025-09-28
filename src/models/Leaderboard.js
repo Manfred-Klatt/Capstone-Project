@@ -21,8 +21,7 @@ const leaderboardEntrySchema = new mongoose.Schema({
   score: {
     type: Number,
     required: true,
-    min: 0,
-    max: 1000
+    min: 0
   },
   gameData: {
     correctAnswers: {

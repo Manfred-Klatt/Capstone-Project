@@ -80,8 +80,8 @@ const validateLeaderboardSubmission = [
   body('score')
     .isNumeric()
     .withMessage('Score must be a number')
-    .isInt({ min: 0, max: 1000 })
-    .withMessage('Score must be between 0 and 1000'),
+    .isInt({ min: 0 })
+    .withMessage('Score must be a positive number'),
   
   body('gameData.correctAnswers')
     .isNumeric()

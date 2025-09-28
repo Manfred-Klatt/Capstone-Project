@@ -21,8 +21,8 @@ const submitScore = catchAsync(async (req, res, next) => {
   }
 
   // Validate score
-  if (typeof score !== 'number' || score < 0 || score > 1000) {
-    return next(new AppError('Score must be a number between 0 and 1000', 400));
+  if (typeof score !== 'number' || score < 0) {
+    return next(new AppError('Score must be a positive number', 400));
   }
 
   // Validate game data
@@ -220,8 +220,8 @@ const submitGuestScore = catchAsync(async (req, res, next) => {
   }
 
   // Validate score
-  if (typeof score !== 'number' || score < 0 || score > 1000) {
-    return next(new AppError('Score must be a number between 0 and 1000', 400));
+  if (typeof score !== 'number' || score < 0) {
+    return next(new AppError('Score must be a positive number', 400));
   }
 
   // Validate player name

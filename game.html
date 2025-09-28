@@ -481,6 +481,7 @@
         document.documentElement.classList.remove('font-loading');
       }
     </script>
+    <script src="js/secureTokenManager.js"></script>
     <script type="module" src="game.js"></script>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0, minimum-scale=1.0, user-scalable=yes, viewport-fit=cover" />
@@ -2354,6 +2355,30 @@
       // Global debug flag - set to false to disable most console logs
       const DEBUG = false;
       
+      // Debug function to check authentication status
+      function debugAuthStatus() {
+        console.log('=== AUTH DEBUG ===');
+        console.log('localStorage token:', localStorage.getItem('token') ? 'Found' : 'Not found');
+        console.log('sessionStorage token:', sessionStorage.getItem('token') ? 'Found' : 'Not found');
+        console.log('secureTokenManager available:', !!window.secureTokenManager);
+        
+        if (window.secureTokenManager) {
+          try {
+            const token = window.secureTokenManager.getToken();
+            console.log('secureTokenManager token:', token ? 'Found' : 'Not found');
+          } catch (e) {
+            console.log('secureTokenManager error:', e.message);
+          }
+        }
+        
+        const secureData = sessionStorage.getItem('acnh_secure_token');
+        console.log('acnh_secure_token data:', secureData ? 'Found' : 'Not found');
+        console.log('==================');
+      }
+      
+      // Call debug function on page load
+      window.addEventListener('load', debugAuthStatus);
+      
       // Custom logger that respects the DEBUG flag
       const logger = {
         info: function(message, ...args) {
@@ -2853,6 +2878,7 @@
         <button id="reset-villagers-btn" style="width: 100%; padding: 10px; margin: 0;">Reset Villagers</button>
         <button id="reset-to-defaults-btn" style="width: 100%; padding: 10px; margin: 0; background-color: #4a90e2; color: white;">Reset All Leaderboards</button>
         <button id="reset-high-score" style="width: 100%; padding: 10px; margin: 0; background-color: #ffa500; color: white;">Reset Personal Best</button>
+        <button id="debug-auth-btn" style="width: 100%; padding: 10px; margin: 0; background-color: #9b59b6; color: white;">Debug Auth Status</button>
       </div>
     </div>
 
@@ -3764,97 +3790,86 @@
       }
       
       async function submitHighScore(playerName, finalScore, category) {
+        console.log('🎯 === SUBMIT HIGH SCORE DEBUG ===');
+        console.log('Player Name:', playerName);
+        console.log('Final Score:', finalScore);
+        console.log('Category:', category);
+        
         // Validate inputs
         if (!playerName || typeof playerName !== 'string' || playerName.trim() === '') {
-          // Try to get a name from the input field
           const nameInput = document.getElementById('playerName');
           if (nameInput && nameInput.value && nameInput.value.trim() !== '') {
             playerName = nameInput.value.trim();
           } else {
-            // If no input field is found, use a default name
             playerName = 'Player';
           }
         }
         
-        // Get the current username from localStorage or sessionStorage
-        const username = localStorage.getItem('username') || sessionStorage.getItem('username') || playerName;
+        console.log('🔍 Checking authentication status...');
         
-        // Check if we're in offline mode
-        if (isStandaloneMode()) {
-          // Always confirm before switching to standalone mode
-          if (!localStorage.getItem('standalone_confirmed_this_session')) {
-            if (confirm("Server connection unavailable. Your scores will be saved locally but not shared online. Continue in offline mode?")) {
-              // Set a session flag to avoid multiple prompts in the same session
-              localStorage.setItem('standalone_confirmed_this_session', 'true');
-              localStorage.setItem('force_standalone', 'true');
-            } else {
-              // User declined standalone mode, redirect to index
-              window.location.href = 'index.html';
-              return;
-            }
+        // Get JWT token - check all possible sources
+        let token = null;
+        
+        // 1. Check localStorage/sessionStorage first (most common)
+        token = localStorage.getItem('token') || sessionStorage.getItem('token');
+        console.log('🔑 Token from localStorage/sessionStorage:', token ? 'FOUND' : 'NOT FOUND');
+        
+        // 2. Check secureTokenManager if available
+        if (!token && window.secureTokenManager) {
+          try {
+            token = window.secureTokenManager.getToken();
+            console.log('🔑 Token from secureTokenManager:', token ? 'FOUND' : 'NOT FOUND');
+          } catch (e) {
+            console.log('❌ Error with secureTokenManager:', e.message);
           }
-          console.log('Running in offline mode, saving score to local storage only');
-          saveScoreToLocalStorage(playerName, finalScore, category);
+        }
+        
+        // 3. Check secure token storage directly
+        if (!token) {
+          try {
+            const secureTokenData = sessionStorage.getItem('acnh_secure_token');
+            if (secureTokenData) {
+              const parsed = JSON.parse(secureTokenData);
+              if (parsed.token && Date.now() < parsed.expires) {
+                token = parsed.token;
+                console.log('🔑 Token from acnh_secure_token:', 'FOUND');
+              }
+            }
+          } catch (e) {
+            console.log('❌ Error parsing secure token:', e.message);
+          }
+        }
+        
+        console.log('🎯 FINAL AUTHENTICATION STATUS:', token ? '✅ AUTHENTICATED USER' : '❌ NO TOKEN FOUND');
+        
+        if (!token) {
+          console.error('❌ NO AUTHENTICATION TOKEN FOUND');
+          alert('You must be logged in to submit scores to the leaderboard. Please log in and try again.');
+          closeHighScoreModal();
           return;
         }
         
         try {
-          // Get the JWT token for authentication
-          let token = null;
+          console.log('📤 Submitting score as authenticated user...');
           
-          // Try to get token from secure token manager first
-          if (window.secureTokenManager && typeof window.secureTokenManager.getToken === 'function') {
-            token = window.secureTokenManager.getToken();
-          }
-          
-          // Fallback to localStorage/sessionStorage
-          if (!token) {
-            token = localStorage.getItem('token') || sessionStorage.getItem('token');
-          }
-          
-          let endpoint, headers, requestBody;
-          
-          if (token) {
-            // Authenticated user - use the proper leaderboard endpoint
-            console.log(`Submitting score for ${category} as authenticated user`);
-            endpoint = `${window.BACKEND_API}/leaderboard/submit`;
-            headers = {
-              'Content-Type': 'application/json',
-              'Accept': 'application/json',
-              'Authorization': `Bearer ${token}`
-            };
-            requestBody = {
-              category: category,
-              score: finalScore,
-              gameData: {
-                playerName: playerName,
-                timestamp: new Date().toISOString()
-              }
-            };
-          } else {
-            // Guest user - use guest endpoint
-            let guestToken = localStorage.getItem('guestToken');
-            if (!guestToken) {
-              guestToken = 'guest_' + Math.random().toString(36).substring(2, 11);
-              localStorage.setItem('guestToken', guestToken);
+          const endpoint = `${window.BACKEND_API}/leaderboard/submit`;
+          const headers = {
+            'Content-Type': 'application/json',
+            'Accept': 'application/json',
+            'Authorization': `Bearer ${token}`
+          };
+          const requestBody = {
+            category: category,
+            score: finalScore,
+            gameData: {
+              playerName: playerName,
+              timestamp: new Date().toISOString()
             }
-            
-            console.log(`Submitting score for ${category} with guest token: ${guestToken.substring(0, 5)}...`);
-            endpoint = `${window.BACKEND_API}/submit-guest-score`;
-            headers = {
-              'Content-Type': 'application/json',
-              'Accept': 'application/json',
-              'Authorization': `Bearer ${guestToken}`,
-              'X-Guest-Token': guestToken
-            };
-            requestBody = {
-              name: playerName,
-              score: finalScore,
-              category: category
-            };
-          }
+          };
           
-          // Submit the score
+          console.log('🌐 Endpoint:', endpoint);
+          console.log('📋 Request body:', requestBody);
+          
           const response = await fetch(endpoint, {
             method: 'POST',
             headers: headers,
@@ -3863,9 +3878,14 @@
             mode: 'cors'
           });
           
+          console.log('📥 Response status:', response.status);
+          
           if (response.ok) {
             const data = await response.json();
-            console.log('Score submitted successfully:', data);
+            console.log('✅ Score submitted successfully:', data);
+            
+            // Show success message
+            alert(`🎉 High score submitted successfully! You scored ${finalScore} points in ${category}!`);
             
             // Update the leaderboard
             loadLeaderboardData(category);
@@ -3874,132 +3894,33 @@
             closeHighScoreModal();
             
             return data;
-          } else if (response.status === 401 && !token) {
-            // Handle unauthorized for guest users only - generate a new guest token and retry once
-            console.warn('Unauthorized when submitting score, generating new guest token');
-            const newGuestToken = 'guest_' + Math.random().toString(36).substring(2, 11);
-            localStorage.setItem('guestToken', newGuestToken);
+          } else if (response.status === 401) {
+            console.error('❌ Authentication failed - token expired or invalid');
+            alert('Your login session has expired. Please log in again to submit scores.');
             
-            // Try one more time with the new token
-            console.log(`Retrying score submission with new token: ${newGuestToken.substring(0, 5)}...`);
-            
-            headers['Authorization'] = `Bearer ${newGuestToken}`;
-            headers['X-Guest-Token'] = newGuestToken;
-            
-            const retryResponse = await fetch(endpoint, {
-              method: 'POST',
-              headers: headers,
-              body: JSON.stringify(requestBody),
-              credentials: 'include',
-              mode: 'cors'
-            });
-            
-            if (retryResponse.ok) {
-              const retryData = await retryResponse.json();
-              console.log('Score submitted successfully on retry:', retryData);
-              
-              // Update the leaderboard
-              loadLeaderboardData(category);
-              
-              // Close the modal
-              closeHighScoreModal();
-              
-              return retryData;
-            } else {
-              // If retry fails, save locally
-              console.warn('Retry failed, saving score to local storage');
-              saveScoreToLocalStorage(playerName, finalScore, category);
-              
-              // Close the modal
-              closeHighScoreModal();
-            }
-          } else if (response.status === 401 && token) {
-            // Authenticated user got 401 - token might be expired
-            console.error('Authentication failed for logged-in user. Token may be expired.');
-            alert('Your session has expired. Please log in again.');
-            
-            // Clear the expired token and redirect to login
+            // Clear tokens and redirect to login
             localStorage.removeItem('token');
             sessionStorage.removeItem('token');
+            if (window.secureTokenManager && window.secureTokenManager.clearToken) {
+              window.secureTokenManager.clearToken();
+            }
+            
             window.location.href = 'index.html';
             return;
           } else {
-            // Handle other error responses
             const errorText = await response.text();
-            console.error('Error submitting score:', response.status, errorText);
-            
-            // Save locally for any other errors
-            console.warn('API error, saving score to local storage');
-            saveScoreToLocalStorage(playerName, finalScore, category);
-            
-            // Close the modal
+            console.error('❌ Server error:', response.status, errorText);
+            alert(`Failed to submit score. Server error: ${response.status}. Please try again later.`);
             closeHighScoreModal();
           }
         } catch (error) {
-          console.error('Error submitting score:', error);
-          
-          // Fall back to local storage
-          console.log('Falling back to local storage for score');
-          saveScoreToLocalStorage(playerName, finalScore, category);
-          
-          // Close the modal
+          console.error('❌ Network error submitting score:', error);
+          alert('Network error. Please check your connection and try again.');
           closeHighScoreModal();
         }
       }
       
-      // Helper function to save score to localStorage and show placement
-      function saveScoreToLocalStorage(playerName, finalScore, category) {
-        // Get existing leaderboard data
-        const savedLeaderboard = localStorage.getItem('acnh_leaderboard');
-        let leaderboardData = {};
-        
-        if (savedLeaderboard) {
-          try {
-            leaderboardData = JSON.parse(savedLeaderboard);
-          } catch (e) {
-            console.error('Error parsing saved leaderboard:', e);
-            leaderboardData = { ...DEFAULT_LEADERBOARD };
-          }
-        } else {
-          leaderboardData = { ...DEFAULT_LEADERBOARD };
-        }
-        
-        // Add the new score
-        const newScore = {
-            name: playerName,
-            score: finalScore,
-            date: new Date().toISOString().split('T')[0], // Format: YYYY-MM-DD
-            isNew: true // Mark this as a new score for highlighting
-        };
-        
-        // Add to the appropriate category
-        if (!leaderboardData[category]) {
-            leaderboardData[category] = [];
-        }
-        
-        leaderboardData[category].push(newScore);
-        
-        // Sort scores in descending order
-        leaderboardData[category].sort((a, b) => b.score - a.score);
-        
-        // Keep only top 10 scores
-        leaderboardData[category] = leaderboardData[category].slice(0, 10);
-        
-        // Save the updated leaderboard to localStorage
-        localStorage.setItem('acnh_leaderboard', JSON.stringify(leaderboardData));
-        
-        // Find the placement of the new score
-        const placement = leaderboardData[category].findIndex(score => score.name === playerName && score.score === finalScore) + 1;
-        
-        // Show placement message
-        showPlacementMessage(placement);
-        
-        // Close the modal
-        closeHighScoreModal();
-        
-        // Update the displayed leaderboard for the current category
-        updateLeaderboardUI(category, leaderboardData[category]);
-      }
+      // Note: Local storage functionality removed - leaderboards are now online-only
       
       // Helper function to show placement message
       function showPlacementMessage(placement) {
@@ -5125,6 +5046,9 @@
         
         const resetToDefaultsBtn = document.getElementById('reset-to-defaults-btn');
         if (resetToDefaultsBtn) resetToDefaultsBtn.addEventListener('click', resetToDefaults);
+        
+        const debugAuthBtn = document.getElementById('debug-auth-btn');
+        if (debugAuthBtn) debugAuthBtn.addEventListener('click', debugAuthStatus);
 
         submitButton.addEventListener("click", checkGuess);
         guessInput.addEventListener("keypress", (e) => {

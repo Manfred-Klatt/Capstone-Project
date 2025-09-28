@@ -402,9 +402,15 @@
         }
         
         // Check if we're in offline mode or have recent failed auth attempts
-        if (isStandaloneMode() || localStorage.getItem('leaderboard_auth_failed') === 'true') {
-          logger.debug(`Using default data for ${categoryName} (offline mode or auth failed)`);
-          updateLeaderboardUI(categoryName, LEADERBOARD_CONFIG.defaultData[categoryName] || []);
+        const isOffline = isStandaloneMode();
+        const authFailed = localStorage.getItem('leaderboard_auth_failed') === 'true';
+        console.log(`🔍 Offline mode: ${isOffline}, Auth failed: ${authFailed}`);
+        
+        if (isOffline || authFailed) {
+          console.log(`⚠️ Using default data for ${categoryName} (offline: ${isOffline}, auth failed: ${authFailed})`);
+          const defaultData = LEADERBOARD_CONFIG.defaultData[categoryName];
+          console.log(`📋 Default data for ${categoryName}:`, defaultData);
+          updateLeaderboardUI(categoryName, defaultData || []);
           return;
         }
         
@@ -2416,7 +2422,68 @@
         
         const secureData = sessionStorage.getItem('acnh_secure_token');
         console.log('acnh_secure_token data:', secureData ? 'Found' : 'Not found');
+        console.log('leaderboard_auth_failed:', localStorage.getItem('leaderboard_auth_failed'));
         console.log('==================');
+      }
+      
+      // Function to clear leaderboard auth failed flag
+      function clearLeaderboardAuthFailed() {
+        localStorage.removeItem('leaderboard_auth_failed');
+        console.log('🧹 Cleared leaderboard auth failed flag');
+      }
+      
+      // Function to get current username
+      function getCurrentUsername() {
+        let username = null;
+        
+        // Try to get username from secure token manager first
+        if (window.secureTokenManager && typeof window.secureTokenManager.getUserData === 'function') {
+          const userData = window.secureTokenManager.getUserData();
+          if (userData && userData.username) {
+            username = userData.username;
+          }
+        }
+        
+        // Fall back to localStorage/sessionStorage if needed
+        if (!username) {
+          username = localStorage.getItem('username') || sessionStorage.getItem('username');
+        }
+        
+        return username;
+      }
+      
+      // Function to check if user is authenticated
+      function isUserAuthenticated() {
+        // Check for authentication token
+        let token = null;
+        
+        if (window.secureTokenManager) {
+          try {
+            token = window.secureTokenManager.getToken();
+          } catch (e) {
+            // Ignore errors
+          }
+        }
+        
+        if (!token) {
+          token = localStorage.getItem('token') || sessionStorage.getItem('token');
+        }
+        
+        if (!token) {
+          try {
+            const secureTokenData = sessionStorage.getItem('acnh_secure_token');
+            if (secureTokenData) {
+              const parsed = JSON.parse(secureTokenData);
+              if (parsed.token && Date.now() < parsed.expires) {
+                token = parsed.token;
+              }
+            }
+          } catch (e) {
+            // Ignore errors
+          }
+        }
+        
+        return !!token;
       }
       
       // Call debug function on page load
@@ -2922,6 +2989,7 @@
         <button id="reset-to-defaults-btn" style="width: 100%; padding: 10px; margin: 0; background-color: #4a90e2; color: white;">Reset All Leaderboards</button>
         <button id="reset-high-score" style="width: 100%; padding: 10px; margin: 0; background-color: #ffa500; color: white;">Reset Personal Best</button>
         <button id="debug-auth-btn" style="width: 100%; padding: 10px; margin: 0; background-color: #9b59b6; color: white;">Debug Auth Status</button>
+        <button id="clear-auth-failed-btn" style="width: 100%; padding: 10px; margin: 0; background-color: #e74c3c; color: white;">Clear Auth Failed Flag</button>
       </div>
     </div>
 
@@ -3298,8 +3366,13 @@
         <h2 style="color: #2c3e50;">New High Score!</h2>
         <p style="color: #34495e;">🎉 Congratulations! You scored <span id="finalScore" style="font-weight: bold; color: #2c3e50;"></span> points in <span id="categoryName" style="font-weight: bold; color: #2c3e50; text-transform: capitalize;"></span>! 🎉</p>
         <div id="placementMessage"></div>
-        <p style="color: #2c3e50; font-weight: 500; margin-top: 15px;">🏆 Enter your name for the leaderboard:</p>
-        <input type="text" id="playerName" placeholder="Your name" maxlength="10" style="width: 150px; padding: 8px; font-size: 14px;" />
+        <div id="nameInputSection">
+          <p style="color: #2c3e50; font-weight: 500; margin-top: 15px;">🏆 Enter your name for the leaderboard:</p>
+          <input type="text" id="playerName" placeholder="Your name" maxlength="10" style="width: 150px; padding: 8px; font-size: 14px;" />
+        </div>
+        <div id="loggedInSection" style="display: none;">
+          <p style="color: #2c3e50; font-weight: 500; margin-top: 15px;">🏆 Submitting as: <span id="loggedInUsername" style="font-weight: bold; color: #27ae60;"></span></p>
+        </div>
         <div class="modal-buttons">
           <button id="submitScore" class="modal-btn submit-btn">Submit</button>
           <button id="skipSubmit" class="modal-btn skip-btn">Skip</button>
@@ -3788,6 +3861,15 @@
           categoryNameElement.textContent = categoryDisplayNames[category] || category;
         }
         
+        // Check if user is authenticated
+        const isAuthenticated = isUserAuthenticated();
+        const currentUsername = getCurrentUsername();
+        
+        console.log('🔍 Authentication status for high score modal:', {
+          isAuthenticated,
+          currentUsername
+        });
+        
         // Show the modal
         const modal = document.getElementById('highScoreModal');
         if (modal) {
@@ -3796,27 +3878,56 @@
           // Store category for later use
           modal.dataset.category = category;
           
-          // Focus on the name input
-          const playerNameInput = document.getElementById('playerName');
-          if (playerNameInput) {
-            playerNameInput.value = '';
-            playerNameInput.focus();
+          // Show/hide appropriate sections based on authentication
+          const nameInputSection = document.getElementById('nameInputSection');
+          const loggedInSection = document.getElementById('loggedInSection');
+          const loggedInUsernameSpan = document.getElementById('loggedInUsername');
+          
+          if (isAuthenticated && currentUsername) {
+            // User is logged in - hide name input, show username
+            if (nameInputSection) nameInputSection.style.display = 'none';
+            if (loggedInSection) loggedInSection.style.display = 'block';
+            if (loggedInUsernameSpan) loggedInUsernameSpan.textContent = currentUsername;
             
-            // Allow Enter key to submit
-            playerNameInput.onkeypress = function(e) {
-              if (e.key === 'Enter') {
-                const playerName = playerNameInput.value.trim() || 'Player';
-                submitHighScore(playerName, finalScore, category);
-              }
-            };
+            console.log(`✅ Logged in user: ${currentUsername} - auto-submitting with username`);
+          } else {
+            // User is not logged in - show name input
+            if (nameInputSection) nameInputSection.style.display = 'block';
+            if (loggedInSection) loggedInSection.style.display = 'none';
+            
+            // Focus on the name input
+            const playerNameInput = document.getElementById('playerName');
+            if (playerNameInput) {
+              playerNameInput.value = '';
+              playerNameInput.focus();
+              
+              // Allow Enter key to submit
+              playerNameInput.onkeypress = function(e) {
+                if (e.key === 'Enter') {
+                  const playerName = playerNameInput.value.trim() || 'Player';
+                  submitHighScore(playerName, finalScore, category);
+                }
+              };
+            }
+            
+            console.log('👤 Guest user - showing name input');
           }
           
           // Add event listeners for the buttons
           const submitButton = document.getElementById('submitScore');
           if (submitButton) {
             submitButton.onclick = function() {
-              const playerNameInput = document.getElementById('playerName');
-              const playerName = playerNameInput ? playerNameInput.value.trim() || 'Player' : 'Player';
+              let playerName;
+              
+              if (isAuthenticated && currentUsername) {
+                // Use the logged-in username
+                playerName = currentUsername;
+              } else {
+                // Get name from input
+                const playerNameInput = document.getElementById('playerName');
+                playerName = playerNameInput ? playerNameInput.value.trim() || 'Player' : 'Player';
+              }
+              
               submitHighScore(playerName, finalScore, category);
             };
           }
@@ -5090,6 +5201,9 @@
         
         const debugAuthBtn = document.getElementById('debug-auth-btn');
         if (debugAuthBtn) debugAuthBtn.addEventListener('click', debugAuthStatus);
+        
+        const clearAuthFailedBtn = document.getElementById('clear-auth-failed-btn');
+        if (clearAuthFailedBtn) clearAuthFailedBtn.addEventListener('click', clearLeaderboardAuthFailed);
 
         submitButton.addEventListener("click", checkGuess);
         guessInput.addEventListener("keypress", (e) => {

@@ -26,17 +26,17 @@ const leaderboardEntrySchema = new mongoose.Schema({
   gameData: {
     correctAnswers: {
       type: Number,
-      required: true,
+      required: false,
       min: 0
     },
     totalQuestions: {
       type: Number,
-      required: true,
+      required: false,
       min: 1
     },
     timeTaken: {
       type: Number, // in seconds
-      required: true,
+      required: false,
       min: 1
     },
     difficulty: {

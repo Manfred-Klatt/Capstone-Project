@@ -83,28 +83,12 @@ const validateLeaderboardSubmission = [
     .isInt({ min: 0 })
     .withMessage('Score must be a positive number'),
   
-  body('gameData.correctAnswers')
-    .isNumeric()
-    .withMessage('Correct answers must be a number')
-    .isInt({ min: 0 })
-    .withMessage('Correct answers must be 0 or greater'),
-  
-  body('gameData.totalQuestions')
-    .isNumeric()
-    .withMessage('Total questions must be a number')
-    .isInt({ min: 1 })
-    .withMessage('Total questions must be 1 or greater'),
-  
-  body('gameData.timeTaken')
-    .isNumeric()
-    .withMessage('Time taken must be a number')
-    .isInt({ min: 1 })
-    .withMessage('Time taken must be 1 second or greater'),
-  
-  body('gameData.difficulty')
+  body('playerName')
     .optional()
-    .isIn(['easy', 'medium', 'hard'])
-    .withMessage('Difficulty must be one of: easy, medium, hard'),
+    .isString()
+    .withMessage('Player name must be a string')
+    .isLength({ min: 1, max: 50 })
+    .withMessage('Player name must be between 1 and 50 characters'),
   
   handleValidationErrors
 ];

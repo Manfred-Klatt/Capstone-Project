@@ -249,11 +249,6 @@
     <!-- Server Status Indicators removed -->
 
     <main class="container" id="container">
-      <!-- Notification banner for local auth server -->
-      <div id="localAuthNotification" style="display: none; background-color: #4CAF50; color: white; text-align: center; padding: 10px; margin-bottom: 15px; border-radius: 5px; font-size: 14px;">
-        Using local authentication server. Your account will be stored locally.
-      </div>
-      
       <h1>🌿 Welcome to the Blathers App Portal! 🌿</h1>
       <p>Play as a guest or sign in to track your progress</p>
       <button id="playAsGuest" aria-label="Play as Guest">Play as Guest</button>
@@ -294,7 +289,6 @@
       // API URL and path configuration - automatically detect environment
       let API_BASE_URL;
       let API_PATH_PREFIX = '/api/v1';
-      let USE_LOCAL_AUTH_SERVER = false;
       
       // Determine base URL based on hostname
       const determineApiBaseUrl = () => {
@@ -323,11 +317,10 @@
       
       // Store alternate API URLs to try if the primary one fails
       const ALTERNATE_API_URLS = [
-        'https://capstone-project-production-3cce.up.railway.app',
-        'https://api.blathers.app',
+        'https://capstone-project-production-3cce.up.railway.app', 
+        'https://api.blathers.app', 
         'https://acnh-auth-server.up.railway.app', 
-        'https://acnh-auth-server-production.up.railway.app', 
-        'http://localhost:3000' 
+        'https://acnh-auth-server-production.up.railway.app'
       ];
       
       // Log available servers for debugging
@@ -335,10 +328,7 @@
       
       // Store possible API path prefixes to try
       const POSSIBLE_API_PATHS = [
-        '/api/v1',
-        '/api',
-        '', // Empty string means no prefix
-        '/v1'
+        '/api/v1'  // Only try the standard path to reduce console noise
       ];
       
       // Function to get the full API URL with the current path prefix
@@ -348,19 +338,12 @@
           endpoint = '/' + endpoint;
         }
         
-        // If using local auth server and this is an auth endpoint, use the local server
-        if (USE_LOCAL_AUTH_SERVER && endpoint.includes('/auth/')) {
-          console.log('Using local auth server for endpoint:', endpoint);
-          return `http://localhost:3000${API_PATH_PREFIX}${endpoint}`;
-        }
-        
         return `${API_BASE_URL}${API_PATH_PREFIX}${endpoint}`;
       }
       
       console.log('Initial API base URL:', API_BASE_URL);
       console.log('Initial API path prefix:', API_PATH_PREFIX);
       console.log('Alternate API URLs available:', ALTERNATE_API_URLS.length);
-      console.log('Possible API paths to try:', POSSIBLE_API_PATHS.length);
 
       // Check if we're running in standalone mode (file:// protocol)
       function isStandaloneMode() {
@@ -413,42 +396,9 @@
             API_PATH_PREFIX = altResult.pathPrefix;
             console.log(`Switched to API URL: ${API_BASE_URL}${API_PATH_PREFIX}`);
             
-            // If we're using the local auth server, set the flag
-            if (altUrl === 'http://localhost:3000') {
-              console.log('Using local authentication server for auth endpoints');
-              USE_LOCAL_AUTH_SERVER = true;
-              // Show notification banner
-              document.getElementById('localAuthNotification').style.display = 'block';
-            }
-            
             console.log('==== SERVER AVAILABILITY CHECK ENDED: SUCCESS (ALTERNATE URL) ====');
             return true;
           }
-        }
-        
-        // Special case: Try the local auth server specifically for auth endpoints
-        try {
-          console.log('%c[LOCAL AUTH] Trying local auth server as last resort...', 'color: orange; font-weight: bold');
-          const localAuthUrl = 'http://localhost:3000/health';
-          console.log('%c[LOCAL AUTH] Testing URL:', 'color: orange', localAuthUrl);
-          const localAuthResponse = await fetch(localAuthUrl, {
-            method: 'GET',
-            mode: 'cors',
-            headers: {
-              'Accept': 'application/json'
-            }
-          });
-          
-          if (localAuthResponse.ok) {
-            console.log('Local auth server is available. Will use it for auth endpoints only.');
-            USE_LOCAL_AUTH_SERVER = true;
-            // Show notification banner
-            document.getElementById('localAuthNotification').style.display = 'block';
-            // Keep the main API URL for non-auth endpoints
-            return true;
-          }
-        } catch (localAuthError) {
-          console.log('Local auth server is not available:', localAuthError.message);
         }
         
         console.log('All API URLs failed, server is unavailable');
@@ -485,10 +435,8 @@
               for (const pathPrefix of POSSIBLE_API_PATHS) {
                 // Try the auth endpoint to see if it exists
                 const authEndpoint = `${baseUrl}${pathPrefix}/auth`;
-                console.log('%c[API PATH] Testing API path:', 'color: purple', authEndpoint);
                 
                 try {
-                  console.log('%c[API PATH] Sending request to:', 'color: purple', authEndpoint);
                   const authResponse = await fetch(`${authEndpoint}`, {
                     method: 'GET',
                     signal: controller.signal,
@@ -497,48 +445,19 @@
                       'Accept': 'application/json'
                     }
                   });
-                  console.log('%c[API PATH] Auth response status:', 'color: purple', authResponse.status);
                   
                   // If we get any response other than 404, this path might be correct
                   // Even a 401 Unauthorized is good because it means the endpoint exists
                   if (authResponse.status !== 404) {
-                    console.log(`Found working API path: ${pathPrefix} (status: ${authResponse.status})`);
+                    console.log(`✅ Found working API path: ${pathPrefix} at ${baseUrl}`);
                     return { available: true, pathPrefix: pathPrefix };
                   }
-                  console.log(`API path ${pathPrefix} returned 404, trying next...`);
                 } catch (authError) {
-                  console.log('%c[API PATH] Error testing path:', 'color: red', pathPrefix, authError.message);
-                  console.error('Full error object:', authError);
+                  // Silently continue to next path - errors are expected during discovery
                 }
               }
               
               // If we got here, the server is up but we couldn't find the API path
-              // Check if we should use the local auth server
-              if (baseUrl !== 'http://localhost:3000') {
-                console.log('Main server is up but auth endpoints are not available. Checking local auth server...');
-                
-                // Try to connect to the local auth server
-                try {
-                  const localAuthResponse = await fetch('http://localhost:3000/health', {
-                    method: 'GET',
-                    signal: controller.signal,
-                    mode: 'cors',
-                    headers: {
-                      'Accept': 'application/json'
-                    }
-                  });
-                  
-                  if (localAuthResponse.ok) {
-                    console.log('Local auth server is available. Will use it for auth endpoints.');
-                    USE_LOCAL_AUTH_SERVER = true;
-                    // Show notification banner
-                    document.getElementById('localAuthNotification').style.display = 'block';
-                  }
-                } catch (localAuthError) {
-                  console.log('Local auth server is not available:', localAuthError.message);
-                }
-              }
-              
               // Default to the first path in our list
               console.log(`Using default API path: ${POSSIBLE_API_PATHS[0]}`);
               return { available: true, pathPrefix: POSSIBLE_API_PATHS[0] };
@@ -565,7 +484,6 @@
               for (const pathPrefix of POSSIBLE_API_PATHS) {
                 // Try the auth endpoint
                 const authEndpoint = `${baseUrl}${pathPrefix}/auth`;
-                console.log(`Testing API path from root: ${authEndpoint}`);
                 
                 try {
                   const authResponse = await fetch(`${authEndpoint}`, {
@@ -578,11 +496,11 @@
                   });
                   
                   if (authResponse.status !== 404) {
-                    console.log(`Found working API path from root: ${pathPrefix}`);
+                    console.log(`✅ Found working API path: ${pathPrefix} at ${baseUrl}`);
                     return { available: true, pathPrefix: pathPrefix };
                   }
                 } catch (authError) {
-                  console.log(`Error testing API path ${pathPrefix} from root:`, authError.message);
+                  // Silently continue - errors expected during discovery
                 }
               }
               

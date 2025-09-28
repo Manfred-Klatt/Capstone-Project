@@ -6,12 +6,12 @@ const { successResponse } = require('../../../utils/response');
 
 // Submit a new score
 const submitScore = catchAsync(async (req, res, next) => {
-  const { category, score, gameData } = req.body;
+  const { category, score, playerName } = req.body;
   const userId = req.user.id;
 
   // Validate required fields
-  if (!category || score === undefined || !gameData) {
-    return next(new AppError('Category, score, and game data are required', 400));
+  if (!category || score === undefined) {
+    return next(new AppError('Category and score are required', 400));
   }
 
   // Validate category
@@ -25,30 +25,21 @@ const submitScore = catchAsync(async (req, res, next) => {
     return next(new AppError('Score must be a positive number', 400));
   }
 
-  // Validate game data
-  const { correctAnswers, totalQuestions, timeTaken } = gameData;
-  if (!correctAnswers || !totalQuestions || !timeTaken) {
-    return next(new AppError('Game data must include correctAnswers, totalQuestions, and timeTaken', 400));
-  }
-
   // Get user info
   const user = await User.findById(userId).select('username');
   if (!user) {
     return next(new AppError('User not found', 404));
   }
 
+  // Use playerName if provided, otherwise use username
+  const displayName = playerName || user.username;
+
   // Create leaderboard entry
   const leaderboardEntry = new Leaderboard({
     userId,
-    username: user.username,
+    username: displayName,
     category,
-    score,
-    gameData: {
-      correctAnswers,
-      totalQuestions,
-      timeTaken,
-      difficulty: gameData.difficulty || 'medium'
-    }
+    score
   });
 
   await leaderboardEntry.save();

@@ -185,7 +185,7 @@
           fish: '<img src="images/Fish_Icon.png" alt="Fish" style="width: 24px; height: 24px; vertical-align: middle;">',
           bugs: '<img src="images/Bug_Icon.png" alt="Bugs" style="width: 24px; height: 24px; vertical-align: middle;">',
           sea: '<img src="images/Sea_Creature_Icon.png" alt="Sea Creatures" style="width: 24px; height: 24px; vertical-align: middle;">',
-          villagers: '<img src="images/Cat_Silhouette.png" alt="Villagers" style="width: 24px; height: 24px; vertical-align: middle;">'
+          villagers: '<img src="images/Cat_Silhouette.png" alt="Villagers" style="width: 24px; height: 24px; vertical-align: middle; filter: brightness(0) saturate(100%) invert(28%) sepia(18%) saturate(629%) hue-rotate(345deg) brightness(96%) contrast(92%);">'
         },
         // Placeholder data removed - leaderboards now show empty state when no data available
         defaultData: {}
@@ -241,7 +241,7 @@
         if (data && data.data && data.data.entries && Array.isArray(data.data.entries)) {
           // Handle API response format: { status: 'success', data: { entries: [...] } }
           leaderboardData = data.data.entries;
-          console.log(`📊 Loaded ${leaderboardData.length} entries for ${categoryName}`);
+          logger.debug(`Loaded ${leaderboardData.length} entries for ${categoryName}`);
         } else if (data && data.data && Array.isArray(data.data)) {
           // Handle API response format: { status: 'success', data: [...] }
           leaderboardData = data.data;
@@ -383,12 +383,11 @@
         
         try {
           const apiUrl = `${window.BACKEND_API}/leaderboard/${categoryName}`;
-          console.log(`🌐 Loading leaderboard from: ${apiUrl}`);
-        
+          logger.debug(`Loading leaderboard from: ${apiUrl}`);
+          
           const element = document.getElementById(`${categoryName}-scores`);
           // Reduce max retries to 1 to avoid excessive API calls
           const maxRetries = 1;
-          
           if (!element) {
             logger.error(`Element not found for category: ${categoryName}`);
             return;
@@ -411,7 +410,7 @@
           // Check if we're in offline mode or have recent failed auth attempts
           const isOffline = isStandaloneMode();
           const authFailed = localStorage.getItem('leaderboard_auth_failed') === 'true';
-          console.log(`🔍 Offline mode: ${isOffline}, Auth failed: ${authFailed}`);
+          logger.debug(`Offline mode: ${isOffline}, Auth failed: ${authFailed}`);
           
           if (isOffline || authFailed) {
             console.log(`⚠️ Showing empty state for ${categoryName} (offline: ${isOffline}, auth failed: ${authFailed})`);
@@ -460,7 +459,7 @@
           if (token) {
             // Authenticated user
             headers['Authorization'] = `Bearer ${token}`;
-            console.log(`🔑 Loading leaderboard as authenticated user for ${categoryName}`);
+            logger.debug(`Loading as authenticated user for ${categoryName}`);
           } else {
             // Guest user - use guest token
             let guestToken = localStorage.getItem('guestToken');
@@ -470,7 +469,7 @@
             }
             headers['Authorization'] = `Bearer ${guestToken}`;
             headers['X-Guest-Token'] = guestToken;
-            console.log(`👤 Loading leaderboard as guest user for ${categoryName}`);
+            logger.debug(`Loading as guest user for ${categoryName}`);
           }
           
           // Use AbortController to set a timeout
@@ -492,7 +491,7 @@
             localStorage.removeItem('leaderboard_auth_failed');
             
             const data = await response.json();
-            console.log(`✅ Successfully loaded ${categoryName} data:`, data);
+            logger.debug(`Successfully loaded ${categoryName} data`);
             updateLeaderboardUI(categoryName, data);
           } else if (response.status === 401) {
             // Handle unauthorized - generate a new guest token and retry once
@@ -2413,24 +2412,26 @@
       
       // Debug function to check authentication status
       function debugAuthStatus() {
-        console.log('=== AUTH DEBUG ===');
-        console.log('localStorage token:', localStorage.getItem('token') ? 'Found' : 'Not found');
-        console.log('sessionStorage token:', sessionStorage.getItem('token') ? 'Found' : 'Not found');
-        console.log('secureTokenManager available:', !!window.secureTokenManager);
+        if (DEBUG) {
+          console.log('=== AUTH DEBUG ===');
+          console.log('localStorage token:', localStorage.getItem('token') ? 'Found' : 'Not found');
+          console.log('sessionStorage token:', sessionStorage.getItem('token') ? 'Found' : 'Not found');
+          console.log('secureTokenManager available:', !!window.secureTokenManager);
         
-        if (window.secureTokenManager) {
-          try {
-            const token = window.secureTokenManager.getToken();
-            console.log('secureTokenManager token:', token ? 'Found' : 'Not found');
-          } catch (e) {
-            console.log('secureTokenManager error:', e.message);
+          if (window.secureTokenManager) {
+            try {
+              const token = window.secureTokenManager.getToken();
+              console.log('secureTokenManager token:', token ? 'Found' : 'Not found');
+            } catch (e) {
+              console.log('secureTokenManager error:', e.message);
+            }
           }
+          
+          const secureData = sessionStorage.getItem('acnh_secure_token');
+          console.log('acnh_secure_token data:', secureData ? 'Found' : 'Not found');
+          console.log('leaderboard_auth_failed:', localStorage.getItem('leaderboard_auth_failed'));
+          console.log('==================');
         }
-        
-        const secureData = sessionStorage.getItem('acnh_secure_token');
-        console.log('acnh_secure_token data:', secureData ? 'Found' : 'Not found');
-        console.log('leaderboard_auth_failed:', localStorage.getItem('leaderboard_auth_failed'));
-        console.log('==================');
       }
       
       // Function to clear leaderboard auth failed flag
@@ -2516,14 +2517,14 @@
         debugAuthStatus();
         // Clear the auth failed flag on page load to allow fresh attempts
         localStorage.removeItem('leaderboard_auth_failed');
-        console.log('🧹 Cleared leaderboard auth failed flag on page load');
+        logger.debug('Cleared leaderboard auth failed flag on page load');
         
         // Fallback: Ensure leaderboards are loaded after page fully loads
         setTimeout(() => {
           LEADERBOARD_CONFIG.categories.forEach(category => {
             const element = document.getElementById(`${category}-scores`);
             if (element && element.innerHTML.trim() === '') {
-              console.log(`🔄 Fallback loading for empty ${category} leaderboard`);
+              logger.debug(`Fallback loading for empty ${category} leaderboard`);
               loadLeaderboardData(category);
             }
           });
@@ -3224,7 +3225,7 @@
       <!-- Villagers Leaderboard -->
       <div class="leaderboard-card villagers-leaderboard">
         <div class="leaderboard-header">
-          <span class="category-icon"><img src="images/Cat_Silhouette.png" alt="Villagers" style="width: 36px; height: 36px; vertical-align: middle; margin-right: 5px; filter: invert(1);"></span>
+          <span class="category-icon"><img src="images/Cat_Silhouette.png" alt="Villagers" style="width: 36px; height: 36px; vertical-align: middle; margin-right: 5px; filter: brightness(0) saturate(100%) invert(28%) sepia(18%) saturate(629%) hue-rotate(345deg) brightness(96%) contrast(92%);"></span>
           <h3 class="leaderboard-category"></h3>
           <button class="refresh-btn" onclick="refreshLeaderboard('villagers')" title="Refresh Villagers Leaderboard">
             <i class="fas fa-sync-alt"></i>
@@ -5360,7 +5361,7 @@
     <script>
       // Function to handle category changes
       const handleCategoryChange = async (category) => {
-        console.log('Category changed to:', category);
+        logger.debug('Category changed to:', category);
         
         // Ensure category is a valid string
         if (typeof category !== 'string' || !['fish', 'bugs', 'sea', 'villagers'].includes(category)) {
@@ -5382,7 +5383,7 @@
         
         // If we're already changing categories, wait for that to complete
         if (isCategoryLoading) {
-          console.log('Category change already in progress, waiting...');
+          logger.debug('Category change already in progress, waiting...');
           return;
         }
         
@@ -5401,14 +5402,14 @@
           timerDisplay.textContent = `Time: ${timeLeft}`;
           timerDisplay.className = 'timer';
           
-          console.log(`Loading category: ${category}`);
+          logger.debug(`Loading category: ${category}`);
           
           // Always load items for the category to ensure we have fresh data
           await loadCategoryItems(category);
           
           // Only update the category and score, but don't load images yet
           if (currentCategory !== category) {
-            console.log(`Category changed from ${currentCategory} to ${category}, resetting score`);
+            logger.debug(`Category changed from ${currentCategory} to ${category}, resetting score`);
             score = 0;
             currentCategory = category;
             
@@ -5441,7 +5442,7 @@
       if (categorySelector) {
         categorySelector.addEventListener("change", (e) => {
           const newCategory = e.target.value;
-          console.log('Category selector changed to:', newCategory);
+          logger.debug('Category selector changed to:', newCategory);
           handleCategoryChange(newCategory);
         });
         
@@ -5451,7 +5452,7 @@
         categorySelector.value = initialCategory;
         
         // Initialize the game with the selected category
-        console.log('Initializing with category:', initialCategory);
+        logger.debug('Initializing with category:', initialCategory);
         handleCategoryChange(initialCategory);
       }
     </script>

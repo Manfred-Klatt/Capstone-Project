@@ -198,7 +198,7 @@
           if (!leaderboardInitialized) {
             // First try to load from server
             initializeLeaderboard().catch(error => {
-              logger.error('Failed to load leaderboard from server, using default data');
+              logger.error('Failed to load leaderboard from server, showing empty state');
               // Show empty state for all categories
               LEADERBOARD_CONFIG.categories.forEach(category => {
                 updateLeaderboardUI(category, []);
@@ -206,6 +206,12 @@
             });
           } else {
             logger.debug('Leaderboard already initialized by external manager, skipping DOM initialization');
+            // Even if external manager initialized, make sure we load the actual data
+            LEADERBOARD_CONFIG.categories.forEach(category => {
+              if (!loadingStates.get(category)) {
+                loadLeaderboardData(category);
+              }
+            });
           }
         }, 100); // Small delay to let external managers initialize first
       });
@@ -2511,6 +2517,17 @@
         // Clear the auth failed flag on page load to allow fresh attempts
         localStorage.removeItem('leaderboard_auth_failed');
         console.log('🧹 Cleared leaderboard auth failed flag on page load');
+        
+        // Fallback: Ensure leaderboards are loaded after page fully loads
+        setTimeout(() => {
+          LEADERBOARD_CONFIG.categories.forEach(category => {
+            const element = document.getElementById(`${category}-scores`);
+            if (element && element.innerHTML.trim() === '') {
+              console.log(`🔄 Fallback loading for empty ${category} leaderboard`);
+              loadLeaderboardData(category);
+            }
+          });
+        }, 2000); // Wait 2 seconds after page load
       });
       
       // Custom logger that respects the DEBUG flag

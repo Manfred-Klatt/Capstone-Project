@@ -4166,65 +4166,7 @@
         return 'th';
       }
       
-      // Default leaderboard data
-      const DEFAULT_LEADERBOARD = {
-        fish: [
-          { name: "Kapp'n", score: 2850 },
-          { name: "Leif", score: 2720 },
-          { name: "Cyrus", score: 2590 },
-          { name: "Kicks", score: 2460 },
-          { name: "Redd", score: 2330 },
-          { name: "Mabel", score: 2200 },
-          { name: "Saharah", score: 2070 },
-          { name: "Gulliver", score: 1940 },
-          { name: "Wisp", score: 1810 },
-          { name: "Harvey", score: 1680 }
-        ],
-        bugs: [
-          { name: "Flick", score: 3200 },
-          { name: "Cube", score: 3050 },
-          { name: "Kapp'n", score: 2900 },
-          { name: "Kiki", score: 2750 },
-          { name: "Cyrus", score: 2600 },
-          { name: "Kicks", score: 2450 },
-          { name: "Redd", score: 2300 },
-          { name: "Mabel", score: 2150 },
-          { name: "Saharah", score: 2000 },
-          { name: "Gulliver", score: 1850 }
-        ],
-        sea: [
-          { name: "Pascal", score: 2950 },
-          { name: "Kapp'n", score: 2800 },
-          { name: "Leif", score: 2650 },
-          { name: "Cyrus", score: 2500 },
-          { name: "Kicks", score: 2350 },
-          { name: "Redd", score: 2200 },
-          { name: "Mabel", score: 2050 },
-          { name: "Saharah", score: 1900 },
-          { name: "Gulliver", score: 1750 },
-          { name: "Wisp", score: 1600 }
-        ],
-        villagers: [
-          { name: "Tom Nook", score: 3100 },
-          { name: "Isabelle", score: 2970 },
-          { name: "Blathers", score: 2840 },
-          { name: "Celeste", score: 2710 },
-          { name: "Brewster", score: 2580 },
-          { name: "K.K. Slider", score: 2450 },
-          { name: "Sable", score: 2320 },
-          { name: "Label", score: 2190 },
-          { name: "Reese", score: 2060 },
-          { name: "Cyrus", score: 1930 }
-        ]
-      };
-      
-      // Make it globally available
-      window.DEFAULT_LEADERBOARD = DEFAULT_LEADERBOARD;
-      
-      // Initialize leaderboard with default data for all categories
-      Object.keys(DEFAULT_LEADERBOARD).forEach(category => {
-        updateLeaderboardUI(category, DEFAULT_LEADERBOARD[category]);
-      });
+      // Note: Placeholder data removed - leaderboards now load real data from server only
 
 
       async function initGame(category, isInitialLoad = false) {

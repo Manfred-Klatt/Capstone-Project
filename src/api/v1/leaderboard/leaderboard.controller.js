@@ -6,6 +6,10 @@ const { successResponse } = require('../../../utils/response');
 
 // Submit a new score
 const submitScore = catchAsync(async (req, res, next) => {
+  console.log('🎯 === AUTHENTICATED SCORE SUBMISSION DEBUG ===');
+  console.log('Request body:', req.body);
+  console.log('User from req.user:', req.user);
+  
   const { category, score, playerName } = req.body;
   const userId = req.user.id;
 
@@ -31,8 +35,12 @@ const submitScore = catchAsync(async (req, res, next) => {
     return next(new AppError('User not found', 404));
   }
 
+  console.log('User found in database:', user);
+  console.log('PlayerName from request:', playerName);
+  
   // Use playerName if provided, otherwise use username
   const displayName = playerName || user.username;
+  console.log('Final displayName that will be saved:', displayName);
 
   // Create leaderboard entry
   console.log(`💾 Creating leaderboard entry: ${displayName}, ${score} points in ${category}`);
@@ -84,11 +92,14 @@ const getLeaderboard = catchAsync(async (req, res, next) => {
     // Add rank to each entry
     const leaderboardWithRanks = leaderboard.map((entry, index) => ({
       rank: index + 1,
-      username: entry.username,
+      username: entry.username || 'Anonymous', // Add fallback for debugging
       score: entry.score,
       gameData: entry.gameData,
       timestamp: entry.timestamp
     }));
+    
+    console.log('📊 Raw leaderboard entries from database:', leaderboard);
+    console.log('📊 Processed leaderboard with ranks:', leaderboardWithRanks);
 
     console.log(`✅ Returning ${leaderboardWithRanks.length} ranked entries for ${category}`);
     successResponse(res, 200, 'Leaderboard retrieved successfully', {
@@ -202,6 +213,9 @@ const resetAllLeaderboards = catchAsync(async (req, res, next) => {
 
 // Submit a guest score (without user authentication)
 const submitGuestScore = catchAsync(async (req, res, next) => {
+  console.log('👤 === GUEST SCORE SUBMISSION DEBUG ===');
+  console.log('Request body:', req.body);
+  
   const { playerName, score, category, gameData } = req.body;
 
   // Validate required fields

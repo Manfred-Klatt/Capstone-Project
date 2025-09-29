@@ -193,18 +193,28 @@
 
       // Initialize leaderboard when DOM is ready
       document.addEventListener('DOMContentLoaded', function() {
-        // First try to load from server
-        initializeLeaderboard().catch(error => {
-          logger.error('Failed to load leaderboard from server, using default data');
-          // Show empty state for all categories
-          LEADERBOARD_CONFIG.categories.forEach(category => {
-            updateLeaderboardUI(category, []);
-          });
-        });
+        // Wait a bit to see if external LeaderboardManager initializes first
+        setTimeout(() => {
+          if (!leaderboardInitialized) {
+            // First try to load from server
+            initializeLeaderboard().catch(error => {
+              logger.error('Failed to load leaderboard from server, using default data');
+              // Show empty state for all categories
+              LEADERBOARD_CONFIG.categories.forEach(category => {
+                updateLeaderboardUI(category, []);
+              });
+            });
+          } else {
+            logger.debug('Leaderboard already initialized by external manager, skipping DOM initialization');
+          }
+        }, 100); // Small delay to let external managers initialize first
       });
 
       // Track loading states to prevent duplicate requests
       const loadingStates = new Map();
+      
+      // Global flag to prevent multiple initialization attempts
+      let leaderboardInitialized = false;
       
       // Function to update the leaderboard UI
       function updateLeaderboardUI(category, data) {
@@ -295,11 +305,19 @@
       }
       
       async function initializeLeaderboard() {
+        // Prevent multiple initializations
+        if (leaderboardInitialized) {
+          logger.debug('Leaderboard already initialized, skipping');
+          return;
+        }
+        
+        leaderboardInitialized = true;
         logger.debug('Initializing leaderboard');
         
         // Ensure we have valid categories
         if (!Array.isArray(LEADERBOARD_CONFIG?.categories)) {
           logger.error('Invalid or missing categories in config');
+          leaderboardInitialized = false; // Reset flag on error
           return;
         }
         
@@ -2426,6 +2444,12 @@
         loadingStates.set(category, false); // Clear any existing loading state
         loadLeaderboardData(category);
       }
+      
+      // Global function for external managers to mark leaderboards as initialized
+      window.markLeaderboardsInitialized = function() {
+        leaderboardInitialized = true;
+        logger.debug('Leaderboards marked as initialized by external manager');
+      };
       
       // Function to get current username
       function getCurrentUsername() {

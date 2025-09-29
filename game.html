@@ -2857,6 +2857,7 @@
                     adminToolsContainer.style.display = 'block';
                     passcodeModal.style.display = 'none';
                     passcodeInput.value = ''; // Clear the input
+                    document.body.classList.add('admin-mode'); // Show refresh buttons
                     showNotification('Admin Mode Activated', 'info');
                   } else {
                     alert('Incorrect passcode');
@@ -2896,6 +2897,7 @@
               } else {
                 // Deactivating admin mode - no passcode needed
                 adminToolsContainer.style.display = 'none';
+                document.body.classList.remove('admin-mode'); // Hide refresh buttons
               }
               
               // Show notification for admin mode activation
@@ -3315,13 +3317,18 @@
         height: 32px;
         color: white;
         cursor: pointer;
-        display: flex;
+        display: none; /* Hidden by default */
         align-items: center;
         justify-content: center;
         font-size: 14px;
         transition: all 0.3s ease;
         box-shadow: 0 2px 4px rgba(0,0,0,0.2);
         margin-left: auto;
+      }
+      
+      /* Show refresh buttons when admin mode is active */
+      body.admin-mode .refresh-btn {
+        display: flex;
       }
       
       .refresh-btn:hover {
@@ -3537,6 +3544,13 @@
         // Toggle admin tools
         const isHidden = adminToolsContainer.style.display === "none";
         adminToolsContainer.style.display = isHidden ? "block" : "none";
+        
+        // Toggle admin mode class for refresh buttons
+        if (isHidden) {
+          document.body.classList.add('admin-mode');
+        } else {
+          document.body.classList.remove('admin-mode');
+        }
         
         // Add a subtle notification that admin mode is activated/deactivated
         const notification = document.createElement('div');

@@ -277,7 +277,7 @@
               const isCurrentUser = entry.isCurrentUser || false;
               const rank = index + 1;
               const score = entry.score || 0;
-              const name = (entry.name || 'Anonymous').substring(0, 15); // Limit name length
+              const name = (entry.username || entry.name || 'Anonymous').substring(0, 15); // Limit name length
               
               html += `
                 <li class="leaderboard-item ${isCurrentUser ? 'current-user' : ''}">
@@ -4102,9 +4102,6 @@
           if (response.ok) {
             const data = await response.json();
             console.log('✅ Score submitted successfully:', data);
-            
-            // Show success message
-            alert(`🎉 High score submitted successfully! You scored ${finalScore} points in ${category}!`);
             
             // Update the leaderboard
             console.log(`🔄 Refreshing leaderboard for category: ${category}`);

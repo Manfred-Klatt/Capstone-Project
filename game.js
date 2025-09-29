@@ -140,6 +140,12 @@ class LeaderboardManager {
     try {
       console.log('[LeaderboardManager] Initializing...');
       
+      // Mark leaderboards as initialized by external manager
+      if (typeof window.markLeaderboardsInitialized === 'function') {
+        window.markLeaderboardsInitialized();
+        console.log('[LeaderboardManager] Marked leaderboards as initialized by external manager');
+      }
+      
       // First check if we're forcing standalone mode via URL parameter
       const urlParams = new URLSearchParams(window.location.search);
       if (urlParams.get('standalone') === 'true') {

@@ -2931,8 +2931,23 @@
         const logoutBtnMobile = document.getElementById('logoutBtn-mobile');
         if (logoutBtnMobile) {
           logoutBtnMobile.addEventListener('click', function() {
+            // Clear game state
             localStorage.removeItem('acnh_current_score');
             localStorage.removeItem('acnh_last_category');
+            
+            // Log out user by clearing all auth tokens
+            localStorage.removeItem('token');
+            sessionStorage.removeItem('token');
+            localStorage.removeItem('username');
+            sessionStorage.removeItem('username');
+            sessionStorage.removeItem('acnh_secure_token');
+            
+            // Clear secure token manager if available
+            if (window.secureTokenManager && window.secureTokenManager.clearToken) {
+              window.secureTokenManager.clearToken();
+            }
+            
+            console.log('🚪 Logged out and returning to home');
             window.location.href = 'index.html';
           });
         }
@@ -3656,8 +3671,23 @@
       }
 
       logoutBtn.addEventListener("click", () => {
+        // Clear game state
         localStorage.removeItem("acnh_current_score");
         localStorage.removeItem("acnh_last_category");
+        
+        // Log out user by clearing all auth tokens
+        localStorage.removeItem('token');
+        sessionStorage.removeItem('token');
+        localStorage.removeItem('username');
+        sessionStorage.removeItem('username');
+        sessionStorage.removeItem('acnh_secure_token');
+        
+        // Clear secure token manager if available
+        if (window.secureTokenManager && window.secureTokenManager.clearToken) {
+          window.secureTokenManager.clearToken();
+        }
+        
+        console.log('🚪 Logged out and returning to home');
         window.location.href = "index.html";
       });
 

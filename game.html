@@ -123,6 +123,22 @@
         }
       }
       
+      // Custom logger that respects the DEBUG flag
+      const logger = {
+        info: function(message, ...args) {
+          if (DEBUG) console.info(message, ...args);
+        },
+        debug: function(message, ...args) {
+          if (DEBUG) console.log(message, ...args);
+        },
+        warn: function(message, ...args) {
+          console.warn(message, ...args);
+        },
+        error: function(message, ...args) {
+          console.error(message, ...args);
+        }
+      };
+      
       // Load the font when the page loads
       document.addEventListener('DOMContentLoaded', () => {
         loadCustomFont();
@@ -173,7 +189,9 @@
         }, 1000);
       });
       
-      // Guest token is now handled per-request with the server's expected value
+      // Clear localStorage leaderboard cache to ensure fresh data from database
+      localStorage.removeItem('acnh_leaderboard');
+      console.log('🧹 Cleared localStorage leaderboard cache');
       
       // Leaderboard data and functionality
       const LEADERBOARD_CONFIG = {
@@ -2559,22 +2577,6 @@
           });
         }, 2000); // Wait 2 seconds after page load
       });
-      
-      // Custom logger that respects the DEBUG flag
-      const logger = {
-        info: function(message, ...args) {
-          if (DEBUG) console.info(message, ...args);
-        },
-        warn: function(message, ...args) {
-          console.warn(message, ...args); // Always show warnings
-        },
-        error: function(message, ...args) {
-          console.error(message, ...args); // Always show errors
-        },
-        debug: function(message, ...args) {
-          if (DEBUG) console.debug(message, ...args);
-        }
-      };
       
       // Define API URLs
       const API_URL = 'https://capstone-project-production-3cce.up.railway.app';
@@ -5220,22 +5222,21 @@
         if (resetFishBtn) resetFishBtn.addEventListener('click', () => resetLeaderboardCategory('fish'));
         
         // Add event listeners for admin buttons
-        document.getElementById('simulate-score-btn').addEventListener('click', () => {
-          const categories = ['fish', 'bugs', 'sea', 'villagers'];
-          const randomCategory = categories[Math.floor(Math.random() * categories.length)];
-          
-          // Get the current top score for this category to ensure we beat it
-          let topScore = 0;
-          if (DEFAULT_LEADERBOARD[randomCategory] && DEFAULT_LEADERBOARD[randomCategory].length > 0) {
-            topScore = DEFAULT_LEADERBOARD[randomCategory][0].score;
-          }
-          
-          // Generate a score that's guaranteed to be 1st place (top score + random amount)
-          const testScore = topScore + Math.floor(Math.random() * 500) + 100; // Beat top score by 100-599 points
-          
-          // Directly show the high score modal for the test score
-          showHighScoreModal(testScore, randomCategory);
-        });
+        const simulateScoreBtn = document.getElementById('simulate-score-btn');
+        if (simulateScoreBtn) {
+          simulateScoreBtn.addEventListener('click', () => {
+            const categories = ['fish', 'bugs', 'sea', 'villagers'];
+            const randomCategory = categories[Math.floor(Math.random() * categories.length)];
+            
+            // Generate a random high score
+            const testScore = Math.floor(Math.random() * 1000) + 3000; // Score between 3000-4000
+            
+            console.log(`🎯 Simulating high score: ${testScore} for ${randomCategory}`);
+            
+            // Directly show the high score modal for the test score
+            showHighScoreModal(testScore, randomCategory);
+          });
+        }
         
         const resetBugsBtn = document.getElementById('reset-bugs-btn');
         if (resetBugsBtn) resetBugsBtn.addEventListener('click', () => resetLeaderboardCategory('bugs'));

@@ -242,11 +242,12 @@
         // Handle case where category is an object
         const categoryName = typeof category === 'object' && category.name ? category.name : category;
         
-        logger.debug(`Updating UI for ${categoryName}`);
+        console.log(`🎨 Updating UI for ${categoryName}`);
+        console.log(`📦 Received data:`, data);
         const element = document.getElementById(`${categoryName}-scores`);
         
         if (!element) {
-          logger.error(`Element not found for category: ${categoryName}`);
+          console.error(`❌ Element not found for category: ${categoryName}`);
           return;
         }
         
@@ -256,18 +257,21 @@
         if (data && data.data && data.data.entries && Array.isArray(data.data.entries)) {
           // Handle API response format: { status: 'success', data: { entries: [...] } }
           leaderboardData = data.data.entries;
-          logger.debug(`Loaded ${leaderboardData.length} entries for ${categoryName}`);
+          console.log(`✅ Format 1: Loaded ${leaderboardData.length} entries for ${categoryName}`);
         } else if (data && data.data && Array.isArray(data.data)) {
           // Handle API response format: { status: 'success', data: [...] }
           leaderboardData = data.data;
+          console.log(`✅ Format 2: Loaded ${leaderboardData.length} entries for ${categoryName}`);
         } else if (Array.isArray(data)) {
           // Handle direct array format
           leaderboardData = data;
+          console.log(`✅ Format 3: Loaded ${leaderboardData.length} entries for ${categoryName}`);
         } else if (data && data.leaderboard && Array.isArray(data.leaderboard)) {
           // Handle alternative API format: { leaderboard: [...] }
           leaderboardData = data.leaderboard;
+          console.log(`✅ Format 4: Loaded ${leaderboardData.length} entries for ${categoryName}`);
         } else {
-          console.log('Unknown data format:', data);
+          console.log('⚠️ Unknown data format:', data);
         }
         
         if (!leaderboardData || leaderboardData.length === 0) {
@@ -501,7 +505,8 @@
             localStorage.removeItem('leaderboard_auth_failed');
             
             const data = await response.json();
-            logger.debug(`Successfully loaded ${categoryName} data`);
+            console.log(`✅ Successfully loaded ${categoryName} data:`, data);
+            console.log(`📊 Data structure:`, JSON.stringify(data, null, 2));
             updateLeaderboardUI(categoryName, data);
           } else if (response.status === 401) {
             // Handle unauthorized

@@ -940,18 +940,18 @@
         flex: 1;
         display: flex;
         flex-direction: column;
-        gap: 8px;
+        gap: 2px;
       }
       
       .leaderboard-item {
         display: flex;
         align-items: baseline;
-        padding: 4px 8px;
+        padding: 2px 4px;
         background: transparent;
         transition: all 0.2s ease;
-        font-family: 'Courier New', monospace;
-        font-size: 0.95em;
-        line-height: 1.6;
+        font-family: 'CustomFont', 'Arial', sans-serif;
+        font-size: 0.9em;
+        line-height: 1.4;
       }
       
       .leaderboard-item:hover {
@@ -986,11 +986,12 @@
         text-align: center;
         color: #7f8c8d;
         font-style: italic;
-        padding: 40px 20px;
+        padding: 20px 10px;
         flex: 1;
         display: flex;
         align-items: center;
         justify-content: center;
+        font-size: 0.9em;
       }
       
       .leaderboard-category {
@@ -3235,7 +3236,7 @@
       <!-- Fish Leaderboard -->
       <div class="leaderboard-card fish-leaderboard">
         <div class="leaderboard-header">
-          <span class="category-icon"><img src="images/Fish_Icon.png" alt="Fish" style="width: 48px; height: 48px; vertical-align: middle; margin-right: 5px;"></span>
+          <span class="category-icon"><img src="images/Fish_Icon.png" alt="Fish" style="width: 32px; height: 32px; vertical-align: middle; margin-right: 5px;"></span>
           <h3 class="leaderboard-category"></h3>
           <button class="refresh-btn" onclick="refreshLeaderboard('fish')" title="Refresh Fish Leaderboard">
             <i class="fas fa-sync-alt"></i>
@@ -3247,7 +3248,7 @@
       <!-- Bugs Leaderboard -->
       <div class="leaderboard-card bugs-leaderboard">
         <div class="leaderboard-header">
-          <span class="category-icon"><img src="images/Bug_Icon.png" alt="Bugs" style="width: 48px; height: 48px; vertical-align: middle; margin-right: 5px;"></span>
+          <span class="category-icon"><img src="images/Bug_Icon.png" alt="Bugs" style="width: 32px; height: 32px; vertical-align: middle; margin-right: 5px;"></span>
           <h3 class="leaderboard-category"></h3>
           <button class="refresh-btn" onclick="refreshLeaderboard('bugs')" title="Refresh Bugs Leaderboard">
             <i class="fas fa-sync-alt"></i>
@@ -3259,7 +3260,7 @@
       <!-- Sea Creatures Leaderboard -->
       <div class="leaderboard-card sea-leaderboard">
         <div class="leaderboard-header">
-          <span class="category-icon"><img src="images/Sea_Creature_Icon.png" alt="Sea Creatures" style="width: 48px; height: 48px; vertical-align: middle; margin-right: 5px;"></span>
+          <span class="category-icon"><img src="images/Sea_Creature_Icon.png" alt="Sea Creatures" style="width: 32px; height: 32px; vertical-align: middle; margin-right: 5px;"></span>
           <h3 class="leaderboard-category"></h3>
           <button class="refresh-btn" onclick="refreshLeaderboard('sea')" title="Refresh Sea Creatures Leaderboard">
             <i class="fas fa-sync-alt"></i>
@@ -3271,7 +3272,7 @@
       <!-- Villagers Leaderboard -->
       <div class="leaderboard-card villagers-leaderboard">
         <div class="leaderboard-header">
-          <span class="category-icon"><img src="images/Cat_Silhouette.png" alt="Villagers" style="width: 36px; height: 36px; vertical-align: middle; margin-right: 5px; filter: brightness(0) saturate(100%) invert(28%) sepia(18%) saturate(629%) hue-rotate(345deg) brightness(96%) contrast(92%);"></span>
+          <span class="category-icon"><img src="images/Cat_Silhouette.png" alt="Villagers" style="width: 28px; height: 28px; vertical-align: middle; margin-right: 5px; filter: brightness(0) saturate(100%) invert(28%) sepia(18%) saturate(629%) hue-rotate(345deg) brightness(96%) contrast(92%);"></span>
           <h3 class="leaderboard-category"></h3>
           <button class="refresh-btn" onclick="refreshLeaderboard('villagers')" title="Refresh Villagers Leaderboard">
             <i class="fas fa-sync-alt"></i>
@@ -3319,14 +3320,16 @@
       .leaderboard-card {
         width: 100%; /* Fill the grid cell */
         background: rgba(255, 255, 255, 0.9);
-        border-radius: 16px;
-        padding: 15px;
+        border-radius: 12px;
+        padding: 10px;
         box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
         transition: transform 0.3s ease, box-shadow 0.3s ease;
         position: relative;
         overflow: hidden;
         border: 3px solid;
         box-sizing: border-box;
+        display: flex;
+        flex-direction: column;
       }
 
       .leaderboard-card::before {
@@ -3348,8 +3351,8 @@
         display: flex;
         align-items: center;
         justify-content: space-between;
-        margin-bottom: 15px;
-        padding-bottom: 10px;
+        margin-bottom: 8px;
+        padding-bottom: 6px;
         border-bottom: 2px dashed;
       }
       

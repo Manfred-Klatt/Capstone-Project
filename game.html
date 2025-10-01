@@ -923,9 +923,9 @@
         height: 280px;
         overflow: hidden;
         padding: 10px;
-        background: #fefae0;
+        background: transparent;
         border-radius: 0 0 8px 8px;
-        box-shadow: inset 0 1px 3px rgba(0, 0, 0, 0.1);
+        box-shadow: none;
         display: flex;
         flex-direction: column;
         justify-content: flex-start;
@@ -993,6 +993,7 @@
         align-items: center;
         justify-content: center;
         font-size: 0.9em;
+        background: transparent;
       }
       
       .leaderboard-category {
@@ -3421,12 +3422,18 @@
       .fish-leaderboard .leaderboard-header {
         border-color: #4a90e2;
       }
+      .fish-leaderboard .leaderboard-header::after {
+        border-color: #4a90e2;
+      }
 
       .bugs-leaderboard {
         border-color: #8bc34a;
         background: linear-gradient(145deg, #f1f8e9, #e8f5e9);
       }
       .bugs-leaderboard .leaderboard-header {
+        border-color: #8bc34a;
+      }
+      .bugs-leaderboard .leaderboard-header::after {
         border-color: #8bc34a;
       }
 
@@ -3437,6 +3444,9 @@
       .sea-leaderboard .leaderboard-header {
         border-color: #00bcd4;
       }
+      .sea-leaderboard .leaderboard-header::after {
+        border-color: #00bcd4;
+      }
 
       .villagers-leaderboard {
         border-color: #ff9800;
@@ -3444,6 +3454,47 @@
       }
       .villagers-leaderboard .leaderboard-header {
         border-color: #ff9800;
+      }
+      .villagers-leaderboard .leaderboard-header::after {
+        border-color: #ff9800;
+      }
+
+      /* Make list backgrounds transparent */
+      .fish-leaderboard .leaderboard-list,
+      .fish-leaderboard .leaderboard-item {
+        background: transparent;
+      }
+
+      .bugs-leaderboard .leaderboard-list,
+      .bugs-leaderboard .leaderboard-item {
+        background: transparent;
+      }
+
+      .sea-leaderboard .leaderboard-list,
+      .sea-leaderboard .leaderboard-item {
+        background: transparent;
+      }
+
+      .villagers-leaderboard .leaderboard-list,
+      .villagers-leaderboard .leaderboard-item {
+        background: transparent;
+      }
+
+      /* Hover effects for each category */
+      .fish-leaderboard .leaderboard-item:hover {
+        background: #d0e8ff;
+      }
+
+      .bugs-leaderboard .leaderboard-item:hover {
+        background: #e0f0d8;
+      }
+
+      .sea-leaderboard .leaderboard-item:hover {
+        background: #a0dde8;
+      }
+
+      .villagers-leaderboard .leaderboard-item:hover {
+        background: #ffd49f;
       }
 
       /* Custom scrollbar */

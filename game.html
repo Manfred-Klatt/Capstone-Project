@@ -173,10 +173,7 @@
         }, 1000);
       });
       
-      // Generate a random guest token if not exists
-      if (!localStorage.getItem('guestToken')) {
-        localStorage.setItem('guestToken', 'guest_' + Math.random().toString(36).substr(2, 9));
-      }
+      // Guest token is now handled per-request with the server's expected value
       
       // Leaderboard data and functionality
       const LEADERBOARD_CONFIG = {
@@ -461,13 +458,8 @@
             headers['Authorization'] = `Bearer ${token}`;
             logger.debug(`Loading as authenticated user for ${categoryName}`);
           } else {
-            // Guest user - use guest token
-            let guestToken = localStorage.getItem('guestToken');
-            if (!guestToken) {
-              guestToken = 'guest_' + Math.random().toString(36).substring(2, 11);
-              localStorage.setItem('guestToken', guestToken);
-            }
-            headers['Authorization'] = `Bearer ${guestToken}`;
+            // Guest user - use the server's expected guest token
+            const guestToken = 'a7b9c2d5e8f3g6h1j4k7m2n5p8r3t6v9';
             headers['X-Guest-Token'] = guestToken;
             logger.debug(`Loading as guest user for ${categoryName}`);
           }
@@ -494,22 +486,15 @@
             logger.debug(`Successfully loaded ${categoryName} data`);
             updateLeaderboardUI(categoryName, data);
           } else if (response.status === 401) {
-            // Handle unauthorized - generate a new guest token and retry once
+            // Handle unauthorized
             logger.warn(`Unauthorized for ${categoryName}`);
             
-            if (retryCount === 0) {
-              // Generate a new token and try once more
-              const newGuestToken = 'guest_' + Math.random().toString(36).substring(2, 11);
-              localStorage.setItem('guestToken', newGuestToken);
-              return loadLeaderboardData(categoryName, 1);
-            } else {
-              // If we've already retried, mark auth as failed and use default data
-              localStorage.setItem('leaderboard_auth_failed', 'true');
-              // Set a timeout to clear the auth failed flag after 5 minutes
-              setTimeout(() => localStorage.removeItem('leaderboard_auth_failed'), 5 * 60 * 1000);
-              
-              updateLeaderboardUI(categoryName, []);
-            }
+            // Mark auth as failed and use empty data
+            localStorage.setItem('leaderboard_auth_failed', 'true');
+            // Set a timeout to clear the auth failed flag after 5 minutes
+            setTimeout(() => localStorage.removeItem('leaderboard_auth_failed'), 5 * 60 * 1000);
+            
+            updateLeaderboardUI(categoryName, []);
           } else {
             // For other errors, use default data
             console.error(`❌ Error loading ${categoryName}: ${response.status} ${response.statusText}`);
@@ -2631,24 +2616,14 @@
         try {
           logger.debug('Checking server availability');
           
-          // Get guest token from localStorage or generate a new one
-          let guestToken = localStorage.getItem('guestToken');
-          if (!guestToken) {
-            guestToken = 'guest_' + Math.random().toString(36).substring(2, 11);
-            localStorage.setItem('guestToken', guestToken);
-          }
+          // Use the server's expected guest token
+          const guestToken = 'a7b9c2d5e8f3g6h1j4k7m2n5p8r3t6v9';
           
           // Prepare headers with guest token
           const headers = {
-            'Accept': 'application/json',
-            'Content-Type': 'application/json'
+            'Content-Type': 'application/json',
+            'X-Guest-Token': guestToken
           };
-          
-          // Add guest token to headers
-          if (guestToken) {
-            headers['Authorization'] = `Bearer ${guestToken}`;
-            headers['X-Guest-Token'] = guestToken;
-          }
           
           // Try direct health check first
           try {
@@ -2762,13 +2737,8 @@
         logger.debug('Initializing server health check');
         
         try {
-          // Get or generate guest token
-          let guestToken = localStorage.getItem('guestToken');
-          if (!guestToken) {
-            guestToken = 'guest_' + Math.random().toString(36).substring(2, 11);
-            localStorage.setItem('guestToken', guestToken);
-            logger.debug('Generated new guest token');
-          }
+          // Use the server's expected guest token
+          const guestToken = 'a7b9c2d5e8f3g6h1j4k7m2n5p8r3t6v9';
           
           // Check if we have a recent health check
           const healthCheck = localStorage.getItem('backendHealth');

@@ -11,7 +11,6 @@ const submitScore = catchAsync(async (req, res, next) => {
   console.log('User from req.user:', req.user);
   
   const { category, score, playerName } = req.body;
-  const userId = req.user.id;
 
   // Validate required fields
   if (!category || score === undefined) {
@@ -29,23 +28,25 @@ const submitScore = catchAsync(async (req, res, next) => {
     return next(new AppError('Score must be a positive number', 400));
   }
 
-  // Get user info
-  const user = await User.findById(userId).select('username');
-  if (!user) {
-    return next(new AppError('User not found', 404));
+  // Get username from authenticated user or use playerName
+  let displayName = playerName;
+  
+  if (req.user) {
+    const user = await User.findById(req.user.id).select('username');
+    if (user) {
+      displayName = playerName || user.username;
+    }
+  }
+  
+  if (!displayName) {
+    return next(new AppError('Username is required', 400));
   }
 
-  console.log('User found in database:', user);
-  console.log('PlayerName from request:', playerName);
-  
-  // Use playerName if provided, otherwise use username
-  const displayName = playerName || user.username;
   console.log('Final displayName that will be saved:', displayName);
 
   // Create leaderboard entry
   console.log(`💾 Creating leaderboard entry: ${displayName}, ${score} points in ${category}`);
   const leaderboardEntry = new Leaderboard({
-    userId,
     username: displayName,
     category,
     score
@@ -54,15 +55,11 @@ const submitScore = catchAsync(async (req, res, next) => {
   await leaderboardEntry.save();
   console.log(`✅ Saved leaderboard entry with ID: ${leaderboardEntry._id}`);
 
-  // Get user's new rank
-  const rank = await Leaderboard.getUserRank(userId, category);
-
   successResponse(res, 201, 'Score submitted successfully', {
     entry: {
       id: leaderboardEntry._id,
+      username: leaderboardEntry.username,
       score: leaderboardEntry.score,
-      rank,
-      isPersonalBest: leaderboardEntry.isPersonalBest,
       timestamp: leaderboardEntry.timestamp
     }
   });
@@ -92,9 +89,8 @@ const getLeaderboard = catchAsync(async (req, res, next) => {
     // Add rank to each entry
     const leaderboardWithRanks = leaderboard.map((entry, index) => ({
       rank: index + 1,
-      username: entry.username || 'Anonymous', // Add fallback for debugging
+      username: entry.username || 'Anonymous',
       score: entry.score,
-      gameData: entry.gameData,
       timestamp: entry.timestamp
     }));
     
@@ -132,7 +128,6 @@ const getAllLeaderboards = catchAsync(async (req, res, next) => {
         rank: index + 1,
         username: entry.username,
         score: entry.score,
-        gameData: entry.gameData,
         timestamp: entry.timestamp
       }));
     }
@@ -158,19 +153,23 @@ const getAllLeaderboards = catchAsync(async (req, res, next) => {
 
 // Get user's personal stats
 const getUserStats = catchAsync(async (req, res, next) => {
-  const userId = req.user.id;
+  const username = req.user.username;
   const categories = ['fish', 'bugs', 'sea', 'villagers'];
 
   const stats = {};
 
   for (const category of categories) {
-    const bestScore = await Leaderboard.getUserBestScore(userId, category);
-    const rank = bestScore ? await Leaderboard.getUserRank(userId, category) : null;
-    const totalGames = await Leaderboard.countDocuments({ userId, category });
+    // Get user's best score by username
+    const userScores = await Leaderboard.find({ username, category })
+      .sort({ score: -1 })
+      .limit(1)
+      .lean();
+    
+    const bestScore = userScores.length > 0 ? userScores[0] : null;
+    const totalGames = await Leaderboard.countDocuments({ username, category });
 
     stats[category] = {
       bestScore: bestScore ? bestScore.score : 0,
-      rank: rank || null,
       totalGames,
       lastPlayed: bestScore ? bestScore.timestamp : null
     };
@@ -182,7 +181,7 @@ const getUserStats = catchAsync(async (req, res, next) => {
 // Get user's score history for a category
 const getUserHistory = catchAsync(async (req, res, next) => {
   const { category } = req.params;
-  const userId = req.user.id;
+  const username = req.user.username;
   const limit = parseInt(req.query.limit) || 20;
 
   // Validate category
@@ -191,10 +190,10 @@ const getUserHistory = catchAsync(async (req, res, next) => {
     return next(new AppError('Invalid category', 400));
   }
 
-  const history = await Leaderboard.find({ userId, category })
+  const history = await Leaderboard.find({ username, category })
     .sort({ timestamp: -1 })
     .limit(limit)
-    .select('score gameData timestamp isPersonalBest')
+    .select('score timestamp')
     .lean();
 
   successResponse(res, 200, 'User history retrieved successfully', {
@@ -216,7 +215,7 @@ const submitGuestScore = catchAsync(async (req, res, next) => {
   console.log('👤 === GUEST SCORE SUBMISSION DEBUG ===');
   console.log('Request body:', req.body);
   
-  const { playerName, score, category, gameData } = req.body;
+  const { playerName, score, category } = req.body;
 
   // Validate required fields
   if (!playerName || score === undefined || !category) {
@@ -235,62 +234,29 @@ const submitGuestScore = catchAsync(async (req, res, next) => {
   }
 
   // Validate player name
-  if (typeof playerName !== 'string' || playerName.trim().length === 0 || playerName.length > 50) {
-    return next(new AppError('Player name must be a non-empty string with max 50 characters', 400));
+  if (typeof playerName !== 'string' || playerName.trim().length === 0 || playerName.length > 10) {
+    return next(new AppError('Player name must be a non-empty string with max 10 characters', 400));
   }
 
-  try {
-    // Find or create leaderboard for this category
-    let leaderboard = await Leaderboard.findOne({ category });
-    
-    if (!leaderboard) {
-      leaderboard = new Leaderboard({
-        category,
-        scores: []
-      });
+  // Create leaderboard entry
+  console.log(`💾 Creating guest leaderboard entry: ${playerName}, ${score} points in ${category}`);
+  const leaderboardEntry = new Leaderboard({
+    username: playerName.trim(),
+    category,
+    score
+  });
+
+  await leaderboardEntry.save();
+  console.log(`✅ Saved guest leaderboard entry with ID: ${leaderboardEntry._id}`);
+
+  successResponse(res, 201, 'Guest score submitted successfully', {
+    entry: {
+      id: leaderboardEntry._id,
+      username: leaderboardEntry.username,
+      score: leaderboardEntry.score,
+      timestamp: leaderboardEntry.timestamp
     }
-
-    // Create score entry
-    const scoreEntry = {
-      playerName: playerName.trim(),
-      score,
-      isGuest: true,
-      submittedAt: new Date(),
-      gameData: gameData || {}
-    };
-
-    // Add score to leaderboard
-    leaderboard.scores.push(scoreEntry);
-
-    // Sort scores by score (descending) and keep top 100
-    leaderboard.scores.sort((a, b) => b.score - a.score);
-    if (leaderboard.scores.length > 100) {
-      leaderboard.scores = leaderboard.scores.slice(0, 100);
-    }
-
-    // Update leaderboard metadata
-    leaderboard.lastUpdated = new Date();
-
-    // Save leaderboard
-    await leaderboard.save();
-
-    // Find the rank of the submitted score
-    const rank = leaderboard.scores.findIndex(s => 
-      s.playerName === scoreEntry.playerName && 
-      s.score === scoreEntry.score &&
-      Math.abs(new Date(s.submittedAt) - scoreEntry.submittedAt) < 1000
-    ) + 1;
-
-    successResponse(res, 201, 'Guest score submitted successfully', {
-      score: scoreEntry,
-      rank,
-      totalScores: leaderboard.scores.length,
-      category
-    });
-  } catch (error) {
-    console.error('Error submitting guest score:', error);
-    return next(new AppError('Failed to submit score', 500));
-  }
+  });
 });
 
 module.exports = {

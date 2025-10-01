@@ -307,6 +307,7 @@
               html += `
                 <li class="leaderboard-item ${isCurrentUser ? 'current-user' : ''}">
                   <span class="name" title="${name}">${name}</span>
+                  <span class="dots"></span>
                   <span class="score">${score.toLocaleString()}</span>
                 </li>
               `;
@@ -944,34 +945,41 @@
       
       .leaderboard-item {
         display: flex;
-        justify-content: space-between;
-        align-items: center;
-        padding: 12px 15px;
-        background: rgba(255, 255, 255, 0.7);
-        border-radius: 8px;
-        border-left: 4px solid #4CAF50;
+        align-items: baseline;
+        padding: 4px 8px;
+        background: transparent;
         transition: all 0.2s ease;
-        min-height: 40px;
-        flex: 1;
-        max-height: 48px;
+        font-family: 'Courier New', monospace;
+        font-size: 0.95em;
+        line-height: 1.6;
       }
       
       .leaderboard-item:hover {
-        background: rgba(255, 255, 255, 0.9);
-        transform: translateX(4px);
+        background: rgba(255, 255, 255, 0.3);
       }
       
       .leaderboard-item .name {
-        font-weight: 600;
+        font-weight: 500;
         color: #2c3e50;
+        white-space: nowrap;
+        padding-right: 4px;
+      }
+      
+      .leaderboard-item .dots {
         flex: 1;
-        text-align: left;
+        border-bottom: 1px dotted #95a5a6;
+        margin: 0 4px;
+        min-width: 20px;
+        height: 1px;
+        align-self: center;
+        margin-bottom: 4px;
       }
       
       .leaderboard-item .score {
-        font-weight: 700;
-        color: #27ae60;
-        font-size: 1.1em;
+        font-weight: 600;
+        color: #2c3e50;
+        white-space: nowrap;
+        padding-left: 4px;
       }
       
       .no-scores {
@@ -4145,29 +4153,41 @@
           }
         }
         
-        console.log('🎯 FINAL AUTHENTICATION STATUS:', token ? '✅ AUTHENTICATED USER' : '❌ NO TOKEN FOUND');
-        
-        if (!token) {
-          console.error('❌ NO AUTHENTICATION TOKEN FOUND');
-          alert('You must be logged in to submit scores to the leaderboard. Please log in and try again.');
-          closeHighScoreModal();
-          return;
-        }
+        console.log('🎯 FINAL AUTHENTICATION STATUS:', token ? '✅ AUTHENTICATED USER' : '👤 GUEST USER');
         
         try {
-          console.log('📤 Submitting score as authenticated user...');
+          let endpoint, headers, requestBody;
           
-          const endpoint = `${window.BACKEND_API}/leaderboard/submit`;
-          const headers = {
-            'Content-Type': 'application/json',
-            'Accept': 'application/json',
-            'Authorization': `Bearer ${token}`
-          };
-          const requestBody = {
-            category: category,
-            score: finalScore,
-            playerName: playerName
-          };
+          if (token) {
+            // Authenticated user submission
+            console.log('📤 Submitting score as authenticated user...');
+            endpoint = `${window.BACKEND_API}/leaderboard/submit`;
+            headers = {
+              'Content-Type': 'application/json',
+              'Accept': 'application/json',
+              'Authorization': `Bearer ${token}`
+            };
+            requestBody = {
+              category: category,
+              score: finalScore,
+              playerName: playerName
+            };
+          } else {
+            // Guest user submission
+            console.log('📤 Submitting score as guest user...');
+            endpoint = `${window.BACKEND_API}/submit-guest-score`;
+            const guestToken = 'a7b9c2d5e8f3g6h1j4k7m2n5p8r3t6v9';
+            headers = {
+              'Content-Type': 'application/json',
+              'Accept': 'application/json',
+              'X-Guest-Token': guestToken
+            };
+            requestBody = {
+              playerName: playerName,
+              score: finalScore,
+              category: category
+            };
+          }
           
           console.log('🌐 Endpoint:', endpoint);
           console.log('📋 Request body:', requestBody);
@@ -4195,17 +4215,9 @@
             
             return data;
           } else if (response.status === 401) {
-            console.error('❌ Authentication failed - token expired or invalid');
-            alert('Your login session has expired. Please log in again to submit scores.');
-            
-            // Clear tokens and redirect to login
-            localStorage.removeItem('token');
-            sessionStorage.removeItem('token');
-            if (window.secureTokenManager && window.secureTokenManager.clearToken) {
-              window.secureTokenManager.clearToken();
-            }
-            
-            window.location.href = 'index.html';
+            console.error('❌ Authentication failed');
+            alert('Failed to submit score. Please try again.');
+            closeHighScoreModal();
             return;
           } else {
             const errorText = await response.text();

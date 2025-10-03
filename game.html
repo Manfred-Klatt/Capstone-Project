@@ -304,8 +304,9 @@
               const score = entry.score || 0;
               const name = (entry.username || entry.name || 'Anonymous').substring(0, 15); // Limit name length
               
+              const rankClass = rank === 1 ? 'rank-1' : rank === 2 ? 'rank-2' : rank === 3 ? 'rank-3' : '';
               html += `
-                <li class="leaderboard-item ${isCurrentUser ? 'current-user' : ''}">
+                <li class="leaderboard-item ${isCurrentUser ? 'current-user' : ''} ${rankClass}">
                   <span class="name" title="${name}">${name}</span>
                   <span class="dots"></span>
                   <span class="score">${score.toLocaleString()}</span>
@@ -919,10 +920,9 @@
       }
       
       .leaderboard-scores {
-        min-height: 280px;
-        height: 280px;
+        flex: 1;
         overflow: hidden;
-        padding: 10px;
+        padding: 6px;
         background: transparent;
         border-radius: 0 0 8px 8px;
         box-shadow: none;
@@ -948,15 +948,15 @@
         display: flex;
         align-items: baseline;
         padding: 1px 4px;
-        background: rgba(255, 255, 255, 0.9);
+        background: transparent;
         transition: all 0.2s ease;
         font-family: 'CustomFont', 'Arial', sans-serif;
-        font-size: 0.85em;
-        line-height: 1.3;
+        font-size: 0.8em;
+        line-height: 1.25;
       }
       
       .leaderboard-item:hover {
-        background: rgba(255, 255, 255, 1);
+        background: rgba(255, 255, 255, 0.8);
       }
       
       .leaderboard-item .name {
@@ -968,12 +968,8 @@
       
       .leaderboard-item .dots {
         flex: 1;
-        border-bottom: 1px dotted #95a5a6;
-        margin: 0 4px;
+        margin: 0 6px;
         min-width: 20px;
-        height: 1px;
-        align-self: center;
-        margin-bottom: 4px;
       }
       
       .leaderboard-item .score {
@@ -981,6 +977,29 @@
         color: #2c3e50;
         white-space: nowrap;
         padding-left: 4px;
+        padding-right: 4px;
+      }
+      
+      /* Rank colors */
+      .leaderboard-item.rank-1 .name,
+      .leaderboard-item.rank-1 .score {
+        color: #FFD700;
+        font-weight: 700;
+        text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.3);
+      }
+      
+      .leaderboard-item.rank-2 .name,
+      .leaderboard-item.rank-2 .score {
+        color: #C0C0C0;
+        font-weight: 700;
+        text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.3);
+      }
+      
+      .leaderboard-item.rank-3 .name,
+      .leaderboard-item.rank-3 .score {
+        color: #CD7F32;
+        font-weight: 700;
+        text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.3);
       }
       
       .no-scores {
@@ -3321,9 +3340,10 @@
       
       .leaderboard-card {
         width: 100%; /* Fill the grid cell */
+        aspect-ratio: 5 / 3;
         background: rgba(255, 255, 255, 0.9);
         border-radius: 12px;
-        padding: 10px;
+        padding: 8px;
         box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
         transition: transform 0.3s ease, box-shadow 0.3s ease;
         position: relative;
@@ -3353,8 +3373,8 @@
         display: flex;
         align-items: center;
         justify-content: space-between;
-        margin-bottom: 8px;
-        padding-bottom: 6px;
+        margin-bottom: 6px;
+        padding-bottom: 4px;
         border-bottom: 2px dashed;
       }
       

@@ -304,7 +304,7 @@
               const score = entry.score || 0;
               const name = (entry.username || entry.name || 'Anonymous').substring(0, 15); // Limit name length
               
-              const rankClass = rank === 1 ? 'rank-1' : rank === 2 ? 'rank-2' : rank === 3 ? 'rank-3' : '';
+              const rankClass = rank === 1 ? 'rank-1' : rank === 2 ? 'rank-2' : rank === 3 ? 'rank-3' : rank === 4 ? 'rank-4' : rank === 5 ? 'rank-5' : '';
               html += `
                 <li class="leaderboard-item ${isCurrentUser ? 'current-user' : ''} ${rankClass}">
                   <span class="name" title="${name}">${name}</span>
@@ -980,26 +980,40 @@
         padding-right: 4px;
       }
       
-      /* Rank colors */
+      /* Rank colors - Animal Crossing theme with progression */
       .leaderboard-item.rank-1 .name,
       .leaderboard-item.rank-1 .score {
-        color: #FFD700;
-        font-weight: 700;
-        text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.3);
+        color: #FF6B35;
+        font-weight: 800;
+        text-shadow: 1px 1px 3px rgba(0, 0, 0, 0.3);
       }
       
       .leaderboard-item.rank-2 .name,
       .leaderboard-item.rank-2 .score {
-        color: #C0C0C0;
-        font-weight: 700;
-        text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.3);
+        color: #F7931E;
+        font-weight: 750;
+        text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.25);
       }
       
       .leaderboard-item.rank-3 .name,
       .leaderboard-item.rank-3 .score {
-        color: #CD7F32;
+        color: #FDC830;
         font-weight: 700;
-        text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.3);
+        text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.2);
+      }
+      
+      .leaderboard-item.rank-4 .name,
+      .leaderboard-item.rank-4 .score {
+        color: #8BC34A;
+        font-weight: 650;
+        text-shadow: 1px 1px 1px rgba(0, 0, 0, 0.15);
+      }
+      
+      .leaderboard-item.rank-5 .name,
+      .leaderboard-item.rank-5 .score {
+        color: #81C784;
+        font-weight: 600;
+        text-shadow: 1px 1px 1px rgba(0, 0, 0, 0.1);
       }
       
       .no-scores {
@@ -3340,7 +3354,7 @@
       
       .leaderboard-card {
         width: 100%; /* Fill the grid cell */
-        aspect-ratio: 5 / 3;
+        height: auto;
         background: rgba(255, 255, 255, 0.9);
         border-radius: 12px;
         padding: 8px;

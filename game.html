@@ -5280,13 +5280,13 @@
                   requestBody = {
                     category: category,
                     score: scoreEntry.score,
-                    username: scoreEntry.name || 'Admin',
+                    username: scoreEntry.username || scoreEntry.name || 'Guest',
                     date: scoreEntry.date || new Date().toISOString()
                   };
                 } else {
                   // Guest endpoint expects: playerName, score, category
                   requestBody = {
-                    playerName: scoreEntry.name || 'Admin',
+                    playerName: scoreEntry.username || scoreEntry.name || 'Guest',
                     score: scoreEntry.score,
                     category: category
                   };

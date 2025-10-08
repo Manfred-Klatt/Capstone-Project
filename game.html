@@ -1509,6 +1509,15 @@
         background-color: #357abd !important; /* Darker shade of blue */
       }
 
+      /* Save Leaderboards Button Hover Effect */
+      #save-leaderboards-btn {
+        transition: background-color 0.3s ease !important;
+      }
+
+      #save-leaderboards-btn:hover {
+        background-color: #229954 !important; /* Darker shade of green */
+      }
+
       /* Reset Personal Best Button Hover Effect */
       #reset-high-score {
         transition: background-color 0.3s ease !important;
@@ -3111,6 +3120,7 @@
         <button id="reset-sea-btn" style="width: 100%; padding: 10px; margin: 0;">Reset Sea</button>
         <button id="reset-villagers-btn" style="width: 100%; padding: 10px; margin: 0;">Reset Villagers</button>
         <button id="reset-to-defaults-btn" style="width: 100%; padding: 10px; margin: 0; background-color: #4a90e2; color: white;">Reset All Leaderboards</button>
+        <button id="save-leaderboards-btn" style="width: 100%; padding: 10px; margin: 0; background-color: #27ae60; color: white;">Save Leaderboards</button>
         <button id="reset-high-score" style="width: 100%; padding: 10px; margin: 0; background-color: #ffa500; color: white;">Reset Personal Best</button>
         <button id="debug-auth-btn" style="width: 100%; padding: 10px; margin: 0; background-color: #9b59b6; color: white;">Debug Auth Status</button>
         <button id="clear-auth-failed-btn" style="width: 100%; padding: 10px; margin: 0; background-color: #e74c3c; color: white;">Clear Auth Failed Flag</button>
@@ -5201,6 +5211,84 @@
           });
       }
 
+      async function saveLeaderboardsToMongoDB() {
+        if (!confirm('Are you sure you want to save the current leaderboard state to MongoDB? This will make the current state permanent.')) {
+          return; // User canceled
+        }
+
+        try {
+          // Get current leaderboard data from localStorage
+          const savedLeaderboard = localStorage.getItem('acnh_leaderboard');
+          if (!savedLeaderboard) {
+            alert('No leaderboard data found in local storage. Please load or reset leaderboards first.');
+            return;
+          }
+
+          const leaderboardData = JSON.parse(savedLeaderboard);
+          const categories = ['fish', 'bugs', 'sea', 'villagers'];
+          
+          console.log('💾 Saving leaderboards to MongoDB...');
+          
+          // Get authentication token
+          const token = localStorage.getItem('token');
+          if (!token) {
+            alert('You must be logged in to save leaderboards to the database.');
+            return;
+          }
+
+          let successCount = 0;
+          let failCount = 0;
+
+          // Save each category to MongoDB
+          for (const category of categories) {
+            const categoryScores = leaderboardData[category] || [];
+            
+            // Save each score in the category
+            for (const scoreEntry of categoryScores) {
+              try {
+                const endpoint = `${window.BACKEND_API}/leaderboard/submit`;
+                const response = await fetch(endpoint, {
+                  method: 'POST',
+                  headers: {
+                    'Content-Type': 'application/json',
+                    'Accept': 'application/json',
+                    'Authorization': `Bearer ${token}`
+                  },
+                  body: JSON.stringify({
+                    category: category,
+                    score: scoreEntry.score,
+                    username: scoreEntry.name || 'Admin',
+                    date: scoreEntry.date || new Date().toISOString()
+                  })
+                });
+
+                if (response.ok) {
+                  successCount++;
+                  console.log(`✅ Saved ${category} score: ${scoreEntry.score}`);
+                } else {
+                  failCount++;
+                  console.error(`❌ Failed to save ${category} score:`, await response.text());
+                }
+              } catch (error) {
+                failCount++;
+                console.error(`❌ Error saving ${category} score:`, error);
+              }
+            }
+          }
+
+          // Show results
+          if (failCount === 0) {
+            alert(`✅ Successfully saved all leaderboards to MongoDB!\n\nTotal scores saved: ${successCount}`);
+          } else {
+            alert(`⚠️ Leaderboard save completed with some errors:\n\nSuccessful: ${successCount}\nFailed: ${failCount}\n\nCheck console for details.`);
+          }
+
+        } catch (error) {
+          console.error('❌ Error saving leaderboards to MongoDB:', error);
+          alert('Error saving leaderboards to MongoDB. Please check the console for details.');
+        }
+      }
+
       async function isHighScore(score, category) {
         try {
           // First check local storage for any existing scores
@@ -5388,6 +5476,9 @@
         
         const resetToDefaultsBtn = document.getElementById('reset-to-defaults-btn');
         if (resetToDefaultsBtn) resetToDefaultsBtn.addEventListener('click', resetToDefaults);
+        
+        const saveLeaderboardsBtn = document.getElementById('save-leaderboards-btn');
+        if (saveLeaderboardsBtn) saveLeaderboardsBtn.addEventListener('click', saveLeaderboardsToMongoDB);
         
         const debugAuthBtn = document.getElementById('debug-auth-btn');
         if (debugAuthBtn) debugAuthBtn.addEventListener('click', debugAuthStatus);

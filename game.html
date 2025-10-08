@@ -5273,15 +5273,29 @@
                   };
                 }
                 
-                const response = await fetch(endpoint, {
-                  method: 'POST',
-                  headers: headers,
-                  body: JSON.stringify({
+                // Prepare request body based on endpoint type
+                let requestBody;
+                if (useAuthEndpoint) {
+                  // Authenticated endpoint expects: username, score, category, date
+                  requestBody = {
                     category: category,
                     score: scoreEntry.score,
                     username: scoreEntry.name || 'Admin',
                     date: scoreEntry.date || new Date().toISOString()
-                  })
+                  };
+                } else {
+                  // Guest endpoint expects: playerName, score, category
+                  requestBody = {
+                    playerName: scoreEntry.name || 'Admin',
+                    score: scoreEntry.score,
+                    category: category
+                  };
+                }
+                
+                const response = await fetch(endpoint, {
+                  method: 'POST',
+                  headers: headers,
+                  body: JSON.stringify(requestBody)
                 });
 
                 if (response.ok) {

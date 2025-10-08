@@ -5228,16 +5228,23 @@
           const categories = ['fish', 'bugs', 'sea', 'villagers'];
           
           console.log('💾 Saving leaderboards to MongoDB...');
-          
-          // Get authentication token
-          const token = localStorage.getItem('token');
-          if (!token) {
-            alert('You must be logged in to save leaderboards to the database.');
-            return;
-          }
+          console.log('🔓 Admin tools are password-protected, proceeding with save...');
 
           let successCount = 0;
           let failCount = 0;
+
+          // Determine authentication method
+          const token = localStorage.getItem('token');
+          const guestToken = 'a7b9c2d5e8f3g6h1j4k7m2n5p8r3t6v9';
+          
+          // Use authenticated endpoint if logged in, otherwise use guest endpoint
+          const useAuthEndpoint = !!token;
+          
+          if (useAuthEndpoint) {
+            console.log('✅ Using authenticated submission (logged in)');
+          } else {
+            console.log('✅ Using guest submission (admin tools access)');
+          }
 
           // Save each category to MongoDB
           for (const category of categories) {
@@ -5246,14 +5253,29 @@
             // Save each score in the category
             for (const scoreEntry of categoryScores) {
               try {
-                const endpoint = `${window.BACKEND_API}/leaderboard/submit`;
-                const response = await fetch(endpoint, {
-                  method: 'POST',
-                  headers: {
+                let endpoint, headers;
+                
+                if (useAuthEndpoint) {
+                  // Authenticated submission
+                  endpoint = `${window.BACKEND_API}/leaderboard/submit`;
+                  headers = {
                     'Content-Type': 'application/json',
                     'Accept': 'application/json',
                     'Authorization': `Bearer ${token}`
-                  },
+                  };
+                } else {
+                  // Guest submission (admin tools are password-protected)
+                  endpoint = `${window.BACKEND_API}/submit-guest-score`;
+                  headers = {
+                    'Content-Type': 'application/json',
+                    'Accept': 'application/json',
+                    'X-Guest-Token': guestToken
+                  };
+                }
+                
+                const response = await fetch(endpoint, {
+                  method: 'POST',
+                  headers: headers,
                   body: JSON.stringify({
                     category: category,
                     score: scoreEntry.score,

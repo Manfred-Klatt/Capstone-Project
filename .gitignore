@@ -109,5 +109,10 @@ game.html.bak
 fonts/ACfont.otf
 /node_modules
 /node_modules
-*.md
 *.bak
+# Allow markdown files for documentation
+!*.md
+# But still ignore specific markdown files
+*-guide.md
+*-instructions.md
+*-readme.md

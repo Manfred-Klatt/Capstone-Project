@@ -147,10 +147,6 @@
             margin-bottom: 15px;
         }
 
-        .shop-section {
-            /* No bottom margin since it's in middle section */
-        }
-
         .shop-items {
             display: grid;
             grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
@@ -1335,9 +1331,14 @@
             // Try to fetch from backend API (which proxies Nookipedia to avoid CORS)
             try {
                 // Use backend proxy to avoid CORS issues
-                const backendUrl = `${BACKEND_API}/game/villagers`;
+                const backendUrl = `${BACKEND_API}/game/data/villagers`;
+                const guestToken = 'a7b9c2d5e8f3g6h1j4k7m2n5p8r3t6v9';
                 
-                const result = await fetchWithTimeout(backendUrl, {}, 10000);
+                const result = await fetchWithTimeout(backendUrl, {
+                    headers: {
+                        'X-Guest-Token': guestToken
+                    }
+                }, 10000);
                 
                 if (result && result.data && Array.isArray(result.data)) {
                     const rawVillagers = result.data;

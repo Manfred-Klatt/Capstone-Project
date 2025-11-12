@@ -80,7 +80,27 @@ exports.getNookipediaData = catchAsync(async (req, res, next) => {
       return next(new AppError(`No local data available for ${category}`, 404));
     }
     
-    const localData = JSON.parse(fs.readFileSync(fallbackPath, 'utf8'));
+    let localData = JSON.parse(fs.readFileSync(fallbackPath, 'utf8'));
+    
+    // Handle villagers.json which is an object, not an array
+    if (category === 'villagers' && !Array.isArray(localData)) {
+      // Convert object to array
+      localData = Object.values(localData).map(villager => ({
+        name: villager.name?.['name-USen'] || villager.name || 'Unknown',
+        species: villager.species || 'Unknown',
+        personality: villager.personality || 'Unknown',
+        gender: villager.gender || 'Unknown',
+        birthday: villager.birthday || null,
+        'birthday-string': villager['birthday-string'] || null,
+        hobby: villager.hobby || null,
+        'catch-phrase': villager['catch-phrase'] || null,
+        saying: villager.saying || null,
+        image_url: villager.image_uri || null,
+        icon_url: villager.icon_uri || null
+      }));
+      
+      console.log(`Converted villagers object to array: ${localData.length} villagers`);
+    }
     
     if (!Array.isArray(localData) || localData.length === 0) {
       return next(new AppError(`Invalid local data for ${category}`, 500));

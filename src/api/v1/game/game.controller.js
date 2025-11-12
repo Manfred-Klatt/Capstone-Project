@@ -35,7 +35,10 @@ exports.getNookipediaData = catchAsync(async (req, res, next) => {
     try {
       console.log(`Fetching ${category} data from Nookipedia API...`);
       
-      const nookipediaUrl = `https://api.nookipedia.com/nh/${category}`;
+      // Nookipedia uses 'villagers' not 'nh/villagers'
+      const endpoint = category === 'villagers' ? 'villagers' : `nh/${category}`;
+      const nookipediaUrl = `https://api.nookipedia.com/${endpoint}`;
+      
       const response = await fetch(nookipediaUrl, {
         headers: {
           'X-API-KEY': apiKey,
@@ -57,10 +60,27 @@ exports.getNookipediaData = catchAsync(async (req, res, next) => {
       
       console.log(`Successfully fetched ${data.length} ${category} items from Nookipedia`);
       
+      // Normalize villager data from Nookipedia API
+      let normalizedData = data;
+      if (category === 'villagers') {
+        normalizedData = data.map(villager => ({
+          name: villager.name,
+          species: villager.species || 'Unknown',
+          personality: villager.personality || 'Unknown',
+          gender: villager.gender || 'Unknown',
+          birthday: villager.birthday_month && villager.birthday_day 
+            ? `${villager.birthday_month}/${villager.birthday_day}` 
+            : null,
+          hobby: villager.hobby || null,
+          image_url: villager.image_url || villager.photo_url || null,
+          icon_url: villager.icon_url || null
+        }));
+      }
+      
       return res.status(200).json({
         status: 'success',
-        results: data.length,
-        data: data,
+        results: normalizedData.length,
+        data: normalizedData,
         source: 'api'
       });
       

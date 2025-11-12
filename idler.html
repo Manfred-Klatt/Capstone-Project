@@ -1345,10 +1345,18 @@
                     
                     // Normalize villager data from API
                     const apiVillagersCache = rawVillagers.map(villager => {
-                        // Fix HTTP URLs to use HTTPS to avoid SSL protocol errors
+                        // Only accept HTTPS URLs to prevent SSL protocol errors
+                        // Filter out acnhapi.com and any HTTP URLs
                         let imageUrl = villager.image_url || villager.icon_url || null;
-                        if (imageUrl && imageUrl.startsWith('http://')) {
-                            imageUrl = imageUrl.replace('http://', 'https://');
+                        
+                        // Only keep HTTPS URLs (Nookipedia uses HTTPS)
+                        if (imageUrl && !imageUrl.startsWith('https://')) {
+                            imageUrl = null; // Use placeholder for non-HTTPS URLs
+                        }
+                        
+                        // Filter out acnhapi.com even if HTTPS (known to have issues)
+                        if (imageUrl && imageUrl.includes('acnhapi.com')) {
+                            imageUrl = null;
                         }
                         
                         return {

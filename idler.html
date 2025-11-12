@@ -1370,7 +1370,15 @@
                     // Only update if we got valid data
                     if (apiVillagersCache.length > 0) {
                         villagersCache = apiVillagersCache;
-                        console.log(`👥 Loaded ${villagersCache.length} villagers from backend API`);
+                        
+                        // Debug: Check how many have images
+                        const withImages = apiVillagersCache.filter(v => v.image_url).length;
+                        console.log(`👥 Loaded ${villagersCache.length} villagers from backend API (${withImages} with images)`);
+                        
+                        // Debug: Show first villager's data
+                        if (apiVillagersCache.length > 0) {
+                            console.log('Sample villager:', apiVillagersCache[0]);
+                        }
                     }
                 } else {
                     console.warn('Failed to fetch villagers from backend API, using fallback data');

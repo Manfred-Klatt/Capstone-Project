@@ -2501,6 +2501,9 @@
       
       <!-- Right Side: Sound and Home Buttons -->
       <div style="position: absolute; right: 60px; top: 15px; display: flex; gap: 8px; align-items: center;">
+        <button id="new-button" class="mobile-btn" style="background:rgba(255,255,255,0.9); box-shadow:0 4px 16px rgba(0,0,0,0.18); border:none; cursor:pointer; width:48px; height:48px; border-radius:50%; display:flex; align-items:center; justify-content:center; transition:all 0.3s ease;" aria-label="New button">
+          ⭐
+        </button>
         <button id="sound-toggle-mobile" class="mobile-btn" style="background:rgba(255,255,255,0.9); box-shadow:0 4px 16px rgba(0,0,0,0.18); border:none; cursor:pointer; width:48px; height:48px; border-radius:50%; display:flex; align-items:center; justify-content:center; transition:all 0.3s ease;" aria-label="Toggle sound">
           <img src="images/speaker.png" alt="Sound" style="width:28px; height:28px; transition:all 0.3s ease;">
         </button>
@@ -3032,6 +3035,19 @@
             if (soundImg) {
               soundImg.src = soundEnabled ? 'images/speaker.png' : 'images/speaker-mute.png';
               soundImg.alt = soundEnabled ? 'Sound On' : 'Sound Off';
+            }
+          });
+        }
+        
+        // New button event listener for password prompt
+        const newButton = document.getElementById('new-button');
+        if (newButton) {
+          newButton.addEventListener('click', function() {
+            const password = prompt('Please enter the password:');
+            if (password === 'blathers') {
+              window.location.href = 'idler.html';
+            } else if (password !== null) {
+              alert('Incorrect password!');
             }
           });
         }

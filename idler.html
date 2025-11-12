@@ -1420,7 +1420,12 @@
                 if (i < purchasedVillagers.length) {
                     const villager = purchasedVillagers[i];
                     slot.className = 'villager-slot';
-                    const imageHtml = villager.image_url ? `<img src="${villager.image_url}" alt="${villager.name}" class="villager-portrait" onerror="this.style.display='none'">` : '<div class="villager-placeholder">👤</div>';
+                    
+                    // Show image with placeholder fallback on error, or just placeholder if no URL
+                    const imageHtml = villager.image_url 
+                        ? `<img src="${villager.image_url}" alt="${villager.name}" class="villager-portrait" onerror="this.outerHTML='<div class=\\'villager-placeholder\\'>👤</div>';">` 
+                        : '<div class="villager-placeholder">👤</div>';
+                    
                     slot.innerHTML = `
                         ${imageHtml}
                         <div class="villager-name-tooltip">${villager.name}</div>

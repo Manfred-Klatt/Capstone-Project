@@ -105,19 +105,28 @@ exports.getNookipediaData = catchAsync(async (req, res, next) => {
     // Handle villagers.json which is an object, not an array
     if (category === 'villagers' && !Array.isArray(localData)) {
       // Convert object to array
-      localData = Object.values(localData).map(villager => ({
-        name: villager.name?.['name-USen'] || villager.name || 'Unknown',
-        species: villager.species || 'Unknown',
-        personality: villager.personality || 'Unknown',
-        gender: villager.gender || 'Unknown',
-        birthday: villager.birthday || null,
-        'birthday-string': villager['birthday-string'] || null,
-        hobby: villager.hobby || null,
-        'catch-phrase': villager['catch-phrase'] || null,
-        saying: villager.saying || null,
-        image_url: villager.image_uri || null,
-        icon_url: villager.icon_uri || null
-      }));
+      localData = Object.values(localData).map(villager => {
+        const name = villager.name?.['name-USen'] || villager.name || 'Unknown';
+        
+        // Construct Nookipedia image URL as fallback
+        // Use the simpler format that works for most villagers
+        const nameFormatted = name.replace(/ /g, '_').replace(/\./g, '');
+        const nookipediaIconUrl = `https://dodo.ac/np/images/${nameFormatted}_NH_Villager_Icon.png`;
+        
+        return {
+          name: name,
+          species: villager.species || 'Unknown',
+          personality: villager.personality || 'Unknown',
+          gender: villager.gender || 'Unknown',
+          birthday: villager.birthday || null,
+          'birthday-string': villager['birthday-string'] || null,
+          hobby: villager.hobby || null,
+          'catch-phrase': villager['catch-phrase'] || null,
+          saying: villager.saying || null,
+          image_url: villager.image_uri || nookipediaIconUrl,
+          icon_url: villager.icon_uri || nookipediaIconUrl
+        };
+      });
       
       console.log(`Converted villagers object to array: ${localData.length} villagers`);
     }

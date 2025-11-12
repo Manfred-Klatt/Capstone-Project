@@ -1344,12 +1344,20 @@
                     const rawVillagers = result.data;
                     
                     // Normalize villager data from API
-                    const apiVillagersCache = rawVillagers.map(villager => ({
-                        name: villager.name,
-                        species: villager.species || 'Unknown',
-                        personality: villager.personality || 'Unknown',
-                        image_url: villager.image_url || villager.photo_url || null
-                    }));
+                    const apiVillagersCache = rawVillagers.map(villager => {
+                        // Fix HTTP URLs to use HTTPS to avoid SSL protocol errors
+                        let imageUrl = villager.image_url || villager.icon_url || null;
+                        if (imageUrl && imageUrl.startsWith('http://')) {
+                            imageUrl = imageUrl.replace('http://', 'https://');
+                        }
+                        
+                        return {
+                            name: villager.name,
+                            species: villager.species || 'Unknown',
+                            personality: villager.personality || 'Unknown',
+                            image_url: imageUrl
+                        };
+                    });
                     
                     // Only update if we got valid data
                     if (apiVillagersCache.length > 0) {

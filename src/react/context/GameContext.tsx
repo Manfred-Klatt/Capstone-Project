@@ -75,8 +75,10 @@ export const GameProvider: React.FC<GameProviderProps> = ({ children }) => {
     cachedData: {}
   });
 
-  // Timer reference
+  // Timer reference and start time tracking
   const timerRef = React.useRef<NodeJS.Timeout | null>(null);
+  const startTimeRef = React.useRef<number | null>(null);
+  const initialTimeRef = React.useRef<number>(0);
 
   // Load high score from localStorage on mount
   useEffect(() => {
@@ -86,13 +88,23 @@ export const GameProvider: React.FC<GameProviderProps> = ({ children }) => {
     }
   }, []);
 
-  // Timer effect
+  // Timer effect - uses timestamp-based tracking to work in background tabs
   useEffect(() => {
     if (gameState.isGameActive && gameState.timeLeft > 0) {
+      // Initialize start time when timer begins or resumes
+      if (startTimeRef.current === null) {
+        startTimeRef.current = Date.now();
+        initialTimeRef.current = gameState.timeLeft;
+      }
+
       timerRef.current = setTimeout(() => {
-        setGameState(prev => ({ ...prev, timeLeft: prev.timeLeft - 1 }));
-      }, 1000);
+        const elapsed = (Date.now() - (startTimeRef.current || Date.now())) / 1000;
+        const newTimeLeft = Math.max(0, initialTimeRef.current - elapsed);
+        
+        setGameState(prev => ({ ...prev, timeLeft: Math.ceil(newTimeLeft) }));
+      }, 100); // Check more frequently for smoother updates
     } else if (gameState.timeLeft <= 0 && gameState.isGameActive) {
+      startTimeRef.current = null;
       endGame();
     }
 

@@ -63,18 +63,25 @@ exports.getNookipediaData = catchAsync(async (req, res, next) => {
       // Normalize villager data from Nookipedia API
       let normalizedData = data;
       if (category === 'villagers') {
-        normalizedData = data.map(villager => ({
-          name: villager.name,
-          species: villager.species || 'Unknown',
-          personality: villager.personality || 'Unknown',
-          gender: villager.gender || 'Unknown',
-          birthday: villager.birthday_month && villager.birthday_day 
-            ? `${villager.birthday_month}/${villager.birthday_day}` 
-            : null,
-          hobby: villager.hobby || null,
-          image_url: villager.image_url || villager.photo_url || null,
-          icon_url: villager.icon_url || null
-        }));
+        normalizedData = data.map(villager => {
+          // Construct Nookipedia image URL (more reliable than acnhapi.com)
+          const nameFormatted = villager.name.replace(/ /g, '_').replace(/\./g, '');
+          const nookipediaIconUrl = `https://dodo.ac/np/images/${nameFormatted}_NH_Villager_Icon.png`;
+          
+          return {
+            name: villager.name,
+            species: villager.species || 'Unknown',
+            personality: villager.personality || 'Unknown',
+            gender: villager.gender || 'Unknown',
+            birthday: villager.birthday_month && villager.birthday_day 
+              ? `${villager.birthday_month}/${villager.birthday_day}` 
+              : null,
+            hobby: villager.hobby || null,
+            // Use Nookipedia images instead of acnhapi.com (SSL issues)
+            image_url: villager.image_url || nookipediaIconUrl,
+            icon_url: villager.icon_url || nookipediaIconUrl
+          };
+        });
       }
       
       return res.status(200).json({

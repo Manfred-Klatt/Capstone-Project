@@ -620,23 +620,26 @@ let timeLeft = 10; // Default to medium difficulty (10s)
 let timerInterval;
 let maxTime = 10000; // Default to medium difficulty (10s in ms)
 let gameOver = false; // Track if game is over
+let timerStartTime = null; // Track when timer started for background tab support
+let initialTimeLeft = 0; // Track initial time for accurate countdown
 
 // === Timer Functions ===
 function startTimer() {
-  timerInterval = setInterval(updateTimer, 1000);
+  // Initialize timestamp-based tracking
+  timerStartTime = Date.now();
+  initialTimeLeft = timeLeft;
+  
+  // Use shorter interval for smoother updates
+  timerInterval = setInterval(updateTimer, 100);
 }
 
 function updateTimer() {
-  // Decrease time based on the actual time passed for better accuracy
-  const now = Date.now();
-  if (!this.lastUpdateTime) {
-    this.lastUpdateTime = now;
-  }
+  // Calculate elapsed time since timer started
+  const elapsed = (Date.now() - timerStartTime) / 1000; // Convert to seconds
+  const newTimeLeft = Math.max(0, initialTimeLeft - elapsed);
   
-  const deltaTime = now - this.lastUpdateTime;
-  this.lastUpdateTime = now;
-  
-  timeLeft = Math.max(0, timeLeft - (deltaTime / 1000)); // Convert ms to seconds
+  // Update timeLeft based on actual elapsed time
+  timeLeft = newTimeLeft;
   
   // Update timer display using cached element
   updateTimerDisplay();
@@ -644,6 +647,7 @@ function updateTimer() {
   if (timeLeft <= 0) {
     clearInterval(timerInterval);
     timerInterval = null;
+    timerStartTime = null;
     endGame();
   }
 }
@@ -651,7 +655,9 @@ function updateTimer() {
 function stopTimer() {
   if (timerInterval) {
     clearInterval(timerInterval);
+    timerInterval = null;
   }
+  timerStartTime = null;
 }
 
 // Function to update input placeholder based on selected category

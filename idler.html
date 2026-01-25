@@ -26,9 +26,9 @@
             background: white;
             border-radius: 20px;
             box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
-            max-width: 1400px;
+            max-width: 1800px;
             width: 100%;
-            padding: 40px;
+            padding: 50px;
             display: flex;
             flex-direction: column;
         }
@@ -741,10 +741,10 @@
             left: 0;
             width: 100%;
             height: 100%;
-            background: rgba(0, 0, 0, 0.7);
-            z-index: 2000;
-            align-items: center;
+            background: rgba(0, 0, 0, 0.6);
+            z-index: 999;
             justify-content: center;
+            align-items: center;
         }
         
         .inventory-modal.active {
@@ -752,52 +752,56 @@
         }
         
         .inventory-content {
-            background: white;
-            border-radius: 20px;
-            padding: 30px;
-            max-width: 700px;
+            background: linear-gradient(135deg, #FFF9E6 0%, #FFEFC1 100%);
+            border-radius: 24px;
+            padding: 20px;
+            max-width: 520px;
             width: 90%;
-            max-height: 80vh;
+            max-height: 85vh;
             overflow-y: auto;
-            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.5);
+            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.4);
+            border: 4px solid #8B4513;
         }
         
         .inventory-header {
             display: flex;
             justify-content: space-between;
             align-items: center;
-            margin-bottom: 20px;
-            padding-bottom: 15px;
-            border-bottom: 2px solid #eee;
+            margin-bottom: 15px;
+            padding-bottom: 12px;
+            border-bottom: 3px solid #8B4513;
         }
         
         .inventory-title {
-            font-size: 1.8em;
-            color: #333;
+            font-size: 1.4em;
             font-weight: bold;
+            color: #5D4E37;
+            text-shadow: 1px 1px 2px rgba(255, 255, 255, 0.5);
         }
         
         .inventory-close {
-            background: #ff4444;
+            background: linear-gradient(135deg, #8B4513 0%, #A0522D 100%);
             color: white;
-            border: none;
+            border: 2px solid #5D4E37;
             border-radius: 50%;
-            width: 35px;
-            height: 35px;
-            font-size: 20px;
+            width: 32px;
+            height: 32px;
+            font-size: 1.1em;
             cursor: pointer;
-            transition: background 0.2s;
+            transition: all 0.2s;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
         }
         
         .inventory-close:hover {
-            background: #cc0000;
+            transform: scale(1.1);
+            box-shadow: 0 3px 6px rgba(0, 0, 0, 0.3);
         }
         
         .inventory-grid {
             display: grid;
-            grid-template-columns: repeat(4, 1fr);
-            gap: 10px;
-            margin-bottom: 20px;
+            grid-template-columns: repeat(5, 1fr);
+            gap: 8px;
+            margin-bottom: 15px;
         }
         
         .inventory-slot {
@@ -829,36 +833,38 @@
         }
         
         .inventory-slot-icon {
-            font-size: 2em;
-            margin-bottom: 5px;
+            font-size: 1.5em;
+            margin-bottom: 2px;
         }
         
         .inventory-slot-name {
-            font-size: 0.7em;
+            font-size: 0.55em;
             text-align: center;
-            color: #666;
-            padding: 0 5px;
+            color: #5D4E37;
+            font-weight: 600;
+            padding: 0 3px;
             overflow: hidden;
             text-overflow: ellipsis;
             white-space: nowrap;
             max-width: 100%;
+            line-height: 1.1;
         }
         
         .inventory-slot-quantity {
             position: absolute;
-            top: 0;
-            right: 0;
-            background: #FF6B6B;
+            top: -2px;
+            right: -2px;
+            background: linear-gradient(135deg, #FF6B6B 0%, #FF5252 100%);
             color: white;
             border-radius: 50%;
-            width: 24px;
-            height: 24px;
+            width: 22px;
+            height: 22px;
             display: flex;
             align-items: center;
             justify-content: center;
-            font-size: 0.7em;
+            font-size: 0.65em;
             font-weight: bold;
-            border: 2px solid white;
+            border: 2px solid #FFF9E6;
             box-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
         }
         
@@ -908,15 +914,18 @@
         .museum-stats {
             text-align: center;
             margin-bottom: 15px;
-            padding: 10px;
-            background: #f0f0f0;
-            border-radius: 8px;
-            font-size: 0.9em;
-            color: #666;
+            padding: 10px 15px;
+            background: linear-gradient(135deg, #E8F5E9 0%, #C8E6C9 100%);
+            border-radius: 12px;
+            font-size: 0.85em;
+            color: #2E7D32;
+            border: 2px solid #81C784;
+            font-weight: 600;
         }
         
         .museum-stats strong {
-            color: #333;
+            color: #1B5E20;
+            font-size: 1.1em;
         }
         
         .inventory-empty-message {
@@ -928,7 +937,17 @@
         
         @media (max-width: 768px) {
             .inventory-grid {
-                grid-template-columns: repeat(3, 1fr);
+                grid-template-columns: repeat(4, 1fr);
+                gap: 6px;
+            }
+            
+            .inventory-content {
+                padding: 15px;
+                max-width: 95%;
+            }
+            
+            .inventory-slot-name {
+                font-size: 0.5em;
             }
             
             .inventory-button {
@@ -1929,8 +1948,7 @@
         // Inventory Functions
         function addFishToInventory(fish) {
             // Check if inventory is full
-            const totalFish = fishInventory.reduce((sum, item) => sum + item.quantity, 0);
-            if (totalFish >= MAX_INVENTORY_SLOTS) {
+            if (fishInventory.length >= MAX_INVENTORY_SLOTS) {
                 console.log('Inventory full! Auto-selling fish...');
                 const fishValue = fish.sell || fish.sell_nook || 400;
                 bells += fishValue;
@@ -1938,13 +1956,8 @@
                 return;
             }
             
-            // Check if fish already exists in inventory
-            const existingFish = fishInventory.find(item => item.fish.name === fish.name);
-            if (existingFish) {
-                existingFish.quantity++;
-            } else {
-                fishInventory.push({ fish: fish, quantity: 1 });
-            }
+            // Add each fish as a separate item (no stacking)
+            fishInventory.push({ fish: fish, quantity: 1 });
             
             updateInventoryBadge();
         }
@@ -1975,8 +1988,6 @@
             const container = document.getElementById('inventoryGridContainer');
             if (!container) return;
             
-            const totalFish = fishInventory.reduce((sum, item) => sum + item.quantity, 0);
-            
             if (fishInventory.length === 0) {
                 container.innerHTML = '<div class="inventory-empty-message">🎣 Your inventory is empty!<br>Catch some fish to fill it up.</div>';
                 const donateBtn = document.getElementById('donateBtn');
@@ -2000,19 +2011,18 @@
                 const donatedBadge = isDonated ? ' 🏛️' : '';
                 const fishIcon = item.fish.icon_uri || item.fish.image_uri || '🐟';
                 const iconHtml = fishIcon.startsWith('http') 
-                    ? `<img src="${fishIcon}" alt="${item.fish.name}" style="width: 40px; height: 40px; object-fit: contain;">` 
+                    ? `<img src="${fishIcon}" alt="${item.fish.name}" style="width: 35px; height: 35px; object-fit: contain; margin-bottom: 2px;">` 
                     : `<div class="inventory-slot-icon">${fishIcon}</div>`;
                 html += `
-                    <div class="inventory-slot" title="${item.fish.name}${donatedBadge}\nQuantity: ${item.quantity}\nValue: ${sellPrice.toLocaleString()} Bells each">
+                    <div class="inventory-slot" title="${item.fish.name}${donatedBadge}\nValue: ${sellPrice.toLocaleString()} Bells">
                         ${iconHtml}
                         <div class="inventory-slot-name">${item.fish.name}</div>
-                        <div class="inventory-slot-quantity">${item.quantity}</div>
                     </div>
                 `;
             });
             
             // Add empty slots
-            const emptySlots = MAX_INVENTORY_SLOTS - totalFish;
+            const emptySlots = MAX_INVENTORY_SLOTS - fishInventory.length;
             for (let i = 0; i < emptySlots; i++) {
                 html += '<div class="inventory-slot empty"></div>';
             }
@@ -2077,7 +2087,7 @@
                 }
                 
                 const iconHtml = isDonated && fishIcon.startsWith('http') 
-                    ? `<img src="${fishIcon}" alt="${fishName}" style="width: 40px; height: 40px; object-fit: contain;">` 
+                    ? `<img src="${fishIcon}" alt="${fishName}" style="width: 35px; height: 35px; object-fit: contain; margin-bottom: 2px;">` 
                     : `<div class="inventory-slot-icon">${isDonated ? (fishIcon.startsWith('http') ? '🐟' : fishIcon) : '❓'}</div>`;
                 
                 html += `
@@ -2111,11 +2121,8 @@
             // Add to museum collection
             museumCollection.add(item.fish.name);
             
-            // Remove one from inventory
-            item.quantity--;
-            if (item.quantity <= 0) {
-                fishInventory.splice(index, 1);
-            }
+            // Remove from inventory
+            fishInventory.splice(index, 1);
             
             // Update UI
             updateInventoryBadge();
@@ -2144,8 +2151,6 @@
             const container = document.getElementById('nookGridContainer');
             if (!container) return;
             
-            const totalFish = fishInventory.reduce((sum, item) => sum + item.quantity, 0);
-            
             if (fishInventory.length === 0) {
                 container.innerHTML = '<div class="inventory-empty-message">🎣 No fish to sell!<br>Catch some fish first.</div>';
                 document.getElementById('sellAllBtn').disabled = true;
@@ -2159,22 +2164,20 @@
             // Add fish slots
             fishInventory.forEach((item, index) => {
                 const sellPrice = item.fish.sell || item.fish.sell_nook || 400;
-                const totalValue = sellPrice * item.quantity;
                 const fishIcon = item.fish.icon_uri || item.fish.image_uri || '🐟';
                 const iconHtml = fishIcon.startsWith('http') 
-                    ? `<img src="${fishIcon}" alt="${item.fish.name}" style="width: 40px; height: 40px; object-fit: contain;">` 
+                    ? `<img src="${fishIcon}" alt="${item.fish.name}" style="width: 35px; height: 35px; object-fit: contain; margin-bottom: 2px;">` 
                     : `<div class="inventory-slot-icon">${fishIcon}</div>`;
                 html += `
-                    <div class="inventory-slot" onclick="sellFish(${index})" style="cursor: pointer;" title="Click to sell\n${item.fish.name}\n${sellPrice.toLocaleString()} Bells each\nTotal: ${totalValue.toLocaleString()} Bells">
+                    <div class="inventory-slot" onclick="sellFish(${index})" style="cursor: pointer;" title="Click to sell\n${item.fish.name}\n${sellPrice.toLocaleString()} Bells">
                         ${iconHtml}
                         <div class="inventory-slot-name">${item.fish.name}</div>
-                        <div class="inventory-slot-quantity">${item.quantity}</div>
                     </div>
                 `;
             });
             
             // Add empty slots
-            const emptySlots = MAX_INVENTORY_SLOTS - totalFish;
+            const emptySlots = MAX_INVENTORY_SLOTS - fishInventory.length;
             for (let i = 0; i < emptySlots; i++) {
                 html += '<div class="inventory-slot empty"></div>';
             }
@@ -2193,10 +2196,9 @@
             
             const item = fishInventory[index];
             const sellPrice = item.fish.sell || item.fish.sell_nook || 400;
-            const totalValue = sellPrice * item.quantity;
             
-            bells += totalValue;
-            totalBellsEarned += totalValue;
+            bells += sellPrice;
+            totalBellsEarned += sellPrice;
             
             // Remove from inventory
             fishInventory.splice(index, 1);
@@ -2206,19 +2208,18 @@
             renderNookStore();
             updateDisplay();
             
-            console.log(`Sold ${item.quantity}x ${item.fish.name} for ${totalValue.toLocaleString()} Bells`);
+            console.log(`Sold ${item.fish.name} for ${sellPrice.toLocaleString()} Bells`);
         }
         
         function sellAllFish() {
             if (fishInventory.length === 0) return;
             
             let totalValue = 0;
-            let totalCount = 0;
+            const totalCount = fishInventory.length;
             
             fishInventory.forEach(item => {
                 const sellPrice = item.fish.sell || item.fish.sell_nook || 400;
-                totalValue += sellPrice * item.quantity;
-                totalCount += item.quantity;
+                totalValue += sellPrice;
             });
             
             bells += totalValue;
@@ -2294,6 +2295,11 @@
                 area.rods += amount;
             } else if (amount < 0 && area.rods >= Math.abs(amount)) {
                 area.rods += amount; // amount is negative
+                
+                // Reset progress when rod is unassigned
+                if (area.rods === 0) {
+                    fishingAreaProgress[areaId] = 0;
+                }
             }
             
             updateFishingAreasUI();
@@ -2775,7 +2781,8 @@
                 museumCollection: Array.from(museumCollection), // Save museum collection
                 caughtFish: Array.from(caughtFish), // Convert Set to Array for JSON
                 purchasedVillagers,
-                villagerCooldownEnd
+                villagerCooldownEnd,
+                lastSaveTime: Date.now() // Track when game was last saved
             };
             localStorage.setItem('animalCrossingBellsSave', JSON.stringify(gameState));
         }, 5000);
@@ -2831,8 +2838,73 @@
                 if (gameState.villagerCooldownEnd) {
                     villagerCooldownEnd = gameState.villagerCooldownEnd;
                 }
+                
+                // Calculate offline progress for fishing areas
+                if (gameState.lastSaveTime) {
+                    const offlineTime = (Date.now() - gameState.lastSaveTime) / 1000; // Convert to seconds
+                    if (offlineTime > 0 && offlineTime < 86400) { // Cap at 24 hours
+                        calculateOfflineFishingProgress(offlineTime);
+                    }
+                }
+                
                 calculateCPS();
             }
+        }
+        
+        // Calculate offline progress for fishing areas
+        function calculateOfflineFishingProgress(offlineTime) {
+            if (fishCache.length === 0) return;
+            
+            fishingAreas.forEach(area => {
+                if (area.rods > 0) {
+                    let remainingTime = offlineTime;
+                    let catchCount = 0;
+                    
+                    // Add any existing progress
+                    remainingTime += fishingAreaProgress[area.id] || 0;
+                    
+                    // Calculate how many catches occurred
+                    const catchInterval = fishingAreaNextCatch[area.id] || 37.5;
+                    while (remainingTime >= catchInterval) {
+                        catchCount++;
+                        remainingTime -= catchInterval;
+                        // Generate new random interval for next catch
+                        fishingAreaNextCatch[area.id] = 30 + Math.random() * 15;
+                    }
+                    
+                    // Apply catches
+                    if (catchCount > 0) {
+                        const validFish = fishCache.filter(fish => fish.location.includes(area.name.replace(/[^a-zA-Z]/g, '').toLowerCase()));
+                        
+                        for (let i = 0; i < catchCount * area.rods; i++) {
+                            if (validFish.length > 0) {
+                                const fish = validFish[Math.floor(Math.random() * validFish.length)];
+                                const fishName = fish.name;
+                                
+                                // Add to inventory
+                                if (!fishInventory[fishName]) {
+                                    fishInventory[fishName] = { count: 0, fish: fish };
+                                }
+                                fishInventory[fishName].count++;
+                                
+                                // Track caught fish
+                                caughtFish.add(fishName);
+                                
+                                // Add bells
+                                const bellValue = fish.sell_nook || 100;
+                                bells += bellValue;
+                                totalBellsEarned += bellValue;
+                            }
+                        }
+                        
+                        updateInventoryBadge();
+                        console.log(`🎣 Offline progress: Caught ${catchCount * area.rods} fish from ${area.name}`);
+                    }
+                    
+                    // Set remaining progress
+                    fishingAreaProgress[area.id] = remainingTime;
+                }
+            });
         }
 
         // Reset game

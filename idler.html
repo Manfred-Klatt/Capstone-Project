@@ -19,7 +19,7 @@
             display: flex;
             justify-content: center;
             align-items: center;
-            padding: 20px;
+            padding: 10px;
         }
 
         .game-container {
@@ -28,7 +28,7 @@
             box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
             max-width: 1400px;
             width: 100%;
-            padding: 40px;
+            padding: 20px;
             display: flex;
             flex-direction: column;
         }
@@ -36,14 +36,14 @@
         .top-section {
             display: flex;
             justify-content: flex-end;
-            gap: 20px;
-            margin-bottom: 20px;
+            gap: 15px;
+            margin-bottom: 15px;
         }
 
         .right-sidebar {
             display: flex;
             flex-direction: column;
-            gap: 20px;
+            gap: 10px;
             min-width: 240px;
             max-width: 240px;
         }
@@ -51,8 +51,9 @@
         .middle-section {
             display: flex;
             gap: 15px;
-            margin-bottom: 20px;
+            margin-bottom: 15px;
             align-items: flex-start;
+            flex-wrap: wrap;
         }
 
         .shop-section-wrapper {
@@ -62,13 +63,13 @@
         .main-header {
             background: linear-gradient(135deg, #FFF9E6 0%, #FFE8B3 100%);
             border-radius: 12px;
-            padding: 20px;
+            padding: 15px;
             box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
             display: flex;
             align-items: center;
             justify-content: center;
-            flex: 0 0 auto;
-            width: 240px;
+            flex: 2;
+            min-width: 300px;
         }
 
         .header {
@@ -78,21 +79,21 @@
         h1 {
             color: #F7B32B;
             font-size: 1.8em;
-            margin-bottom: 10px;
+            margin-bottom: 8px;
             text-align: center;
             text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.1);
         }
 
         .stats {
             text-align: center;
-            margin-bottom: 20px;
+            margin-bottom: 0;
         }
 
         .bell-count {
             font-size: 1.6em;
             font-weight: bold;
             color: #333;
-            margin-bottom: 8px;
+            margin-bottom: 5px;
         }
 
         .per-second {
@@ -103,7 +104,7 @@
         .total-production {
             font-size: 0.8em;
             color: #6BAA5E;
-            margin-top: 8px;
+            margin-top: 5px;
             font-weight: 600;
         }
 
@@ -144,19 +145,19 @@
         h2 {
             color: #6BAA5E;
             font-size: 1.5em;
-            margin-bottom: 15px;
+            margin-bottom: 10px;
         }
 
         .shop-items {
             display: grid;
             grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
-            gap: 15px;
-            margin-bottom: 30px;
+            gap: 10px;
+            margin-bottom: 15px;
         }
 
         .shop-item {
             background: linear-gradient(135deg, #FFF9E6 0%, #FFE8CC 100%);
-            padding: 20px;
+            padding: 12px;
             border-radius: 12px;
             border: 2px solid #F7B32B;
             cursor: pointer;
@@ -177,7 +178,7 @@
             display: flex;
             justify-content: space-between;
             align-items: center;
-            margin-bottom: 10px;
+            margin-bottom: 6px;
         }
 
         .shop-item-name {
@@ -195,7 +196,7 @@
         .shop-item-description {
             font-size: 0.9em;
             color: #666;
-            margin-bottom: 10px;
+            margin-bottom: 6px;
         }
 
         .shop-item-owned {
@@ -207,7 +208,7 @@
         .upgrades-container {
             display: flex;
             flex-direction: column;
-            gap: 12px;
+            gap: 8px;
             overflow-y: auto;
             max-height: 600px;
             padding-right: 10px;
@@ -229,7 +230,7 @@
 
         .upgrade-item {
             background: linear-gradient(135deg, #FFF8DC 0%, #E8F5E9 100%);
-            padding: 15px;
+            padding: 12px;
             border-radius: 12px;
             cursor: pointer;
             border: 2px solid transparent;
@@ -239,7 +240,7 @@
             display: flex;
             justify-content: space-between;
             align-items: center;
-            margin-bottom: 10px;
+            margin-bottom: 6px;
         }
 
         .upgrade-item.disabled {
@@ -277,7 +278,7 @@
             border-radius: 11px;
             overflow: hidden;
             position: relative;
-            margin-top: 8px;
+            margin-top: 5px;
         }
 
         .progress-bar {
@@ -308,8 +309,8 @@
         }
 
         .fishing-areas {
-            margin-top: 10px;
-            padding: 12px;
+            margin-top: 8px;
+            padding: 10px;
             background: rgba(255, 255, 255, 0.5);
             border-radius: 8px;
             border: 2px dashed #6BAA5E;
@@ -319,18 +320,18 @@
             font-size: 0.95em;
             font-weight: bold;
             color: #6BAA5E;
-            margin-bottom: 8px;
+            margin-bottom: 6px;
         }
 
         .fishing-area {
             background: white;
-            padding: 10px;
-            margin-bottom: 8px;
+            padding: 8px;
+            margin-bottom: 6px;
             border-radius: 6px;
             border: 2px solid #E8F5E9;
             display: flex;
             flex-direction: column;
-            gap: 8px;
+            gap: 6px;
         }
 
         .fishing-area-top {
@@ -447,16 +448,16 @@
 
         .reset-container {
             text-align: right;
-            margin-bottom: 15px;
+            margin-bottom: 10px;
         }
 
         .reset-button {
             background: linear-gradient(135deg, #E57373 0%, #EF5350 100%);
             color: white;
             border: none;
-            padding: 10px 24px;
+            padding: 8px 16px;
             border-radius: 8px;
-            font-size: 0.9em;
+            font-size: 0.85em;
             font-weight: bold;
             cursor: pointer;
             box-shadow: 0 4px 12px rgba(229, 115, 115, 0.3);
@@ -478,13 +479,13 @@
             max-width: 240px;
             background: linear-gradient(135deg, #E8F5E9 0%, #C8E6C9 100%);
             border-radius: 12px;
-            padding: 10px;
+            padding: 8px;
             box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
         }
 
         .calendar-header {
             text-align: center;
-            margin-bottom: 6px;
+            margin-bottom: 4px;
         }
 
         .calendar-date {
@@ -500,34 +501,34 @@
         }
 
         .seasonal-fish {
-            margin-top: 6px;
+            margin-top: 4px;
         }
 
         .seasonal-fish-title {
             font-size: 0.85em;
             font-weight: bold;
             color: #2E7D32;
-            margin-bottom: 5px;
+            margin-bottom: 4px;
             text-align: center;
             border-bottom: 2px solid #81C784;
-            padding-bottom: 3px;
+            padding-bottom: 2px;
         }
 
         .fish-location-group {
-            margin-bottom: 6px;
+            margin-bottom: 4px;
         }
 
         .fish-location-name {
             font-size: 0.75em;
             font-weight: bold;
             color: #388E3C;
-            margin-bottom: 3px;
+            margin-bottom: 2px;
         }
 
         .fish-list {
             display: flex;
             flex-wrap: wrap;
-            gap: 3px;
+            gap: 2px;
         }
 
         .fish-tag {
@@ -636,43 +637,69 @@
             color: #757575;
             font-style: italic;
             text-align: center;
-            padding: 8px;
+            padding: 4px;
         }
 
         .villagers-section {
-            position: fixed;
-            right: 20px;
-            top: 50%;
-            transform: translateY(-50%);
             background: linear-gradient(135deg, #FFF9E6 0%, #FFE8B3 100%);
             border-radius: 12px;
-            padding: 15px;
+            padding: 10px;
             box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
             display: none;
+            flex: 0 0 auto;
+            width: 580px;
         }
 
         .villagers-section.visible {
             display: block;
         }
 
+        .villagers-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 8px;
+        }
+
         .villagers-title {
             font-size: 1em;
             font-weight: bold;
             color: #F7B32B;
-            text-align: center;
-            margin-bottom: 10px;
+        }
+
+        .buy-house-button {
+            background: linear-gradient(135deg, #6BAA5E 0%, #5A9A4D 100%);
+            color: white;
+            border: none;
+            padding: 6px 12px;
+            border-radius: 6px;
+            font-size: 0.85em;
+            font-weight: bold;
+            cursor: pointer;
+            box-shadow: 0 2px 6px rgba(0, 0, 0, 0.2);
+            transition: transform 0.2s;
+        }
+
+        .buy-house-button:hover {
+            transform: scale(1.05);
+        }
+
+        .buy-house-button:disabled {
+            background: #ccc;
+            cursor: not-allowed;
+            opacity: 0.6;
         }
 
         .villagers-grid {
             display: grid;
-            grid-template-columns: repeat(2, 1fr);
-            grid-template-rows: repeat(5, 1fr);
+            grid-template-columns: repeat(5, 1fr);
+            grid-template-rows: repeat(2, 1fr);
             gap: 8px;
         }
 
         .villager-slot {
-            width: 60px;
-            height: 60px;
+            width: 100px;
+            height: 100px;
             background: white;
             border: 2px solid #F7B32B;
             border-radius: 8px;
@@ -680,18 +707,53 @@
             align-items: center;
             justify-content: center;
             position: relative;
-            overflow: hidden;
+            cursor: pointer;
+            transition: transform 0.2s;
+        }
+        
+        .villager-slot:not(.empty):hover {
+            transform: scale(1.05);
         }
 
         .villager-slot.empty {
             background: rgba(255, 255, 255, 0.3);
             border-style: dashed;
         }
+        
+        .villager-slot.buy-house {
+            background: linear-gradient(135deg, #E8F5E9 0%, #C8E6C9 100%);
+            border: 2px solid #6BAA5E;
+            cursor: pointer;
+            transition: transform 0.2s;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            gap: 4px;
+        }
+        
+        .villager-slot.buy-house:hover {
+            transform: scale(1.05);
+        }
+        
+        .buy-house-icon {
+            font-size: 2.5em;
+            color: #6BAA5E;
+        }
+        
+        .buy-house-price {
+            font-size: 0.75em;
+            font-weight: bold;
+            color: #6BAA5E;
+            text-align: center;
+        }
 
         .villager-portrait {
-            width: 100%;
-            height: 100%;
-            object-fit: cover;
+            max-width: 100%;
+            max-height: 100%;
+            width: auto;
+            height: auto;
+            object-fit: contain;
         }
 
         .villager-placeholder {
@@ -699,45 +761,250 @@
             color: #F7B32B;
         }
 
-        .villager-name-tooltip {
+        .villager-tooltip {
             position: absolute;
-            bottom: -25px;
+            bottom: -80px;
             left: 50%;
             transform: translateX(-50%);
-            background: rgba(0, 0, 0, 0.8);
-            color: white;
-            padding: 4px 8px;
-            border-radius: 4px;
-            font-size: 0.7em;
+            background: linear-gradient(135deg, #FFF9E6 0%, #FFE8B3 100%);
+            color: #333;
+            padding: 10px 14px;
+            border-radius: 8px;
+            font-size: 0.85em;
             white-space: nowrap;
             opacity: 0;
             pointer-events: none;
             transition: opacity 0.2s;
             z-index: 100;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+            border: 2px solid #F7B32B;
+            min-width: 140px;
         }
 
-        .villager-slot:hover .villager-name-tooltip {
+        .villager-slot:hover .villager-tooltip {
             opacity: 1;
+        }
+
+        .villager-tooltip-name {
+            font-weight: bold;
+            color: #F7B32B;
+            margin-bottom: 6px;
+            font-size: 1.1em;
+            text-align: center;
+        }
+
+        .villager-tooltip-info {
+            font-size: 0.9em;
+            color: #666;
+            line-height: 1.6;
+        }
+
+        .villager-tooltip-row {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 3px;
+        }
+
+        .villager-tooltip-label {
+            font-weight: bold;
+            color: #6BAA5E;
+            margin-right: 8px;
+        }
+
+
+        .museum-section {
+            background: linear-gradient(135deg, #E8EAF6 0%, #C5CAE9 100%);
+            border-radius: 12px;
+            padding: 10px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+        }
+
+        .museum-header {
+            text-align: center;
+            margin-bottom: 6px;
+        }
+
+        .museum-title {
+            font-size: 1em;
+            font-weight: bold;
+            color: #3F51B5;
+            margin-bottom: 2px;
+        }
+
+        .museum-stats {
+            font-size: 0.75em;
+            color: #5C6BC0;
+            margin-bottom: 6px;
+        }
+
+        .museum-progress {
+            width: 100%;
+            height: 16px;
+            background: rgba(63, 81, 181, 0.2);
+            border-radius: 8px;
+            overflow: hidden;
+            position: relative;
+            margin-bottom: 8px;
+        }
+
+        .museum-progress-bar {
+            height: 100%;
+            background: linear-gradient(90deg, #3F51B5 0%, #5C6BC0 100%);
+            border-radius: 8px;
+            transition: width 0.3s ease;
+        }
+
+        .museum-progress-text {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            font-size: 0.7em;
+            font-weight: bold;
+            color: white;
+            text-shadow: 0 0 3px rgba(0,0,0,0.5);
+        }
+
+        .museum-fish-list {
+            max-height: 200px;
+            overflow-y: auto;
+            padding-right: 4px;
+        }
+
+        .museum-fish-list::-webkit-scrollbar {
+            width: 4px;
+        }
+
+        .museum-fish-list::-webkit-scrollbar-track {
+            background: #f1f1f1;
+            border-radius: 10px;
+        }
+
+        .museum-fish-list::-webkit-scrollbar-thumb {
+            background: #3F51B5;
+            border-radius: 10px;
+        }
+
+        .museum-fish-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 4px 6px;
+            margin-bottom: 3px;
+            background: white;
+            border-radius: 6px;
+            font-size: 0.7em;
+            border: 1px solid #C5CAE9;
+        }
+
+        .museum-fish-item.donated {
+            background: linear-gradient(135deg, #E8F5E9 0%, #C8E6C9 100%);
+            border-color: #81C784;
+        }
+
+        .museum-fish-item.not-caught {
+            opacity: 0.4;
+        }
+
+        .museum-fish-name {
+            flex: 1;
+            color: #333;
+        }
+
+        .museum-fish-status {
+            font-size: 0.9em;
+            margin-left: 4px;
+        }
+
+        .donate-button {
+            background: #3F51B5;
+            color: white;
+            border: none;
+            padding: 2px 6px;
+            border-radius: 4px;
+            font-size: 0.85em;
+            cursor: pointer;
+            transition: background 0.2s;
+        }
+
+        .donate-button:hover {
+            background: #303F9F;
+        }
+
+        .donate-button:disabled {
+            background: #ccc;
+            cursor: not-allowed;
+        }
+
+        .museum-reward {
+            background: linear-gradient(135deg, #FFF9E6 0%, #FFE8B3 100%);
+            border: 2px solid #F7B32B;
+            border-radius: 6px;
+            padding: 6px;
+            margin-top: 6px;
+            text-align: center;
+            font-size: 0.75em;
+            color: #F7B32B;
+            font-weight: bold;
+        }
+
+        .loading-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(255, 249, 230, 0.95);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            z-index: 9999;
+            gap: 20px;
+        }
+        
+        .loading-overlay.hidden {
+            display: none;
+        }
+        
+        .loading-spinner {
+            font-size: 4em;
+            animation: spin 2s linear infinite;
+        }
+        
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+        
+        .loading-text {
+            font-size: 1.5em;
+            color: #F7B32B;
+            font-weight: bold;
+        }
+        
+        .loading-status {
+            font-size: 1em;
+            color: #666;
         }
 
         @media (max-width: 768px) {
             .game-container {
-                padding: 20px;
+                padding: 15px;
             }
 
             h1 {
-                font-size: 2em;
-            }
-            
-            .villagers-section {
-                position: static;
-                transform: none;
-                margin-top: 20px;
+                font-size: 1.6em;
             }
         }
     </style>
 </head>
 <body>
+    <div class="loading-overlay" id="loadingOverlay">
+        <div class="loading-spinner">🏝️</div>
+        <div class="loading-text">Loading Lazy Island...</div>
+        <div class="loading-status" id="loadingStatus">Initializing...</div>
+    </div>
     <div class="game-container">
         <div class="top-section">
             <div class="right-sidebar">
@@ -751,6 +1018,24 @@
                         <div id="seasonalFishList">
                             <div class="no-fish">Loading...</div>
                         </div>
+                    </div>
+                </div>
+
+                <!-- Museum Section -->
+                <div class="museum-section">
+                    <div class="museum-header">
+                        <div class="museum-title">🏛️ Museum</div>
+                        <div class="museum-stats" id="museumStats">0 / 0 donated</div>
+                    </div>
+                    <div class="museum-progress">
+                        <div class="museum-progress-text" id="museumProgressText">0%</div>
+                        <div class="museum-progress-bar" id="museumProgressBar" style="width: 0%"></div>
+                    </div>
+                    <div class="museum-fish-list" id="museumFishList">
+                        <!-- Fish donation list will be added here -->
+                    </div>
+                    <div class="museum-reward" id="museumReward" style="display: none;">
+                        🎉 Museum Bonus: +<span id="museumBonusAmount">0</span> Bells/sec
                     </div>
                 </div>
             </div>
@@ -770,12 +1055,20 @@
                     <button class="reset-button" onclick="resetGame()">🔄 Start Over</button>
                 </div>
                 <div class="header">
-                    <h1>Island Idler</h1>
+                    <h1>Lazy Island</h1>
                     <div class="stats">
                         <div class="bell-count" id="bellCount">0 Bells</div>
                         <div class="per-second">Generating: <span id="perSecond">0</span> Bells/sec</div>
                         <div class="total-production" id="totalProduction">Total Earned: 0 Bells</div>
                     </div>
+                </div>
+            </div>
+            
+            <!-- Villagers Grid -->
+            <div class="villagers-section" id="villagersSection">
+                <div class="villagers-title">🏘️ Villagers</div>
+                <div class="villagers-grid" id="villagersGrid">
+                    <!-- Villager slots will be dynamically added here -->
                 </div>
             </div>
         </div>
@@ -795,51 +1088,98 @@
         </div>
     </div>
 
-    <!-- Villagers Grid -->
-    <div class="villagers-section" id="villagersSection">
-        <div class="villagers-title">🏘️ Villagers</div>
-        <div class="villagers-grid" id="villagersGrid">
-            <!-- Villager slots will be dynamically added here -->
-        </div>
-    </div>
-
     <script>
         // Nookipedia API Configuration
         const NOOKIPEDIA_API_KEY = '8a10f688-39d6-40b8-8426-744f30542e94'; // Replace with your API key from https://api.nookipedia.com/
         const NOOKIPEDIA_API_URL = 'https://api.nookipedia.com/nh/fish';
         
         // Game state
-        let bells = 300;
+        let bells = 500;
         let bellsPerSecond = 0;
         let totalBellsEarned = 0;
         let fishCache = [];
         let fishByLocation = {};
         let caughtFish = new Set(); // Track discovered/caught fish by name
+        let donatedFish = new Set(); // Track fish donated to museum
         let villagersCache = []; // All available villagers from API
         let purchasedVillagers = []; // Villagers the player has bought
         let villagerCooldownEnd = 0; // Timestamp when villager can be purchased again
+        let villagerHouses = 3; // Number of villager houses owned (starts at 3, max 10)
         let inventory = {
             fishingRod: 0
         };
         
+        // Fishing rod tier (1-6, affects fishing speed)
+        let fishingRodTier = 1;
+        
         // Progress tracking for each upgrade
         const upgradeProgress = {};
         
-        // Shop items - price will be updated from API
-        let shopItems = [
-            {
-                id: 'fishingRod',
-                name: '🎣 Flimsy Fishing Rod',
-                description: 'A basic fishing rod. Assign to fishing areas to start earning!',
-                price: 400, // Default price, will be updated from Nookipedia API
-                inventoryKey: 'fishingRod',
-                maxPurchases: 1
-            }
+        // Fishing rod upgrade tiers
+        const fishingRodTiers = [
+            { tier: 1, name: '🎣 Flimsy Fishing Rod', speedMultiplier: 1.0, price: 400 },
+            { tier: 2, name: '🎣 Fishing Rod', speedMultiplier: 0.85, price: 4000 },
+            { tier: 3, name: '🌈 Colorful Fishing Rod', speedMultiplier: 0.70, price: 40000 },
+            { tier: 4, name: '🐟 Fish Fishing Rod', speedMultiplier: 0.55, price: 400000 },
+            { tier: 5, name: '🏞️ Outdoorsy Fishing Rod', speedMultiplier: 0.40, price: 4000000 },
+            { tier: 6, name: '⭐ Golden Fishing Rod', speedMultiplier: 0.25, price: 40000000 }
         ];
+        
+        // Shop items - dynamically built based on fishing rod tier
+        let shopItems = [];
+        
+        // Build shop items based on current fishing rod tier
+        function buildShopItems() {
+            shopItems = [];
+            
+            // Add initial fishing rod if not owned
+            if (inventory.fishingRod === 0) {
+                shopItems.push({
+                    id: 'fishingRod',
+                    name: '🎣 Flimsy Fishing Rod',
+                    description: 'A basic fishing rod. Assign to fishing areas to start earning!',
+                    price: 400,
+                    inventoryKey: 'fishingRod',
+                    maxPurchases: 1
+                });
+            }
+            
+            // Add next fishing rod upgrade if available
+            if (fishingRodTier < 6) {
+                const nextTier = fishingRodTiers.find(t => t.tier === fishingRodTier + 1);
+                if (nextTier) {
+                    const speedBonus = Math.round((1 - nextTier.speedMultiplier) * 100);
+                    shopItems.push({
+                        id: `fishingRodUpgrade${nextTier.tier}`,
+                        name: nextTier.name,
+                        description: `Upgrade your fishing rod! ${speedBonus}% faster fishing`,
+                        price: nextTier.price,
+                        isRodUpgrade: true,
+                        tier: nextTier.tier
+                    });
+                }
+            }
+        }
         
         // Fishing area progress tracking
         const fishingAreaProgress = {};
         const fishingAreaNextCatch = {}; // Stores the next catch time for each area
+        
+        // Get current fishing speed multiplier
+        function getFishingSpeedMultiplier() {
+            const tierData = fishingRodTiers.find(t => t.tier === fishingRodTier);
+            return tierData ? tierData.speedMultiplier : 1.0;
+        }
+        
+        // Get base fishing interval (30-45 seconds)
+        function getBaseFishingInterval() {
+            return 30 + Math.random() * 15;
+        }
+        
+        // Get actual fishing interval with speed multiplier
+        function getFishingInterval() {
+            return getBaseFishingInterval() * getFishingSpeedMultiplier();
+        }
         
         // Fishing area allocations
         const fishingAreas = [
@@ -949,8 +1289,8 @@
         // Initialize fishing area progress
         fishingAreas.forEach(area => {
             fishingAreaProgress[area.id] = 0;
-            // Random interval between 30-45 seconds
-            fishingAreaNextCatch[area.id] = 30 + Math.random() * 15;
+            // Random interval between 30-45 seconds, affected by rod tier
+            fishingAreaNextCatch[area.id] = getFishingInterval();
         });
         
         // Update calendar display
@@ -1136,6 +1476,83 @@
             seasonalFishListEl.innerHTML = html;
         }
         
+        // Update museum display
+        function updateMuseumDisplay() {
+            const museumStats = document.getElementById('museumStats');
+            const museumProgressBar = document.getElementById('museumProgressBar');
+            const museumProgressText = document.getElementById('museumProgressText');
+            const museumFishList = document.getElementById('museumFishList');
+            const museumReward = document.getElementById('museumReward');
+            const museumBonusAmount = document.getElementById('museumBonusAmount');
+            
+            if (!museumStats || !museumFishList) return;
+            
+            const totalFish = fishCache.length;
+            const donatedCount = donatedFish.size;
+            const percentage = totalFish > 0 ? Math.floor((donatedCount / totalFish) * 100) : 0;
+            
+            // Update stats
+            museumStats.textContent = `${donatedCount} / ${totalFish} donated`;
+            museumProgressBar.style.width = percentage + '%';
+            museumProgressText.textContent = percentage + '%';
+            
+            // Show reward if any fish donated
+            if (donatedCount > 0) {
+                museumReward.style.display = 'block';
+                museumBonusAmount.textContent = donatedCount;
+            } else {
+                museumReward.style.display = 'none';
+            }
+            
+            // Build fish list
+            museumFishList.innerHTML = '';
+            
+            if (fishCache.length === 0) {
+                museumFishList.innerHTML = '<div style="text-align: center; padding: 8px; color: #999; font-size: 0.7em;">Loading fish data...</div>';
+                return;
+            }
+            
+            // Sort fish by name
+            const sortedFish = [...fishCache].sort((a, b) => a.name.localeCompare(b.name));
+            
+            sortedFish.forEach(fish => {
+                const isDonated = donatedFish.has(fish.name);
+                const isCaught = caughtFish.has(fish.name);
+                
+                const fishItem = document.createElement('div');
+                fishItem.className = 'museum-fish-item';
+                
+                if (isDonated) {
+                    fishItem.classList.add('donated');
+                } else if (!isCaught) {
+                    fishItem.classList.add('not-caught');
+                }
+                
+                let statusHtml = '';
+                if (isDonated) {
+                    statusHtml = '<span class="museum-fish-status">✅</span>';
+                } else if (isCaught) {
+                    statusHtml = `<button class="donate-button" onclick="donateFish('${fish.name.replace(/'/g, "\\'")}')">Donate</button>`;
+                } else {
+                    statusHtml = '<span class="museum-fish-status" style="color: #999;">❓</span>';
+                }
+                
+                fishItem.innerHTML = `
+                    <span class="museum-fish-name">${fish.name}</span>
+                    ${statusHtml}
+                `;
+                
+                museumFishList.appendChild(fishItem);
+            });
+        }
+        
+        // Donate a fish to the museum (manual donation - not used with auto-donate)
+        function donateFish(fishName) {
+            // This function is kept for backwards compatibility but won't be called
+            // since fish are auto-donated on first catch
+            return;
+        }
+        
         // Fetch item prices from Nookipedia API
         async function fetchItemPrices() {
             try {
@@ -1220,18 +1637,47 @@
             updateSeasonalFish();
         }
         
+        // Update loading status
+        function updateLoadingStatus(message) {
+            const statusEl = document.getElementById('loadingStatus');
+            if (statusEl) {
+                statusEl.textContent = message;
+            }
+        }
+        
+        // Hide loading overlay
+        function hideLoadingOverlay() {
+            const overlay = document.getElementById('loadingOverlay');
+            if (overlay) {
+                overlay.classList.add('hidden');
+            }
+        }
+        
         // Fetch API data in background
         async function fetchAPIDataInBackground() {
-            // Fetch all in parallel
-            const itemPricesPromise = fetchItemPrices();
-            const fishDataPromise = fetchFishData();
+            updateLoadingStatus('Loading villagers...');
             const villagersDataPromise = fetchVillagersFromAPI();
             
+            updateLoadingStatus('Loading fish data...');
+            const fishDataPromise = fetchFishData();
+            
+            updateLoadingStatus('Loading item prices...');
+            const itemPricesPromise = fetchItemPrices();
+            
+            // Wait for all to complete
             await Promise.all([itemPricesPromise, fishDataPromise, villagersDataPromise]);
             
+            updateLoadingStatus('Finalizing...');
+            
             // Update UI after API data loads
+            buildShopItems();
             createShopItems();
             updateSeasonalFish();
+            
+            // Hide loading overlay
+            setTimeout(() => {
+                hideLoadingOverlay();
+            }, 500);
         }
         
         // Fetch fish data from Nookipedia API
@@ -1303,9 +1749,8 @@
         }
         
         // Fetch villagers from Nookipedia API
-        // Note: Villagers endpoint blocked by CORS - using curated fallback data
         async function fetchVillagersFromAPI() {
-            // Load fallback villagers (curated list of popular villagers)
+            // Load fallback villagers first (curated list of popular villagers)
             if (villagersCache.length === 0) {
                 villagersCache = [
                     { name: 'Bob', species: 'Cat', personality: 'Lazy', image_url: null },
@@ -1330,7 +1775,88 @@
                     { name: 'Tangy', species: 'Cat', personality: 'Peppy', image_url: null }
                 ];
             }
-            // API endpoint doesn't support CORS from browsers, so we use fallback data only
+            
+            // Try to fetch from API
+            if (NOOKIPEDIA_API_KEY === 'YOUR_API_KEY_HERE') {
+                console.warn('Nookipedia API key not set. Using fallback villager data.');
+                return;
+            }
+            
+            try {
+                const controller = new AbortController();
+                const timeoutId = setTimeout(() => {
+                    console.log('Villagers API request timed out after 8 seconds');
+                    controller.abort();
+                }, 8000);
+                
+                const response = await fetch('https://api.nookipedia.com/villagers', {
+                    method: 'GET',
+                    headers: {
+                        'X-API-KEY': NOOKIPEDIA_API_KEY,
+                        'Accept-Version': '1.0.0'
+                    },
+                    signal: controller.signal,
+                    mode: 'cors'
+                });
+                
+                clearTimeout(timeoutId);
+                
+                if (response.ok) {
+                    const rawVillagers = await response.json();
+                    
+                    // Normalize villager data from API
+                    const apiVillagers = rawVillagers.map(villager => ({
+                        name: villager.name,
+                        species: villager.species,
+                        personality: villager.personality,
+                        image_url: villager.image_url || villager.photo_url || villager.icon_url || null
+                    }));
+                    
+                    // Only update if we got valid data
+                    if (apiVillagers.length > 0) {
+                        villagersCache = apiVillagers;
+                        console.log(`🏘️ Loaded ${villagersCache.length} villagers from API`);
+                        
+                        // Update villager grid if we have purchased villagers
+                        if (purchasedVillagers.length > 0) {
+                            updateVillagersGrid();
+                        }
+                    }
+                } else {
+                    console.warn('Failed to fetch villagers:', response.status);
+                }
+            } catch (error) {
+                if (error.name === 'AbortError') {
+                    console.warn('Villagers API request timed out - keeping fallback data');
+                } else {
+                    console.warn('Error fetching villagers:', error.name, error.message);
+                }
+            }
+        }
+        
+        // Get house purchase price
+        function getHousePrice() {
+            // Price increases exponentially: 5000, 10000, 20000, 40000, 80000, 160000, 320000
+            return 50000 * Math.pow(2, villagerHouses - 3);
+        }
+        
+        // Buy a new house
+        function buyHouse() {
+            if (villagerHouses >= 10) {
+                alert('You already have the maximum number of houses!');
+                return;
+            }
+            
+            const price = getHousePrice();
+            if (bells >= price) {
+                bells -= price;
+                villagerHouses++;
+                updateDisplay();
+                updateVillagersGrid();
+                alert(`🏠 Purchased a new house!\n\nVillager slots: ${villagerHouses}/10`);
+            } else {
+                alert(`Not enough bells!\n\nNeed: ${formatNumber(price)} 🔔\nHave: ${formatNumber(bells)} 🔔`);
+            }
         }
         
         // Initialize villagers grid
@@ -1339,11 +1865,28 @@
             if (!grid) return;
             
             grid.innerHTML = '';
-            for (let i = 0; i < 10; i++) {
+            
+            // Create slots for owned houses
+            for (let i = 0; i < villagerHouses; i++) {
                 const slot = document.createElement('div');
                 slot.className = 'villager-slot empty';
                 slot.id = `villager-slot-${i}`;
                 grid.appendChild(slot);
+            }
+            
+            // Add one "buy house" slot if not at max
+            if (villagerHouses < 10) {
+                const buySlot = document.createElement('div');
+                buySlot.className = 'villager-slot buy-house';
+                buySlot.id = 'buy-house-slot';
+                buySlot.onclick = buyHouse;
+                const price = getHousePrice();
+                buySlot.innerHTML = `
+                    <div class="buy-house-icon">🔔</div>
+                    <div class="buy-house-price">${formatNumber(price)}</div>
+                `;
+                buySlot.title = `Buy House (${formatNumber(price)} 🔔)`;
+                grid.appendChild(buySlot);
             }
         }
         
@@ -1354,16 +1897,27 @@
             
             if (!section || !grid) return;
             
-            // Show section if we have villagers
-            if (purchasedVillagers.length > 0) {
+            // Show section if we have villagers or houses
+            if (purchasedVillagers.length > 0 || villagerHouses > 0) {
                 section.classList.add('visible');
             } else {
                 section.classList.remove('visible');
                 return;
             }
             
-            // Update each slot
-            for (let i = 0; i < 10; i++) {
+            // Update buy house slot if it exists
+            const buySlot = document.getElementById('buy-house-slot');
+            if (buySlot) {
+                const price = getHousePrice();
+                buySlot.innerHTML = `
+                    <div class="buy-house-icon">🔔</div>
+                    <div class="buy-house-price">${formatNumber(price)}</div>
+                `;
+                buySlot.title = `Buy House (${formatNumber(price)} 🔔)`;
+            }
+            
+            // Update each villager slot
+            for (let i = 0; i < villagerHouses; i++) {
                 const slot = document.getElementById(`villager-slot-${i}`);
                 if (!slot) continue;
                 
@@ -1371,13 +1925,37 @@
                     const villager = purchasedVillagers[i];
                     slot.className = 'villager-slot';
                     const imageHtml = villager.image_url ? `<img src="${villager.image_url}" alt="${villager.name}" class="villager-portrait" onerror="this.style.display='none'">` : '<div class="villager-placeholder">👤</div>';
+                    
+                    const tooltipHtml = `
+                        <div class="villager-tooltip">
+                            <div class="villager-tooltip-name">${villager.name}</div>
+                            <div class="villager-tooltip-info">
+                                <div class="villager-tooltip-row">
+                                    <span class="villager-tooltip-label">Species:</span>
+                                    <span>${villager.species || 'Unknown'}</span>
+                                </div>
+                                <div class="villager-tooltip-row">
+                                    <span class="villager-tooltip-label">Type:</span>
+                                    <span>${villager.personality || 'Unknown'}</span>
+                                </div>
+                            </div>
+                        </div>
+                    `;
+                    
                     slot.innerHTML = `
                         ${imageHtml}
-                        <div class="villager-name-tooltip">${villager.name}</div>
+                        ${tooltipHtml}
                     `;
+                    
+                    // Add click handler to open Nookipedia page
+                    slot.onclick = () => {
+                        const villagerName = villager.name.replace(/\s+/g, '_');
+                        window.open(`https://nookipedia.com/wiki/${villagerName}`, '_blank');
+                    };
                 } else {
                     slot.className = 'villager-slot empty';
                     slot.innerHTML = '';
+                    slot.onclick = null;
                 }
             }
         }
@@ -1407,7 +1985,7 @@
         }
         
         // Display fish catch message
-        function showFishMessage(fish) {
+        function showFishMessage(fish, isDonation = false) {
             const fishingUpgrade = document.getElementById('upgrade-fishing');
             if (!fishingUpgrade) return;
             
@@ -1422,10 +2000,18 @@
             
             const message = document.createElement('div');
             message.className = 'fish-message';
-            message.innerHTML = `
-                <div><strong>🎣 Caught a ${fish.name}!</strong></div>
-                <div class="fish-details">Size: ${fishSize} | Sold for: ${sellPrice.toLocaleString()} Bells</div>
-            `;
+            
+            if (isDonation) {
+                message.innerHTML = `
+                    <div><strong>🎉 Caught & Donated ${fish.name}!</strong></div>
+                    <div class="fish-details">Size: ${fishSize} | Donated to Museum (+1 Bell/sec bonus)</div>
+                `;
+            } else {
+                message.innerHTML = `
+                    <div><strong>🎣 Caught a ${fish.name}!</strong></div>
+                    <div class="fish-details">Size: ${fishSize} | Sold for: ${sellPrice.toLocaleString()} Bells</div>
+                `;
+            }
             
             // Insert at the beginning (after the upgrade-header)
             const upgradeHeader = fishingUpgrade.querySelector('.upgrade-header');
@@ -1642,6 +2228,31 @@
         
         // Buy shop item
         function buyShopItem(item) {
+            // Handle fishing rod upgrades
+            if (item.isRodUpgrade) {
+                if (bells >= item.price) {
+                    bells -= item.price;
+                    fishingRodTier = item.tier;
+                    
+                    // Reset all fishing area timers with new speed
+                    fishingAreas.forEach(area => {
+                        if (area.rods > 0) {
+                            fishingAreaNextCatch[area.id] = getFishingInterval();
+                        }
+                    });
+                    
+                    buildShopItems();
+                    createShopItems();
+                    updateDisplay();
+                    updateFishingAreasUI();
+                    
+                    const speedBonus = Math.round((1 - fishingRodTiers.find(t => t.tier === item.tier).speedMultiplier) * 100);
+                    alert(`🎣 Upgraded to ${item.name}!\n\nFishing speed increased by ${speedBonus}%`);
+                }
+                return;
+            }
+            
+            // Handle regular items
             const owned = inventory[item.inventoryKey] || 0;
             
             // Check if max purchases reached
@@ -1653,10 +2264,17 @@
             if (bells >= item.price) {
                 bells -= item.price;
                 inventory[item.inventoryKey]++;
+                buildShopItems();
                 updateDisplay();
                 updateShopItems();
                 updateFishingAreasUI();
             }
+        }
+        
+        // Upgrade fishing rod (deprecated - now handled in shop)
+        function upgradeFishingRod() {
+            // This function is no longer used - upgrades are in the shop
+            return;
         }
         
         // Create upgrade buttons
@@ -1668,11 +2286,13 @@
             fishingDiv.className = 'upgrade-item';
             fishingDiv.id = 'upgrade-fishing';
             
+            const currentRodTier = fishingRodTiers.find(t => t.tier === fishingRodTier);
+            
             fishingDiv.innerHTML = `
                 <div class="upgrade-header">
                     <div class="upgrade-info">
                         <div class="upgrade-name">🎣 Fishing Areas</div>
-                        <div class="upgrade-description">Assign your fishing rods to different areas</div>
+                        <div class="upgrade-description">Current Rod: ${currentRodTier.name} (${Math.round(currentRodTier.speedMultiplier * 100)}% speed)</div>
                     </div>
                 </div>
                 <div class="fishing-areas" id="fishing-areas-container" style="display: none;">
@@ -1867,15 +2487,24 @@
         
         // Buy upgrade
         function buyUpgrade(upgrade) {
-            // Check if max owned limit reached
-            if (upgrade.maxOwned && upgrade.owned >= upgrade.maxOwned) {
-                return;
+            // Special handling for villager upgrade
+            if (upgrade.id === 'villager') {
+                // Check if we have space for more villagers (based on houses)
+                if (purchasedVillagers.length >= villagerHouses) {
+                    alert(`No empty houses!\n\nVillagers: ${purchasedVillagers.length}/${villagerHouses}\n\nBuy more houses to invite more villagers.`);
+                    return;
+                }
+                
+                // Check villager cooldown
+                if (isVillagerOnCooldown()) {
+                    const remaining = formatCooldownTime(getRemainingCooldown());
+                    alert(`⏰ You can invite another villager in ${remaining}`);
+                    return;
+                }
             }
             
-            // Check villager cooldown
-            if (upgrade.id === 'villager' && isVillagerOnCooldown()) {
-                const remaining = formatCooldownTime(getRemainingCooldown());
-                alert(`⏰ You can invite another villager in ${remaining}`);
+            // Check if max owned limit reached
+            if (upgrade.maxOwned && upgrade.owned >= upgrade.maxOwned) {
                 return;
             }
             
@@ -1906,6 +2535,9 @@
                 // cps represents bells per interval, so divide by interval to get per second
                 bellsPerSecond += (upgrade.cps / upgrade.interval) * upgrade.owned;
             });
+            
+            // Add museum bonus (1 bell/sec per donated fish)
+            bellsPerSecond += donatedFish.size;
         }
 
 
@@ -1949,21 +2581,36 @@
                     if (fishingAreaProgress[area.id] >= fishingAreaNextCatch[area.id]) {
                         const fish = getRandomFishFromArea(area);
                         if (fish) {
+                            let isNewFish = false;
+                            let isDonation = false;
+                            
                             // Add fish to caught list if not already there
                             if (!caughtFish.has(fish.name)) {
                                 caughtFish.add(fish.name);
+                                isNewFish = true;
                                 updateSeasonalFish(); // Update calendar when new fish is discovered
+                                
+                                // Auto-donate to museum if not already donated
+                                if (!donatedFish.has(fish.name)) {
+                                    donatedFish.add(fish.name);
+                                    isDonation = true;
+                                    calculateCPS(); // Recalculate for museum bonus
+                                    updateMuseumDisplay(); // Update museum display
+                                }
                             }
                             
-                            // Add fish sell price to bells (per rod in this area)
-                            const fishValue = fish.sell || 0;
-                            bells += fishValue * area.rods;
-                            totalBellsEarned += fishValue * area.rods;
-                            showFishMessage(fish);
+                            // Only earn bells if fish was already donated (not a donation)
+                            if (!isDonation) {
+                                const fishValue = fish.sell || 0;
+                                bells += fishValue * area.rods;
+                                totalBellsEarned += fishValue * area.rods;
+                            }
+                            
+                            showFishMessage(fish, isDonation);
                         }
                         fishingAreaProgress[area.id] = 0;
-                        // Set new random interval between 30-45 seconds
-                        fishingAreaNextCatch[area.id] = 30 + Math.random() * 15;
+                        // Set new random interval between 30-45 seconds, affected by rod tier
+                        fishingAreaNextCatch[area.id] = getFishingInterval();
                     }
                 }
             });
@@ -1981,8 +2628,11 @@
                 fishingAreaNextCatch,
                 inventory,
                 caughtFish: Array.from(caughtFish), // Convert Set to Array for JSON
+                donatedFish: Array.from(donatedFish), // Convert Set to Array for JSON
                 purchasedVillagers,
-                villagerCooldownEnd
+                villagerCooldownEnd,
+                fishingRodTier,
+                villagerHouses
             };
             localStorage.setItem('animalCrossingBellsSave', JSON.stringify(gameState));
         }, 5000);
@@ -2031,6 +2681,15 @@
                 if (gameState.villagerCooldownEnd) {
                     villagerCooldownEnd = gameState.villagerCooldownEnd;
                 }
+                if (gameState.donatedFish) {
+                    donatedFish = new Set(gameState.donatedFish);
+                }
+                if (gameState.fishingRodTier) {
+                    fishingRodTier = gameState.fishingRodTier;
+                }
+                if (gameState.villagerHouses !== undefined) {
+                    villagerHouses = gameState.villagerHouses;
+                }
                 calculateCPS();
             }
         }
@@ -2065,22 +2724,31 @@
                 loadGame();
                 
                 // Setup UI
+                buildShopItems();
                 createShopItems();
                 createUpgradeButtons();
                 updateDisplay();
                 updateFishingAreasUI();
                 initVillagersGrid();
                 updateVillagersGrid();
+                updateMuseumDisplay();
                 
-                // Fetch API data in background (non-blocking)
-                fetchAPIDataInBackground();
+                // Update museum when fish data loads
+                setTimeout(() => updateMuseumDisplay(), 1000);
                 
                 // Update calendar every minute
                 setInterval(updateCalendar, 60000);
                 
                 console.log('✅ Game initialized successfully!');
+                
+                // Fetch API data and hide loading when done
+                fetchAPIDataInBackground();
             } catch (error) {
-                console.error('Error initializing game:', error);
+                console.error('❌ Failed to initialize game:', error);
+                updateLoadingStatus('Error loading game. Please refresh.');
+                setTimeout(() => {
+                    alert('Failed to initialize game. Please refresh the page.');
+                }, 1000);
             }
         }
         

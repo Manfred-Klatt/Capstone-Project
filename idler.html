@@ -356,54 +356,32 @@
             font-weight: bold;
         }
 
-        .bell-clicker-section {
-            background: linear-gradient(135deg, #FFD700 0%, #FFA500 100%);
-            border-radius: 12px;
-            padding: 10px;
-            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
-            grid-column: 8 / span 1;
-            grid-row: 5 / span 1;
-            position: relative;
-            z-index: 2;
-            border: 3px solid #FFB347;
+        .bell-clicker-button {
+            background: transparent;
+            border: none;
+            padding: 0;
             display: flex;
             align-items: center;
             justify-content: center;
             cursor: pointer;
-            transition: transform 0.1s, box-shadow 0.1s;
+            transition: transform 0.1s;
             user-select: none;
+            margin: 10px auto 0;
+            width: 80px;
+            height: 80px;
+            position: relative;
         }
 
-        .bell-clicker-section:hover {
-            transform: scale(1.05);
-            box-shadow: 0 6px 16px rgba(0, 0, 0, 0.2);
+        .bell-clicker-button:hover {
+            transform: scale(1.1);
         }
 
-        .bell-clicker-section:active {
-            transform: scale(0.95);
-        }
-
-        .bell-clicker-section::before {
-            content: '1×1';
-            position: absolute;
-            top: 5px;
-            right: 5px;
-            background: rgba(0, 0, 0, 0.6);
-            color: white;
-            padding: 2px 6px;
-            border-radius: 4px;
-            font-size: 0.7em;
-            font-weight: bold;
-            display: none;
-            z-index: 10;
-        }
-
-        .game-container.show-grid .bell-clicker-section::before {
-            display: block;
+        .bell-clicker-button:active {
+            transform: scale(0.9);
         }
 
         .bell-icon {
-            font-size: 3em;
+            font-size: 2.5em;
             animation: bellBounce 2s ease-in-out infinite;
         }
 
@@ -2476,6 +2454,11 @@
                     <div class="shop-items" id="shopContainer">
                         <!-- Activity point allocation will be added here -->
                     </div>
+                    
+                    <!-- Bell Clicker Button -->
+                    <div class="bell-clicker-button" onclick="clickBellBag(event)">
+                        <div class="bell-icon">💰</div>
+                    </div>
                 </div>
             </div>
             
@@ -2523,11 +2506,6 @@
                         🎉 Museum Bonus: +<span id="museumBonusAmount">0</span> Bells/sec
                     </div>
                 </div>
-            </div>
-            
-            <!-- Bell Clicker Section -->
-            <div class="bell-clicker-section" onclick="clickBellBag(event)">
-                <div class="bell-icon">💰</div>
             </div>
         </div>
         
@@ -2596,7 +2574,7 @@
         });
 
         function enableDragging() {
-            const containers = document.querySelectorAll('.island-activities-section, .shop-section-wrapper, .villagers-section, .calendar-section, .museum-section, .header, .bell-clicker-section');
+            const containers = document.querySelectorAll('.island-activities-section, .shop-section-wrapper, .villagers-section, .calendar-section, .museum-section, .header');
             containers.forEach(container => {
                 container.classList.add('draggable');
                 container.style.cursor = 'move';
@@ -2617,7 +2595,7 @@
         }
 
         function disableDragging() {
-            const containers = document.querySelectorAll('.island-activities-section, .shop-section-wrapper, .villagers-section, .calendar-section, .museum-section, .header, .bell-clicker-section');
+            const containers = document.querySelectorAll('.island-activities-section, .shop-section-wrapper, .villagers-section, .calendar-section, .museum-section, .header');
             containers.forEach(container => {
                 container.classList.remove('draggable');
                 container.style.cursor = '';
@@ -2706,7 +2684,7 @@
 
         function checkCollision(col, row, cols, rows, excludeElement) {
             // Check if the proposed position collides with any existing container
-            const containers = document.querySelectorAll('.island-activities-section, .shop-section-wrapper, .villagers-section, .calendar-section, .museum-section, .header, .bell-clicker-section');
+            const containers = document.querySelectorAll('.island-activities-section, .shop-section-wrapper, .villagers-section, .calendar-section, .museum-section, .header');
             
             for (const container of containers) {
                 if (container === excludeElement) continue;
@@ -2805,7 +2783,7 @@
 
         function saveLayout() {
             const layout = {};
-            const containers = document.querySelectorAll('.island-activities-section, .shop-section-wrapper, .villagers-section, .calendar-section, .museum-section, .header, .bell-clicker-section');
+            const containers = document.querySelectorAll('.island-activities-section, .shop-section-wrapper, .villagers-section, .calendar-section, .museum-section, .header');
             
             containers.forEach((container, index) => {
                 const id = container.id || container.className.split(' ')[0];

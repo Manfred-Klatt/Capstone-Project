@@ -68,6 +68,25 @@ exports.getNookipediaData = catchAsync(async (req, res, next) => {
           const nameFormatted = villager.name.replace(/ /g, '_').replace(/\./g, '');
           const nookipediaIconUrl = `https://dodo.ac/np/images/${nameFormatted}_NH_Villager_Icon.png`;
           
+          // Calculate rarity based on appearances
+          const appearances = villager.appearances || [];
+          const mainGames = ['DNM', 'AC', 'E_PLUS', 'WW', 'CF', 'NL', 'WA', 'NH', 'HHD', 'PC'];
+          const gameCount = appearances.filter(game => 
+            mainGames.some(mainGame => game.toUpperCase().includes(mainGame))
+          ).length;
+          
+          let rarity = 5; // Default
+          if (gameCount >= 10) rarity = 1;
+          else if (gameCount >= 9) rarity = 2;
+          else if (gameCount >= 8) rarity = 3;
+          else if (gameCount >= 7) rarity = 4;
+          else if (gameCount >= 6) rarity = 5;
+          else if (gameCount >= 5) rarity = 6;
+          else if (gameCount >= 4) rarity = 7;
+          else if (gameCount >= 3) rarity = 8;
+          else if (gameCount >= 2) rarity = 9;
+          else if (gameCount >= 1) rarity = 10;
+          
           return {
             name: villager.name,
             species: villager.species || 'Unknown',
@@ -79,7 +98,10 @@ exports.getNookipediaData = catchAsync(async (req, res, next) => {
             hobby: villager.hobby || null,
             // Use Nookipedia images instead of acnhapi.com (SSL issues)
             image_url: villager.image_url || nookipediaIconUrl,
-            icon_url: villager.icon_url || nookipediaIconUrl
+            icon_url: villager.icon_url || nookipediaIconUrl,
+            rarity: rarity,
+            appearances: appearances,
+            appearance_count: appearances.length
           };
         });
       }
@@ -131,7 +153,10 @@ exports.getNookipediaData = catchAsync(async (req, res, next) => {
           'catch-phrase': villager['catch-phrase'] || null,
           saying: villager.saying || null,
           image_url: villager.image_uri || nookipediaIconUrl,
-          icon_url: villager.icon_uri || nookipediaIconUrl
+          icon_url: villager.icon_uri || nookipediaIconUrl,
+          rarity: villager.rarity || 5,
+          appearances: villager.appearances || [],
+          appearance_count: villager.appearance_count || 0
         };
       });
       

@@ -15,32 +15,93 @@
         body {
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
             background: linear-gradient(135deg, #87CEEB 0%, #98D8C8 100%);
-            min-height: 100vh;
+            height: 100vh;
             display: flex;
             justify-content: center;
             align-items: center;
             padding: 10px;
+            overflow: hidden;
         }
 
         .game-container {
-            background: white;
+            background: 
+                repeating-linear-gradient(
+                    45deg,
+                    rgba(139, 195, 74, 0.1) 0px,
+                    rgba(139, 195, 74, 0.1) 10px,
+                    transparent 10px,
+                    transparent 20px
+                ),
+                repeating-linear-gradient(
+                    -45deg,
+                    rgba(104, 159, 56, 0.1) 0px,
+                    rgba(104, 159, 56, 0.1) 10px,
+                    transparent 10px,
+                    transparent 20px
+                ),
+                linear-gradient(135deg, #A5D6A7 0%, #81C784 50%, #66BB6A 100%);
             border-radius: 20px;
             box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
-            max-width: 1400px;
-            width: 100%;
-            padding: 20px;
-            display: flex;
-            flex-direction: column;
+            width: 1248px;
+            height: 948px;
+            padding: 24px;
+            display: grid;
+            grid-template-columns: repeat(12, 100px);
+            grid-template-rows: repeat(9, 100px);
+            gap: 0;
+            overflow: hidden;
+            position: relative;
+        }
+        
+        .game-container.show-grid::after {
+            content: '';
+            position: absolute;
+            top: 24px;
+            left: 24px;
+            width: 1200px;
+            height: 900px;
+            background-image: 
+                repeating-linear-gradient(
+                    to right,
+                    rgba(0, 0, 0, 0.3) 0px,
+                    rgba(0, 0, 0, 0.3) 2px,
+                    transparent 2px,
+                    transparent 100px
+                ),
+                repeating-linear-gradient(
+                    to bottom,
+                    rgba(0, 0, 0, 0.3) 0px,
+                    rgba(0, 0, 0, 0.3) 2px,
+                    transparent 2px,
+                    transparent 100px
+                ),
+                linear-gradient(
+                    to right,
+                    transparent calc(100% - 2px),
+                    rgba(0, 0, 0, 0.3) calc(100% - 2px)
+                ),
+                linear-gradient(
+                    to bottom,
+                    transparent calc(100% - 2px),
+                    rgba(0, 0, 0, 0.3) calc(100% - 2px)
+                );
+            background-size: 100px 100px, 100px 100px, 100% 100%, 100% 100%;
+            background-position: 0 0, 0 0, 0 0, 0 0;
+            pointer-events: none;
+            z-index: 1;
         }
 
         .top-section {
+            grid-column: 1 / -1;
+            grid-row: 1 / 2;
             display: flex;
             justify-content: flex-end;
             gap: 15px;
-            margin-bottom: 15px;
         }
 
         .right-sidebar {
+            grid-column: 10 / -1;
+            grid-row: 2 / -1;
             display: flex;
             flex-direction: column;
             gap: 10px;
@@ -49,15 +110,108 @@
         }
 
         .middle-section {
-            display: flex;
-            gap: 15px;
-            margin-bottom: 15px;
-            align-items: flex-start;
-            flex-wrap: wrap;
+            display: contents;
+        }
+
+        .grid-container {
+            position: relative;
+            overflow: hidden;
+        }
+
+        .grid-container.draggable {
+            cursor: move;
+            transition: none;
+        }
+
+        .dragging {
+            opacity: 0 !important;
+            pointer-events: none;
+        }
+
+        .grid-snap-preview {
+            position: absolute;
+            border: 3px dashed #2196F3;
+            background: rgba(33, 150, 243, 0.2);
+            pointer-events: none;
+            z-index: 999;
+            border-radius: 8px;
         }
 
         .shop-section-wrapper {
-            flex: 0 0 auto;
+            grid-column: 4 / span 3;
+            grid-row: 2 / span 3;
+            position: relative;
+            z-index: 2;
+            border: 3px solid #FFB3BA;
+            background: linear-gradient(135deg, #FFF9E6 0%, #FFE8B3 100%);
+            border-radius: 12px;
+            padding: 10px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+        }
+
+        .shop-section-wrapper::before {
+            content: '3×3';
+            position: absolute;
+            top: 5px;
+            right: 5px;
+            background: rgba(0, 0, 0, 0.6);
+            color: white;
+            padding: 2px 6px;
+            border-radius: 4px;
+            font-size: 0.7em;
+            font-weight: bold;
+            display: none;
+            z-index: 10;
+        }
+
+        .game-container.show-grid .shop-section-wrapper::before {
+            display: block;
+        }
+
+        .shop-header {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            gap: 4px;
+            margin-bottom: 6px;
+        }
+
+        .shop-header h2 {
+            margin: 0;
+            white-space: nowrap;
+            font-size: 0.95em;
+        }
+
+        .shop-upgrade-btn {
+            background: linear-gradient(135deg, #6BAA5E 0%, #5A9A4D 100%);
+            color: white;
+            border: none;
+            padding: 4px 10px;
+            border-radius: 6px;
+            font-size: 0.75em;
+            font-weight: bold;
+            cursor: pointer;
+            box-shadow: 0 2px 8px rgba(107, 170, 94, 0.3);
+            transition: transform 0.2s, box-shadow 0.2s;
+            white-space: nowrap;
+        }
+
+        .shop-upgrade-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(107, 170, 94, 0.4);
+        }
+
+        .shop-upgrade-btn:disabled {
+            background: #ccc;
+            cursor: not-allowed;
+            opacity: 0.6;
+            transform: none;
+        }
+
+        .shop-upgrade-btn:disabled:hover {
+            transform: none;
+            box-shadow: 0 2px 8px rgba(107, 170, 94, 0.3);
         }
 
         .main-header {
@@ -72,9 +226,6 @@
             min-width: 300px;
         }
 
-        .header {
-            text-align: center;
-        }
 
         h1 {
             color: #F7B32B;
@@ -109,15 +260,7 @@
         }
 
         .fish-message {
-            background: linear-gradient(135deg, #E3F2FD 0%, #BBDEFB 100%);
-            border-left: 4px solid #2196F3;
-            padding: 10px 12px;
-            margin-top: 8px;
-            border-radius: 6px;
-            font-size: 0.85em;
-            color: #1565C0;
-            animation: slideIn 0.3s ease-out;
-            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+            display: none;
         }
 
         .fish-message strong {
@@ -149,24 +292,32 @@
         }
 
         .shop-items {
-            display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
-            gap: 10px;
-            margin-bottom: 15px;
+            display: flex;
+            flex-direction: column;
+            gap: 6px;
+            margin-bottom: 8px;
+            max-height: 220px;
+            overflow-y: auto;
+        }
+
+        .shop-items.closed {
+            display: none;
+        }
+
+        .shop-closed-message {
+            text-align: center;
+            padding: 40px 20px;
+            color: #999;
+            font-size: 1.1em;
+            font-style: italic;
         }
 
         .shop-item {
             background: linear-gradient(135deg, #FFF9E6 0%, #FFE8CC 100%);
-            padding: 12px;
-            border-radius: 12px;
-            border: 2px solid #F7B32B;
+            padding: 8px;
+            border-radius: 8px;
             cursor: pointer;
-            transition: transform 0.2s;
-        }
-
-        .shop-item:hover:not(.shop-item-disabled) {
-            transform: translateY(-3px);
-            box-shadow: 0 5px 15px rgba(247, 179, 43, 0.3);
+            border: 2px solid #F7B32B;
         }
 
         .shop-item-disabled {
@@ -178,31 +329,81 @@
             display: flex;
             justify-content: space-between;
             align-items: center;
-            margin-bottom: 6px;
+            margin-bottom: 3px;
         }
 
         .shop-item-name {
-            font-size: 1.2em;
+            font-size: 0.85em;
             font-weight: bold;
             color: #333;
         }
 
         .shop-item-price {
-            font-size: 1.3em;
+            font-size: 0.9em;
             font-weight: bold;
             color: #F7B32B;
         }
 
         .shop-item-description {
-            font-size: 0.9em;
+            font-size: 0.75em;
             color: #666;
-            margin-bottom: 6px;
+            margin-bottom: 3px;
         }
 
         .shop-item-owned {
-            font-size: 0.85em;
+            font-size: 0.7em;
             color: #6BAA5E;
             font-weight: bold;
+        }
+
+        .island-activities-section {
+            background: linear-gradient(135deg, #FFF9E6 0%, #FFEAA7 100%);
+            border-radius: 12px;
+            padding: 15px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+            grid-column: 1 / span 4;
+            grid-row: 2 / span 5;
+            overflow: auto;
+            position: relative;
+            z-index: 2;
+            border: 3px solid #FFDFBA;
+            scrollbar-width: none; /* Firefox */
+            -ms-overflow-style: none; /* IE and Edge */
+        }
+
+        .island-activities-section::-webkit-scrollbar {
+            display: none; /* Chrome, Safari, Opera */
+        }
+
+        .island-activities-section::before {
+            content: '4×5';
+            position: absolute;
+            top: 5px;
+            right: 5px;
+            background: rgba(0, 0, 0, 0.6);
+            color: white;
+            padding: 2px 6px;
+            border-radius: 4px;
+            font-size: 0.7em;
+            font-weight: bold;
+            display: none;
+            z-index: 10;
+        }
+
+        .game-container.show-grid .island-activities-section::before {
+            display: block;
+        }
+
+        .island-activities-header {
+            text-align: center;
+            margin-bottom: 8px;
+        }
+
+        .island-activities-title {
+            font-size: 1.1em;
+            font-weight: bold;
+            color: #F7B32B;
+            margin-bottom: 3px;
         }
 
         .upgrades-container {
@@ -210,8 +411,8 @@
             flex-direction: column;
             gap: 8px;
             overflow-y: auto;
-            max-height: 600px;
-            padding-right: 10px;
+            max-height: 530px;
+            padding-right: 5px;
         }
 
         .upgrades-container::-webkit-scrollbar {
@@ -230,8 +431,8 @@
 
         .upgrade-item {
             background: linear-gradient(135deg, #FFF8DC 0%, #E8F5E9 100%);
-            padding: 12px;
-            border-radius: 12px;
+            padding: 8px;
+            border-radius: 8px;
             cursor: pointer;
             border: 2px solid transparent;
         }
@@ -240,7 +441,7 @@
             display: flex;
             justify-content: space-between;
             align-items: center;
-            margin-bottom: 6px;
+            margin-bottom: 4px;
         }
 
         .upgrade-item.disabled {
@@ -253,29 +454,29 @@
         }
 
         .upgrade-name {
-            font-size: 1.1em;
+            font-size: 0.95em;
             font-weight: bold;
             color: #333;
-            margin-bottom: 3px;
+            margin-bottom: 2px;
         }
 
         .upgrade-description {
-            font-size: 0.85em;
+            font-size: 0.75em;
             color: #666;
-            margin-bottom: 3px;
+            margin-bottom: 2px;
         }
 
         .upgrade-owned {
-            font-size: 0.8em;
+            font-size: 0.7em;
             color: #6BAA5E;
             font-weight: bold;
         }
 
         .progress-bar-container {
             width: 100%;
-            height: 22px;
+            height: 18px;
             background: rgba(107, 170, 94, 0.2);
-            border-radius: 11px;
+            border-radius: 9px;
             overflow: hidden;
             position: relative;
             margin-top: 5px;
@@ -311,16 +512,34 @@
         .fishing-areas {
             margin-top: 8px;
             padding: 10px;
-            background: rgba(255, 255, 255, 0.5);
+            background: linear-gradient(135deg, #E8F5E9 0%, #C8E6C9 100%);
             border-radius: 8px;
-            border: 2px dashed #6BAA5E;
+            border: 2px solid #6BAA5E;
+            border: 3px solid #2196F3;
+        }
+
+        .fishing-areas-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 6px;
         }
 
         .fishing-areas-title {
             font-size: 0.95em;
             font-weight: bold;
-            color: #6BAA5E;
-            margin-bottom: 6px;
+            color: #2E7D32;
+        }
+
+        .fishing-catch-message {
+            font-size: 0.85em;
+            font-weight: bold;
+            color: #2E7D32;
+            text-align: right;
+            min-height: 1.2em;
+            display: flex;
+            align-items: center;
+            justify-content: flex-end;
         }
 
         .fishing-area {
@@ -332,12 +551,25 @@
             display: flex;
             flex-direction: column;
             gap: 6px;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .fishing-area:hover {
+            border-color: #6BAA5E;
+            transform: translateX(2px);
+        }
+
+        .fishing-area.active {
+            border-color: #2196F3;
+            background: #E3F2FD;
         }
 
         .fishing-area-top {
             display: flex;
             justify-content: space-between;
             align-items: center;
+            width: 100%;
         }
 
         .fishing-area:last-child {
@@ -368,19 +600,26 @@
         }
 
         .area-progress-container {
-            flex: 1;
-            height: 20px;
+            width: 100%;
+            height: 8px;
             background: rgba(33, 150, 243, 0.15);
-            border-radius: 10px;
+            border-radius: 4px;
             overflow: hidden;
             position: relative;
+            margin-top: 6px;
+            display: none;
+        }
+
+        .fishing-area.active .area-progress-container {
+            display: block;
         }
 
         .area-progress-bar {
             height: 100%;
             background: linear-gradient(90deg, #2196F3 0%, #64B5F6 100%);
-            border-radius: 10px;
+            border-radius: 4px;
             transition: width 0.1s linear;
+            position: relative;
         }
 
         .area-progress-text {
@@ -394,10 +633,29 @@
             text-shadow: 0 0 3px white;
         }
 
-        .area-controls {
-            display: flex;
-            align-items: center;
-            gap: 10px;
+        .fishing-areas-instruction {
+            font-size: 0.85em;
+            text-align: center;
+            margin-bottom: 8px;
+            font-style: italic;
+            font-weight: bold;
+            background: linear-gradient(90deg, 
+                #ff0000, #ff7f00, #ffff00, #00ff00, 
+                #0000ff, #4b0082, #9400d3, #ff0000);
+            background-size: 200% 100%;
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            animation: rainbow 3s linear infinite;
+        }
+
+        @keyframes rainbow {
+            0% {
+                background-position: 0% 50%;
+            }
+            100% {
+                background-position: 200% 50%;
+            }
         }
 
         .rod-count {
@@ -446,22 +704,22 @@
             margin-left: 15px;
         }
 
-        .reset-container {
-            text-align: right;
-            margin-bottom: 10px;
-        }
-
         .reset-button {
+            position: fixed;
+            top: 20px;
+            right: 110px;
             background: linear-gradient(135deg, #E57373 0%, #EF5350 100%);
             color: white;
             border: none;
-            padding: 8px 16px;
+            padding: 10px 20px;
             border-radius: 8px;
-            font-size: 0.85em;
+            font-size: 1.2em;
             font-weight: bold;
             cursor: pointer;
             box-shadow: 0 4px 12px rgba(229, 115, 115, 0.3);
             transition: transform 0.2s, box-shadow 0.2s;
+            z-index: 1000;
+            border: 3px solid #FFC107;
         }
 
         .reset-button:hover {
@@ -474,68 +732,481 @@
             box-shadow: 0 2px 8px rgba(229, 115, 115, 0.3);
         }
 
+        .dark-mode-toggle {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            background: linear-gradient(135deg, #6BAA5E 0%, #5A9A4D 100%);
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 8px;
+            font-size: 1.2em;
+            cursor: pointer;
+            box-shadow: 0 4px 12px rgba(107, 170, 94, 0.3);
+            transition: transform 0.2s, box-shadow 0.2s;
+            z-index: 1000;
+            border: 3px solid #8BC34A;
+        }
+
+        .dark-mode-toggle:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 16px rgba(107, 170, 94, 0.4);
+        }
+
+        .dark-mode-toggle:active {
+            transform: translateY(0);
+            box-shadow: 0 2px 8px rgba(107, 170, 94, 0.3);
+        }
+
+        .lock-toggle {
+            position: fixed;
+            top: 20px;
+            left: 20px;
+            background: linear-gradient(135deg, #FFA726 0%, #FB8C00 100%);
+            color: white;
+            border: none;
+            border-radius: 50%;
+            width: 50px;
+            height: 50px;
+            font-size: 1.5em;
+            cursor: pointer;
+            box-shadow: 0 4px 12px rgba(255, 167, 38, 0.3);
+            transition: all 0.3s;
+            z-index: 1000;
+            border: 3px solid #FF9800;
+        }
+
+        .lock-toggle:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 16px rgba(255, 167, 38, 0.4);
+        }
+
+        .lock-toggle:active {
+            transform: translateY(0);
+            box-shadow: 0 2px 8px rgba(255, 167, 38, 0.3);
+        }
+
+        .lock-toggle.locked {
+            background: linear-gradient(135deg, #66BB6A 0%, #43A047 100%);
+        }
+
+        body.dark-mode {
+            background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
+        }
+
+        body.dark-mode .game-container {
+            background: #0f3460;
+            color: #e8e8e8;
+        }
+
+        body.dark-mode .main-header {
+            background: linear-gradient(135deg, #2c3e50 0%, #34495e 100%);
+        }
+
+        body.dark-mode .header {
+            background: linear-gradient(135deg, #34495e 0%, #2c3e50 100%);
+            border-color: #5A9A4D;
+        }
+
+        body.dark-mode h1 {
+            color: #F7B32B;
+        }
+
+        body.dark-mode .bell-count {
+            color: #ffffff;
+        }
+
+        body.dark-mode .per-second {
+            color: #d0d0d0;
+        }
+
+        body.dark-mode .shop-item {
+            background: linear-gradient(135deg, #2c3e50 0%, #34495e 100%);
+            border-color: #F7B32B;
+        }
+
+        body.dark-mode .shop-item-name {
+            color: #ffffff;
+        }
+
+        body.dark-mode .shop-item-description {
+            color: #d0d0d0;
+        }
+
+        body.dark-mode .upgrade-item {
+            background: linear-gradient(135deg, #2c3e50 0%, #34495e 100%);
+        }
+
+        body.dark-mode .upgrade-name {
+            color: #ffffff;
+        }
+
+        body.dark-mode .upgrade-description {
+            color: #d0d0d0;
+        }
+
+        body.dark-mode .calendar-section {
+            background: linear-gradient(135deg, #2c3e50 0%, #34495e 100%);
+        }
+
+        body.dark-mode .calendar-date {
+            color: #a5d6a7;
+        }
+
+        body.dark-mode .calendar-day {
+            color: #81C784;
+        }
+
+        body.dark-mode .seasonal-fish-title {
+            color: #a5d6a7;
+        }
+
+        body.dark-mode .fish-location-name {
+            color: #a5d6a7;
+        }
+
+        body.dark-mode .fish-tag {
+            background: #1a1a2e;
+            color: #a5d6a7;
+            border-color: #5A9A4D;
+        }
+
+        body.dark-mode .fish-tag:hover {
+            background: #2c3e50;
+        }
+
+        body.dark-mode .fish-tooltip {
+            background: #2c3e50;
+            border-color: #5A9A4D;
+        }
+
+        body.dark-mode .fish-tooltip-name {
+            color: #a5d6a7;
+            border-color: #5A9A4D;
+        }
+
+        body.dark-mode .fish-tooltip-label {
+            color: #a5d6a7;
+        }
+
+        body.dark-mode .fish-tooltip-value {
+            color: #ffffff;
+        }
+
+        body.dark-mode .game-container {
+            background: 
+                radial-gradient(
+                    circle at 20% 30%,
+                    rgba(46, 125, 50, 0.1) 0%,
+                    transparent 50%
+                ),
+                radial-gradient(
+                    circle at 80% 70%,
+                    rgba(56, 142, 60, 0.08) 0%,
+                    transparent 50%
+                ),
+                linear-gradient(135deg, #1a2f26 0%, #0f1f18 50%, #0a150f 100%);
+        }
+
+        body.dark-mode .shop-section-wrapper {
+            background: linear-gradient(135deg, #2c3e50 0%, #34495e 100%);
+        }
+
+        body.dark-mode .island-activities-section {
+            background: linear-gradient(135deg, #2c3e50 0%, #34495e 100%);
+        }
+
+        body.dark-mode .villagers-section {
+            background: linear-gradient(135deg, #2c3e50 0%, #34495e 100%);
+        }
+
+        body.dark-mode .villager-slot {
+            background: #1a1a2e;
+            border-color: #F7B32B;
+        }
+
+        body.dark-mode .villager-slot.buy-house {
+            background: linear-gradient(135deg, #2c3e50 0%, #34495e 100%);
+            border-color: #5A9A4D;
+        }
+
+        body.dark-mode .villager-tooltip {
+            background: linear-gradient(135deg, #2c3e50 0%, #34495e 100%);
+            border-color: #F7B32B;
+        }
+
+        body.dark-mode .villager-tooltip-name {
+            color: #FFD54F;
+        }
+
+        body.dark-mode .villager-tooltip-info {
+            color: #ffffff;
+        }
+
+        body.dark-mode .villager-tooltip-label {
+            color: #a5d6a7;
+        }
+
+        body.dark-mode .museum-section {
+            background: linear-gradient(135deg, #2c3e50 0%, #34495e 100%);
+        }
+
+        body.dark-mode .museum-title {
+            color: #FFD54F;
+        }
+
+        body.dark-mode .museum-stats {
+            color: #ffffff;
+        }
+
+        body.dark-mode .museum-progress-text {
+            color: #ffffff;
+        }
+
+        body.dark-mode .museum-fish-item {
+            background: #1a1a2e;
+            border-color: #34495e;
+            color: #ffffff;
+        }
+
+        body.dark-mode .museum-fish-name {
+            color: #ffffff;
+        }
+
+        body.dark-mode .museum-reward {
+            background: linear-gradient(135deg, #2c3e50 0%, #34495e 100%);
+            color: #FFD54F;
+            border-color: #FFD54F;
+        }
+
+        body.dark-mode .villager-points-section {
+            background: linear-gradient(135deg, #2c3e50 0%, #34495e 100%);
+        }
+
+        body.dark-mode .villager-points-title {
+            color: #a5d6a7;
+        }
+
+        body.dark-mode .villager-points-info {
+            color: #ffffff;
+        }
+
+        body.dark-mode .activity-point-item {
+            background: #1a1a2e;
+            border-color: #5A9A4D;
+        }
+
+        body.dark-mode .activity-point-name {
+            color: #ffffff;
+        }
+
+        body.dark-mode .fishing-areas {
+            background: linear-gradient(135deg, #2c3e50 0%, #34495e 100%);
+            border-color: #5A9A4D;
+        }
+
+        body.dark-mode .fishing-area {
+            background: #1a1a2e;
+            border-color: #34495e;
+        }
+
+        body.dark-mode .fishing-areas-title {
+            color: #a5d6a7;
+        }
+
+        body.dark-mode .area-name {
+            color: #ffffff;
+        }
+
+        body.dark-mode .area-fish-types {
+            color: #d0d0d0;
+        }
+
+        body.dark-mode .fishing-catch-message {
+            color: #a5d6a7;
+        }
+
+        body.dark-mode .villager-selection-content,
+        body.dark-mode .villager-assignment-content {
+            background: linear-gradient(135deg, #2c3e50 0%, #34495e 100%);
+        }
+
+        body.dark-mode .villager-choice,
+        body.dark-mode .villager-assignment-item {
+            background: #1a1a2e;
+            border-color: #F7B32B;
+        }
+
+        body.dark-mode .villager-choice-name {
+            color: #ffffff;
+        }
+
+        body.dark-mode .villager-choice-info {
+            color: #d0d0d0;
+        }
+
+        .main-layout {
+            display: flex;
+            gap: 15px;
+            margin-bottom: 15px;
+            align-items: flex-start;
+        }
+
+        .left-column {
+            flex: 0 0 auto;
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+            width: 270px;
+        }
+
+        .right-column {
+            flex: 1;
+            min-width: 0;
+        }
+
+        .calendar-museum-column {
+            display: contents;
+        }
+
+        .header {
+            background: linear-gradient(135deg, #E8F5E9 0%, #C8E6C9 100%);
+            border-radius: 12px;
+            padding: 10px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+            position: relative;
+            z-index: 2;
+            grid-column: 1 / span 2;
+            grid-row: 1 / span 1;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            text-align: center;
+            border: 3px solid #FFFFBA;
+        }
+
+        .header::before {
+            content: '2×1';
+            position: absolute;
+            top: 5px;
+            right: 5px;
+            background: rgba(0, 0, 0, 0.6);
+            color: white;
+            padding: 2px 6px;
+            border-radius: 4px;
+            font-size: 0.7em;
+            font-weight: bold;
+            display: none;
+            z-index: 10;
+        }
+
+        .game-container.show-grid .header::before {
+            display: block;
+        }
+
+        .header h1 {
+            margin: 0;
+            font-size: 1.2em;
+            line-height: 1.2;
+        }
+
+        .header .bell-count {
+            margin: 3px 0;
+            font-size: 1em;
+        }
+
+        .header .per-second {
+            margin: 0;
+            font-size: 0.85em;
+        }
+
         .calendar-section {
-            min-width: 240px;
-            max-width: 240px;
             background: linear-gradient(135deg, #E8F5E9 0%, #C8E6C9 100%);
             border-radius: 12px;
             padding: 8px;
             box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+            grid-column: 10 / span 3;
+            grid-row: 2 / span 4;
+            overflow: auto;
+            position: relative;
+            z-index: 2;
+            border: 3px solid #BAFFC9;
+        }
+
+        .calendar-section::before {
+            content: '3×4';
+            position: absolute;
+            top: 5px;
+            right: 5px;
+            background: rgba(0, 0, 0, 0.6);
+            color: white;
+            padding: 2px 6px;
+            border-radius: 4px;
+            font-size: 0.7em;
+            font-weight: bold;
+            display: none;
+            z-index: 10;
+        }
+
+        .game-container.show-grid .calendar-section::before {
+            display: block;
         }
 
         .calendar-header {
             text-align: center;
-            margin-bottom: 4px;
+            margin-bottom: 2px;
         }
 
         .calendar-date {
-            font-size: 1.1em;
+            font-size: 0.95em;
             font-weight: bold;
             color: #2E7D32;
-            margin-bottom: 1px;
+            margin-bottom: 0;
         }
 
         .calendar-day {
-            font-size: 0.75em;
+            font-size: 0.7em;
             color: #558B2F;
         }
 
         .seasonal-fish {
-            margin-top: 4px;
+            margin-top: 2px;
         }
 
         .seasonal-fish-title {
-            font-size: 0.85em;
+            font-size: 0.75em;
             font-weight: bold;
             color: #2E7D32;
-            margin-bottom: 4px;
+            margin-bottom: 2px;
             text-align: center;
-            border-bottom: 2px solid #81C784;
-            padding-bottom: 2px;
+            border-bottom: 1px solid #81C784;
+            padding-bottom: 1px;
         }
 
         .fish-location-group {
-            margin-bottom: 4px;
+            margin-bottom: 2px;
         }
 
         .fish-location-name {
-            font-size: 0.75em;
+            font-size: 0.7em;
             font-weight: bold;
             color: #388E3C;
-            margin-bottom: 2px;
+            margin-bottom: 1px;
         }
 
         .fish-list {
             display: flex;
             flex-wrap: wrap;
-            gap: 2px;
+            gap: 1px;
         }
 
         .fish-tag {
             background: white;
-            padding: 2px 5px;
-            border-radius: 8px;
-            font-size: 0.65em;
+            padding: 1px 4px;
+            border-radius: 6px;
+            font-size: 0.6em;
             color: #2E7D32;
             border: 1px solid #A5D6A7;
             white-space: nowrap;
@@ -633,11 +1304,11 @@
         }
 
         .no-fish {
-            font-size: 0.75em;
+            font-size: 0.7em;
             color: #757575;
             font-style: italic;
             text-align: center;
-            padding: 4px;
+            padding: 2px;
         }
 
         .villagers-section {
@@ -646,12 +1317,34 @@
             padding: 10px;
             box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
             display: none;
-            flex: 0 0 auto;
-            width: 580px;
+            grid-column: 4 / span 6;
+            grid-row: 6 / span 3;
+            position: relative;
+            z-index: 2;
+            border: 3px solid #C9BAFF;
+        }
+
+        .villagers-section::before {
+            content: '6×3';
+            position: absolute;
+            top: 5px;
+            right: 5px;
+            background: rgba(0, 0, 0, 0.6);
+            color: white;
+            padding: 2px 6px;
+            border-radius: 4px;
+            font-size: 0.7em;
+            font-weight: bold;
+            display: none;
+            z-index: 10;
+        }
+
+        .game-container.show-grid .villagers-section::before {
+            display: block;
         }
 
         .villagers-section.visible {
-            display: block;
+            display: grid;
         }
 
         .villagers-header {
@@ -709,10 +1402,12 @@
             position: relative;
             cursor: pointer;
             transition: transform 0.2s;
+            z-index: 1;
         }
         
         .villager-slot:not(.empty):hover {
             transform: scale(1.05);
+            z-index: 10001;
         }
 
         .villager-slot.empty {
@@ -763,7 +1458,7 @@
 
         .villager-tooltip {
             position: absolute;
-            bottom: -80px;
+            top: 110px;
             left: 50%;
             transform: translateX(-50%);
             background: linear-gradient(135deg, #FFF9E6 0%, #FFE8B3 100%);
@@ -775,7 +1470,7 @@
             opacity: 0;
             pointer-events: none;
             transition: opacity 0.2s;
-            z-index: 100;
+            z-index: 10000;
             box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
             border: 2px solid #F7B32B;
             min-width: 140px;
@@ -817,6 +1512,31 @@
             border-radius: 12px;
             padding: 10px;
             box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+            grid-column: 10 / span 3;
+            grid-row: 6 / span 4;
+            overflow: auto;
+            position: relative;
+            z-index: 2;
+            border: 3px solid #BAE1FF;
+        }
+
+        .museum-section::before {
+            content: '3×4';
+            position: absolute;
+            top: 5px;
+            right: 5px;
+            background: rgba(0, 0, 0, 0.6);
+            color: white;
+            padding: 2px 6px;
+            border-radius: 4px;
+            font-size: 0.7em;
+            font-weight: bold;
+            display: none;
+            z-index: 10;
+        }
+
+        .game-container.show-grid .museum-section::before {
+            display: block;
         }
 
         .museum-header {
@@ -859,10 +1579,53 @@
             top: 50%;
             left: 50%;
             transform: translate(-50%, -50%);
-            font-size: 0.7em;
+            font-size: 0.75em;
             font-weight: bold;
             color: white;
             text-shadow: 0 0 3px rgba(0,0,0,0.5);
+        }
+
+        .museum-tabs {
+            display: flex;
+            gap: 4px;
+            margin-bottom: 6px;
+        }
+
+        .museum-tab {
+            flex: 1;
+            padding: 6px;
+            background: #E8F5E9;
+            border: 2px solid #BAE1FF;
+            border-radius: 6px;
+            text-align: center;
+            font-size: 0.85em;
+            font-weight: bold;
+            color: #666;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .museum-tab:hover {
+            background: #C8E6C9;
+        }
+
+        .museum-tab.active {
+            background: #3F51B5;
+            color: white;
+            border-color: #3F51B5;
+        }
+
+        .museum-title {
+            font-size: 1em;
+            font-weight: bold;
+            color: #3F51B5;
+            margin-bottom: 2px;
+        }
+
+        .museum-stats {
+            font-size: 0.75em;
+            color: #5C6BC0;
+            margin-bottom: 6px;
         }
 
         .museum-fish-list {
@@ -895,6 +1658,92 @@
             border-radius: 6px;
             font-size: 0.7em;
             border: 1px solid #C5CAE9;
+            position: relative;
+            cursor: pointer;
+            transition: background 0.2s;
+        }
+
+        .museum-fish-item:hover {
+            background: #F5F5F5;
+        }
+
+        .villager-points-section {
+            background: linear-gradient(135deg, #E8F5E9 0%, #C8E6C9 100%);
+            border-radius: 12px;
+            padding: 12px;
+            margin-top: 10px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+        }
+
+        .villager-points-title {
+            font-size: 1em;
+            font-weight: bold;
+            color: #6BAA5E;
+            margin-bottom: 8px;
+        }
+
+        .villager-points-info {
+            font-size: 0.8em;
+            color: #555;
+            margin-bottom: 10px;
+        }
+
+        .activity-point-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 8px;
+            margin-bottom: 6px;
+            background: white;
+            border-radius: 6px;
+            border: 2px solid #E8F5E9;
+        }
+
+        .activity-point-name {
+            font-weight: bold;
+            color: #333;
+            flex: 1;
+        }
+
+        .activity-point-bonus {
+            font-size: 0.85em;
+            color: #6BAA5E;
+            margin: 0 10px;
+        }
+
+        .activity-point-controls {
+            display: flex;
+            gap: 8px;
+            align-items: center;
+        }
+
+        .point-button {
+            background: linear-gradient(135deg, #6BAA5E 0%, #5A9A4D 100%);
+            color: white;
+            border: none;
+            padding: 4px 10px;
+            border-radius: 6px;
+            font-size: 0.9em;
+            font-weight: bold;
+            cursor: pointer;
+            transition: transform 0.2s;
+        }
+
+        .point-button:hover:not(:disabled) {
+            transform: scale(1.1);
+        }
+
+        .point-button:disabled {
+            background: #ccc;
+            cursor: not-allowed;
+            opacity: 0.5;
+        }
+
+        .activity-point-count {
+            font-weight: bold;
+            color: #6BAA5E;
+            min-width: 20px;
+            text-align: center;
         }
 
         .museum-fish-item.donated {
@@ -954,13 +1803,14 @@
             left: 0;
             width: 100%;
             height: 100%;
-            background: rgba(255, 249, 230, 0.95);
+            background: transparent;
             display: flex;
             flex-direction: column;
             align-items: center;
             justify-content: center;
             z-index: 9999;
             gap: 20px;
+            pointer-events: none;
         }
         
         .loading-overlay.hidden {
@@ -987,27 +1837,580 @@
             font-size: 1em;
             color: #666;
         }
+        
+        .villager-selection-modal {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.7);
+            display: none;
+            align-items: center;
+            justify-content: center;
+            z-index: 10000;
+        }
+        
+        .villager-selection-modal.active {
+            display: flex;
+        }
+        
+        .villager-selection-content {
+            background: linear-gradient(135deg, #FFF9E6 0%, #FFE8B3 100%);
+            border-radius: 16px;
+            padding: 30px;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+            max-width: 600px;
+            width: 90%;
+        }
+        
+        .villager-selection-title {
+            font-size: 1.8em;
+            color: #F7B32B;
+            text-align: center;
+            margin-bottom: 20px;
+            font-weight: bold;
+        }
+        
+        .villager-choices {
+            display: flex;
+            gap: 20px;
+            justify-content: center;
+            margin-bottom: 20px;
+        }
+        
+        .villager-choice {
+            background: white;
+            border: 3px solid #F7B32B;
+            border-radius: 12px;
+            padding: 15px;
+            cursor: pointer;
+            transition: all 0.3s;
+            text-align: center;
+            flex: 1;
+            max-width: 150px;
+            position: relative;
+        }
+
+        .villager-rarity-stars {
+            position: absolute;
+            left: 5px;
+            top: 50%;
+            transform: translateY(-50%);
+            display: flex;
+            flex-direction: column;
+            gap: 2px;
+            font-size: 14px;
+            line-height: 1;
+        }
+
+        .villager-rarity-stars .star {
+            color: #FFD700;
+            text-shadow: 0 0 2px rgba(0, 0, 0, 0.3);
+        }
+        
+        .villager-choice:hover {
+            transform: scale(1.05);
+            border-color: #6BAA5E;
+            box-shadow: 0 4px 12px rgba(107, 170, 94, 0.3);
+        }
+        
+        .villager-choice-portrait {
+            width: 100px;
+            height: 100px;
+            object-fit: contain;
+            margin-bottom: 10px;
+        }
+        
+        .villager-choice-name {
+            font-weight: bold;
+            color: #333;
+            margin-bottom: 5px;
+        }
+        
+        .villager-choice-info {
+            font-size: 0.85em;
+            color: #666;
+        }
+        
+        .assigned-villagers {
+            margin-top: 10px;
+            padding: 8px;
+            background: rgba(255, 249, 230, 0.5);
+            border-radius: 6px;
+            font-size: 0.85em;
+        }
+        
+        .assigned-villager-item {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            padding: 4px;
+            margin: 4px 0;
+            background: white;
+            border-radius: 4px;
+        }
+        
+        .assigned-villager-portrait {
+            width: 30px;
+            height: 30px;
+            object-fit: contain;
+            border-radius: 4px;
+        }
+        
+        .assigned-villager-name {
+            flex: 1;
+            font-weight: bold;
+            color: #333;
+        }
+        
+        .unassign-button {
+            background: #ff6b6b;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            padding: 4px 8px;
+            cursor: pointer;
+            font-size: 0.8em;
+        }
+        
+        .unassign-button:hover {
+            background: #ff5252;
+        }
+        
+        .assign-button {
+            background: #6BAA5E;
+            color: white;
+            border: none;
+            border-radius: 6px;
+            padding: 8px 16px;
+            cursor: pointer;
+            font-size: 0.9em;
+            margin-top: 8px;
+            width: 100%;
+        }
+        
+        .assign-button:hover {
+            background: #5a9950;
+        }
+        
+        .assign-button:disabled {
+            background: #ccc;
+            cursor: not-allowed;
+        }
+        
+        .villager-assignment-modal {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.7);
+            display: none;
+            align-items: center;
+            justify-content: center;
+            z-index: 10000;
+        }
+        
+        .villager-assignment-modal.active {
+            display: flex;
+        }
+        
+        .villager-assignment-content {
+            background: linear-gradient(135deg, #FFF9E6 0%, #FFE8B3 100%);
+            border-radius: 16px;
+            padding: 30px;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+            max-width: 700px;
+            width: 90%;
+            max-height: 80vh;
+            overflow-y: auto;
+        }
+        
+        .villager-assignment-title {
+            font-size: 1.5em;
+            color: #F7B32B;
+            text-align: center;
+            margin-bottom: 20px;
+            font-weight: bold;
+        }
+        
+        .villager-assignment-list {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+            gap: 15px;
+            margin-bottom: 20px;
+        }
+        
+        .villager-assignment-item {
+            background: white;
+            border: 3px solid #F7B32B;
+            border-radius: 12px;
+            padding: 12px;
+            cursor: pointer;
+            transition: all 0.3s;
+            text-align: center;
+        }
+        
+        .villager-assignment-item:hover {
+            transform: scale(1.05);
+            border-color: #6BAA5E;
+            box-shadow: 0 4px 12px rgba(107, 170, 94, 0.3);
+        }
+        
+        .villager-assignment-item.assigned {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+        
+        .villager-assignment-item.assigned:hover {
+            transform: none;
+            border-color: #F7B32B;
+            box-shadow: none;
+        }
+        
+        .assignment-cancel {
+            background: #999;
+            color: white;
+            border: none;
+            border-radius: 6px;
+            padding: 10px 20px;
+            cursor: pointer;
+            width: 100%;
+        }
+        
+        .assignment-cancel:hover {
+            background: #777;
+        }
 
         @media (max-width: 768px) {
             .game-container {
-                padding: 15px;
+                padding: 10px;
+                max-width: 100%;
             }
 
             h1 {
-                font-size: 1.6em;
+                font-size: 1.4em;
+                margin-bottom: 10px;
+            }
+
+            /* Layout adjustments for mobile */
+            .main-layout {
+                flex-direction: column;
+            }
+
+            .left-column {
+                flex: 1;
+                width: 100%;
+            }
+
+            .right-column {
+                flex: 1;
+                width: 100%;
+            }
+
+            /* Header adjustments */
+            .header {
+                padding: 15px;
+            }
+
+            .bell-count {
+                font-size: 1.2em;
+            }
+
+            /* Shop items - stack vertically */
+            .shop-items {
+                grid-template-columns: 1fr;
+                gap: 10px;
+            }
+
+            .shop-item {
+                padding: 12px;
+            }
+
+            /* Upgrades - single column */
+            .upgrades {
+                grid-template-columns: 1fr;
+                gap: 10px;
+            }
+
+            .upgrade {
+                padding: 12px;
+            }
+
+            .upgrade-header {
+                flex-direction: column;
+                gap: 8px;
+            }
+
+            .upgrade-button {
+                width: 100%;
+                padding: 10px;
+                font-size: 0.9em;
+            }
+
+            /* Villager grid - 2 columns on mobile */
+            .villagers-grid {
+                grid-template-columns: repeat(2, 1fr);
+                gap: 8px;
+            }
+
+            .villager-slot {
+                width: 100%;
+                height: 80px;
+            }
+
+            .villager-portrait {
+                width: 50px;
+                height: 50px;
+            }
+
+            /* Villager selection modal */
+            .villager-selection-content {
+                width: 95%;
+                max-width: 95%;
+                padding: 15px;
+                max-height: 90vh;
+                overflow-y: auto;
+            }
+
+            .villager-selection-title {
+                font-size: 1.2em;
+                margin-bottom: 15px;
+            }
+
+            .villager-choices {
+                flex-direction: column;
+                gap: 12px;
+            }
+
+            .villager-choice {
+                max-width: 100%;
+                width: 100%;
+                padding: 12px;
+            }
+
+            .villager-choice-portrait {
+                width: 80px;
+                height: 80px;
+            }
+
+            .villager-rarity-stars {
+                font-size: 12px;
+                left: 3px;
+            }
+
+            /* Fishing areas */
+            .fishing-area {
+                padding: 10px;
+            }
+
+            .fishing-area-top {
+                flex-direction: column;
+                gap: 10px;
+            }
+
+            .area-info {
+                flex-direction: column;
+                gap: 8px;
+            }
+
+            .area-text {
+                min-width: 100%;
+            }
+
+            .area-progress-container {
+                width: 100%;
+            }
+
+            .area-controls {
+                justify-content: center;
+                width: 100%;
+            }
+
+            /* Villager points section */
+            .villager-points-grid {
+                grid-template-columns: 1fr;
+                gap: 8px;
+            }
+
+            .point-item {
+                padding: 10px;
+            }
+
+            /* Museum section */
+            .museum-stats {
+                flex-direction: column;
+                gap: 8px;
+            }
+
+            .fish-grid {
+                grid-template-columns: repeat(3, 1fr);
+                gap: 8px;
+            }
+
+            .fish-card {
+                padding: 8px;
+            }
+
+            /* Tooltips - adjust for mobile */
+            .villager-tooltip {
+                font-size: 0.85em;
+                min-width: 120px;
+                top: 90px;
+            }
+
+            /* Calendar */
+            .calendar {
+                font-size: 0.85em;
+                padding: 8px 12px;
+            }
+
+            /* Modals */
+            .villager-assignment-modal-content {
+                width: 95%;
+                max-width: 95%;
+                padding: 15px;
+            }
+
+            .assignment-options {
+                grid-template-columns: 1fr;
+                gap: 10px;
+            }
+
+            /* Buttons */
+            button {
+                padding: 8px 12px;
+                font-size: 0.9em;
+            }
+
+            /* Reset button */
+            .reset-button {
+                top: 10px;
+                right: 70px;
+                padding: 10px 20px;
+                font-size: 1.2em;
+            }
+        }
+
+        /* Extra small devices (phones in portrait, less than 480px) */
+        @media (max-width: 480px) {
+            .game-container {
+                padding: 8px;
+            }
+
+            h1 {
+                font-size: 1.2em;
+            }
+
+            .bell-count {
+                font-size: 1em;
+            }
+
+            .villagers-grid {
+                grid-template-columns: repeat(2, 1fr);
+                gap: 6px;
+            }
+
+            .villager-slot {
+                height: 70px;
+            }
+
+            .villager-portrait {
+                width: 40px;
+                height: 40px;
+            }
+
+            .fish-grid {
+                grid-template-columns: repeat(2, 1fr);
+                gap: 6px;
+            }
+
+            .villager-choice-portrait {
+                width: 70px;
+                height: 70px;
+            }
+
+            .villager-rarity-stars {
+                font-size: 10px;
             }
         }
     </style>
 </head>
 <body>
+    <button class="dark-mode-toggle" id="darkModeToggle" title="Toggle Dark Mode">🌙</button>
+    <button class="lock-toggle locked" id="lockToggle" title="Toggle Layout Lock">🔒</button>
     <div class="loading-overlay" id="loadingOverlay">
         <div class="loading-spinner">🏝️</div>
         <div class="loading-text">Loading Lazy Island...</div>
         <div class="loading-status" id="loadingStatus">Initializing...</div>
     </div>
+    
+    <!-- Villager Selection Modal -->
+    <div class="villager-selection-modal" id="villagerSelectionModal">
+        <div class="villager-selection-content">
+            <div class="villager-selection-title">🏝️ Choose a Villager</div>
+            <div class="villager-choices" id="villagerChoices">
+                <!-- Villager choices will be inserted here -->
+            </div>
+        </div>
+    </div>
+    
+    <!-- Villager Assignment Modal -->
+    <div class="villager-assignment-modal" id="villagerAssignmentModal">
+        <div class="villager-assignment-content">
+            <div class="villager-assignment-title" id="assignmentModalTitle">Assign Villager</div>
+            <div class="villager-assignment-list" id="villagerAssignmentList">
+                <!-- Available villagers will be inserted here -->
+            </div>
+            <button class="assignment-cancel" onclick="closeAssignmentModal()">Cancel</button>
+        </div>
+    </div>
+    
     <div class="game-container">
-        <div class="top-section">
-            <div class="right-sidebar">
+        <button class="reset-button" onclick="resetGame()" title="Start Over">🔄</button>
+        
+        <div class="middle-section">
+            <div class="header">
+                <h1>Lazy Island</h1>
+                <div class="bell-count" id="bellCount">0 Bells</div>
+                <div class="per-second">Generating: <span id="perSecond">0</span> Bells/sec</div>
+            </div>
+            
+            <div class="island-activities-section">
+                <div class="island-activities-header">
+                    <div class="island-activities-title">🏝️ Island Activities</div>
+                </div>
+                <div class="upgrades-container" id="upgradesContainer">
+                    <!-- Upgrades will be dynamically added here -->
+                </div>
+            </div>
+            
+            <div class="shop-section-wrapper">
+                <div class="shop-section">
+                    <div class="shop-header">
+                        <h2 id="shopName">🏪 Nook's Cranny</h2>
+                        <button class="shop-upgrade-btn" id="shopUpgradeBtn" style="display: none;" onclick="upgradeShop()">Upgrade</button>
+                    </div>
+                    <div class="shop-closed-message" id="shopClosedMessage" style="display: none;">
+                        🚪 Shop is closed. Open the store to start selling items!
+                    </div>
+                    <div class="shop-items" id="shopContainer">
+                        <!-- Activity point allocation will be added here -->
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Villagers Grid -->
+            <div class="villagers-section" id="villagersSection">
+                <div class="villagers-grid" id="villagersGrid">
+                    <!-- Villager slots will be dynamically added here -->
+                </div>
+            </div>
+            
+            <!-- Calendar and Museum Column -->
+            <div class="calendar-museum-column">
+                <!-- Calendar Section -->
                 <div class="calendar-section">
                     <div class="calendar-header">
                         <div class="calendar-date" id="calendarDate">Jan 1</div>
@@ -1020,7 +2423,7 @@
                         </div>
                     </div>
                 </div>
-
+                
                 <!-- Museum Section -->
                 <div class="museum-section">
                     <div class="museum-header">
@@ -1030,6 +2433,10 @@
                     <div class="museum-progress">
                         <div class="museum-progress-text" id="museumProgressText">0%</div>
                         <div class="museum-progress-bar" id="museumProgressBar" style="width: 0%"></div>
+                    </div>
+                    <div class="museum-tabs">
+                        <div class="museum-tab active" onclick="switchMuseumTab('caught')">Caught</div>
+                        <div class="museum-tab" onclick="switchMuseumTab('missing')">Missing</div>
                     </div>
                     <div class="museum-fish-list" id="museumFishList">
                         <!-- Fish donation list will be added here -->
@@ -1041,54 +2448,315 @@
             </div>
         </div>
         
-        <div class="middle-section">
-            <div class="shop-section-wrapper">
-                <div class="shop-section">
-                    <h2>🏪 Item Shop</h2>
-                    <div class="shop-items" id="shopContainer">
-                        <!-- Shop items will be dynamically added here -->
-                    </div>
-                </div>
-            </div>
-            <div class="main-header">
-                <div class="reset-container">
-                    <button class="reset-button" onclick="resetGame()">🔄 Start Over</button>
-                </div>
-                <div class="header">
-                    <h1>Lazy Island</h1>
-                    <div class="stats">
-                        <div class="bell-count" id="bellCount">0 Bells</div>
-                        <div class="per-second">Generating: <span id="perSecond">0</span> Bells/sec</div>
-                        <div class="total-production" id="totalProduction">Total Earned: 0 Bells</div>
-                    </div>
-                </div>
-            </div>
-            
-            <!-- Villagers Grid -->
-            <div class="villagers-section" id="villagersSection">
-                <div class="villagers-title">🏘️ Villagers</div>
-                <div class="villagers-grid" id="villagersGrid">
-                    <!-- Villager slots will be dynamically added here -->
-                </div>
-            </div>
-        </div>
-        
         <!-- Fish tooltip -->
         <div class="fish-tooltip" id="fishTooltip">
             <div class="fish-tooltip-content" id="tooltipContent">
                 <!-- Image and details will be inserted here -->
             </div>
         </div>
-
-        <div>
-            <h2>🏝️ Island Activities</h2>
-            <div class="upgrades-container" id="upgradesContainer">
-                <!-- Upgrades will be dynamically added here -->
-            </div>
-        </div>
     </div>
 
     <script>
+        // Dark Mode Toggle Functionality
+        const darkModeToggle = document.getElementById('darkModeToggle');
+        const body = document.body;
+        
+        // Check for saved dark mode preference
+        const isDarkMode = localStorage.getItem('darkMode') === 'true';
+        if (isDarkMode) {
+            body.classList.add('dark-mode');
+            darkModeToggle.textContent = '☀️';
+        }
+        
+        // Toggle dark mode
+        darkModeToggle.addEventListener('click', () => {
+            body.classList.toggle('dark-mode');
+            const isNowDark = body.classList.contains('dark-mode');
+            localStorage.setItem('darkMode', isNowDark);
+            darkModeToggle.textContent = isNowDark ? '☀️' : '🌙';
+        });
+
+        // Draggable Container System
+        let draggedElement = null;
+        let dragOffset = { x: 0, y: 0 };
+        let containerSizes = new Map();
+        let snapPreview = null;
+
+        // Lock Toggle Functionality
+        const lockToggle = document.getElementById('lockToggle');
+        let isLocked = localStorage.getItem('layoutLocked') !== 'false';
+        
+        // Set initial state
+        if (!isLocked) {
+            lockToggle.classList.remove('locked');
+            lockToggle.textContent = '🔓';
+            enableDragging();
+            const gameContainer = document.querySelector('.game-container');
+            if (gameContainer) gameContainer.classList.add('show-grid');
+        }
+        
+        lockToggle.addEventListener('click', () => {
+            isLocked = !isLocked;
+            lockToggle.classList.toggle('locked');
+            lockToggle.textContent = isLocked ? '🔒' : '🔓';
+            localStorage.setItem('layoutLocked', isLocked);
+            
+            const gameContainer = document.querySelector('.game-container');
+            
+            if (isLocked) {
+                disableDragging();
+                if (gameContainer) gameContainer.classList.remove('show-grid');
+            } else {
+                enableDragging();
+                if (gameContainer) gameContainer.classList.add('show-grid');
+            }
+        });
+
+        function enableDragging() {
+            const containers = document.querySelectorAll('.island-activities-section, .shop-section-wrapper, .villagers-section, .calendar-section, .museum-section, .header');
+            containers.forEach(container => {
+                container.classList.add('draggable');
+                container.style.cursor = 'move';
+                
+                // Store container size
+                const computedStyle = window.getComputedStyle(container);
+                const colMatch = computedStyle.gridColumn.match(/(\d+)\s*\/\s*span\s*(\d+)/);
+                const rowMatch = computedStyle.gridRow.match(/(\d+)\s*\/\s*span\s*(\d+)/);
+                if (colMatch && rowMatch) {
+                    containerSizes.set(container, {
+                        cols: parseInt(colMatch[2]),
+                        rows: parseInt(rowMatch[2])
+                    });
+                }
+                
+                container.addEventListener('mousedown', handleMouseDown);
+            });
+        }
+
+        function disableDragging() {
+            const containers = document.querySelectorAll('.island-activities-section, .shop-section-wrapper, .villagers-section, .calendar-section, .museum-section, .header');
+            containers.forEach(container => {
+                container.classList.remove('draggable');
+                container.style.cursor = '';
+                container.removeEventListener('mousedown', handleMouseDown);
+            });
+        }
+
+        function handleMouseDown(e) {
+            if (!e.target.closest('.draggable')) return;
+            
+            draggedElement = e.currentTarget;
+            draggedElement.classList.add('dragging');
+            
+            const gameContainer = document.querySelector('.game-container');
+            const containerRect = gameContainer.getBoundingClientRect();
+            const elementRect = draggedElement.getBoundingClientRect();
+            
+            // Calculate offset from mouse to element's top-left corner
+            dragOffset.x = e.clientX - elementRect.left;
+            dragOffset.y = e.clientY - elementRect.top;
+            
+            // Create snap preview
+            snapPreview = document.createElement('div');
+            snapPreview.className = 'grid-snap-preview';
+            gameContainer.appendChild(snapPreview);
+            
+            document.addEventListener('mousemove', handleMouseMove);
+            document.addEventListener('mouseup', handleMouseUp);
+            
+            e.preventDefault();
+        }
+
+        function handleMouseMove(e) {
+            if (!draggedElement) return;
+            
+            const gameContainer = document.querySelector('.game-container');
+            const containerRect = gameContainer.getBoundingClientRect();
+            
+            // Calculate position relative to game container (absolute positioning is relative to game-container)
+            let x = e.clientX - containerRect.left - dragOffset.x;
+            let y = e.clientY - containerRect.top - dragOffset.y;
+            
+            // Get container dimensions
+            const elementWidth = draggedElement.offsetWidth;
+            const elementHeight = draggedElement.offsetHeight;
+            
+            // Constrain to grid boundaries (24px padding + 1200px grid width/900px grid height)
+            const minX = 24;
+            const minY = 24;
+            const maxX = 24 + 1200 - elementWidth;
+            const maxY = 24 + 900 - elementHeight;
+            
+            x = Math.max(minX, Math.min(maxX, x));
+            y = Math.max(minY, Math.min(maxY, y));
+            
+            // Position element absolutely during drag
+            draggedElement.style.position = 'absolute';
+            draggedElement.style.left = x + 'px';
+            draggedElement.style.top = y + 'px';
+            draggedElement.style.zIndex = '1000';
+            
+            // Update snap preview
+            if (snapPreview) {
+                // Calculate snap position
+                const gridX = x - 24;
+                const gridY = y - 24;
+                const snapCol = Math.max(1, Math.min(12, Math.round(gridX / 100) + 1));
+                const snapRow = Math.max(1, Math.min(9, Math.round(gridY / 100) + 1));
+                
+                const size = containerSizes.get(draggedElement) || { cols: 3, rows: 3 };
+                const finalCol = Math.min(snapCol, 13 - size.cols);
+                const finalRow = Math.min(snapRow, 10 - size.rows);
+                
+                // Position preview at snap location
+                const previewX = 24 + (finalCol - 1) * 100;
+                const previewY = 24 + (finalRow - 1) * 100;
+                const previewWidth = size.cols * 100;
+                const previewHeight = size.rows * 100;
+                
+                snapPreview.style.left = previewX + 'px';
+                snapPreview.style.top = previewY + 'px';
+                snapPreview.style.width = previewWidth + 'px';
+                snapPreview.style.height = previewHeight + 'px';
+            }
+        }
+
+        function checkCollision(col, row, cols, rows, excludeElement) {
+            // Check if the proposed position collides with any existing container
+            const containers = document.querySelectorAll('.island-activities-section, .shop-section-wrapper, .villagers-section, .calendar-section, .museum-section, .header');
+            
+            for (const container of containers) {
+                if (container === excludeElement) continue;
+                
+                const style = window.getComputedStyle(container);
+                const gridColumn = container.style.gridColumn || style.gridColumn;
+                const gridRow = container.style.gridRow || style.gridRow;
+                
+                // Parse grid position
+                const colMatch = gridColumn.match(/(\d+)\s*\/\s*span\s*(\d+)/);
+                const rowMatch = gridRow.match(/(\d+)\s*\/\s*span\s*(\d+)/);
+                
+                if (!colMatch || !rowMatch) continue;
+                
+                const existingCol = parseInt(colMatch[1]);
+                const existingCols = parseInt(colMatch[2]);
+                const existingRow = parseInt(rowMatch[1]);
+                const existingRows = parseInt(rowMatch[2]);
+                
+                // Check for overlap
+                const colOverlap = col < existingCol + existingCols && col + cols > existingCol;
+                const rowOverlap = row < existingRow + existingRows && row + rows > existingRow;
+                
+                if (colOverlap && rowOverlap) {
+                    return true; // Collision detected
+                }
+            }
+            
+            return false; // No collision
+        }
+
+        function handleMouseUp(e) {
+            if (!draggedElement) return;
+            
+            const gameContainer = document.querySelector('.game-container');
+            
+            // Store original position in case we need to revert
+            const computedStyle = window.getComputedStyle(draggedElement);
+            const originalGridColumn = draggedElement.style.gridColumn || computedStyle.gridColumn;
+            const originalGridRow = draggedElement.style.gridRow || computedStyle.gridRow;
+            
+            // Get the current absolute position of the element
+            const currentLeft = parseFloat(draggedElement.style.left) || 0;
+            const currentTop = parseFloat(draggedElement.style.top) || 0;
+            
+            // Calculate grid position from the element's current position (accounting for 24px padding)
+            const gridX = currentLeft - 24;
+            const gridY = currentTop - 24;
+            
+            // Snap to grid (100px per cell)
+            const gridCol = Math.max(1, Math.min(12, Math.round(gridX / 100) + 1));
+            const gridRow = Math.max(1, Math.min(9, Math.round(gridY / 100) + 1));
+            
+            // Get container size
+            const size = containerSizes.get(draggedElement) || { cols: 3, rows: 3 };
+            
+            // Ensure container doesn't go out of bounds
+            const finalCol = Math.min(gridCol, 13 - size.cols);
+            const finalRow = Math.min(gridRow, 10 - size.rows);
+            
+            // Check for collision
+            const hasCollision = checkCollision(finalCol, finalRow, size.cols, size.rows, draggedElement);
+            
+            // Reset position styles
+            draggedElement.style.position = '';
+            draggedElement.style.left = '';
+            draggedElement.style.top = '';
+            draggedElement.style.zIndex = '';
+            
+            if (hasCollision) {
+                // Collision detected - revert to original position
+                draggedElement.style.gridColumn = originalGridColumn;
+                draggedElement.style.gridRow = originalGridRow;
+            } else {
+                // No collision - apply new position
+                draggedElement.style.gridColumn = `${finalCol} / span ${size.cols}`;
+                draggedElement.style.gridRow = `${finalRow} / span ${size.rows}`;
+                
+                // Save layout to localStorage
+                saveLayout();
+            }
+            
+            draggedElement.classList.remove('dragging');
+            
+            // Remove snap preview
+            if (snapPreview) {
+                snapPreview.remove();
+                snapPreview = null;
+            }
+            
+            document.removeEventListener('mousemove', handleMouseMove);
+            document.removeEventListener('mouseup', handleMouseUp);
+            
+            draggedElement = null;
+        }
+
+        function saveLayout() {
+            const layout = {};
+            const containers = document.querySelectorAll('.island-activities-section, .shop-section-wrapper, .villagers-section, .calendar-section, .museum-section, .header');
+            
+            containers.forEach((container, index) => {
+                const id = container.id || container.className.split(' ')[0];
+                layout[id] = {
+                    gridColumn: container.style.gridColumn,
+                    gridRow: container.style.gridRow
+                };
+            });
+            
+            localStorage.setItem('gridLayout', JSON.stringify(layout));
+        }
+
+        function loadLayout() {
+            const savedLayout = localStorage.getItem('gridLayout');
+            if (!savedLayout) return;
+            
+            try {
+                const layout = JSON.parse(savedLayout);
+                
+                Object.keys(layout).forEach(id => {
+                    const container = document.getElementById(id) || document.querySelector('.' + id);
+                    if (container && layout[id].gridColumn && layout[id].gridRow) {
+                        container.style.gridColumn = layout[id].gridColumn;
+                        container.style.gridRow = layout[id].gridRow;
+                    }
+                });
+            } catch (e) {
+                console.error('Failed to load layout:', e);
+            }
+        }
+
+        // Load saved layout on page load
+        window.addEventListener('DOMContentLoaded', loadLayout);
+        
         // Nookipedia API Configuration
         const NOOKIPEDIA_API_KEY = '8a10f688-39d6-40b8-8426-744f30542e94'; // Replace with your API key from https://api.nookipedia.com/
         const NOOKIPEDIA_API_URL = 'https://api.nookipedia.com/nh/fish';
@@ -1105,25 +2773,53 @@
         let purchasedVillagers = []; // Villagers the player has bought
         let villagerCooldownEnd = 0; // Timestamp when villager can be purchased again
         let villagerHouses = 3; // Number of villager houses owned (starts at 3, max 10)
+        let villagerAssignments = {}; // Maps upgrade.id to assigned villager object
+        let hasCompletedInitialSelection = false; // Track if player has chosen initial 3 villagers
+        let villagerPoints = {}; // Maps activity ID to number of villager points assigned (1 point = 10% speed boost)
+        let rerollsRemaining = 3; // Number of free rerolls available during initial selection
+        let currentVillagerChoices = []; // Current 3 villagers being shown in selection modal
         let inventory = {
             fishingRod: 0
         };
         
+        // Store stage (1-4: Nook's Cranny, Nook 'n' Go, Nookway, Nookington's)
+        let storeStage = 1;
+        
+        // Store upgrade tiers
+        const storeTiers = [
+            { stage: 1, name: '🏪 Nook\'s Cranny', price: 100, cpsBonus: 1 },
+            { stage: 2, name: '🏪 Nook \'n\' Go', price: 100000, cpsBonus: 5 },
+            { stage: 3, name: '🏪 Nookway', price: 100000000, cpsBonus: 25 },
+            { stage: 4, name: '🏪 Nookington\'s', price: 100000000000, cpsBonus: 125 }
+        ];
+        
         // Fishing rod tier (1-6, affects fishing speed)
         let fishingRodTier = 1;
+        let currentMuseumTab = 'caught'; // Track which museum tab is active
         
         // Progress tracking for each upgrade
         const upgradeProgress = {};
         
         // Fishing rod upgrade tiers
+        // Speed multiplier is calculated dynamically based on villager count
         const fishingRodTiers = [
-            { tier: 1, name: '🎣 Flimsy Fishing Rod', speedMultiplier: 1.0, price: 400 },
-            { tier: 2, name: '🎣 Fishing Rod', speedMultiplier: 0.85, price: 4000 },
-            { tier: 3, name: '🌈 Colorful Fishing Rod', speedMultiplier: 0.70, price: 40000 },
-            { tier: 4, name: '🐟 Fish Fishing Rod', speedMultiplier: 0.55, price: 400000 },
-            { tier: 5, name: '🏞️ Outdoorsy Fishing Rod', speedMultiplier: 0.40, price: 4000000 },
-            { tier: 6, name: '⭐ Golden Fishing Rod', speedMultiplier: 0.25, price: 40000000 }
+            { tier: 1, name: '🎣 Flimsy Fishing Rod', price: 400 },
+            { tier: 2, name: '🎣 Fishing Rod', price: 4000 },
+            { tier: 3, name: '🌈 Colorful Fishing Rod', price: 40000 },
+            { tier: 4, name: '🐟 Fish Fishing Rod', price: 400000 },
+            { tier: 5, name: '🏞️ Outdoorsy Fishing Rod', price: 4000000 },
+            { tier: 6, name: '⭐ Golden Fishing Rod', price: 40000000 }
         ];
+        
+        // Calculate speed multiplier for a fishing rod tier based on villager count
+        // Each tier increases speed by 100% per villager owned
+        function getRodSpeedMultiplier(tier) {
+            const villagerCount = purchasedVillagers.length;
+            // Speed increase = tier * 100% * villagerCount
+            // Convert to multiplier: 1 / (1 + speedIncrease)
+            const speedIncrease = (tier - 1) * 1.0 * villagerCount;
+            return 1 / (1 + speedIncrease);
+        }
         
         // Shop items - dynamically built based on fishing rod tier
         let shopItems = [];
@@ -1132,43 +2828,58 @@
         function buildShopItems() {
             shopItems = [];
             
-            // Add initial fishing rod if not owned
+            // Show only one fishing rod at a time
+            // Priority: initial rod if not owned, otherwise next upgrade
             if (inventory.fishingRod === 0) {
+                // Add initial fishing rod if not owned
                 shopItems.push({
                     id: 'fishingRod',
                     name: '🎣 Flimsy Fishing Rod',
-                    description: 'A basic fishing rod. Assign to fishing areas to start earning!',
+                    description: 'A basic fishing rod.',
                     price: 400,
                     inventoryKey: 'fishingRod',
                     maxPurchases: 1
                 });
-            }
-            
-            // Add next fishing rod upgrade if available
-            if (fishingRodTier < 6) {
+            } else if (fishingRodTier < 6) {
+                // Add next fishing rod upgrade if available (only if initial rod is owned)
                 const nextTier = fishingRodTiers.find(t => t.tier === fishingRodTier + 1);
                 if (nextTier) {
-                    const speedBonus = Math.round((1 - nextTier.speedMultiplier) * 100);
+                    const villagerCount = purchasedVillagers.length;
+                    const speedBonus = (nextTier.tier - 1) * 100 * villagerCount;
+                    const description = villagerCount > 0 
+                        ? `${speedBonus}% faster fishing!`
+                        : 'Upgrade your fishing rod!';
                     shopItems.push({
                         id: `fishingRodUpgrade${nextTier.tier}`,
                         name: nextTier.name,
-                        description: `Upgrade your fishing rod! ${speedBonus}% faster fishing`,
+                        description: description,
                         price: nextTier.price,
                         isRodUpgrade: true,
                         tier: nextTier.tier
                     });
                 }
             }
+            
+            // Store upgrades are now handled by the upgrade button, not shop items
         }
         
         // Fishing area progress tracking
         const fishingAreaProgress = {};
         const fishingAreaNextCatch = {}; // Stores the next catch time for each area
         
-        // Get current fishing speed multiplier
+        // Get current fishing speed multiplier (includes rod tier + villager point bonuses)
         function getFishingSpeedMultiplier() {
-            const tierData = fishingRodTiers.find(t => t.tier === fishingRodTier);
-            return tierData ? tierData.speedMultiplier : 1.0;
+            const baseMult = getRodSpeedMultiplier(fishingRodTier);
+            
+            // Apply villager point bonus: each point = 50% faster
+            // Formula: 1 / (1 + (points * 0.5))
+            // 1 point: 1/1.5 = 0.667x time (50% faster)
+            // 2 points: 1/2.0 = 0.5x time (100% faster)
+            // 3 points: 1/2.5 = 0.4x time (150% faster)
+            const fishingPoints = villagerPoints['fishing'] || 0;
+            const villagerBonus = 1 / (1 + (fishingPoints * 0.5));
+            
+            return baseMult * villagerBonus;
         }
         
         // Get base fishing interval (30-45 seconds)
@@ -1221,9 +2932,7 @@
                 description: 'A friendly villager who helps gather Bells',
                 baseCost: 100,
                 cps: 100,
-                interval: 30,
-                owned: 0,
-                maxOwned: 10 // Cap at 10 villagers
+                interval: 30
             },
             {
                 id: 'orchard',
@@ -1232,15 +2941,6 @@
                 baseCost: 1100,
                 cps: 8,
                 interval: 8,
-                owned: 0
-            },
-            {
-                id: 'shop',
-                name: '🏪 Nook\'s Cranny',
-                description: 'A shop that generates passive income',
-                baseCost: 12000,
-                cps: 47,
-                interval: 6,
                 owned: 0
             },
             {
@@ -1346,15 +3046,6 @@
                 `;
             }
             
-            if (fish.size) {
-                detailsHTML += `
-                    <div class="fish-tooltip-row">
-                        <span class="fish-tooltip-label">Size:</span>
-                        <span class="fish-tooltip-value">${fish.size}</span>
-                    </div>
-                `;
-            }
-            
             if (fish.location) {
                 detailsHTML += `
                     <div class="fish-tooltip-row">
@@ -1364,6 +3055,18 @@
                 `;
             }
             
+            // Show months available
+            if (fish.north && fish.north.months) {
+                const monthsStr = fish.north.months || 'All year';
+                detailsHTML += `
+                    <div class="fish-tooltip-row">
+                        <span class="fish-tooltip-label">Months:</span>
+                        <span class="fish-tooltip-value">${monthsStr}</span>
+                    </div>
+                `;
+            }
+            
+            // Show time of day available
             if (fish.north && fish.north.availability_array) {
                 const times = fish.north.availability_array;
                 const timeStr = times.length > 0 ? times.map(t => {
@@ -1394,6 +3097,17 @@
             tooltip.style.left = x + 'px';
             tooltip.style.top = y + 'px';
             tooltip.classList.add('show');
+        }
+        
+        // Update tooltip position as mouse moves
+        function updateTooltipPosition(event) {
+            const tooltip = document.getElementById('fishTooltip');
+            if (tooltip && tooltip.classList.contains('show')) {
+                const x = event.clientX + 15;
+                const y = event.clientY + 15;
+                tooltip.style.left = x + 'px';
+                tooltip.style.top = y + 'px';
+            }
         }
         
         // Hide fish tooltip
@@ -1476,6 +3190,25 @@
             seasonalFishListEl.innerHTML = html;
         }
         
+        // Switch museum tab between caught and missing
+        function switchMuseumTab(tab) {
+            currentMuseumTab = tab;
+            
+            // Update tab styling
+            const tabs = document.querySelectorAll('.museum-tab');
+            tabs.forEach(tabEl => {
+                if ((tab === 'caught' && tabEl.textContent === 'Caught') ||
+                    (tab === 'missing' && tabEl.textContent === 'Missing')) {
+                    tabEl.classList.add('active');
+                } else {
+                    tabEl.classList.remove('active');
+                }
+            });
+            
+            // Refresh the museum display
+            updateMuseumDisplay();
+        }
+        
         // Update museum display
         function updateMuseumDisplay() {
             const museumStats = document.getElementById('museumStats');
@@ -1499,7 +3232,8 @@
             // Show reward if any fish donated
             if (donatedCount > 0) {
                 museumReward.style.display = 'block';
-                museumBonusAmount.textContent = donatedCount;
+                const bonusAmount = donatedCount * 100;
+                museumBonusAmount.textContent = formatNumber(bonusAmount);
             } else {
                 museumReward.style.display = 'none';
             }
@@ -1516,31 +3250,43 @@
             const sortedFish = [...fishCache].sort((a, b) => a.name.localeCompare(b.name));
             
             sortedFish.forEach(fish => {
-                const isDonated = donatedFish.has(fish.name);
                 const isCaught = caughtFish.has(fish.name);
+                const isDonated = donatedFish.has(fish.name);
                 
-                const fishItem = document.createElement('div');
-                fishItem.className = 'museum-fish-item';
-                
-                if (isDonated) {
-                    fishItem.classList.add('donated');
-                } else if (!isCaught) {
-                    fishItem.classList.add('not-caught');
+                // Filter based on active tab
+                if (currentMuseumTab === 'caught') {
+                    // Show only caught fish
+                    if (!isCaught) {
+                        return;
+                    }
+                } else if (currentMuseumTab === 'missing') {
+                    // Show only missing (not caught) fish
+                    if (isCaught) {
+                        return;
+                    }
                 }
                 
-                let statusHtml = '';
+                const fishItem = document.createElement('div');
+                fishItem.className = `museum-fish-item ${isCaught ? 'caught' : 'not-caught'}`;
+                
+                let statusIcon = '';
                 if (isDonated) {
-                    statusHtml = '<span class="museum-fish-status">✅</span>';
+                    statusIcon = '🏛️';
                 } else if (isCaught) {
-                    statusHtml = `<button class="donate-button" onclick="donateFish('${fish.name.replace(/'/g, "\\'")}')">Donate</button>`;
+                    statusIcon = '✅';
                 } else {
-                    statusHtml = '<span class="museum-fish-status" style="color: #999;">❓</span>';
+                    statusIcon = '❓';
                 }
                 
                 fishItem.innerHTML = `
                     <span class="museum-fish-name">${fish.name}</span>
-                    ${statusHtml}
+                    <span class="museum-fish-status">${statusIcon}</span>
                 `;
+                
+                // Add tooltip event listeners
+                fishItem.addEventListener('mouseenter', (e) => showFishTooltip(e, fish));
+                fishItem.addEventListener('mouseleave', hideFishTooltip);
+                fishItem.addEventListener('mousemove', updateTooltipPosition);
                 
                 museumFishList.appendChild(fishItem);
             });
@@ -1753,26 +3499,26 @@
             // Load fallback villagers first (curated list of popular villagers)
             if (villagersCache.length === 0) {
                 villagersCache = [
-                    { name: 'Bob', species: 'Cat', personality: 'Lazy', image_url: null },
-                    { name: 'Rosie', species: 'Cat', personality: 'Peppy', image_url: null },
-                    { name: 'Marshal', species: 'Squirrel', personality: 'Smug', image_url: null },
-                    { name: 'Raymond', species: 'Cat', personality: 'Smug', image_url: null },
-                    { name: 'Ankha', species: 'Cat', personality: 'Snooty', image_url: null },
-                    { name: 'Stitches', species: 'Cub', personality: 'Lazy', image_url: null },
-                    { name: 'Fauna', species: 'Deer', personality: 'Normal', image_url: null },
-                    { name: 'Zucker', species: 'Octopus', personality: 'Lazy', image_url: null },
-                    { name: 'Judy', species: 'Cub', personality: 'Snooty', image_url: null },
-                    { name: 'Sherb', species: 'Goat', personality: 'Lazy', image_url: null },
-                    { name: 'Audie', species: 'Wolf', personality: 'Peppy', image_url: null },
-                    { name: 'Dom', species: 'Sheep', personality: 'Jock', image_url: null },
-                    { name: 'Molly', species: 'Duck', personality: 'Normal', image_url: null },
-                    { name: 'Marina', species: 'Octopus', personality: 'Normal', image_url: null },
-                    { name: 'Merengue', species: 'Rhino', personality: 'Normal', image_url: null },
-                    { name: 'Coco', species: 'Rabbit', personality: 'Normal', image_url: null },
-                    { name: 'Lucky', species: 'Dog', personality: 'Lazy', image_url: null },
-                    { name: 'Maple', species: 'Cub', personality: 'Normal', image_url: null },
-                    { name: 'Lolly', species: 'Cat', personality: 'Normal', image_url: null },
-                    { name: 'Tangy', species: 'Cat', personality: 'Peppy', image_url: null }
+                    { name: 'Bob', species: 'Cat', personality: 'Lazy', image_url: null, rarity: 1 },
+                    { name: 'Rosie', species: 'Cat', personality: 'Peppy', image_url: null, rarity: 1 },
+                    { name: 'Marshal', species: 'Squirrel', personality: 'Smug', image_url: null, rarity: 6 },
+                    { name: 'Raymond', species: 'Cat', personality: 'Smug', image_url: null, rarity: 9 },
+                    { name: 'Ankha', species: 'Cat', personality: 'Snooty', image_url: null, rarity: 1 },
+                    { name: 'Stitches', species: 'Cub', personality: 'Lazy', image_url: null, rarity: 1 },
+                    { name: 'Fauna', species: 'Deer', personality: 'Normal', image_url: null, rarity: 4 },
+                    { name: 'Zucker', species: 'Octopus', personality: 'Lazy', image_url: null, rarity: 6 },
+                    { name: 'Judy', species: 'Cub', personality: 'Snooty', image_url: null, rarity: 9 },
+                    { name: 'Sherb', species: 'Goat', personality: 'Lazy', image_url: null, rarity: 9 },
+                    { name: 'Audie', species: 'Wolf', personality: 'Peppy', image_url: null, rarity: 9 },
+                    { name: 'Dom', species: 'Sheep', personality: 'Jock', image_url: null, rarity: 9 },
+                    { name: 'Molly', species: 'Duck', personality: 'Normal', image_url: null, rarity: 6 },
+                    { name: 'Marina', species: 'Octopus', personality: 'Normal', image_url: null, rarity: 6 },
+                    { name: 'Merengue', species: 'Rhino', personality: 'Normal', image_url: null, rarity: 6 },
+                    { name: 'Coco', species: 'Rabbit', personality: 'Normal', image_url: null, rarity: 1 },
+                    { name: 'Lucky', species: 'Dog', personality: 'Lazy', image_url: null, rarity: 1 },
+                    { name: 'Maple', species: 'Cub', personality: 'Normal', image_url: null, rarity: 1 },
+                    { name: 'Lolly', species: 'Cat', personality: 'Normal', image_url: null, rarity: 6 },
+                    { name: 'Tangy', species: 'Cat', personality: 'Peppy', image_url: null, rarity: 1 }
                 ];
             }
             
@@ -1805,12 +3551,36 @@
                     const rawVillagers = await response.json();
                     
                     // Normalize villager data from API
-                    const apiVillagers = rawVillagers.map(villager => ({
-                        name: villager.name,
-                        species: villager.species,
-                        personality: villager.personality,
-                        image_url: villager.image_url || villager.photo_url || villager.icon_url || null
-                    }));
+                    const apiVillagers = rawVillagers.map(villager => {
+                        // Calculate rarity from appearances if available
+                        let rarity = 5; // Default
+                        if (villager.appearances && Array.isArray(villager.appearances)) {
+                            const mainGames = ['DNM', 'AC', 'E_PLUS', 'WW', 'CF', 'NL', 'WA', 'NH', 'HHD', 'PC'];
+                            const gameCount = villager.appearances.filter(game => 
+                                mainGames.some(mainGame => game.toUpperCase().includes(mainGame))
+                            ).length;
+                            
+                            if (gameCount >= 10) rarity = 1;
+                            else if (gameCount >= 9) rarity = 2;
+                            else if (gameCount >= 8) rarity = 3;
+                            else if (gameCount >= 7) rarity = 4;
+                            else if (gameCount >= 6) rarity = 5;
+                            else if (gameCount >= 5) rarity = 6;
+                            else if (gameCount >= 4) rarity = 7;
+                            else if (gameCount >= 3) rarity = 8;
+                            else if (gameCount >= 2) rarity = 9;
+                            else if (gameCount >= 1) rarity = 10;
+                        }
+                        
+                        return {
+                            name: villager.name,
+                            species: villager.species,
+                            personality: villager.personality,
+                            image_url: villager.icon_url || villager.image_url || villager.photo_url || null,
+                            rarity: rarity,
+                            appearances: villager.appearances || []
+                        };
+                    });
                     
                     // Only update if we got valid data
                     if (apiVillagers.length > 0) {
@@ -1843,7 +3613,7 @@
         // Buy a new house
         function buyHouse() {
             if (villagerHouses >= 10) {
-                alert('You already have the maximum number of houses!');
+                console.log('Maximum houses reached');
                 return;
             }
             
@@ -1853,9 +3623,9 @@
                 villagerHouses++;
                 updateDisplay();
                 updateVillagersGrid();
-                alert(`🏠 Purchased a new house!\n\nVillager slots: ${villagerHouses}/10`);
+                console.log(`🏠 Purchased a new house! Villager slots: ${villagerHouses}/10`);
             } else {
-                alert(`Not enough bells!\n\nNeed: ${formatNumber(price)} 🔔\nHave: ${formatNumber(bells)} 🔔`);
+                console.log(`Not enough bells for house. Need: ${formatNumber(price)}, Have: ${formatNumber(bells)}`);
             }
         }
         
@@ -1924,7 +3694,31 @@
                 if (i < purchasedVillagers.length) {
                     const villager = purchasedVillagers[i];
                     slot.className = 'villager-slot';
-                    const imageHtml = villager.image_url ? `<img src="${villager.image_url}" alt="${villager.name}" class="villager-portrait" onerror="this.style.display='none'">` : '<div class="villager-placeholder">👤</div>';
+                    const imageHtml = villager.image_url ? `<img src="${villager.image_url}" alt="${villager.name}" class="villager-portrait" onerror="this.style.display='none'">` : '<div class="villager-placeholder">🐱</div>';
+                    
+                    // Find if villager is assigned to any activity
+                    let assignedTo = null;
+                    for (const [upgradeId, assignedVillager] of Object.entries(villagerAssignments)) {
+                        if (assignedVillager.name === villager.name) {
+                            const upgrade = upgrades.find(u => u.id === upgradeId);
+                            assignedTo = upgrade ? upgrade.name : 'Activity';
+                            break;
+                        }
+                    }
+                    
+                    const assignmentRow = assignedTo ? `
+                        <div class="villager-tooltip-row">
+                            <span class="villager-tooltip-label">Assigned:</span>
+                            <span style="color: #6BAA5E; font-weight: bold;">${assignedTo}</span>
+                        </div>
+                    ` : '';
+                    
+                    const rarityRow = villager.rarity ? `
+                        <div class="villager-tooltip-row">
+                            <span class="villager-tooltip-label">Rarity:</span>
+                            <span>${villager.rarity}/10</span>
+                        </div>
+                    ` : '';
                     
                     const tooltipHtml = `
                         <div class="villager-tooltip">
@@ -1938,6 +3732,8 @@
                                     <span class="villager-tooltip-label">Type:</span>
                                     <span>${villager.personality || 'Unknown'}</span>
                                 </div>
+                                ${rarityRow}
+                                ${assignmentRow}
                             </div>
                         </div>
                     `;
@@ -1984,48 +3780,302 @@
             return availableVillagers[Math.floor(Math.random() * availableVillagers.length)];
         }
         
-        // Display fish catch message
-        function showFishMessage(fish, isDonation = false) {
-            const fishingUpgrade = document.getElementById('upgrade-fishing');
-            if (!fishingUpgrade) return;
+        // Get 3 random villagers for selection
+        function getRandomVillagerChoices(count = 3) {
+            const choices = [];
+            const purchasedNames = new Set(purchasedVillagers.map(v => v.name));
+            const availableVillagers = villagersCache.filter(v => !purchasedNames.has(v.name));
             
-            // Remove any existing fish message
-            const existingMessage = fishingUpgrade.querySelector('.fish-message');
-            if (existingMessage) {
-                existingMessage.remove();
+            if (availableVillagers.length === 0) {
+                // All villagers purchased, use all villagers
+                const shuffled = [...villagersCache].sort(() => Math.random() - 0.5);
+                return shuffled.slice(0, count);
             }
             
-            const sellPrice = fish.sell || fish.sell_nook || 400;
-            const fishSize = fish.size || fish.shadow_size || 'Medium';
+            // Get random unique villagers
+            const shuffled = [...availableVillagers].sort(() => Math.random() - 0.5);
+            return shuffled.slice(0, Math.min(count, shuffled.length));
+        }
+        
+        // Show villager selection modal
+        function showVillagerSelection(isInitialSelection = false) {
+            const modal = document.getElementById('villagerSelectionModal');
+            const choicesContainer = document.getElementById('villagerChoices');
             
-            const message = document.createElement('div');
-            message.className = 'fish-message';
+            if (!modal || !choicesContainer) return;
+            
+            // Get 3 random villagers if starting fresh or rerolling
+            if (currentVillagerChoices.length === 0) {
+                currentVillagerChoices = getRandomVillagerChoices(3);
+            }
+            
+            // Clear previous choices
+            choicesContainer.innerHTML = '';
+            
+            // Update title for initial selection
+            const titleEl = modal.querySelector('.villager-selection-title');
+            if (titleEl && isInitialSelection) {
+                const remaining = 3 - purchasedVillagers.length;
+                const rerollButton = rerollsRemaining > 0 ? `<button onclick="rerollVillagers()" style="
+                    background: linear-gradient(135deg, #6BAA5E 0%, #5A9A4D 100%);
+                    color: white;
+                    border: none;
+                    padding: 4px 10px;
+                    border-radius: 6px;
+                    font-size: 0.75em;
+                    font-weight: bold;
+                    cursor: pointer;
+                    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+                    transition: transform 0.2s;
+                    margin-left: 10px;
+                " onmouseover="this.style.transform='scale(1.05)'" onmouseout="this.style.transform='scale(1)'">
+                    🔄 Reroll (${rerollsRemaining})
+                </button>` : '';
+                titleEl.innerHTML = `Choose Your Starting Villagers<br><span style="font-size: 0.8em; color: #999;">(${remaining} picks remaining)${rerollButton}</span>`;
+            } else if (titleEl) {
+                titleEl.textContent = '🏝️ Choose a Villager';
+            }
+            
+            // Create choice elements
+            currentVillagerChoices.forEach((villager, index) => {
+                const choiceDiv = document.createElement('div');
+                choiceDiv.className = 'villager-choice';
+                choiceDiv.onclick = () => selectVillagerFromChoices(index, isInitialSelection);
+                
+                const imageHtml = villager.image_url 
+                    ? `<img src="${villager.image_url}" alt="${villager.name}" class="villager-choice-portrait" onerror="this.style.display='none'">` 
+                    : '<div class="villager-placeholder" style="font-size: 3em;">🐱</div>';
+                
+                // Generate rarity stars (vertical display)
+                const rarity = villager.rarity || 5;
+                const starsHtml = `
+                    <div class="villager-rarity-stars">
+                        ${Array(rarity).fill('⭐').map(star => `<span class="star">${star}</span>`).join('')}
+                    </div>
+                `;
+                
+                choiceDiv.innerHTML = `
+                    ${starsHtml}
+                    ${imageHtml}
+                    <div class="villager-choice-name">${villager.name}</div>
+                    <div class="villager-choice-info">${villager.species}</div>
+                    <div class="villager-choice-info">${villager.personality}</div>
+                `;
+                
+                choicesContainer.appendChild(choiceDiv);
+            });
+            
+            // Show modal
+            modal.classList.add('active');
+        }
+        
+        // Reroll all villager choices (only during initial selection)
+        function rerollVillagers() {
+            if (rerollsRemaining > 0) {
+                rerollsRemaining--;
+                currentVillagerChoices = getRandomVillagerChoices(3);
+                showVillagerSelection(true);
+                console.log(`🔄 Rerolled villagers! ${rerollsRemaining} rerolls remaining.`);
+            }
+        }
+        
+        // Select a villager from the current choices by index
+        function selectVillagerFromChoices(index, isInitialSelection = false) {
+            const villager = currentVillagerChoices[index];
+            if (!villager) return;
+            
+            const modal = document.getElementById('villagerSelectionModal');
+            
+            // Add villager to purchased list
+            purchasedVillagers.push(villager);
+            updateVillagersGrid();
+            
+            // Handle initial selection flow
+            if (isInitialSelection) {
+                // Replace only the selected villager with a new one
+                const purchasedNames = new Set(purchasedVillagers.map(v => v.name));
+                const availableVillagers = villagersCache.filter(v => !purchasedNames.has(v.name));
+                
+                if (availableVillagers.length > 0) {
+                    const newVillager = availableVillagers[Math.floor(Math.random() * availableVillagers.length)];
+                    currentVillagerChoices[index] = newVillager;
+                }
+                
+                // Check if we've selected 3 villagers
+                if (purchasedVillagers.length < 3) {
+                    // Continue showing selection with updated choices
+                    setTimeout(() => showVillagerSelection(true), 300);
+                } else {
+                    // Completed initial selection
+                    hasCompletedInitialSelection = true;
+                    currentVillagerChoices = []; // Clear choices
+                    rerollsRemaining = 3; // Reset for next time (though shouldn't happen)
+                    modal.classList.remove('active');
+                    console.log('🏝️ Initial villagers selected! You now have 3 villager points to assign.');
+                    saveGame(); // Save the initial selection
+                }
+            } else {
+                // Normal villager purchase - set 24-hour cooldown
+                villagerCooldownEnd = Date.now() + (24 * 60 * 60 * 1000);
+                currentVillagerChoices = []; // Clear choices
+                modal.classList.remove('active');
+            }
+            
+            // Update display
+            calculateCPS();
+            updateDisplay();
+            updateUpgradeButtons();
+            updateVillagerPointsUI();
+        }
+        
+        
+        // Open assignment modal for an upgrade
+        let currentAssignmentUpgradeId = null;
+        
+        function openAssignmentModal(upgradeId) {
+            currentAssignmentUpgradeId = upgradeId;
+            const modal = document.getElementById('villagerAssignmentModal');
+            const title = document.getElementById('assignmentModalTitle');
+            const listContainer = document.getElementById('villagerAssignmentList');
+            
+            if (!modal || !title || !listContainer) return;
+            
+            // Find upgrade name
+            const upgrade = upgrades.find(u => u.id === upgradeId);
+            title.textContent = `Assign Villager to ${upgrade ? upgrade.name : 'Activity'}`;
+            
+            // Clear list
+            listContainer.innerHTML = '';
+            
+            // Get already assigned villagers
+            const assignedVillagers = Object.values(villagerAssignments);
+            const assignedNames = new Set(assignedVillagers.map(v => v.name));
+            
+            // Show all purchased villagers
+            purchasedVillagers.forEach(villager => {
+                const isAssigned = assignedNames.has(villager.name);
+                const itemDiv = document.createElement('div');
+                itemDiv.className = `villager-assignment-item ${isAssigned ? 'assigned' : ''}`;
+                
+                if (!isAssigned) {
+                    itemDiv.onclick = () => assignVillagerToUpgrade(upgradeId, villager);
+                }
+                
+                const imageHtml = villager.image_url 
+                    ? `<img src="${villager.image_url}" alt="${villager.name}" class="villager-choice-portrait" onerror="this.style.display='none'">` 
+                    : '<div class="villager-placeholder" style="font-size: 3em;">🐱</div>';
+                
+                const statusText = isAssigned ? '<div style="color: #999; font-size: 0.8em;">Already Assigned</div>' : '';
+                
+                itemDiv.innerHTML = `
+                    ${imageHtml}
+                    <div class="villager-choice-name">${villager.name}</div>
+                    <div class="villager-choice-info">${villager.species}</div>
+                    <div class="villager-choice-info">${villager.personality}</div>
+                    ${statusText}
+                `;
+                
+                listContainer.appendChild(itemDiv);
+            });
+            
+            // Show modal
+            modal.classList.add('active');
+        }
+        
+        function closeAssignmentModal() {
+            const modal = document.getElementById('villagerAssignmentModal');
+            if (modal) {
+                modal.classList.remove('active');
+            }
+            currentAssignmentUpgradeId = null;
+        }
+        
+        // Assign a villager to an upgrade
+        function assignVillagerToUpgrade(upgradeId, villager) {
+            // Check if villager is already assigned elsewhere
+            for (const [existingUpgradeId, assignedVillager] of Object.entries(villagerAssignments)) {
+                if (assignedVillager.name === villager.name) {
+                    console.log(`${villager.name} is already assigned to another activity`);
+                    return;
+                }
+            }
+            
+            // Assign villager
+            villagerAssignments[upgradeId] = villager;
+            
+            // Update displays
+            updateAssignedVillagers();
+            updateVillagersGrid();
+            calculateCPS();
+            updateDisplay();
+            
+            // Close modal
+            closeAssignmentModal();
+        }
+        
+        // Unassign a villager from an upgrade
+        function unassignVillager(upgradeId) {
+            delete villagerAssignments[upgradeId];
+            
+            // Update displays
+            updateAssignedVillagers();
+            updateVillagersGrid();
+            calculateCPS();
+            updateDisplay();
+        }
+        
+        // Update the assigned villagers display for all upgrades
+        function updateAssignedVillagers() {
+            upgrades.forEach(upgrade => {
+                if (upgrade.id === 'villager') return; // Skip villager upgrade
+                
+                const container = document.getElementById(`assigned-villagers-${upgrade.id}`);
+                const listEl = document.getElementById(`assigned-list-${upgrade.id}`);
+                
+                if (!container || !listEl) return;
+                
+                const assignedVillager = villagerAssignments[upgrade.id];
+                
+                if (assignedVillager) {
+                    container.style.display = 'block';
+                    
+                    const imageHtml = assignedVillager.image_url 
+                        ? `<img src="${assignedVillager.image_url}" alt="${assignedVillager.name}" class="assigned-villager-portrait" onerror="this.style.display='none'">` 
+                        : '<div style="font-size: 1.5em;">👤</div>';
+                    
+                    listEl.innerHTML = `
+                        <div class="assigned-villager-item">
+                            ${imageHtml}
+                            <div class="assigned-villager-name">${assignedVillager.name}</div>
+                            <button class="unassign-button" onclick="event.stopPropagation(); unassignVillager('${upgrade.id}')">Remove</button>
+                        </div>
+                    `;
+                } else if (upgrade.owned > 0) {
+                    // Show assignment section if upgrade is owned, but no villager assigned
+                    container.style.display = 'block';
+                    listEl.innerHTML = '<div style="color: #999; font-style: italic; padding: 8px;">No villager assigned</div>';
+                } else {
+                    // Hide if upgrade not owned
+                    container.style.display = 'none';
+                }
+            });
+        }
+        
+        // Display fish caught message
+        function displayFishMessage(fish, isDonation = false) {
+            const messageEl = document.getElementById('fishing-catch-message');
+            if (!messageEl) return;
             
             if (isDonation) {
-                message.innerHTML = `
-                    <div><strong>🎉 Caught & Donated ${fish.name}!</strong></div>
-                    <div class="fish-details">Size: ${fishSize} | Donated to Museum (+1 Bell/sec bonus)</div>
-                `;
+                messageEl.textContent = `🏛️ Donated: ${fish.name}`;
             } else {
-                message.innerHTML = `
-                    <div><strong>🎣 Caught a ${fish.name}!</strong></div>
-                    <div class="fish-details">Size: ${fishSize} | Sold for: ${sellPrice.toLocaleString()} Bells</div>
-                `;
-            }
-            
-            // Insert at the beginning (after the upgrade-header)
-            const upgradeHeader = fishingUpgrade.querySelector('.upgrade-header');
-            if (upgradeHeader && upgradeHeader.nextSibling) {
-                fishingUpgrade.insertBefore(message, upgradeHeader.nextSibling);
-            } else {
-                fishingUpgrade.appendChild(message);
+                messageEl.textContent = `🎣 Caught: ${fish.name}`;
             }
             
             // Remove message after 5 seconds
             setTimeout(() => {
-                if (message.parentNode) {
-                    message.style.animation = 'slideIn 0.3s ease-out reverse';
-                    setTimeout(() => message.remove(), 300);
+                if (messageEl) {
+                    messageEl.textContent = '';
                 }
             }, 5000);
         }
@@ -2077,18 +4127,23 @@
             return availableFish[availableFish.length - 1];
         }
         
-        // Allocate rod to area
-        function allocateRod(areaId, amount) {
+        // Toggle fishing area (only one can be active at a time)
+        function toggleFishingArea(areaId) {
+            if (inventory.fishingRod === 0) return;
+            
             const area = fishingAreas.find(a => a.id === areaId);
             if (!area) return;
             
-            const totalAssigned = fishingAreas.reduce((sum, a) => sum + a.rods, 0);
-            const unassigned = inventory.fishingRod - totalAssigned;
+            // Deactivate all areas
+            fishingAreas.forEach(a => a.rods = 0);
             
-            if (amount > 0 && unassigned >= amount) {
-                area.rods += amount;
-            } else if (amount < 0 && area.rods >= Math.abs(amount)) {
-                area.rods += amount; // amount is negative
+            // Activate clicked area
+            area.rods = 1;
+            
+            // Hide instruction message after first activation
+            const instructionEl = document.getElementById('fishing-areas-instruction');
+            if (instructionEl) {
+                instructionEl.style.display = 'none';
             }
             
             updateFishingAreasUI();
@@ -2099,9 +4154,6 @@
             const container = document.getElementById('fishing-areas-container');
             if (!container) return;
             
-            const totalAssigned = fishingAreas.reduce((sum, a) => sum + a.rods, 0);
-            const unassigned = inventory.fishingRod - totalAssigned;
-            
             if (inventory.fishingRod === 0) {
                 container.style.display = 'none';
                 return;
@@ -2109,31 +4161,147 @@
             
             container.style.display = 'block';
             
-            const unassignedEl = document.getElementById('unassigned-rods');
-            if (unassignedEl) {
-                unassignedEl.textContent = `Unassigned Rods: ${unassigned}`;
+            // Show instruction if no area is active
+            const instructionEl = document.getElementById('fishing-areas-instruction');
+            const hasActiveArea = fishingAreas.some(a => a.rods > 0);
+            if (instructionEl) {
+                instructionEl.style.display = hasActiveArea ? 'none' : 'block';
+            }
+                        
+            fishingAreas.forEach(area => {
+                const areaEl = document.getElementById(`fishing-area-${area.id}`);
+                
+                if (areaEl) {
+                    if (area.rods > 0) {
+                        areaEl.classList.add('active');
+                    } else {
+                        areaEl.classList.remove('active');
+                    }
+                }
+            });
+        }
+
+
+        // Villager Points Management
+        function getAvailableVillagerPoints() {
+            const totalPoints = purchasedVillagers.length;
+            const assignedPoints = Object.values(villagerPoints).reduce((sum, val) => sum + val, 0);
+            return totalPoints - assignedPoints;
+        }
+
+        function assignVillagerPoint(activityId) {
+            const available = getAvailableVillagerPoints();
+            if (available > 0) {
+                villagerPoints[activityId] = (villagerPoints[activityId] || 0) + 1;
+                
+                // Recalculate fishing timers to apply speed boost immediately
+                if (activityId === 'fishing') {
+                    fishingAreas.forEach(area => {
+                        if (area.rods > 0 && fishingAreaNextCatch[area.id]) {
+                            const currentProgress = fishingAreaProgress[area.id] || 0;
+                            const oldTarget = fishingAreaNextCatch[area.id];
+                            const percentComplete = currentProgress / oldTarget;
+                            
+                            // Calculate new target with updated speed
+                            const newTarget = getFishingInterval();
+                            fishingAreaNextCatch[area.id] = newTarget;
+                            
+                            // Adjust progress to maintain same percentage completion
+                            fishingAreaProgress[area.id] = percentComplete * newTarget;
+                        }
+                    });
+                }
+                
+                updateVillagerPointsUI();
+                updateFishingAreasUI(); // Refresh fishing UI to show new speed
+                saveGame();
+            }
+        }
+
+        function removeVillagerPoint(activityId) {
+            if (villagerPoints[activityId] && villagerPoints[activityId] > 0) {
+                villagerPoints[activityId]--;
+                if (villagerPoints[activityId] === 0) {
+                    delete villagerPoints[activityId];
+                }
+                
+                // Recalculate fishing timers to apply speed change immediately
+                if (activityId === 'fishing') {
+                    fishingAreas.forEach(area => {
+                        if (area.rods > 0 && fishingAreaNextCatch[area.id]) {
+                            const currentProgress = fishingAreaProgress[area.id] || 0;
+                            const oldTarget = fishingAreaNextCatch[area.id];
+                            const percentComplete = currentProgress / oldTarget;
+                            
+                            // Calculate new target with updated speed
+                            const newTarget = getFishingInterval();
+                            fishingAreaNextCatch[area.id] = newTarget;
+                            
+                            // Adjust progress to maintain same percentage completion
+                            fishingAreaProgress[area.id] = percentComplete * newTarget;
+                        }
+                    });
+                }
+                
+                updateVillagerPointsUI();
+                updateFishingAreasUI(); // Refresh fishing UI to show new speed
+                saveGame();
+            }
+        }
+
+        function updateVillagerPointsUI() {
+            const section = document.getElementById('villagerPointsSection');
+            const availableEl = document.getElementById('availablePoints');
+            const listContainer = document.getElementById('activityPointsList');
+            
+            if (!section || !availableEl || !listContainer) return;
+            
+            // Show section if player has villagers
+            if (purchasedVillagers.length > 0) {
+                section.style.display = 'block';
+            } else {
+                section.style.display = 'none';
+                return;
             }
             
-            fishingAreas.forEach(area => {
-                const rodCountEl = document.getElementById(`rod-count-${area.id}`);
-                const addBtn = document.getElementById(`add-rod-${area.id}`);
-                const removeBtn = document.getElementById(`remove-rod-${area.id}`);
+            const available = getAvailableVillagerPoints();
+            availableEl.textContent = available;
+            
+            // Define activities that can receive points
+            const activities = [
+                { id: 'fishing', name: '🎣', description: 'Faster fishing in all areas' }
+            ];
+            
+            // Clear and rebuild list
+            listContainer.innerHTML = '';
+            
+            activities.forEach(activity => {
+                const points = villagerPoints[activity.id] || 0;
+                const bonus = points * 50; // 50% per point
                 
-                if (rodCountEl) rodCountEl.textContent = area.rods;
-                if (addBtn) addBtn.disabled = unassigned === 0;
-                if (removeBtn) removeBtn.disabled = area.rods === 0;
+                const itemDiv = document.createElement('div');
+                itemDiv.className = 'activity-point-item';
+                itemDiv.innerHTML = `
+                    <div class="activity-point-name">${activity.name}</div>
+                    <div class="activity-point-bonus">+${bonus}% speed</div>
+                    <div class="activity-point-controls">
+                        <button class="point-button" onclick="removeVillagerPoint('${activity.id}')" ${points === 0 ? 'disabled' : ''}>-</button>
+                        <div class="activity-point-count">${points}</div>
+                        <button class="point-button" onclick="assignVillagerPoint('${activity.id}')" ${available === 0 ? 'disabled' : ''}>+</button>
+                    </div>
+                `;
+                listContainer.appendChild(itemDiv);
             });
         }
 
         // DOM elements - will be initialized after DOM loads
-        let bellCountEl, perSecondEl, totalProductionEl, upgradesContainer, shopContainer;
+        let bellCountEl, perSecondEl, upgradesContainer, shopContainer;
         let calendarDateEl, calendarDayEl, seasonalFishListEl;
         
         // Initialize DOM elements
         function initDOMElements() {
             bellCountEl = document.getElementById('bellCount');
             perSecondEl = document.getElementById('perSecond');
-            totalProductionEl = document.getElementById('totalProduction');
             upgradesContainer = document.getElementById('upgradesContainer');
             shopContainer = document.getElementById('shopContainer');
             calendarDateEl = document.getElementById('calendarDate');
@@ -2143,9 +4311,9 @@
 
         // Calculate upgrade cost with scaling
         function getUpgradeCost(upgrade) {
-            // Villagers always cost 100 bells (no scaling)
+            // Villagers are free
             if (upgrade.id === 'villager') {
-                return upgrade.baseCost;
+                return 0;
             }
             return Math.floor(upgrade.baseCost * Math.pow(1.15, upgrade.owned));
         }
@@ -2162,9 +4330,60 @@
         function updateDisplay() {
             bellCountEl.textContent = formatNumber(bells) + ' Bells';
             perSecondEl.textContent = formatNumber(bellsPerSecond);
-            totalProductionEl.textContent = 'Total Earned: ' + formatNumber(totalBellsEarned) + ' Bells';
             updateUpgradeButtons();
             updateShopItems();
+            updateShopUpgradeButton();
+        }
+        
+        // Update shop name based on current store stage
+        function updateShopName() {
+            const shopNameEl = document.getElementById('shopName');
+            const currentStore = storeTiers[storeStage - 1];
+            shopNameEl.textContent = currentStore.name;
+            updateShopVisibility();
+        }
+        
+        // Update shop items visibility based on whether store is open
+        function updateShopVisibility() {
+            const shopContainer = document.getElementById('shopContainer');
+            const closedMessage = document.getElementById('shopClosedMessage');
+            
+            // Shop is always open
+            shopContainer.classList.remove('closed');
+            closedMessage.style.display = 'none';
+        }
+        
+        // Update shop upgrade button visibility and text
+        function updateShopUpgradeButton() {
+            const upgradeBtn = document.getElementById('shopUpgradeBtn');
+            
+            if (storeStage < 4) {
+                const nextStore = storeTiers[storeStage];
+                const canAfford = bells >= nextStore.price;
+                
+                upgradeBtn.style.display = 'block';
+                upgradeBtn.textContent = `Upgrade (${formatNumber(nextStore.price)} Bells)`;
+                upgradeBtn.disabled = !canAfford;
+            } else {
+                upgradeBtn.style.display = 'none';
+            }
+        }
+        
+        // Upgrade shop function
+        function upgradeShop() {
+            if (storeStage >= 4) return;
+            
+            const nextStore = storeTiers[storeStage];
+            if (bells >= nextStore.price) {
+                bells -= nextStore.price;
+                storeStage = nextStore.stage;
+                
+                updateShopName();
+                updateDisplay();
+                calculateCPS();
+                
+                console.log(`🏪 Upgraded to ${nextStore.name}! +${nextStore.cpsBonus} Bells/sec`);
+            }
         }
 
         // Create shop items
@@ -2247,7 +4466,7 @@
                     updateFishingAreasUI();
                     
                     const speedBonus = Math.round((1 - fishingRodTiers.find(t => t.tier === item.tier).speedMultiplier) * 100);
-                    alert(`🎣 Upgraded to ${item.name}!\n\nFishing speed increased by ${speedBonus}%`);
+                    console.log(`🎣 Upgraded to ${item.name}! Fishing speed increased by ${speedBonus}%`);
                 }
                 return;
             }
@@ -2265,6 +4484,7 @@
                 bells -= item.price;
                 inventory[item.inventoryKey]++;
                 buildShopItems();
+                createShopItems(); // Refresh shop UI to show upgrades
                 updateDisplay();
                 updateShopItems();
                 updateFishingAreasUI();
@@ -2291,34 +4511,39 @@
             fishingDiv.innerHTML = `
                 <div class="upgrade-header">
                     <div class="upgrade-info">
-                        <div class="upgrade-name">🎣 Fishing Areas</div>
-                        <div class="upgrade-description">Current Rod: ${currentRodTier.name} (${Math.round(currentRodTier.speedMultiplier * 100)}% speed)</div>
+                        <div class="upgrade-name">Fishing Areas</div>
                     </div>
                 </div>
                 <div class="fishing-areas" id="fishing-areas-container" style="display: none;">
-                    <div class="fishing-areas-title">Fishing Areas</div>
-                    <div class="unassigned-rods" id="unassigned-rods">Unassigned Rods: 0</div>
+                    <div class="fishing-areas-header">
+                        <div class="fishing-catch-message" id="fishing-catch-message"></div>
+                    </div>
+                    
+                    <div class="fishing-areas-instruction" id="fishing-areas-instruction">Pick a spot to start fishing!</div>
                     ${fishingAreas.map(area => `
-                        <div class="fishing-area">
+                        <div class="fishing-area" id="fishing-area-${area.id}" onclick="toggleFishingArea('${area.id}')">
                             <div class="fishing-area-top">
-                                <div class="area-info">
-                                    <div class="area-text">
-                                        <div class="area-name">${area.name}</div>
-                                        <div class="area-fish-types">${area.description}</div>
-                                    </div>
-                                    <div class="area-progress-container">
-                                        <div class="area-progress-text" id="area-progress-text-${area.id}">0%</div>
-                                        <div class="area-progress-bar" id="area-progress-bar-${area.id}" style="width: 0%"></div>
-                                    </div>
+                                <div class="area-text">
+                                    <div class="area-name">${area.name}</div>
+                                    <div class="area-fish-types">${area.description}</div>
                                 </div>
-                                <div class="area-controls">
-                                    <button class="area-button" id="remove-rod-${area.id}" onclick="allocateRod('${area.id}', -1)">-</button>
-                                    <div class="rod-count" id="rod-count-${area.id}">0</div>
-                                    <button class="area-button" id="add-rod-${area.id}" onclick="allocateRod('${area.id}', 1)">+</button>
-                                </div>
+                            </div>
+                            <div class="area-progress-container">
+                                <div class="area-progress-bar" id="area-progress-bar-${area.id}" style="width: 0%"></div>
                             </div>
                         </div>
                     `).join('')}
+                    
+                    <!-- Villager Points Allocation -->
+                    <div class="villager-points-section" id="villagerPointsSection" style="display: none; margin-top: 10px;">
+                        <div class="villager-points-title">⭐ Villager Points</div>
+                        <div class="villager-points-info">
+                            Available: <span id="availablePoints">0</span> | Each point = 50% speed boost
+                        </div>
+                        <div id="activityPointsList">
+                            <!-- Activity point allocation will be added here -->
+                        </div>
+                    </div>
                 </div>
             `;
             
@@ -2332,6 +4557,16 @@
                 
                 const cost = getUpgradeCost(upgrade);
                 const cooldownHtml = upgrade.id === 'villager' ? `<div class="villager-cooldown" id="cooldown-${upgrade.id}" style="display: none; color: #F7B32B; font-size: 0.9em; margin-top: 5px;"></div>` : '';
+                const costHtml = upgrade.id === 'villager' ? '' : `<div class="upgrade-cost" id="cost-${upgrade.id}">${formatNumber(cost)} 🔔</div>`;
+                
+                // Skip villager upgrade (it's not an activity to assign to)
+                const assignmentHtml = upgrade.id !== 'villager' ? `
+                    <div class="assigned-villagers" id="assigned-villagers-${upgrade.id}" style="display: none;">
+                        <div style="font-weight: bold; margin-bottom: 5px;">👥 Assigned Villagers:</div>
+                        <div id="assigned-list-${upgrade.id}"></div>
+                        <button class="assign-button" onclick="event.stopPropagation(); openAssignmentModal('${upgrade.id}')">+ Assign Villager</button>
+                    </div>
+                ` : '';
                 
                 upgradeDiv.innerHTML = `
                     <div class="upgrade-header">
@@ -2342,12 +4577,13 @@
                             <div class="production-rate" id="production-${upgrade.id}">Generates: 0 Bells/${upgrade.interval}s</div>
                             ${cooldownHtml}
                         </div>
-                        <div class="upgrade-cost" id="cost-${upgrade.id}">${formatNumber(cost)} 🔔</div>
+                        ${costHtml}
                     </div>
                     <div class="progress-bar-container" id="progress-container-${upgrade.id}" style="display: none;">
                         <div class="progress-text" id="progress-text-${upgrade.id}">0%</div>
                         <div class="progress-bar" id="progress-bar-${upgrade.id}" style="width: 0%"></div>
                     </div>
+                    ${assignmentHtml}
                 `;
                 
                 upgradeDiv.addEventListener('click', () => buyUpgrade(upgrade));
@@ -2413,14 +4649,26 @@
                 if (progressContainer) {
                     if (upgrade.owned > 0) {
                         progressContainer.style.display = 'block';
-                        const bellsPerInterval = upgrade.cps * upgrade.owned;
+                        let bellsPerInterval = upgrade.cps * upgrade.owned;
+                        
+                        // Apply villager bonus
+                        if (villagerAssignments[upgrade.id]) {
+                            bellsPerInterval *= 1.5;
+                        }
+                        
                         if (productionEl) {
-                            productionEl.textContent = `Generates: ${formatNumber(bellsPerInterval)} Bells/${upgrade.interval}s`;
+                            const bellsPerSec = bellsPerInterval / upgrade.interval;
+                            if (villagerAssignments[upgrade.id]) {
+                                productionEl.innerHTML = `Generates: ${formatNumber(bellsPerSec)} Bells/sec <span style="color: #6BAA5E; font-weight: bold;">(+50% 👥)</span>`;
+                            } else {
+                                productionEl.textContent = `Generates: ${formatNumber(bellsPerSec)} Bells/sec`;
+                            }
                         }
                     } else {
                         progressContainer.style.display = 'none';
                         if (productionEl) {
-                            productionEl.textContent = `Generates: ${formatNumber(upgrade.cps)} Bells/${upgrade.interval}s each`;
+                            const bellsPerSec = upgrade.cps / upgrade.interval;
+                            productionEl.textContent = `Generates: ${formatNumber(bellsPerSec)} Bells/sec each`;
                         }
                     }
                 }
@@ -2447,14 +4695,12 @@
             fishingAreas.forEach(area => {
                 if (area.rods > 0) {
                     const progressBar = document.getElementById(`area-progress-bar-${area.id}`);
-                    const progressText = document.getElementById(`area-progress-text-${area.id}`);
                     
-                    if (progressBar && progressText) {
+                    if (progressBar) {
                         const progress = fishingAreaProgress[area.id];
                         const nextCatch = fishingAreaNextCatch[area.id];
                         const percentage = (progress / nextCatch) * 100; // Variable interval (30-45s)
                         progressBar.style.width = percentage + '%';
-                        progressText.textContent = Math.floor(percentage) + '%';
                     }
                 }
             });
@@ -2491,16 +4737,23 @@
             if (upgrade.id === 'villager') {
                 // Check if we have space for more villagers (based on houses)
                 if (purchasedVillagers.length >= villagerHouses) {
-                    alert(`No empty houses!\n\nVillagers: ${purchasedVillagers.length}/${villagerHouses}\n\nBuy more houses to invite more villagers.`);
+                    console.log(`No empty houses! Villagers: ${purchasedVillagers.length}/${villagerHouses}. Buy more houses to invite more villagers.`);
                     return;
                 }
                 
                 // Check villager cooldown
                 if (isVillagerOnCooldown()) {
                     const remaining = formatCooldownTime(getRemainingCooldown());
-                    alert(`⏰ You can invite another villager in ${remaining}`);
+                    console.log(`⏰ Villager on cooldown. Can invite another in ${remaining}`);
                     return;
                 }
+                
+                // Show villager selection modal (free, no cost)
+                upgrade.owned++;
+                showVillagerSelection();
+                updateDisplay();
+                updateUpgradeButtons();
+                return;
             }
             
             // Check if max owned limit reached
@@ -2513,16 +4766,6 @@
                 bells -= cost;
                 upgrade.owned++;
                 
-                // If buying a villager, add a random villager to the grid and set cooldown
-                if (upgrade.id === 'villager') {
-                    const newVillager = getRandomVillager();
-                    purchasedVillagers.push(newVillager);
-                    updateVillagersGrid();
-                    
-                    // Set 24-hour cooldown (24 * 60 * 60 * 1000 ms)
-                    villagerCooldownEnd = Date.now() + (24 * 60 * 60 * 1000);
-                }
-                
                 calculateCPS();
                 updateDisplay();
             }
@@ -2533,11 +4776,24 @@
             bellsPerSecond = 0;
             upgrades.forEach(upgrade => {
                 // cps represents bells per interval, so divide by interval to get per second
-                bellsPerSecond += (upgrade.cps / upgrade.interval) * upgrade.owned;
+                let baseCPS = (upgrade.cps / upgrade.interval) * upgrade.owned;
+                
+                // Apply villager bonus (50% increase if assigned)
+                if (villagerAssignments[upgrade.id]) {
+                    baseCPS *= 1.5;
+                }
+                
+                bellsPerSecond += baseCPS;
             });
             
-            // Add museum bonus (1 bell/sec per donated fish)
-            bellsPerSecond += donatedFish.size;
+            // Add store bonus (passive income from store upgrades)
+            if (storeStage > 0) {
+                const currentStore = storeTiers[storeStage - 1];
+                bellsPerSecond += currentStore.cpsBonus;
+            }
+            
+            // Add museum bonus (100 bells/sec per donated fish)
+            bellsPerSecond += donatedFish.size * 100;
         }
 
 
@@ -2606,7 +4862,7 @@
                                 totalBellsEarned += fishValue * area.rods;
                             }
                             
-                            showFishMessage(fish, isDonation);
+                            displayFishMessage(fish, isDonation);
                         }
                         fishingAreaProgress[area.id] = 0;
                         // Set new random interval between 30-45 seconds, affected by rod tier
@@ -2632,7 +4888,8 @@
                 purchasedVillagers,
                 villagerCooldownEnd,
                 fishingRodTier,
-                villagerHouses
+                villagerHouses,
+                villagerAssignments
             };
             localStorage.setItem('animalCrossingBellsSave', JSON.stringify(gameState));
         }, 5000);
@@ -2687,18 +4944,64 @@
                 if (gameState.fishingRodTier) {
                     fishingRodTier = gameState.fishingRodTier;
                 }
+                if (gameState.storeStage !== undefined) {
+                    storeStage = gameState.storeStage;
+                }
                 if (gameState.villagerHouses !== undefined) {
                     villagerHouses = gameState.villagerHouses;
                 }
-                calculateCPS();
+                if (gameState.villagerAssignments) {
+                    villagerAssignments = gameState.villagerAssignments;
+                }
+                if (gameState.hasCompletedInitialSelection !== undefined) {
+                    hasCompletedInitialSelection = gameState.hasCompletedInitialSelection;
+                }
+                if (gameState.villagerPoints) {
+                    villagerPoints = gameState.villagerPoints;
+                }
+                if (gameState.rerollsRemaining !== undefined) {
+                    rerollsRemaining = gameState.rerollsRemaining;
+                }
             }
+            calculateCPS();
+        }
+
+        // Save game
+        function saveGame() {
+            const gameState = {
+                bells,
+                totalBellsEarned,
+                upgrades: upgrades.map(u => ({ id: u.id, owned: u.owned })),
+                progress: upgradeProgress,
+                fishingAreas: fishingAreas.map(a => ({ id: a.id, rods: a.rods })),
+                fishingAreaProgress,
+                fishingAreaNextCatch,
+                inventory,
+                caughtFish: Array.from(caughtFish),
+                donatedFish: Array.from(donatedFish),
+                purchasedVillagers,
+                villagerCooldownEnd,
+                fishingRodTier,
+                storeStage,
+                villagerHouses,
+                villagerAssignments,
+                hasCompletedInitialSelection,
+                villagerPoints,
+                rerollsRemaining
+            };
+            localStorage.setItem('animalCrossingBellsSave', JSON.stringify(gameState));
         }
 
         // Reset game
         function resetGame() {
             if (confirm('Are you sure you want to start over? This will delete all your progress!')) {
                 localStorage.removeItem('animalCrossingBellsSave');
-                location.reload();
+                // Force localStorage to flush by accessing it
+                localStorage.getItem('animalCrossingBellsSave');
+                // Use setTimeout to ensure localStorage is cleared before reload
+                setTimeout(() => {
+                    location.reload();
+                }, 100);
             }
         }
 
@@ -2724,6 +5027,7 @@
                 loadGame();
                 
                 // Setup UI
+                updateShopName();
                 buildShopItems();
                 createShopItems();
                 createUpgradeButtons();
@@ -2731,7 +5035,9 @@
                 updateFishingAreasUI();
                 initVillagersGrid();
                 updateVillagersGrid();
+                updateAssignedVillagers();
                 updateMuseumDisplay();
+                updateVillagerPointsUI();
                 
                 // Update museum when fish data loads
                 setTimeout(() => updateMuseumDisplay(), 1000);
@@ -2743,12 +5049,27 @@
                 
                 // Fetch API data and hide loading when done
                 fetchAPIDataInBackground();
+                
+                // Trigger initial villager selection if not completed
+                if (!hasCompletedInitialSelection && purchasedVillagers.length < 3) {
+                    // Wait for villagers to load from API before showing selection
+                    setTimeout(() => {
+                        if (villagersCache.length > 0) {
+                            console.log('🏝️ Starting initial villager selection...');
+                            showVillagerSelection(true);
+                        } else {
+                            // Retry if villagers haven't loaded yet
+                            setTimeout(() => {
+                                if (villagersCache.length > 0) {
+                                    showVillagerSelection(true);
+                                }
+                            }, 2000);
+                        }
+                    }, 1500);
+                }
             } catch (error) {
                 console.error('❌ Failed to initialize game:', error);
                 updateLoadingStatus('Error loading game. Please refresh.');
-                setTimeout(() => {
-                    alert('Failed to initialize game. Please refresh the page.');
-                }, 1000);
             }
         }
         

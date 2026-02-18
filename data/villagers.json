@@ -46,7 +46,22 @@
       "catch-JPja": "でごわす",
       "catch-KRko": "임돠",
       "catch-EUru": "апчхи"
-    }
+    },
+    "rarity": 1,
+    "appearances": [
+      "DNM",
+      "AC",
+      "E_PLUS",
+      "WW",
+      "CF",
+      "NL",
+      "WA",
+      "NH",
+      "FILM",
+      "HHD",
+      "PC"
+    ],
+    "appearance_count": 11
   },
   "ant01": {
     "id": 2,
@@ -95,7 +110,19 @@
       "catch-JPja": "ホントに",
       "catch-KRko": "진짜로",
       "catch-EUru": "го-го-го"
-    }
+    },
+    "rarity": 3,
+    "appearances": [
+      "E_PLUS",
+      "WW",
+      "CF",
+      "NL",
+      "WA",
+      "NH",
+      "HHD",
+      "PC"
+    ],
+    "appearance_count": 8
   },
   "ant02": {
     "id": 3,
@@ -144,7 +171,21 @@
       "catch-JPja": "だっしー",
       "catch-KRko": "라지요",
       "catch-EUru": "снуф-снуф"
-    }
+    },
+    "rarity": 1,
+    "appearances": [
+      "DNM",
+      "AC",
+      "E_PLUS",
+      "WW",
+      "CF",
+      "NL",
+      "WA",
+      "NH",
+      "HHD",
+      "PC"
+    ],
+    "appearance_count": 10
   },
   "ant03": {
     "id": 4,
@@ -193,7 +234,18 @@
       "catch-JPja": "マジでー",
       "catch-KRko": "정말",
       "catch-EUru": "хрум-хрум"
-    }
+    },
+    "rarity": 4,
+    "appearances": [
+      "WW",
+      "CF",
+      "NL",
+      "WA",
+      "NH",
+      "HHD",
+      "PC"
+    ],
+    "appearance_count": 7
   },
   "ant06": {
     "id": 5,
@@ -242,7 +294,17 @@
       "catch-JPja": "たもれ",
       "catch-KRko": "추릅",
       "catch-EUru": "шмыг"
-    }
+    },
+    "rarity": 5,
+    "appearances": [
+      "DNM",
+      "AC",
+      "E_PLUS",
+      "WA",
+      "NH",
+      "PC"
+    ],
+    "appearance_count": 6
   },
   "ant08": {
     "id": 6,
@@ -291,7 +353,16 @@
       "catch-JPja": "をかし",
       "catch-KRko": "하양하양",
       "catch-EUru": "жуй-жуй"
-    }
+    },
+    "rarity": 6,
+    "appearances": [
+      "NL",
+      "WA",
+      "NH",
+      "HHD",
+      "PC"
+    ],
+    "appearance_count": 5
   },
   "ant09": {
     "id": 7,
@@ -340,7 +411,16 @@
       "catch-JPja": "ムーチョ",
       "catch-KRko": "무쵸",
       "catch-EUru": "уф-уф"
-    }
+    },
+    "rarity": 6,
+    "appearances": [
+      "NL",
+      "WA",
+      "NH",
+      "HHD",
+      "PC"
+    ],
+    "appearance_count": 5
   },
   "bea00": {
     "id": 8,
@@ -389,7 +469,21 @@
       "catch-JPja": "ですたい",
       "catch-KRko": "입네다",
       "catch-EUru": "быр-быр"
-    }
+    },
+    "rarity": 1,
+    "appearances": [
+      "DNM",
+      "AC",
+      "E_PLUS",
+      "WW",
+      "CF",
+      "NL",
+      "WA",
+      "NH",
+      "HHD",
+      "PC"
+    ],
+    "appearance_count": 10
   },
   "bea01": {
     "id": 9,
@@ -438,7 +532,21 @@
       "catch-JPja": "わぉ",
       "catch-KRko": "와",
       "catch-EUru": "ну и ну"
-    }
+    },
+    "rarity": 1,
+    "appearances": [
+      "DNM",
+      "AC",
+      "E_PLUS",
+      "WW",
+      "CF",
+      "NL",
+      "WA",
+      "NH",
+      "HHD",
+      "PC"
+    ],
+    "appearance_count": 10
   },
   "bea02": {
     "id": 10,
@@ -487,7 +595,19 @@
       "catch-JPja": "ウム",
       "catch-KRko": "음",
       "catch-EUru": "махрово"
-    }
+    },
+    "rarity": 3,
+    "appearances": [
+      "E_PLUS",
+      "WW",
+      "CF",
+      "NL",
+      "WA",
+      "NH",
+      "HHD",
+      "PC"
+    ],
+    "appearance_count": 8
   },
   "bea03": {
     "id": 11,
@@ -536,7 +656,21 @@
       "catch-JPja": "アルヨ",
       "catch-KRko": "그럼",
       "catch-EUru": "ай-яй"
-    }
+    },
+    "rarity": 1,
+    "appearances": [
+      "DNM",
+      "AC",
+      "E_PLUS",
+      "WW",
+      "CF",
+      "NL",
+      "WA",
+      "NH",
+      "HHD",
+      "PC"
+    ],
+    "appearance_count": 10
   },
   "bea05": {
     "id": 12,
@@ -585,7 +719,20 @@
       "catch-JPja": "んだ",
       "catch-KRko": "힘내",
       "catch-EUru": "спа-а-ать"
-    }
+    },
+    "rarity": 2,
+    "appearances": [
+      "DNM",
+      "AC",
+      "E_PLUS",
+      "CF",
+      "NL",
+      "WA",
+      "NH",
+      "HHD",
+      "PC"
+    ],
+    "appearance_count": 9
   },
   "bea06": {
     "id": 13,
@@ -634,7 +781,20 @@
       "catch-JPja": "ワォー",
       "catch-KRko": "어쩌라구",
       "catch-EUru": "бур-бур"
-    }
+    },
+    "rarity": 2,
+    "appearances": [
+      "DNM",
+      "AC",
+      "E_PLUS",
+      "CF",
+      "NL",
+      "WA",
+      "NH",
+      "HHD",
+      "PC"
+    ],
+    "appearance_count": 9
   },
   "bea07": {
     "id": 14,
@@ -683,7 +843,20 @@
       "catch-JPja": "ファイト",
       "catch-KRko": "사르르",
       "catch-EUru": "ме-е-ед"
-    }
+    },
+    "rarity": 2,
+    "appearances": [
+      "DNM",
+      "AC",
+      "E_PLUS",
+      "CF",
+      "NL",
+      "WA",
+      "NH",
+      "HHD",
+      "PC"
+    ],
+    "appearance_count": 9
   },
   "bea08": {
     "id": 15,
@@ -732,7 +905,17 @@
       "catch-JPja": "やーねぇ",
       "catch-KRko": "그라지",
       "catch-EUru": "гррум"
-    }
+    },
+    "rarity": 5,
+    "appearances": [
+      "DNM",
+      "AC",
+      "E_PLUS",
+      "WA",
+      "NH",
+      "PC"
+    ],
+    "appearance_count": 6
   },
   "bea09": {
     "id": 16,
@@ -781,7 +964,20 @@
       "catch-JPja": "だクマ",
       "catch-KRko": "냅둬",
       "catch-EUru": "грр"
-    }
+    },
+    "rarity": 2,
+    "appearances": [
+      "DNM",
+      "AC",
+      "E_PLUS",
+      "CF",
+      "NL",
+      "WA",
+      "NH",
+      "HHD",
+      "PC"
+    ],
+    "appearance_count": 9
   },
   "bea10": {
     "id": 17,
@@ -830,7 +1026,17 @@
       "catch-JPja": "ヤッホー",
       "catch-KRko": "야호야호",
       "catch-EUru": "йодль"
-    }
+    },
+    "rarity": 5,
+    "appearances": [
+      "E_PLUS",
+      "NL",
+      "WA",
+      "NH",
+      "HHD",
+      "PC"
+    ],
+    "appearance_count": 6
   },
   "bea11": {
     "id": 18,
@@ -879,7 +1085,15 @@
       "catch-JPja": "ボウズ",
       "catch-KRko": "터프",
       "catch-EUru": "гарр-сон"
-    }
+    },
+    "rarity": 7,
+    "appearances": [
+      "E_PLUS",
+      "WA",
+      "NH",
+      "PC"
+    ],
+    "appearance_count": 4
   },
   "bea12": {
     "id": 19,
@@ -928,7 +1142,17 @@
       "catch-JPja": "よいしょ",
       "catch-KRko": "으랏차차",
       "catch-EUru": "ого-го"
-    }
+    },
+    "rarity": 5,
+    "appearances": [
+      "E_PLUS",
+      "NL",
+      "WA",
+      "NH",
+      "HHD",
+      "PC"
+    ],
+    "appearance_count": 6
   },
   "bea13": {
     "id": 20,
@@ -977,7 +1201,16 @@
       "catch-JPja": "オッホン",
       "catch-KRko": "오홍홍",
       "catch-EUru": "усы мои"
-    }
+    },
+    "rarity": 6,
+    "appearances": [
+      "NL",
+      "WA",
+      "NH",
+      "HHD",
+      "PC"
+    ],
+    "appearance_count": 5
   },
   "bea14": {
     "id": 21,
@@ -1026,7 +1259,16 @@
       "catch-JPja": "オパー",
       "catch-KRko": "라저",
       "catch-EUru": "штрудель"
-    }
+    },
+    "rarity": 6,
+    "appearances": [
+      "NL",
+      "WA",
+      "NH",
+      "HHD",
+      "PC"
+    ],
+    "appearance_count": 5
   },
   "bea15": {
     "id": 22,
@@ -1075,7 +1317,13 @@
       "catch-JPja": "ぺろ",
       "catch-KRko": "낼름",
       "catch-EUru": "сладенько"
-    }
+    },
+    "rarity": 9,
+    "appearances": [
+      "NH",
+      "PC"
+    ],
+    "appearance_count": 2
   },
   "brd00": {
     "id": 23,
@@ -1124,7 +1372,21 @@
       "catch-JPja": "でおます",
       "catch-KRko": "그쵸",
       "catch-EUru": "хей-хей"
-    }
+    },
+    "rarity": 1,
+    "appearances": [
+      "DNM",
+      "AC",
+      "E_PLUS",
+      "WW",
+      "CF",
+      "NL",
+      "WA",
+      "NH",
+      "HHD",
+      "PC"
+    ],
+    "appearance_count": 10
   },
   "brd01": {
     "id": 24,
@@ -1173,7 +1435,21 @@
       "catch-JPja": "さ",
       "catch-KRko": "글쎄",
       "catch-EUru": "ля-ля-ля"
-    }
+    },
+    "rarity": 1,
+    "appearances": [
+      "DNM",
+      "AC",
+      "E_PLUS",
+      "WW",
+      "CF",
+      "NL",
+      "WA",
+      "NH",
+      "HHD",
+      "PC"
+    ],
+    "appearance_count": 10
   },
   "brd02": {
     "id": 25,
@@ -1222,7 +1498,21 @@
       "catch-JPja": "でシ",
       "catch-KRko": "이어라",
       "catch-EUru": "чик-чирик"
-    }
+    },
+    "rarity": 1,
+    "appearances": [
+      "DNM",
+      "AC",
+      "E_PLUS",
+      "WW",
+      "CF",
+      "NL",
+      "WA",
+      "NH",
+      "HHD",
+      "PC"
+    ],
+    "appearance_count": 10
   },
   "brd03": {
     "id": 26,
@@ -1271,7 +1561,21 @@
       "catch-JPja": "ッピ",
       "catch-KRko": "크",
       "catch-EUru": "тю-вить"
-    }
+    },
+    "rarity": 1,
+    "appearances": [
+      "DNM",
+      "AC",
+      "E_PLUS",
+      "WW",
+      "CF",
+      "NL",
+      "WA",
+      "NH",
+      "HHD",
+      "PC"
+    ],
+    "appearance_count": 10
   },
   "brd04": {
     "id": 27,
@@ -1320,7 +1624,18 @@
       "catch-JPja": "だニョ",
       "catch-KRko": "삼바",
       "catch-EUru": "бзе-е-ерт"
-    }
+    },
+    "rarity": 4,
+    "appearances": [
+      "WW",
+      "CF",
+      "NL",
+      "WA",
+      "NH",
+      "HHD",
+      "PC"
+    ],
+    "appearance_count": 7
   },
   "brd05": {
     "id": 28,
@@ -1369,7 +1684,17 @@
       "catch-JPja": "けどー",
       "catch-KRko": "허나",
       "catch-EUru": "чики-чик"
-    }
+    },
+    "rarity": 5,
+    "appearances": [
+      "DNM",
+      "AC",
+      "E_PLUS",
+      "WA",
+      "NH",
+      "PC"
+    ],
+    "appearance_count": 6
   },
   "brd06": {
     "id": 29,
@@ -1418,7 +1743,17 @@
       "catch-JPja": "ってか",
       "catch-KRko": "오예",
       "catch-EUru": "чиф-чиф"
-    }
+    },
+    "rarity": 5,
+    "appearances": [
+      "DNM",
+      "AC",
+      "E_PLUS",
+      "WA",
+      "NH",
+      "PC"
+    ],
+    "appearance_count": 6
   },
   "brd08": {
     "id": 30,
@@ -1467,7 +1802,20 @@
       "catch-JPja": "キョン",
       "catch-KRko": "핑그르르",
       "catch-EUru": "тви-тви"
-    }
+    },
+    "rarity": 2,
+    "appearances": [
+      "DNM",
+      "AC",
+      "E_PLUS",
+      "CF",
+      "NL",
+      "WA",
+      "NH",
+      "HHD",
+      "PC"
+    ],
+    "appearance_count": 9
   },
   "brd11": {
     "id": 31,
@@ -1516,7 +1864,15 @@
       "catch-JPja": "っつーの",
       "catch-KRko": "그거야",
       "catch-EUru": "чуррп"
-    }
+    },
+    "rarity": 7,
+    "appearances": [
+      "E_PLUS",
+      "WA",
+      "NH",
+      "PC"
+    ],
+    "appearance_count": 4
   },
   "brd15": {
     "id": 32,
@@ -1565,7 +1921,16 @@
       "catch-JPja": "カァー",
       "catch-KRko": "까아악",
       "catch-EUru": "кар-ко"
-    }
+    },
+    "rarity": 6,
+    "appearances": [
+      "NL",
+      "WA",
+      "NH",
+      "HHD",
+      "PC"
+    ],
+    "appearance_count": 5
   },
   "brd16": {
     "id": 33,
@@ -1614,7 +1979,16 @@
       "catch-JPja": "チェケラ",
       "catch-KRko": "체키라웃",
       "catch-EUru": "фу ты"
-    }
+    },
+    "rarity": 6,
+    "appearances": [
+      "NL",
+      "WA",
+      "NH",
+      "HHD",
+      "PC"
+    ],
+    "appearance_count": 5
   },
   "brd17": {
     "id": 34,
@@ -1663,7 +2037,16 @@
       "catch-JPja": "ブン",
       "catch-KRko": "츠츠츠",
       "catch-EUru": "тук-тук"
-    }
+    },
+    "rarity": 6,
+    "appearances": [
+      "NL",
+      "WA",
+      "NH",
+      "HHD",
+      "PC"
+    ],
+    "appearance_count": 5
   },
   "brd18": {
     "id": 35,
@@ -1712,7 +2095,16 @@
       "catch-JPja": "だチュン",
       "catch-KRko": "섭섭",
       "catch-EUru": "так-так"
-    }
+    },
+    "rarity": 6,
+    "appearances": [
+      "NL",
+      "WA",
+      "NH",
+      "HHD",
+      "PC"
+    ],
+    "appearance_count": 5
   },
   "bul00": {
     "id": 36,
@@ -1761,7 +2153,19 @@
       "catch-JPja": "ふふ",
       "catch-KRko": "후후",
       "catch-EUru": "макму-у-у"
-    }
+    },
+    "rarity": 3,
+    "appearances": [
+      "E_PLUS",
+      "WW",
+      "CF",
+      "NL",
+      "WA",
+      "NH",
+      "HHD",
+      "PC"
+    ],
+    "appearance_count": 8
   },
   "bul01": {
     "id": 37,
@@ -1810,7 +2214,18 @@
       "catch-JPja": "さすがに",
       "catch-KRko": "디용",
       "catch-EUru": "ковбой"
-    }
+    },
+    "rarity": 4,
+    "appearances": [
+      "WW",
+      "CF",
+      "NL",
+      "WA",
+      "NH",
+      "HHD",
+      "PC"
+    ],
+    "appearance_count": 7
   },
   "bul03": {
     "id": 38,
@@ -1859,7 +2274,17 @@
       "catch-JPja": "だなっす",
       "catch-KRko": "알것소",
       "catch-EUru": "му-у"
-    }
+    },
+    "rarity": 5,
+    "appearances": [
+      "DNM",
+      "AC",
+      "E_PLUS",
+      "WA",
+      "NH",
+      "PC"
+    ],
+    "appearance_count": 6
   },
   "bul05": {
     "id": 39,
@@ -1908,7 +2333,19 @@
       "catch-JPja": "だっぺ",
       "catch-KRko": "워메에",
       "catch-EUru": "бычок"
-    }
+    },
+    "rarity": 3,
+    "appearances": [
+      "DNM",
+      "AC",
+      "E_PLUS",
+      "NL",
+      "WA",
+      "NH",
+      "HHD",
+      "PC"
+    ],
+    "appearance_count": 8
   },
   "bul07": {
     "id": 40,
@@ -1957,7 +2394,16 @@
       "catch-JPja": "ジョリッ",
       "catch-KRko": "땅땅",
       "catch-EUru": "раз-два"
-    }
+    },
+    "rarity": 6,
+    "appearances": [
+      "NL",
+      "WA",
+      "NH",
+      "HHD",
+      "PC"
+    ],
+    "appearance_count": 5
   },
   "bul08": {
     "id": 41,
@@ -2006,7 +2452,16 @@
       "catch-JPja": "モイ",
       "catch-KRko": "뭐임",
       "catch-EUru": "полундра"
-    }
+    },
+    "rarity": 6,
+    "appearances": [
+      "NL",
+      "WA",
+      "NH",
+      "HHD",
+      "PC"
+    ],
+    "appearance_count": 5
   },
   "cat00": {
     "id": 42,
@@ -2055,7 +2510,21 @@
       "catch-JPja": "ネコ",
       "catch-KRko": "고양이",
       "catch-EUru": "кх-кх-кх"
-    }
+    },
+    "rarity": 1,
+    "appearances": [
+      "DNM",
+      "AC",
+      "E_PLUS",
+      "WW",
+      "CF",
+      "NL",
+      "WA",
+      "NH",
+      "HHD",
+      "PC"
+    ],
+    "appearance_count": 10
   },
   "cat01": {
     "id": 43,
@@ -2104,7 +2573,21 @@
       "catch-JPja": "ニャー",
       "catch-KRko": "야～옹",
       "catch-EUru": "мяу-мяу"
-    }
+    },
+    "rarity": 1,
+    "appearances": [
+      "DNM",
+      "AC",
+      "E_PLUS",
+      "WW",
+      "CF",
+      "NL",
+      "WA",
+      "NH",
+      "HHD",
+      "PC"
+    ],
+    "appearance_count": 10
   },
   "cat02": {
     "id": 44,
@@ -2153,7 +2636,22 @@
       "catch-JPja": "チェキ",
       "catch-KRko": "헤이",
       "catch-EUru": "рыбка"
-    }
+    },
+    "rarity": 1,
+    "appearances": [
+      "DNM",
+      "AC",
+      "E_PLUS",
+      "WW",
+      "CF",
+      "NL",
+      "WA",
+      "NH",
+      "FILM",
+      "HHD",
+      "PC"
+    ],
+    "appearance_count": 11
   },
   "cat03": {
     "id": 45,
@@ -2202,7 +2700,21 @@
       "catch-JPja": "なんやん",
       "catch-KRko": "머냐",
       "catch-EUru": "мур-мяу"
-    }
+    },
+    "rarity": 1,
+    "appearances": [
+      "DNM",
+      "AC",
+      "E_PLUS",
+      "WW",
+      "CF",
+      "NL",
+      "WA",
+      "NH",
+      "HHD",
+      "PC"
+    ],
+    "appearance_count": 10
   },
   "cat04": {
     "id": 46,
@@ -2251,7 +2763,21 @@
       "catch-JPja": "だニ",
       "catch-KRko": "뭐라지요",
       "catch-EUru": "кисуля"
-    }
+    },
+    "rarity": 1,
+    "appearances": [
+      "DNM",
+      "AC",
+      "E_PLUS",
+      "WW",
+      "CF",
+      "NL",
+      "WA",
+      "NH",
+      "HHD",
+      "PC"
+    ],
+    "appearance_count": 10
   },
   "cat05": {
     "id": 47,
@@ -2300,7 +2826,21 @@
       "catch-JPja": "みかん",
       "catch-KRko": "귤귤",
       "catch-EUru": "фруктик"
-    }
+    },
+    "rarity": 1,
+    "appearances": [
+      "DNM",
+      "AC",
+      "E_PLUS",
+      "WW",
+      "CF",
+      "NL",
+      "WA",
+      "NH",
+      "HHD",
+      "PC"
+    ],
+    "appearance_count": 10
   },
   "cat06": {
     "id": 48,
@@ -2349,7 +2889,20 @@
       "catch-JPja": "だのら",
       "catch-KRko": "노라줘",
       "catch-EUru": "отдыхаем"
-    }
+    },
+    "rarity": 2,
+    "appearances": [
+      "AC",
+      "E_PLUS",
+      "WW",
+      "CF",
+      "NL",
+      "WA",
+      "NH",
+      "HHD",
+      "PC"
+    ],
+    "appearance_count": 9
   },
   "cat07": {
     "id": 49,
@@ -2398,7 +2951,21 @@
       "catch-JPja": "ふんっ",
       "catch-KRko": "냠",
       "catch-EUru": "кис-кис"
-    }
+    },
+    "rarity": 1,
+    "appearances": [
+      "DNM",
+      "AC",
+      "E_PLUS",
+      "WW",
+      "CF",
+      "NL",
+      "WA",
+      "NH",
+      "HHD",
+      "PC"
+    ],
+    "appearance_count": 10
   },
   "cat08": {
     "id": 50,
@@ -2447,7 +3014,19 @@
       "catch-JPja": "な",
       "catch-KRko": "그치",
       "catch-EUru": "мяу-а-а-а"
-    }
+    },
+    "rarity": 3,
+    "appearances": [
+      "E_PLUS",
+      "WW",
+      "CF",
+      "NL",
+      "WA",
+      "NH",
+      "HHD",
+      "PC"
+    ],
+    "appearance_count": 8
   },
   "cat09": {
     "id": 51,
@@ -2496,7 +3075,21 @@
       "catch-JPja": "ぃよぉー",
       "catch-KRko": "꺄",
       "catch-EUru": "мя-я-яу"
-    }
+    },
+    "rarity": 1,
+    "appearances": [
+      "DNM",
+      "AC",
+      "E_PLUS",
+      "WW",
+      "CF",
+      "NL",
+      "WA",
+      "NH",
+      "HHD",
+      "PC"
+    ],
+    "appearance_count": 10
   },
   "cat10": {
     "id": 52,
@@ -2545,7 +3138,19 @@
       "catch-JPja": "とぉっ",
       "catch-KRko": "얍",
       "catch-EUru": "шш"
-    }
+    },
+    "rarity": 3,
+    "appearances": [
+      "E_PLUS",
+      "WW",
+      "CF",
+      "NL",
+      "WA",
+      "NH",
+      "HHD",
+      "PC"
+    ],
+    "appearance_count": 8
   },
   "cat11": {
     "id": 53,
@@ -2594,7 +3199,21 @@
       "catch-JPja": "ウフーン",
       "catch-KRko": "우",
       "catch-EUru": "фи-фи"
-    }
+    },
+    "rarity": 1,
+    "appearances": [
+      "DNM",
+      "AC",
+      "E_PLUS",
+      "WW",
+      "CF",
+      "NL",
+      "WA",
+      "NH",
+      "HHD",
+      "PC"
+    ],
+    "appearance_count": 10
   },
   "cat12": {
     "id": 54,
@@ -2643,7 +3262,21 @@
       "catch-JPja": "にゃは",
       "catch-KRko": "삐뽀",
       "catch-EUru": "мя-ого"
-    }
+    },
+    "rarity": 1,
+    "appearances": [
+      "DNM",
+      "AC",
+      "E_PLUS",
+      "WW",
+      "CF",
+      "NL",
+      "WA",
+      "NH",
+      "HHD",
+      "PC"
+    ],
+    "appearance_count": 10
   },
   "cat13": {
     "id": 55,
@@ -2692,7 +3325,20 @@
       "catch-JPja": "ダァーッ",
       "catch-KRko": "아뵤",
       "catch-EUru": "фу-у-у"
-    }
+    },
+    "rarity": 2,
+    "appearances": [
+      "DNM",
+      "AC",
+      "E_PLUS",
+      "CF",
+      "NL",
+      "WA",
+      "NH",
+      "HHD",
+      "PC"
+    ],
+    "appearance_count": 9
   },
   "cat14": {
     "id": 56,
@@ -2741,7 +3387,20 @@
       "catch-JPja": "フフ",
       "catch-KRko": "자갸",
       "catch-EUru": "мр-мр-мр"
-    }
+    },
+    "rarity": 2,
+    "appearances": [
+      "DNM",
+      "AC",
+      "E_PLUS",
+      "CF",
+      "NL",
+      "WA",
+      "NH",
+      "HHD",
+      "PC"
+    ],
+    "appearance_count": 9
   },
   "cat15": {
     "id": 57,
@@ -2790,7 +3449,20 @@
       "catch-JPja": "ナックル",
       "catch-KRko": "쳇",
       "catch-EUru": "мя-я-яоза"
-    }
+    },
+    "rarity": 2,
+    "appearances": [
+      "DNM",
+      "AC",
+      "E_PLUS",
+      "CF",
+      "NL",
+      "WA",
+      "NH",
+      "HHD",
+      "PC"
+    ],
+    "appearance_count": 9
   },
   "cat16": {
     "id": 58,
@@ -2839,7 +3511,18 @@
       "catch-JPja": "にゃん",
       "catch-KRko": "냥냥",
       "catch-EUru": "мяуи-и-и"
-    }
+    },
+    "rarity": 4,
+    "appearances": [
+      "E_PLUS",
+      "CF",
+      "NL",
+      "WA",
+      "NH",
+      "HHD",
+      "PC"
+    ],
+    "appearance_count": 7
   },
   "cat17": {
     "id": 59,
@@ -2888,7 +3571,18 @@
       "catch-JPja": "ね",
       "catch-KRko": "우앙",
       "catch-EUru": "ми-ми-ми"
-    }
+    },
+    "rarity": 4,
+    "appearances": [
+      "E_PLUS",
+      "CF",
+      "NL",
+      "WA",
+      "NH",
+      "HHD",
+      "PC"
+    ],
+    "appearance_count": 7
   },
   "cat18": {
     "id": 60,
@@ -2937,7 +3631,18 @@
       "catch-JPja": "あのね",
       "catch-KRko": "퐁퐁",
       "catch-EUru": "конфетка"
-    }
+    },
+    "rarity": 4,
+    "appearances": [
+      "E_PLUS",
+      "CF",
+      "NL",
+      "WA",
+      "NH",
+      "HHD",
+      "PC"
+    ],
+    "appearance_count": 7
   },
   "cat19": {
     "id": 61,
@@ -2986,7 +3691,19 @@
       "catch-JPja": "クフフ",
       "catch-KRko": "파트라",
       "catch-EUru": "ми-мяу"
-    }
+    },
+    "rarity": 3,
+    "appearances": [
+      "AC",
+      "E_PLUS",
+      "CF",
+      "NL",
+      "WA",
+      "NH",
+      "HHD",
+      "PC"
+    ],
+    "appearance_count": 8
   },
   "cat20": {
     "id": 62,
@@ -3035,7 +3752,16 @@
       "catch-JPja": "とかナ",
       "catch-KRko": "그러거나",
       "catch-EUru": "шмяк"
-    }
+    },
+    "rarity": 6,
+    "appearances": [
+      "NL",
+      "WA",
+      "NH",
+      "HHD",
+      "PC"
+    ],
+    "appearance_count": 5
   },
   "cat21": {
     "id": 63,
@@ -3084,7 +3810,16 @@
       "catch-JPja": "じゃね",
       "catch-KRko": "휘리릭",
       "catch-EUru": "хор-р-рошо"
-    }
+    },
+    "rarity": 6,
+    "appearances": [
+      "NL",
+      "WA",
+      "NH",
+      "HHD",
+      "PC"
+    ],
+    "appearance_count": 5
   },
   "cat23": {
     "id": 64,
@@ -3133,7 +3868,13 @@
       "catch-JPja": "キリッ",
       "catch-KRko": "우쭐",
       "catch-EUru": "стильненько"
-    }
+    },
+    "rarity": 9,
+    "appearances": [
+      "NH",
+      "PC"
+    ],
+    "appearance_count": 2
   },
   "cbr00": {
     "id": 65,
@@ -3182,7 +3923,21 @@
       "catch-JPja": "キュン",
       "catch-KRko": "두근",
       "catch-EUru": "персик"
-    }
+    },
+    "rarity": 1,
+    "appearances": [
+      "DNM",
+      "AC",
+      "E_PLUS",
+      "WW",
+      "CF",
+      "NL",
+      "WA",
+      "NH",
+      "HHD",
+      "PC"
+    ],
+    "appearance_count": 10
   },
   "cbr01": {
     "id": 66,
@@ -3231,7 +3986,21 @@
       "catch-JPja": "だベア",
       "catch-KRko": "저기요",
       "catch-EUru": "лапушка"
-    }
+    },
+    "rarity": 1,
+    "appearances": [
+      "DNM",
+      "AC",
+      "E_PLUS",
+      "WW",
+      "CF",
+      "NL",
+      "WA",
+      "NH",
+      "HHD",
+      "PC"
+    ],
+    "appearance_count": 10
   },
   "cbr02": {
     "id": 67,
@@ -3280,7 +4049,21 @@
       "catch-JPja": "モン",
       "catch-KRko": "몽",
       "catch-EUru": "медвежонок"
-    }
+    },
+    "rarity": 1,
+    "appearances": [
+      "DNM",
+      "AC",
+      "E_PLUS",
+      "WW",
+      "CF",
+      "NL",
+      "WA",
+      "NH",
+      "HHD",
+      "PC"
+    ],
+    "appearance_count": 10
   },
   "cbr03": {
     "id": 68,
@@ -3329,7 +4112,21 @@
       "catch-JPja": "んもう",
       "catch-KRko": "아이참",
       "catch-EUru": "карапуз"
-    }
+    },
+    "rarity": 1,
+    "appearances": [
+      "DNM",
+      "AC",
+      "E_PLUS",
+      "WW",
+      "CF",
+      "NL",
+      "WA",
+      "NH",
+      "HHD",
+      "PC"
+    ],
+    "appearance_count": 10
   },
   "cbr04": {
     "id": 69,
@@ -3378,7 +4175,21 @@
       "catch-JPja": "のこころ",
       "catch-KRko": "나는나야",
       "catch-EUru": "гррр"
-    }
+    },
+    "rarity": 1,
+    "appearances": [
+      "DNM",
+      "AC",
+      "E_PLUS",
+      "WW",
+      "CF",
+      "NL",
+      "WA",
+      "NH",
+      "HHD",
+      "PC"
+    ],
+    "appearance_count": 10
   },
   "cbr05": {
     "id": 70,
@@ -3427,7 +4238,18 @@
       "catch-JPja": "なのれす",
       "catch-KRko": "그런거죠",
       "catch-EUru": "плюш-плюш"
-    }
+    },
+    "rarity": 4,
+    "appearances": [
+      "WW",
+      "CF",
+      "NL",
+      "WA",
+      "NH",
+      "HHD",
+      "PC"
+    ],
+    "appearance_count": 7
   },
   "cbr06": {
     "id": 71,
@@ -3476,7 +4298,20 @@
       "catch-JPja": "やんけ",
       "catch-KRko": "참말로",
       "catch-EUru": "ну не-е-ет"
-    }
+    },
+    "rarity": 2,
+    "appearances": [
+      "DNM",
+      "AC",
+      "E_PLUS",
+      "CF",
+      "NL",
+      "WA",
+      "NH",
+      "HHD",
+      "PC"
+    ],
+    "appearance_count": 9
   },
   "cbr07": {
     "id": 72,
@@ -3525,7 +4360,17 @@
       "catch-JPja": "ですばい",
       "catch-KRko": "샐리",
       "catch-EUru": "товарищ"
-    }
+    },
+    "rarity": 5,
+    "appearances": [
+      "DNM",
+      "AC",
+      "E_PLUS",
+      "WA",
+      "NH",
+      "PC"
+    ],
+    "appearance_count": 6
   },
   "cbr09": {
     "id": 73,
@@ -3574,7 +4419,17 @@
       "catch-JPja": "マグ",
       "catch-KRko": "오잉",
       "catch-EUru": "милашка"
-    }
+    },
+    "rarity": 5,
+    "appearances": [
+      "DNM",
+      "AC",
+      "E_PLUS",
+      "WA",
+      "NH",
+      "PC"
+    ],
+    "appearance_count": 6
   },
   "cbr10": {
     "id": 74,
@@ -3623,7 +4478,18 @@
       "catch-JPja": "なんてね",
       "catch-KRko": "어쩜이래",
       "catch-EUru": "тра-ля-ля"
-    }
+    },
+    "rarity": 4,
+    "appearances": [
+      "AC",
+      "E_PLUS",
+      "NL",
+      "WA",
+      "NH",
+      "HHD",
+      "PC"
+    ],
+    "appearance_count": 7
   },
   "cbr13": {
     "id": 75,
@@ -3672,7 +4538,16 @@
       "catch-JPja": "アルネ",
       "catch-KRko": "있죠",
       "catch-EUru": "радуга-дуга"
-    }
+    },
+    "rarity": 6,
+    "appearances": [
+      "AC",
+      "E_PLUS",
+      "WA",
+      "NH",
+      "PC"
+    ],
+    "appearance_count": 5
   },
   "cbr14": {
     "id": 76,
@@ -3721,7 +4596,17 @@
       "catch-JPja": "チャ",
       "catch-KRko": "띵호아",
       "catch-EUru": "цветочек"
-    }
+    },
+    "rarity": 5,
+    "appearances": [
+      "CF",
+      "NL",
+      "WA",
+      "NH",
+      "HHD",
+      "PC"
+    ],
+    "appearance_count": 6
   },
   "cbr15": {
     "id": 77,
@@ -3770,7 +4655,17 @@
       "catch-JPja": "だバンブ",
       "catch-KRko": "부끄",
       "catch-EUru": "бамбук"
-    }
+    },
+    "rarity": 5,
+    "appearances": [
+      "CF",
+      "NL",
+      "WA",
+      "NH",
+      "HHD",
+      "PC"
+    ],
+    "appearance_count": 6
   },
   "cbr16": {
     "id": 78,
@@ -3819,7 +4714,16 @@
       "catch-JPja": "いっそ",
       "catch-KRko": "아니그냥",
       "catch-EUru": "берлога"
-    }
+    },
+    "rarity": 6,
+    "appearances": [
+      "NL",
+      "WA",
+      "NH",
+      "HHD",
+      "PC"
+    ],
+    "appearance_count": 5
   },
   "cbr17": {
     "id": 79,
@@ -3868,7 +4772,16 @@
       "catch-JPja": "だってサ",
       "catch-KRko": "차라리",
       "catch-EUru": "понимаешь"
-    }
+    },
+    "rarity": 6,
+    "appearances": [
+      "NL",
+      "WA",
+      "NH",
+      "HHD",
+      "PC"
+    ],
+    "appearance_count": 5
   },
   "cbr19": {
     "id": 80,
@@ -3917,7 +4830,13 @@
       "catch-JPja": "あらら",
       "catch-KRko": "어머머",
       "catch-EUru": "охохонюшки"
-    }
+    },
+    "rarity": 9,
+    "appearances": [
+      "NH",
+      "PC"
+    ],
+    "appearance_count": 2
   },
   "chn00": {
     "id": 81,
@@ -3966,7 +4885,21 @@
       "catch-JPja": "だコケ",
       "catch-KRko": "키득",
       "catch-EUru": "ко-кей"
-    }
+    },
+    "rarity": 1,
+    "appearances": [
+      "DNM",
+      "AC",
+      "E_PLUS",
+      "WW",
+      "CF",
+      "NL",
+      "WA",
+      "NH",
+      "HHD",
+      "PC"
+    ],
+    "appearance_count": 10
   },
   "chn01": {
     "id": 82,
@@ -4015,7 +4948,19 @@
       "catch-JPja": "ウヒョー",
       "catch-KRko": "우힛",
       "catch-EUru": "о-ко-ко"
-    }
+    },
+    "rarity": 3,
+    "appearances": [
+      "E_PLUS",
+      "WW",
+      "CF",
+      "NL",
+      "WA",
+      "NH",
+      "HHD",
+      "PC"
+    ],
+    "appearance_count": 8
   },
   "chn02": {
     "id": 83,
@@ -4064,7 +5009,21 @@
       "catch-JPja": "だヨ",
       "catch-KRko": "짜잔",
       "catch-EUru": "кукареку"
-    }
+    },
+    "rarity": 1,
+    "appearances": [
+      "DNM",
+      "AC",
+      "E_PLUS",
+      "WW",
+      "CF",
+      "NL",
+      "WA",
+      "NH",
+      "HHD",
+      "PC"
+    ],
+    "appearance_count": 10
   },
   "chn05": {
     "id": 84,
@@ -4113,7 +5072,19 @@
       "catch-JPja": "のよぉ",
       "catch-KRko": "그랬대요",
       "catch-EUru": "клювик"
-    }
+    },
+    "rarity": 3,
+    "appearances": [
+      "DNM",
+      "AC",
+      "E_PLUS",
+      "NL",
+      "WA",
+      "NH",
+      "HHD",
+      "PC"
+    ],
+    "appearance_count": 8
   },
   "chn09": {
     "id": 85,
@@ -4162,7 +5133,18 @@
       "catch-JPja": "ハレルヤ",
       "catch-KRko": "도레미",
       "catch-EUru": "модненько"
-    }
+    },
+    "rarity": 4,
+    "appearances": [
+      "E_PLUS",
+      "CF",
+      "NL",
+      "WA",
+      "NH",
+      "HHD",
+      "PC"
+    ],
+    "appearance_count": 7
   },
   "chn10": {
     "id": 86,
@@ -4211,7 +5193,16 @@
       "catch-JPja": "どうだい",
       "catch-KRko": "그게어때",
       "catch-EUru": "щип-щип"
-    }
+    },
+    "rarity": 6,
+    "appearances": [
+      "AC",
+      "E_PLUS",
+      "WA",
+      "NH",
+      "PC"
+    ],
+    "appearance_count": 5
   },
   "chn11": {
     "id": 87,
@@ -4260,7 +5251,17 @@
       "catch-JPja": "せいッ",
       "catch-KRko": "하앗",
       "catch-EUru": "короко"
-    }
+    },
+    "rarity": 5,
+    "appearances": [
+      "CF",
+      "NL",
+      "WA",
+      "NH",
+      "HHD",
+      "PC"
+    ],
+    "appearance_count": 6
   },
   "chn12": {
     "id": 88,
@@ -4309,7 +5310,16 @@
       "catch-JPja": "ケッコー",
       "catch-KRko": "오싹오싹",
       "catch-EUru": "ки-ки-ки"
-    }
+    },
+    "rarity": 6,
+    "appearances": [
+      "NL",
+      "WA",
+      "NH",
+      "HHD",
+      "PC"
+    ],
+    "appearance_count": 5
   },
   "chn13": {
     "id": 89,
@@ -4358,7 +5368,16 @@
       "catch-JPja": "コッケイ",
       "catch-KRko": "깜깜",
       "catch-EUru": "это точно"
-    }
+    },
+    "rarity": 6,
+    "appearances": [
+      "NL",
+      "WA",
+      "NH",
+      "HHD",
+      "PC"
+    ],
+    "appearance_count": 5
   },
   "cow00": {
     "id": 90,
@@ -4407,7 +5426,21 @@
       "catch-JPja": "だモー",
       "catch-KRko": "음메",
       "catch-EUru": "му-му"
-    }
+    },
+    "rarity": 1,
+    "appearances": [
+      "DNM",
+      "AC",
+      "E_PLUS",
+      "WW",
+      "CF",
+      "NL",
+      "WA",
+      "NH",
+      "HHD",
+      "PC"
+    ],
+    "appearance_count": 10
   },
   "cow01": {
     "id": 91,
@@ -4456,7 +5489,18 @@
       "catch-JPja": "ミルミル",
       "catch-KRko": "우유우유",
       "catch-EUru": "теленок"
-    }
+    },
+    "rarity": 4,
+    "appearances": [
+      "WW",
+      "CF",
+      "NL",
+      "WA",
+      "NH",
+      "HHD",
+      "PC"
+    ],
+    "appearance_count": 7
   },
   "cow06": {
     "id": 92,
@@ -4505,7 +5549,15 @@
       "catch-JPja": "うふ",
       "catch-KRko": "에헤",
       "catch-EUru": "до-ре-му"
-    }
+    },
+    "rarity": 7,
+    "appearances": [
+      "E_PLUS",
+      "WA",
+      "NH",
+      "PC"
+    ],
+    "appearance_count": 4
   },
   "cow07": {
     "id": 93,
@@ -4554,7 +5606,16 @@
       "catch-JPja": "セボーン",
       "catch-KRko": "메르시",
       "catch-EUru": "муля"
-    }
+    },
+    "rarity": 6,
+    "appearances": [
+      "NL",
+      "WA",
+      "NH",
+      "HHD",
+      "PC"
+    ],
+    "appearance_count": 5
   },
   "crd00": {
     "id": 94,
@@ -4603,7 +5664,22 @@
       "catch-JPja": "だワニ",
       "catch-KRko": "나아거",
       "catch-EUru": "это я"
-    }
+    },
+    "rarity": 1,
+    "appearances": [
+      "DNM",
+      "AC",
+      "E_PLUS",
+      "WW",
+      "CF",
+      "NL",
+      "WA",
+      "NH",
+      "FILM",
+      "HHD",
+      "PC"
+    ],
+    "appearance_count": 11
   },
   "crd01": {
     "id": 95,
@@ -4652,7 +5728,21 @@
       "catch-JPja": "どすえ",
       "catch-KRko": "얘야",
       "catch-EUru": "гра-а-а"
-    }
+    },
+    "rarity": 1,
+    "appearances": [
+      "DNM",
+      "AC",
+      "E_PLUS",
+      "WW",
+      "CF",
+      "NL",
+      "WA",
+      "NH",
+      "HHD",
+      "PC"
+    ],
+    "appearance_count": 10
   },
   "crd02": {
     "id": 96,
@@ -4701,7 +5791,17 @@
       "catch-JPja": "だぴょん",
       "catch-KRko": "만세",
       "catch-EUru": "кусь"
-    }
+    },
+    "rarity": 5,
+    "appearances": [
+      "DNM",
+      "AC",
+      "E_PLUS",
+      "WA",
+      "NH",
+      "PC"
+    ],
+    "appearance_count": 6
   },
   "crd04": {
     "id": 97,
@@ -4750,7 +5850,18 @@
       "catch-JPja": "プシュー",
       "catch-KRko": "처얼썩",
       "catch-EUru": "щелк"
-    }
+    },
+    "rarity": 4,
+    "appearances": [
+      "E_PLUS",
+      "CF",
+      "NL",
+      "WA",
+      "NH",
+      "HHD",
+      "PC"
+    ],
+    "appearance_count": 7
   },
   "crd06": {
     "id": 98,
@@ -4799,7 +5910,16 @@
       "catch-JPja": "カサコソ",
       "catch-KRko": "부스럭",
       "catch-EUru": "ура-а-а"
-    }
+    },
+    "rarity": 6,
+    "appearances": [
+      "NL",
+      "WA",
+      "NH",
+      "HHD",
+      "PC"
+    ],
+    "appearance_count": 5
   },
   "crd07": {
     "id": 99,
@@ -4848,7 +5968,16 @@
       "catch-JPja": "ワニャン",
       "catch-KRko": "아거얌",
       "catch-EUru": "перекус"
-    }
+    },
+    "rarity": 6,
+    "appearances": [
+      "NL",
+      "WA",
+      "NH",
+      "HHD",
+      "PC"
+    ],
+    "appearance_count": 5
   },
   "crd08": {
     "id": 100,
@@ -4897,7 +6026,16 @@
       "catch-JPja": "えーと",
       "catch-KRko": "띠용띠용",
       "catch-EUru": "огонь"
-    }
+    },
+    "rarity": 6,
+    "appearances": [
+      "NL",
+      "WA",
+      "NH",
+      "HHD",
+      "PC"
+    ],
+    "appearance_count": 5
   },
   "der00": {
     "id": 101,
@@ -4946,7 +6084,16 @@
       "catch-JPja": "でしか",
       "catch-KRko": "파샵파샵",
       "catch-EUru": "олешек"
-    }
+    },
+    "rarity": 6,
+    "appearances": [
+      "NL",
+      "WA",
+      "NH",
+      "HHD",
+      "PC"
+    ],
+    "appearance_count": 5
   },
   "der01": {
     "id": 102,
@@ -4995,7 +6142,16 @@
       "catch-JPja": "ナラね",
       "catch-KRko": "슉슉",
       "catch-EUru": "скок-скок"
-    }
+    },
+    "rarity": 6,
+    "appearances": [
+      "NL",
+      "WA",
+      "NH",
+      "HHD",
+      "PC"
+    ],
+    "appearance_count": 5
   },
   "der02": {
     "id": 103,
@@ -5044,7 +6200,16 @@
       "catch-JPja": "たしかに",
       "catch-KRko": "슴사사",
       "catch-EUru": "прыг-прыг"
-    }
+    },
+    "rarity": 6,
+    "appearances": [
+      "NL",
+      "WA",
+      "NH",
+      "HHD",
+      "PC"
+    ],
+    "appearance_count": 5
   },
   "der03": {
     "id": 104,
@@ -5093,7 +6258,16 @@
       "catch-JPja": "しかしな",
       "catch-KRko": "아비옹",
       "catch-EUru": "забияка"
-    }
+    },
+    "rarity": 6,
+    "appearances": [
+      "NL",
+      "WA",
+      "NH",
+      "HHD",
+      "PC"
+    ],
+    "appearance_count": 5
   },
   "der04": {
     "id": 105,
@@ -5142,7 +6316,16 @@
       "catch-JPja": "まいっか",
       "catch-KRko": "됐고",
       "catch-EUru": "как-то так"
-    }
+    },
+    "rarity": 6,
+    "appearances": [
+      "NL",
+      "WA",
+      "NH",
+      "HHD",
+      "PC"
+    ],
+    "appearance_count": 5
   },
   "der05": {
     "id": 106,
@@ -5191,7 +6374,16 @@
       "catch-JPja": "がぜん",
       "catch-KRko": "엣헴",
       "catch-EUru": "бубух"
-    }
+    },
+    "rarity": 6,
+    "appearances": [
+      "NL",
+      "WA",
+      "NH",
+      "HHD",
+      "PC"
+    ],
+    "appearance_count": 5
   },
   "der06": {
     "id": 107,
@@ -5240,7 +6432,16 @@
       "catch-JPja": "なんしか",
       "catch-KRko": "핑크크",
       "catch-EUru": "зазноба"
-    }
+    },
+    "rarity": 6,
+    "appearances": [
+      "NL",
+      "WA",
+      "NH",
+      "HHD",
+      "PC"
+    ],
+    "appearance_count": 5
   },
   "der07": {
     "id": 108,
@@ -5289,7 +6490,16 @@
       "catch-JPja": "おろおろ",
       "catch-KRko": "우왕",
       "catch-EUru": "соль-соль"
-    }
+    },
+    "rarity": 6,
+    "appearances": [
+      "NL",
+      "WA",
+      "NH",
+      "HHD",
+      "PC"
+    ],
+    "appearance_count": 5
   },
   "der08": {
     "id": 109,
@@ -5338,7 +6548,16 @@
       "catch-JPja": "でしょ",
       "catch-KRko": "라니까",
       "catch-EUru": "еще бы"
-    }
+    },
+    "rarity": 6,
+    "appearances": [
+      "NL",
+      "WA",
+      "NH",
+      "HHD",
+      "PC"
+    ],
+    "appearance_count": 5
   },
   "der09": {
     "id": 110,
@@ -5387,7 +6606,16 @@
       "catch-JPja": "しかじか",
       "catch-KRko": "뚜비뚜바",
       "catch-EUru": "ем мох"
-    }
+    },
+    "rarity": 6,
+    "appearances": [
+      "NL",
+      "WA",
+      "NH",
+      "HHD",
+      "PC"
+    ],
+    "appearance_count": 5
   },
   "dog00": {
     "id": 111,
@@ -5436,7 +6664,21 @@
       "catch-JPja": "ワン",
       "catch-KRko": "왈왈",
       "catch-EUru": "тяв"
-    }
+    },
+    "rarity": 1,
+    "appearances": [
+      "DNM",
+      "AC",
+      "E_PLUS",
+      "WW",
+      "CF",
+      "NL",
+      "WA",
+      "NH",
+      "HHD",
+      "PC"
+    ],
+    "appearance_count": 10
   },
   "dog01": {
     "id": 112,
@@ -5485,7 +6727,21 @@
       "catch-JPja": "ノン",
       "catch-KRko": "아니",
       "catch-EUru": "ррр-гав"
-    }
+    },
+    "rarity": 1,
+    "appearances": [
+      "DNM",
+      "AC",
+      "E_PLUS",
+      "WW",
+      "CF",
+      "NL",
+      "WA",
+      "NH",
+      "HHD",
+      "PC"
+    ],
+    "appearance_count": 10
   },
   "dog02": {
     "id": 113,
@@ -5534,7 +6790,21 @@
       "catch-JPja": "らしいよ",
       "catch-KRko": "그렇대",
       "catch-EUru": "ррр-ой-ой"
-    }
+    },
+    "rarity": 1,
+    "appearances": [
+      "DNM",
+      "AC",
+      "E_PLUS",
+      "WW",
+      "CF",
+      "NL",
+      "WA",
+      "NH",
+      "HHD",
+      "PC"
+    ],
+    "appearance_count": 10
   },
   "dog03": {
     "id": 114,
@@ -5583,7 +6853,21 @@
       "catch-JPja": "だイヌ",
       "catch-KRko": "멍멍",
       "catch-EUru": "пр-риятяв"
-    }
+    },
+    "rarity": 1,
+    "appearances": [
+      "DNM",
+      "AC",
+      "E_PLUS",
+      "WW",
+      "CF",
+      "NL",
+      "WA",
+      "NH",
+      "HHD",
+      "PC"
+    ],
+    "appearance_count": 10
   },
   "dog04": {
     "id": 115,
@@ -5632,7 +6916,21 @@
       "catch-JPja": "ネッ",
       "catch-KRko": "옙",
       "catch-EUru": "тяв-тяв"
-    }
+    },
+    "rarity": 1,
+    "appearances": [
+      "DNM",
+      "AC",
+      "E_PLUS",
+      "WW",
+      "CF",
+      "NL",
+      "WA",
+      "NH",
+      "HHD",
+      "PC"
+    ],
+    "appearance_count": 10
   },
   "dog05": {
     "id": 116,
@@ -5681,7 +6979,21 @@
       "catch-JPja": "フンッ",
       "catch-KRko": "흥",
       "catch-EUru": "тяв-ряв"
-    }
+    },
+    "rarity": 1,
+    "appearances": [
+      "DNM",
+      "AC",
+      "E_PLUS",
+      "WW",
+      "CF",
+      "NL",
+      "WA",
+      "NH",
+      "HHD",
+      "PC"
+    ],
+    "appearance_count": 10
   },
   "dog06": {
     "id": 117,
@@ -5730,7 +7042,19 @@
       "catch-JPja": "バウ",
       "catch-KRko": "컹컹",
       "catch-EUru": "ау-у"
-    }
+    },
+    "rarity": 3,
+    "appearances": [
+      "E_PLUS",
+      "WW",
+      "CF",
+      "NL",
+      "WA",
+      "NH",
+      "HHD",
+      "PC"
+    ],
+    "appearance_count": 8
   },
   "dog07": {
     "id": 118,
@@ -5779,7 +7103,21 @@
       "catch-JPja": "だよね",
       "catch-KRko": "그렇죠",
       "catch-EUru": "тяв-ого"
-    }
+    },
+    "rarity": 1,
+    "appearances": [
+      "DNM",
+      "AC",
+      "E_PLUS",
+      "WW",
+      "CF",
+      "NL",
+      "WA",
+      "NH",
+      "HHD",
+      "PC"
+    ],
+    "appearance_count": 10
   },
   "dog08": {
     "id": 119,
@@ -5828,7 +7166,20 @@
       "catch-JPja": "プリリン",
       "catch-KRko": "초롱초롱",
       "catch-EUru": "гав-гав"
-    }
+    },
+    "rarity": 2,
+    "appearances": [
+      "DNM",
+      "AC",
+      "E_PLUS",
+      "CF",
+      "NL",
+      "WA",
+      "NH",
+      "HHD",
+      "PC"
+    ],
+    "appearance_count": 9
   },
   "dog09": {
     "id": 120,
@@ -5877,7 +7228,18 @@
       "catch-JPja": "ワンツー",
       "catch-KRko": "달코미",
       "catch-EUru": "ур-ра"
-    }
+    },
+    "rarity": 4,
+    "appearances": [
+      "DNM",
+      "AC",
+      "E_PLUS",
+      "WA",
+      "NH",
+      "HHD",
+      "PC"
+    ],
+    "appearance_count": 7
   },
   "dog10": {
     "id": 121,
@@ -5926,7 +7288,17 @@
       "catch-JPja": "グー",
       "catch-KRko": "쫀득",
       "catch-EUru": "динго"
-    }
+    },
+    "rarity": 5,
+    "appearances": [
+      "DNM",
+      "AC",
+      "E_PLUS",
+      "WA",
+      "NH",
+      "PC"
+    ],
+    "appearance_count": 6
   },
   "dog14": {
     "id": 122,
@@ -5975,7 +7347,17 @@
       "catch-JPja": "モグ",
       "catch-KRko": "우물우물",
       "catch-EUru": "ау-у-гав"
-    }
+    },
+    "rarity": 5,
+    "appearances": [
+      "CF",
+      "NL",
+      "WA",
+      "NH",
+      "HHD",
+      "PC"
+    ],
+    "appearance_count": 6
   },
   "dog15": {
     "id": 123,
@@ -6024,7 +7406,17 @@
       "catch-JPja": "なんじゃ",
       "catch-KRko": "하옵소서",
       "catch-EUru": "ау-уи"
-    }
+    },
+    "rarity": 5,
+    "appearances": [
+      "CF",
+      "NL",
+      "WA",
+      "NH",
+      "HHD",
+      "PC"
+    ],
+    "appearance_count": 6
   },
   "dog16": {
     "id": 124,
@@ -6073,7 +7465,16 @@
       "catch-JPja": "ではでは",
       "catch-KRko": "그럼그럼",
       "catch-EUru": "пор-рядок"
-    }
+    },
+    "rarity": 6,
+    "appearances": [
+      "NL",
+      "WA",
+      "NH",
+      "HHD",
+      "PC"
+    ],
+    "appearance_count": 5
   },
   "dog17": {
     "id": 125,
@@ -6122,7 +7523,16 @@
       "catch-JPja": "だってネ",
       "catch-KRko": "그냥저냥",
       "catch-EUru": "что-что"
-    }
+    },
+    "rarity": 6,
+    "appearances": [
+      "NL",
+      "WA",
+      "NH",
+      "HHD",
+      "PC"
+    ],
+    "appearance_count": 5
   },
   "dog18": {
     "id": 126,
@@ -6171,7 +7581,16 @@
       "catch-JPja": "ワンダー",
       "catch-KRko": "안보여",
       "catch-EUru": "бр-р-разер"
-    }
+    },
+    "rarity": 6,
+    "appearances": [
+      "NL",
+      "WA",
+      "NH",
+      "HHD",
+      "PC"
+    ],
+    "appearance_count": 5
   },
   "duk00": {
     "id": 127,
@@ -6220,7 +7639,21 @@
       "catch-JPja": "かもね",
       "catch-KRko": "어쩌면",
       "catch-EUru": "кра-а"
-    }
+    },
+    "rarity": 1,
+    "appearances": [
+      "DNM",
+      "AC",
+      "E_PLUS",
+      "WW",
+      "CF",
+      "NL",
+      "WA",
+      "NH",
+      "HHD",
+      "PC"
+    ],
+    "appearance_count": 10
   },
   "duk01": {
     "id": 128,
@@ -6269,7 +7702,21 @@
       "catch-JPja": "でヤンス",
       "catch-KRko": "그래유",
       "catch-EUru": "кряк"
-    }
+    },
+    "rarity": 1,
+    "appearances": [
+      "DNM",
+      "AC",
+      "E_PLUS",
+      "WW",
+      "CF",
+      "NL",
+      "WA",
+      "NH",
+      "HHD",
+      "PC"
+    ],
+    "appearance_count": 10
   },
   "duk02": {
     "id": 129,
@@ -6318,7 +7765,21 @@
       "catch-JPja": "メソメソ",
       "catch-KRko": "아잉",
       "catch-EUru": "кряки-кряк"
-    }
+    },
+    "rarity": 1,
+    "appearances": [
+      "DNM",
+      "AC",
+      "E_PLUS",
+      "WW",
+      "CF",
+      "NL",
+      "WA",
+      "NH",
+      "HHD",
+      "PC"
+    ],
+    "appearance_count": 10
   },
   "duk03": {
     "id": 130,
@@ -6367,7 +7828,20 @@
       "catch-JPja": "ふぅ",
       "catch-KRko": "우아",
       "catch-EUru": "желторотик"
-    }
+    },
+    "rarity": 2,
+    "appearances": [
+      "AC",
+      "E_PLUS",
+      "WW",
+      "CF",
+      "NL",
+      "WA",
+      "NH",
+      "HHD",
+      "PC"
+    ],
+    "appearance_count": 9
   },
   "duk04": {
     "id": 131,
@@ -6416,7 +7890,21 @@
       "catch-JPja": "マル",
       "catch-KRko": "우우",
       "catch-EUru": "кря-кря"
-    }
+    },
+    "rarity": 1,
+    "appearances": [
+      "DNM",
+      "AC",
+      "E_PLUS",
+      "WW",
+      "CF",
+      "NL",
+      "WA",
+      "NH",
+      "HHD",
+      "PC"
+    ],
+    "appearance_count": 10
   },
   "duk05": {
     "id": 132,
@@ -6465,7 +7953,21 @@
       "catch-JPja": "だっピ",
       "catch-KRko": "다삐",
       "catch-EUru": "крякушки"
-    }
+    },
+    "rarity": 1,
+    "appearances": [
+      "DNM",
+      "AC",
+      "E_PLUS",
+      "WW",
+      "CF",
+      "NL",
+      "WA",
+      "NH",
+      "HHD",
+      "PC"
+    ],
+    "appearance_count": 10
   },
   "duk06": {
     "id": 133,
@@ -6514,7 +8016,21 @@
       "catch-JPja": "ヨネ",
       "catch-KRko": "모모",
       "catch-EUru": "кряк-фи"
-    }
+    },
+    "rarity": 1,
+    "appearances": [
+      "DNM",
+      "AC",
+      "E_PLUS",
+      "WW",
+      "CF",
+      "NL",
+      "WA",
+      "NH",
+      "HHD",
+      "PC"
+    ],
+    "appearance_count": 10
   },
   "duk07": {
     "id": 134,
@@ -6563,7 +8079,21 @@
       "catch-JPja": "ぎょぎょ",
       "catch-KRko": "물물",
       "catch-EUru": "утенок"
-    }
+    },
+    "rarity": 1,
+    "appearances": [
+      "DNM",
+      "AC",
+      "E_PLUS",
+      "WW",
+      "CF",
+      "NL",
+      "WA",
+      "NH",
+      "HHD",
+      "PC"
+    ],
+    "appearance_count": 10
   },
   "duk08": {
     "id": 135,
@@ -6612,7 +8142,21 @@
       "catch-JPja": "ね！ママ",
       "catch-KRko": "엄마",
       "catch-EUru": "кррря"
-    }
+    },
+    "rarity": 1,
+    "appearances": [
+      "DNM",
+      "AC",
+      "E_PLUS",
+      "WW",
+      "CF",
+      "NL",
+      "WA",
+      "NH",
+      "HHD",
+      "PC"
+    ],
+    "appearance_count": 10
   },
   "duk09": {
     "id": 136,
@@ -6661,7 +8205,18 @@
       "catch-JPja": "かもね",
       "catch-KRko": "어쩌면",
       "catch-EUru": "кра-а"
-    }
+    },
+    "rarity": 4,
+    "appearances": [
+      "WW",
+      "CF",
+      "NL",
+      "WA",
+      "NH",
+      "HHD",
+      "PC"
+    ],
+    "appearance_count": 7
   },
   "duk10": {
     "id": 137,
@@ -6710,7 +8265,20 @@
       "catch-JPja": "グワッ",
       "catch-KRko": "꾸왁",
       "catch-EUru": "брум-брум"
-    }
+    },
+    "rarity": 2,
+    "appearances": [
+      "DNM",
+      "AC",
+      "E_PLUS",
+      "CF",
+      "NL",
+      "WA",
+      "NH",
+      "HHD",
+      "PC"
+    ],
+    "appearance_count": 9
   },
   "duk11": {
     "id": 138,
@@ -6759,7 +8327,17 @@
       "catch-JPja": "ピヨ",
       "catch-KRko": "꽥꽥",
       "catch-EUru": "кря-а"
-    }
+    },
+    "rarity": 5,
+    "appearances": [
+      "DNM",
+      "AC",
+      "E_PLUS",
+      "WA",
+      "NH",
+      "PC"
+    ],
+    "appearance_count": 6
   },
   "duk12": {
     "id": 139,
@@ -6808,7 +8386,18 @@
       "catch-JPja": "なにさ",
       "catch-KRko": "괜찮아",
       "catch-EUru": "покрясающе"
-    }
+    },
+    "rarity": 4,
+    "appearances": [
+      "E_PLUS",
+      "CF",
+      "NL",
+      "WA",
+      "NH",
+      "HHD",
+      "PC"
+    ],
+    "appearance_count": 7
   },
   "duk13": {
     "id": 140,
@@ -6857,7 +8446,15 @@
       "catch-JPja": "プチ",
       "catch-KRko": "찌익",
       "catch-EUru": "покрякушка"
-    }
+    },
+    "rarity": 7,
+    "appearances": [
+      "E_PLUS",
+      "WA",
+      "NH",
+      "PC"
+    ],
+    "appearance_count": 4
   },
   "duk15": {
     "id": 141,
@@ -6906,7 +8503,17 @@
       "catch-JPja": "ぎゃくに",
       "catch-KRko": "유～후",
       "catch-EUru": "не кряк ли"
-    }
+    },
+    "rarity": 5,
+    "appearances": [
+      "CF",
+      "NL",
+      "WA",
+      "NH",
+      "HHD",
+      "PC"
+    ],
+    "appearance_count": 6
   },
   "duk16": {
     "id": 142,
@@ -6955,7 +8562,16 @@
       "catch-JPja": "そうかも",
       "catch-KRko": "그럴지도",
       "catch-EUru": "крякульки"
-    }
+    },
+    "rarity": 6,
+    "appearances": [
+      "NL",
+      "WA",
+      "NH",
+      "HHD",
+      "PC"
+    ],
+    "appearance_count": 5
   },
   "duk17": {
     "id": 143,
@@ -7004,7 +8620,16 @@
       "catch-JPja": "マジかよ",
       "catch-KRko": "리얼리",
       "catch-EUru": "шу-утка"
-    }
+    },
+    "rarity": 6,
+    "appearances": [
+      "NL",
+      "WA",
+      "NH",
+      "HHD",
+      "PC"
+    ],
+    "appearance_count": 5
   },
   "elp00": {
     "id": 144,
@@ -7053,7 +8678,21 @@
       "catch-JPja": "ヨン",
       "catch-KRko": "땡",
       "catch-EUru": "хобот"
-    }
+    },
+    "rarity": 1,
+    "appearances": [
+      "DNM",
+      "AC",
+      "E_PLUS",
+      "WW",
+      "CF",
+      "NL",
+      "WA",
+      "NH",
+      "HHD",
+      "PC"
+    ],
+    "appearance_count": 10
   },
   "elp01": {
     "id": 145,
@@ -7102,7 +8741,21 @@
       "catch-JPja": "だゾウ",
       "catch-KRko": "휴휴",
       "catch-EUru": "тру-ру"
-    }
+    },
+    "rarity": 1,
+    "appearances": [
+      "DNM",
+      "AC",
+      "E_PLUS",
+      "WW",
+      "CF",
+      "NL",
+      "WA",
+      "NH",
+      "HHD",
+      "PC"
+    ],
+    "appearance_count": 10
   },
   "elp02": {
     "id": 146,
@@ -7151,7 +8804,19 @@
       "catch-JPja": "うりゃー",
       "catch-KRko": "으랏차",
       "catch-EUru": "хитрюга"
-    }
+    },
+    "rarity": 3,
+    "appearances": [
+      "E_PLUS",
+      "WW",
+      "CF",
+      "NL",
+      "WA",
+      "NH",
+      "HHD",
+      "PC"
+    ],
+    "appearance_count": 8
   },
   "elp03": {
     "id": 147,
@@ -7200,7 +8865,21 @@
       "catch-JPja": "ルン",
       "catch-KRko": "훨훨",
       "catch-EUru": "тру-тут"
-    }
+    },
+    "rarity": 1,
+    "appearances": [
+      "DNM",
+      "AC",
+      "E_PLUS",
+      "WW",
+      "CF",
+      "NL",
+      "WA",
+      "NH",
+      "HHD",
+      "PC"
+    ],
+    "appearance_count": 10
   },
   "elp04": {
     "id": 148,
@@ -7249,7 +8928,20 @@
       "catch-JPja": "シャララ",
       "catch-KRko": "샬랄라",
       "catch-EUru": "тру-у-ти"
-    }
+    },
+    "rarity": 3,
+    "appearances": [
+      "E_PLUS",
+      "WW",
+      "CF",
+      "NL",
+      "WA",
+      "NH",
+      "FILM",
+      "HHD",
+      "PC"
+    ],
+    "appearance_count": 9
   },
   "elp05": {
     "id": 149,
@@ -7298,7 +8990,17 @@
       "catch-JPja": "パオ",
       "catch-KRko": "파오",
       "catch-EUru": "друг"
-    }
+    },
+    "rarity": 5,
+    "appearances": [
+      "DNM",
+      "AC",
+      "E_PLUS",
+      "WA",
+      "NH",
+      "PC"
+    ],
+    "appearance_count": 6
   },
   "elp06": {
     "id": 150,
@@ -7347,7 +9049,20 @@
       "catch-JPja": "でゴンス",
       "catch-KRko": "히힛",
       "catch-EUru": "потрубим"
-    }
+    },
+    "rarity": 2,
+    "appearances": [
+      "DNM",
+      "AC",
+      "E_PLUS",
+      "CF",
+      "NL",
+      "WA",
+      "NH",
+      "HHD",
+      "PC"
+    ],
+    "appearance_count": 9
   },
   "elp07": {
     "id": 151,
@@ -7396,7 +9111,17 @@
       "catch-JPja": "ララン",
       "catch-KRko": "트랄라",
       "catch-EUru": "кроха"
-    }
+    },
+    "rarity": 5,
+    "appearances": [
+      "DNM",
+      "AC",
+      "E_PLUS",
+      "WA",
+      "NH",
+      "PC"
+    ],
+    "appearance_count": 6
   },
   "elp09": {
     "id": 152,
@@ -7445,7 +9170,16 @@
       "catch-JPja": "もじゃ",
       "catch-KRko": "뿌뿌",
       "catch-EUru": "бивень"
-    }
+    },
+    "rarity": 6,
+    "appearances": [
+      "NL",
+      "WA",
+      "NH",
+      "HHD",
+      "PC"
+    ],
+    "appearance_count": 5
   },
   "elp10": {
     "id": 153,
@@ -7494,7 +9228,16 @@
       "catch-JPja": "ホッ",
       "catch-KRko": "따끈따끈",
       "catch-EUru": "чайку-у"
-    }
+    },
+    "rarity": 6,
+    "appearances": [
+      "NL",
+      "WA",
+      "NH",
+      "HHD",
+      "PC"
+    ],
+    "appearance_count": 5
   },
   "elp12": {
     "id": 154,
@@ -7543,7 +9286,13 @@
       "catch-JPja": "ウス",
       "catch-KRko": "피스",
       "catch-EUru": "рок-н-ролл"
-    }
+    },
+    "rarity": 9,
+    "appearances": [
+      "NH",
+      "PC"
+    ],
+    "appearance_count": 2
   },
   "flg00": {
     "id": 155,
@@ -7592,7 +9341,21 @@
       "catch-JPja": "でちゅ",
       "catch-KRko": "그래요",
       "catch-EUru": "ква"
-    }
+    },
+    "rarity": 1,
+    "appearances": [
+      "DNM",
+      "AC",
+      "E_PLUS",
+      "WW",
+      "CF",
+      "NL",
+      "WA",
+      "NH",
+      "HHD",
+      "PC"
+    ],
+    "appearance_count": 10
   },
   "flg01": {
     "id": 156,
@@ -7641,7 +9404,21 @@
       "catch-JPja": "だロボ",
       "catch-KRko": "오버",
       "catch-EUru": "квак-дзынь"
-    }
+    },
+    "rarity": 1,
+    "appearances": [
+      "DNM",
+      "AC",
+      "E_PLUS",
+      "WW",
+      "CF",
+      "NL",
+      "WA",
+      "NH",
+      "HHD",
+      "PC"
+    ],
+    "appearance_count": 10
   },
   "flg02": {
     "id": 157,
@@ -7690,7 +9467,19 @@
       "catch-JPja": "クルリ",
       "catch-KRko": "객울",
       "catch-EUru": "квак"
-    }
+    },
+    "rarity": 3,
+    "appearances": [
+      "E_PLUS",
+      "WW",
+      "CF",
+      "NL",
+      "WA",
+      "NH",
+      "HHD",
+      "PC"
+    ],
+    "appearance_count": 8
   },
   "flg03": {
     "id": 158,
@@ -7739,7 +9528,21 @@
       "catch-JPja": "わい",
       "catch-KRko": "와이",
       "catch-EUru": "шагом-квак"
-    }
+    },
+    "rarity": 1,
+    "appearances": [
+      "DNM",
+      "AC",
+      "E_PLUS",
+      "WW",
+      "CF",
+      "NL",
+      "WA",
+      "NH",
+      "HHD",
+      "PC"
+    ],
+    "appearance_count": 10
   },
   "flg04": {
     "id": 159,
@@ -7788,7 +9591,20 @@
       "catch-JPja": "ゲロゲロ",
       "catch-KRko": "개굴개굴",
       "catch-EUru": "бро"
-    }
+    },
+    "rarity": 2,
+    "appearances": [
+      "AC",
+      "E_PLUS",
+      "WW",
+      "CF",
+      "NL",
+      "WA",
+      "NH",
+      "HHD",
+      "PC"
+    ],
+    "appearance_count": 9
   },
   "flg05": {
     "id": 160,
@@ -7837,7 +9653,21 @@
       "catch-JPja": "だぎゃ",
       "catch-KRko": "므흣",
       "catch-EUru": "ква-ква"
-    }
+    },
+    "rarity": 1,
+    "appearances": [
+      "DNM",
+      "AC",
+      "E_PLUS",
+      "WW",
+      "CF",
+      "NL",
+      "WA",
+      "NH",
+      "HHD",
+      "PC"
+    ],
+    "appearance_count": 10
   },
   "flg06": {
     "id": 161,
@@ -7886,7 +9716,21 @@
       "catch-JPja": "っちゃ",
       "catch-KRko": "그랬쪄",
       "catch-EUru": "плюх"
-    }
+    },
+    "rarity": 1,
+    "appearances": [
+      "DNM",
+      "AC",
+      "E_PLUS",
+      "WW",
+      "CF",
+      "NL",
+      "WA",
+      "NH",
+      "HHD",
+      "PC"
+    ],
+    "appearance_count": 10
   },
   "flg07": {
     "id": 162,
@@ -7935,7 +9779,21 @@
       "catch-JPja": "にゃむ",
       "catch-KRko": "딩동댕",
       "catch-EUru": "буль-буль"
-    }
+    },
+    "rarity": 1,
+    "appearances": [
+      "DNM",
+      "AC",
+      "E_PLUS",
+      "WW",
+      "CF",
+      "NL",
+      "WA",
+      "NH",
+      "HHD",
+      "PC"
+    ],
+    "appearance_count": 10
   },
   "flg09": {
     "id": 163,
@@ -7984,7 +9842,17 @@
       "catch-JPja": "だよん",
       "catch-KRko": "흐압",
       "catch-EUru": "жабррр"
-    }
+    },
+    "rarity": 5,
+    "appearances": [
+      "DNM",
+      "AC",
+      "E_PLUS",
+      "WA",
+      "NH",
+      "PC"
+    ],
+    "appearance_count": 6
   },
   "flg10": {
     "id": 164,
@@ -8033,7 +9901,20 @@
       "catch-JPja": "のことよ",
       "catch-KRko": "라이라이",
       "catch-EUru": "уи-уи"
-    }
+    },
+    "rarity": 2,
+    "appearances": [
+      "DNM",
+      "AC",
+      "E_PLUS",
+      "CF",
+      "NL",
+      "WA",
+      "NH",
+      "HHD",
+      "PC"
+    ],
+    "appearance_count": 9
   },
   "flg11": {
     "id": 165,
@@ -8082,7 +9963,17 @@
       "catch-JPja": "とかー",
       "catch-KRko": "싸우자",
       "catch-EUru": "скок"
-    }
+    },
+    "rarity": 5,
+    "appearances": [
+      "DNM",
+      "AC",
+      "E_PLUS",
+      "WA",
+      "NH",
+      "PC"
+    ],
+    "appearance_count": 6
   },
   "flg12": {
     "id": 166,
@@ -8131,7 +10022,20 @@
       "catch-JPja": "ですだ",
       "catch-KRko": "이리오슈",
       "catch-EUru": "квак-квак"
-    }
+    },
+    "rarity": 2,
+    "appearances": [
+      "DNM",
+      "AC",
+      "E_PLUS",
+      "CF",
+      "NL",
+      "WA",
+      "NH",
+      "HHD",
+      "PC"
+    ],
+    "appearance_count": 9
   },
   "flg13": {
     "id": 167,
@@ -8180,7 +10084,20 @@
       "catch-JPja": "ですわよ",
       "catch-KRko": "쪼오옥",
       "catch-EUru": "кво-кей"
-    }
+    },
+    "rarity": 2,
+    "appearances": [
+      "DNM",
+      "AC",
+      "E_PLUS",
+      "CF",
+      "NL",
+      "WA",
+      "NH",
+      "HHD",
+      "PC"
+    ],
+    "appearance_count": 9
   },
   "flg15": {
     "id": 168,
@@ -8229,7 +10146,15 @@
       "catch-JPja": "へくしっ",
       "catch-KRko": "콜록",
       "catch-EUru": "ах-ох"
-    }
+    },
+    "rarity": 7,
+    "appearances": [
+      "E_PLUS",
+      "WA",
+      "NH",
+      "PC"
+    ],
+    "appearance_count": 4
   },
   "flg16": {
     "id": 169,
@@ -8278,7 +10203,17 @@
       "catch-JPja": "ベイビィ",
       "catch-KRko": "베이비",
       "catch-EUru": "квакет"
-    }
+    },
+    "rarity": 5,
+    "appearances": [
+      "CF",
+      "NL",
+      "WA",
+      "NH",
+      "HHD",
+      "PC"
+    ],
+    "appearance_count": 6
   },
   "flg17": {
     "id": 170,
@@ -8327,7 +10262,16 @@
       "catch-JPja": "しからば",
       "catch-KRko": "툴툴",
       "catch-EUru": "вроде того"
-    }
+    },
+    "rarity": 6,
+    "appearances": [
+      "NL",
+      "WA",
+      "NH",
+      "HHD",
+      "PC"
+    ],
+    "appearance_count": 5
   },
   "flg18": {
     "id": 171,
@@ -8376,7 +10320,16 @@
       "catch-JPja": "ハーン",
       "catch-KRko": "흐응",
       "catch-EUru": "знаешь"
-    }
+    },
+    "rarity": 6,
+    "appearances": [
+      "NL",
+      "WA",
+      "NH",
+      "HHD",
+      "PC"
+    ],
+    "appearance_count": 5
   },
   "flg19": {
     "id": 172,
@@ -8425,7 +10378,16 @@
       "catch-JPja": "むにゃ",
       "catch-KRko": "음냐음냐",
       "catch-EUru": "ква-храп"
-    }
+    },
+    "rarity": 6,
+    "appearances": [
+      "NL",
+      "WA",
+      "NH",
+      "HHD",
+      "PC"
+    ],
+    "appearance_count": 5
   },
   "goa00": {
     "id": 173,
@@ -8474,7 +10436,21 @@
       "catch-JPja": "っぺ",
       "catch-KRko": "맞아유",
       "catch-EUru": "ле ме-е-е"
-    }
+    },
+    "rarity": 1,
+    "appearances": [
+      "DNM",
+      "AC",
+      "E_PLUS",
+      "WW",
+      "CF",
+      "NL",
+      "WA",
+      "NH",
+      "HHD",
+      "PC"
+    ],
+    "appearance_count": 10
   },
   "goa01": {
     "id": 174,
@@ -8523,7 +10499,19 @@
       "catch-JPja": "っしょ",
       "catch-KRko": "그랬슈",
       "catch-EUru": "козленок"
-    }
+    },
+    "rarity": 3,
+    "appearances": [
+      "E_PLUS",
+      "WW",
+      "CF",
+      "NL",
+      "WA",
+      "NH",
+      "HHD",
+      "PC"
+    ],
+    "appearance_count": 8
   },
   "goa02": {
     "id": 175,
@@ -8572,7 +10560,17 @@
       "catch-JPja": "よのう",
       "catch-KRko": "알아줘",
       "catch-EUru": "такие-сякие"
-    }
+    },
+    "rarity": 5,
+    "appearances": [
+      "DNM",
+      "AC",
+      "E_PLUS",
+      "WA",
+      "NH",
+      "PC"
+    ],
+    "appearance_count": 6
   },
   "goa04": {
     "id": 176,
@@ -8621,7 +10619,19 @@
       "catch-JPja": "イェーイ",
       "catch-KRko": "예이예",
       "catch-EUru": "ме-хе-хе"
-    }
+    },
+    "rarity": 3,
+    "appearances": [
+      "DNM",
+      "AC",
+      "E_PLUS",
+      "NL",
+      "WA",
+      "NH",
+      "HHD",
+      "PC"
+    ],
+    "appearance_count": 8
   },
   "goa06": {
     "id": 177,
@@ -8670,7 +10680,19 @@
       "catch-JPja": "ザーマス",
       "catch-KRko": "똑바로해",
       "catch-EUru": "ме-е-е"
-    }
+    },
+    "rarity": 3,
+    "appearances": [
+      "DNM",
+      "AC",
+      "E_PLUS",
+      "NL",
+      "WA",
+      "NH",
+      "HHD",
+      "PC"
+    ],
+    "appearance_count": 8
   },
   "goa07": {
     "id": 178,
@@ -8719,7 +10741,17 @@
       "catch-JPja": "はぁ～",
       "catch-KRko": "웁스",
       "catch-EUru": "так"
-    }
+    },
+    "rarity": 5,
+    "appearances": [
+      "E_PLUS",
+      "NL",
+      "WA",
+      "NH",
+      "HHD",
+      "PC"
+    ],
+    "appearance_count": 6
   },
   "goa08": {
     "id": 179,
@@ -8768,7 +10800,16 @@
       "catch-JPja": "かな",
       "catch-KRko": "그러게",
       "catch-EUru": "козлятки"
-    }
+    },
+    "rarity": 6,
+    "appearances": [
+      "NL",
+      "WA",
+      "NH",
+      "HHD",
+      "PC"
+    ],
+    "appearance_count": 5
   },
   "goa09": {
     "id": 180,
@@ -8817,7 +10858,13 @@
       "catch-JPja": "ふわぁ",
       "catch-KRko": "흐아앙",
       "catch-EUru": "мемеша"
-    }
+    },
+    "rarity": 9,
+    "appearances": [
+      "NH",
+      "PC"
+    ],
+    "appearance_count": 2
   },
   "gor00": {
     "id": 181,
@@ -8866,7 +10913,22 @@
       "catch-JPja": "ウホウホ",
       "catch-KRko": "우갸우갸",
       "catch-EUru": "высочество"
-    }
+    },
+    "rarity": 1,
+    "appearances": [
+      "DNM",
+      "AC",
+      "E_PLUS",
+      "WW",
+      "CF",
+      "NL",
+      "WA",
+      "NH",
+      "FILM",
+      "HHD",
+      "PC"
+    ],
+    "appearance_count": 11
   },
   "gor01": {
     "id": 182,
@@ -8915,7 +10977,21 @@
       "catch-JPja": "ガオ",
       "catch-KRko": "겉멋",
       "catch-EUru": "мелкота"
-    }
+    },
+    "rarity": 1,
+    "appearances": [
+      "DNM",
+      "AC",
+      "E_PLUS",
+      "WW",
+      "CF",
+      "NL",
+      "WA",
+      "NH",
+      "HHD",
+      "PC"
+    ],
+    "appearance_count": 10
   },
   "gor02": {
     "id": 183,
@@ -8964,7 +11040,18 @@
       "catch-JPja": "ウルトラ",
       "catch-KRko": "야임마",
       "catch-EUru": "бабум"
-    }
+    },
+    "rarity": 4,
+    "appearances": [
+      "WW",
+      "CF",
+      "NL",
+      "WA",
+      "NH",
+      "HHD",
+      "PC"
+    ],
+    "appearance_count": 7
   },
   "gor04": {
     "id": 184,
@@ -9013,7 +11100,18 @@
       "catch-JPja": "コング",
       "catch-KRko": "하압",
       "catch-EUru": "ух-ух-ах"
-    }
+    },
+    "rarity": 4,
+    "appearances": [
+      "DNM",
+      "AC",
+      "E_PLUS",
+      "WA",
+      "NH",
+      "HHD",
+      "PC"
+    ],
+    "appearance_count": 7
   },
   "gor05": {
     "id": 185,
@@ -9062,7 +11160,15 @@
       "catch-JPja": "おうおう",
       "catch-KRko": "오우오우",
       "catch-EUru": "ух-ох"
-    }
+    },
+    "rarity": 7,
+    "appearances": [
+      "E_PLUS",
+      "WA",
+      "NH",
+      "PC"
+    ],
+    "appearance_count": 4
   },
   "gor07": {
     "id": 186,
@@ -9111,7 +11217,18 @@
       "catch-JPja": "ですワ",
       "catch-KRko": "달짝지근",
       "catch-EUru": "сладость"
-    }
+    },
+    "rarity": 4,
+    "appearances": [
+      "E_PLUS",
+      "CF",
+      "NL",
+      "WA",
+      "NH",
+      "HHD",
+      "PC"
+    ],
+    "appearance_count": 7
   },
   "gor08": {
     "id": 187,
@@ -9160,7 +11277,17 @@
       "catch-JPja": "ウヒョッ",
       "catch-KRko": "부락",
       "catch-EUru": "ух-ух-ух"
-    }
+    },
+    "rarity": 5,
+    "appearances": [
+      "CF",
+      "NL",
+      "WA",
+      "NH",
+      "HHD",
+      "PC"
+    ],
+    "appearance_count": 6
   },
   "gor09": {
     "id": 188,
@@ -9209,7 +11336,16 @@
       "catch-JPja": "そりゃっ",
       "catch-KRko": "끼얍",
       "catch-EUru": "на взлет"
-    }
+    },
+    "rarity": 6,
+    "appearances": [
+      "NL",
+      "WA",
+      "NH",
+      "HHD",
+      "PC"
+    ],
+    "appearance_count": 5
   },
   "gor10": {
     "id": 189,
@@ -9258,7 +11394,16 @@
       "catch-JPja": "いえてる",
       "catch-KRko": "알만하다",
       "catch-EUru": "респект"
-    }
+    },
+    "rarity": 6,
+    "appearances": [
+      "NL",
+      "WA",
+      "NH",
+      "HHD",
+      "PC"
+    ],
+    "appearance_count": 5
   },
   "ham00": {
     "id": 190,
@@ -9307,7 +11452,16 @@
       "catch-JPja": "ハム",
       "catch-KRko": "햄햄",
       "catch-EUru": "хомячок"
-    }
+    },
+    "rarity": 6,
+    "appearances": [
+      "NL",
+      "WA",
+      "NH",
+      "HHD",
+      "PC"
+    ],
+    "appearance_count": 5
   },
   "ham01": {
     "id": 191,
@@ -9356,7 +11510,16 @@
       "catch-JPja": "キュルン",
       "catch-KRko": "큐룽",
       "catch-EUru": "щечки"
-    }
+    },
+    "rarity": 6,
+    "appearances": [
+      "NL",
+      "WA",
+      "NH",
+      "HHD",
+      "PC"
+    ],
+    "appearance_count": 5
   },
   "ham02": {
     "id": 192,
@@ -9405,7 +11568,16 @@
       "catch-JPja": "ですぞ",
       "catch-KRko": "그렇다고",
       "catch-EUru": "резонно"
-    }
+    },
+    "rarity": 6,
+    "appearances": [
+      "NL",
+      "WA",
+      "NH",
+      "HHD",
+      "PC"
+    ],
+    "appearance_count": 5
   },
   "ham03": {
     "id": 193,
@@ -9454,7 +11626,16 @@
       "catch-JPja": "ヒュー",
       "catch-KRko": "휴우",
       "catch-EUru": "ле хом"
-    }
+    },
+    "rarity": 6,
+    "appearances": [
+      "NL",
+      "WA",
+      "NH",
+      "HHD",
+      "PC"
+    ],
+    "appearance_count": 5
   },
   "ham04": {
     "id": 194,
@@ -9503,7 +11684,16 @@
       "catch-JPja": "だってば",
       "catch-KRko": "파샤샤",
       "catch-EUru": "о-хо-хо"
-    }
+    },
+    "rarity": 6,
+    "appearances": [
+      "NL",
+      "WA",
+      "NH",
+      "HHD",
+      "PC"
+    ],
+    "appearance_count": 5
   },
   "ham05": {
     "id": 195,
@@ -9552,7 +11742,16 @@
       "catch-JPja": "どきどき",
       "catch-KRko": "둥게둥게",
       "catch-EUru": "стук-стук"
-    }
+    },
+    "rarity": 6,
+    "appearances": [
+      "NL",
+      "WA",
+      "NH",
+      "HHD",
+      "PC"
+    ],
+    "appearance_count": 5
   },
   "ham06": {
     "id": 196,
@@ -9601,7 +11800,16 @@
       "catch-JPja": "なのです",
       "catch-KRko": "뽀드득",
       "catch-EUru": "пушистик"
-    }
+    },
+    "rarity": 6,
+    "appearances": [
+      "NL",
+      "WA",
+      "NH",
+      "HHD",
+      "PC"
+    ],
+    "appearance_count": 5
   },
   "ham07": {
     "id": 197,
@@ -9650,7 +11858,16 @@
       "catch-JPja": "カーッ",
       "catch-KRko": "카악",
       "catch-EUru": "фырк"
-    }
+    },
+    "rarity": 6,
+    "appearances": [
+      "NL",
+      "WA",
+      "NH",
+      "HHD",
+      "PC"
+    ],
+    "appearance_count": 5
   },
   "hip00": {
     "id": 198,
@@ -9699,7 +11916,21 @@
       "catch-JPja": "だぎゃー",
       "catch-KRko": "그러마",
       "catch-EUru": "гиппи"
-    }
+    },
+    "rarity": 1,
+    "appearances": [
+      "DNM",
+      "AC",
+      "E_PLUS",
+      "WW",
+      "CF",
+      "NL",
+      "WA",
+      "NH",
+      "HHD",
+      "PC"
+    ],
+    "appearance_count": 10
   },
   "hip02": {
     "id": 199,
@@ -9748,7 +11979,19 @@
       "catch-JPja": "でガンス",
       "catch-KRko": "히포포",
       "catch-EUru": "хипстер"
-    }
+    },
+    "rarity": 3,
+    "appearances": [
+      "DNM",
+      "AC",
+      "E_PLUS",
+      "NL",
+      "WA",
+      "NH",
+      "HHD",
+      "PC"
+    ],
+    "appearance_count": 8
   },
   "hip03": {
     "id": 200,
@@ -9797,7 +12040,19 @@
       "catch-JPja": "せやねん",
       "catch-KRko": "약히",
       "catch-EUru": "буль"
-    }
+    },
+    "rarity": 3,
+    "appearances": [
+      "DNM",
+      "AC",
+      "E_PLUS",
+      "NL",
+      "WA",
+      "NH",
+      "HHD",
+      "PC"
+    ],
+    "appearance_count": 8
   },
   "hip04": {
     "id": 201,
@@ -9846,7 +12101,19 @@
       "catch-JPja": "じゃけん",
       "catch-KRko": "오도독",
       "catch-EUru": "малек"
-    }
+    },
+    "rarity": 3,
+    "appearances": [
+      "DNM",
+      "AC",
+      "E_PLUS",
+      "NL",
+      "WA",
+      "NH",
+      "HHD",
+      "PC"
+    ],
+    "appearance_count": 8
   },
   "hip05": {
     "id": 202,
@@ -9895,7 +12162,17 @@
       "catch-JPja": "だピー",
       "catch-KRko": "쩝쩝",
       "catch-EUru": "дорогуша"
-    }
+    },
+    "rarity": 5,
+    "appearances": [
+      "DNM",
+      "AC",
+      "E_PLUS",
+      "WA",
+      "NH",
+      "PC"
+    ],
+    "appearance_count": 6
   },
   "hip08": {
     "id": 203,
@@ -9944,7 +12221,18 @@
       "catch-JPja": "でっせ",
       "catch-KRko": "냉큼오슈",
       "catch-EUru": "лежебока"
-    }
+    },
+    "rarity": 4,
+    "appearances": [
+      "E_PLUS",
+      "CF",
+      "NL",
+      "WA",
+      "NH",
+      "HHD",
+      "PC"
+    ],
+    "appearance_count": 7
   },
   "hip09": {
     "id": 204,
@@ -9993,7 +12281,16 @@
       "catch-JPja": "イェス",
       "catch-KRko": "예스",
       "catch-EUru": "естессно"
-    }
+    },
+    "rarity": 6,
+    "appearances": [
+      "NL",
+      "WA",
+      "NH",
+      "HHD",
+      "PC"
+    ],
+    "appearance_count": 5
   },
   "hrs00": {
     "id": 205,
@@ -10042,7 +12339,21 @@
       "catch-JPja": "なんちて",
       "catch-KRko": "농담",
       "catch-EUru": "партнер"
-    }
+    },
+    "rarity": 1,
+    "appearances": [
+      "DNM",
+      "AC",
+      "E_PLUS",
+      "WW",
+      "CF",
+      "NL",
+      "WA",
+      "NH",
+      "HHD",
+      "PC"
+    ],
+    "appearance_count": 10
   },
   "hrs01": {
     "id": 206,
@@ -10091,7 +12402,19 @@
       "catch-JPja": "いくわよ",
       "catch-KRko": "달리자",
       "catch-EUru": "сахарок"
-    }
+    },
+    "rarity": 3,
+    "appearances": [
+      "E_PLUS",
+      "WW",
+      "CF",
+      "NL",
+      "WA",
+      "NH",
+      "HHD",
+      "PC"
+    ],
+    "appearance_count": 8
   },
   "hrs02": {
     "id": 207,
@@ -10140,7 +12463,21 @@
       "catch-JPja": "ってば",
       "catch-KRko": "맞아요",
       "catch-EUru": "и все"
-    }
+    },
+    "rarity": 1,
+    "appearances": [
+      "DNM",
+      "AC",
+      "E_PLUS",
+      "WW",
+      "CF",
+      "NL",
+      "WA",
+      "NH",
+      "HHD",
+      "PC"
+    ],
+    "appearance_count": 10
   },
   "hrs03": {
     "id": 208,
@@ -10189,7 +12526,21 @@
       "catch-JPja": "だヒヒン",
       "catch-KRko": "히히힝",
       "catch-EUru": "жеребенок"
-    }
+    },
+    "rarity": 1,
+    "appearances": [
+      "DNM",
+      "AC",
+      "E_PLUS",
+      "WW",
+      "CF",
+      "NL",
+      "WA",
+      "NH",
+      "HHD",
+      "PC"
+    ],
+    "appearance_count": 10
   },
   "hrs04": {
     "id": 209,
@@ -10238,7 +12589,19 @@
       "catch-JPja": "ブルル",
       "catch-KRko": "부르르",
       "catch-EUru": "не-е-ет"
-    }
+    },
+    "rarity": 3,
+    "appearances": [
+      "E_PLUS",
+      "WW",
+      "CF",
+      "NL",
+      "WA",
+      "NH",
+      "HHD",
+      "PC"
+    ],
+    "appearance_count": 8
   },
   "hrs05": {
     "id": 210,
@@ -10287,7 +12650,20 @@
       "catch-JPja": "みゃあ",
       "catch-KRko": "당근당근",
       "catch-EUru": "тык-дык"
-    }
+    },
+    "rarity": 2,
+    "appearances": [
+      "DNM",
+      "AC",
+      "E_PLUS",
+      "CF",
+      "NL",
+      "WA",
+      "NH",
+      "HHD",
+      "PC"
+    ],
+    "appearance_count": 9
   },
   "hrs06": {
     "id": 211,
@@ -10336,7 +12712,20 @@
       "catch-JPja": "じゃない",
       "catch-KRko": "게슴츠레",
       "catch-EUru": "новичок"
-    }
+    },
+    "rarity": 2,
+    "appearances": [
+      "DNM",
+      "AC",
+      "E_PLUS",
+      "CF",
+      "NL",
+      "WA",
+      "NH",
+      "HHD",
+      "PC"
+    ],
+    "appearance_count": 9
   },
   "hrs07": {
     "id": 212,
@@ -10385,7 +12774,17 @@
       "catch-JPja": "あそばせ",
       "catch-KRko": "훗훗",
       "catch-EUru": "рафинад"
-    }
+    },
+    "rarity": 5,
+    "appearances": [
+      "DNM",
+      "AC",
+      "E_PLUS",
+      "WA",
+      "NH",
+      "PC"
+    ],
+    "appearance_count": 6
   },
   "hrs08": {
     "id": 213,
@@ -10434,7 +12833,20 @@
       "catch-JPja": "だポン",
       "catch-KRko": "몰라요",
       "catch-EUru": "соседушка"
-    }
+    },
+    "rarity": 2,
+    "appearances": [
+      "DNM",
+      "AC",
+      "E_PLUS",
+      "CF",
+      "NL",
+      "WA",
+      "NH",
+      "HHD",
+      "PC"
+    ],
+    "appearance_count": 9
   },
   "hrs09": {
     "id": 214,
@@ -10483,7 +12895,18 @@
       "catch-JPja": "サヴァ",
       "catch-KRko": "봉쥬르",
       "catch-EUru": "кусь-кусь"
-    }
+    },
+    "rarity": 4,
+    "appearances": [
+      "AC",
+      "E_PLUS",
+      "NL",
+      "WA",
+      "NH",
+      "HHD",
+      "PC"
+    ],
+    "appearance_count": 7
   },
   "hrs10": {
     "id": 215,
@@ -10532,7 +12955,17 @@
       "catch-JPja": "ぴろぴろ",
       "catch-KRko": "다그닥",
       "catch-EUru": "цок-цок"
-    }
+    },
+    "rarity": 5,
+    "appearances": [
+      "CF",
+      "NL",
+      "WA",
+      "NH",
+      "HHD",
+      "PC"
+    ],
+    "appearance_count": 6
   },
   "hrs11": {
     "id": 216,
@@ -10581,7 +13014,16 @@
       "catch-JPja": "ごらんよ",
       "catch-KRko": "이거봐",
       "catch-EUru": "глянь"
-    }
+    },
+    "rarity": 6,
+    "appearances": [
+      "NL",
+      "WA",
+      "NH",
+      "HHD",
+      "PC"
+    ],
+    "appearance_count": 5
   },
   "hrs12": {
     "id": 217,
@@ -10630,7 +13072,16 @@
       "catch-JPja": "だっけ",
       "catch-KRko": "그런가",
       "catch-EUru": "се-е-ено"
-    }
+    },
+    "rarity": 6,
+    "appearances": [
+      "NL",
+      "WA",
+      "NH",
+      "HHD",
+      "PC"
+    ],
+    "appearance_count": 5
   },
   "hrs13": {
     "id": 218,
@@ -10679,7 +13130,16 @@
       "catch-JPja": "ね、キミ",
       "catch-KRko": "그대여",
       "catch-EUru": "блеск"
-    }
+    },
+    "rarity": 6,
+    "appearances": [
+      "NL",
+      "WA",
+      "NH",
+      "HHD",
+      "PC"
+    ],
+    "appearance_count": 5
   },
   "hrs16": {
     "id": 219,
@@ -10728,7 +13188,13 @@
       "catch-JPja": "スン",
       "catch-KRko": "쉬익",
       "catch-EUru": "но-но"
-    }
+    },
+    "rarity": 9,
+    "appearances": [
+      "NH",
+      "PC"
+    ],
+    "appearance_count": 2
   },
   "kal00": {
     "id": 220,
@@ -10777,7 +13243,21 @@
       "catch-JPja": "アラ",
       "catch-KRko": "어맛",
       "catch-EUru": "ц-ц"
-    }
+    },
+    "rarity": 1,
+    "appearances": [
+      "DNM",
+      "AC",
+      "E_PLUS",
+      "WW",
+      "CF",
+      "NL",
+      "WA",
+      "NH",
+      "HHD",
+      "PC"
+    ],
+    "appearance_count": 10
   },
   "kal01": {
     "id": 221,
@@ -10826,7 +13306,19 @@
       "catch-JPja": "キラリ",
       "catch-KRko": "반짝",
       "catch-EUru": "лидер"
-    }
+    },
+    "rarity": 3,
+    "appearances": [
+      "E_PLUS",
+      "WW",
+      "CF",
+      "NL",
+      "WA",
+      "NH",
+      "HHD",
+      "PC"
+    ],
+    "appearance_count": 8
   },
   "kal02": {
     "id": 222,
@@ -10875,7 +13367,18 @@
       "catch-JPja": "とっても",
       "catch-KRko": "정말로요",
       "catch-EUru": "хрустяшка"
-    }
+    },
+    "rarity": 4,
+    "appearances": [
+      "WW",
+      "CF",
+      "NL",
+      "WA",
+      "NH",
+      "HHD",
+      "PC"
+    ],
+    "appearance_count": 7
   },
   "kal03": {
     "id": 223,
@@ -10924,7 +13427,20 @@
       "catch-JPja": "だコアラ",
       "catch-KRko": "발그레",
       "catch-EUru": "солнышко"
-    }
+    },
+    "rarity": 2,
+    "appearances": [
+      "DNM",
+      "AC",
+      "E_PLUS",
+      "CF",
+      "NL",
+      "WA",
+      "NH",
+      "HHD",
+      "PC"
+    ],
+    "appearance_count": 9
   },
   "kal04": {
     "id": 224,
@@ -10973,7 +13489,17 @@
       "catch-JPja": "だがや",
       "catch-KRko": "버텨",
       "catch-EUru": "напарник"
-    }
+    },
+    "rarity": 5,
+    "appearances": [
+      "DNM",
+      "AC",
+      "E_PLUS",
+      "WA",
+      "NH",
+      "PC"
+    ],
+    "appearance_count": 6
   },
   "kal05": {
     "id": 225,
@@ -11022,7 +13548,19 @@
       "catch-JPja": "ククッ",
       "catch-KRko": "큐큐",
       "catch-EUru": "медведище"
-    }
+    },
+    "rarity": 3,
+    "appearances": [
+      "DNM",
+      "AC",
+      "E_PLUS",
+      "NL",
+      "WA",
+      "NH",
+      "HHD",
+      "PC"
+    ],
+    "appearance_count": 8
   },
   "kal08": {
     "id": 226,
@@ -11071,7 +13609,16 @@
       "catch-JPja": "え～",
       "catch-KRko": "어어",
       "catch-EUru": "ох-хо"
-    }
+    },
+    "rarity": 6,
+    "appearances": [
+      "NL",
+      "WA",
+      "NH",
+      "HHD",
+      "PC"
+    ],
+    "appearance_count": 5
   },
   "kal09": {
     "id": 227,
@@ -11120,7 +13667,16 @@
       "catch-JPja": "わ～い",
       "catch-KRko": "우와",
       "catch-EUru": "ничего"
-    }
+    },
+    "rarity": 6,
+    "appearances": [
+      "NL",
+      "WA",
+      "NH",
+      "HHD",
+      "PC"
+    ],
+    "appearance_count": 5
   },
   "kal10": {
     "id": 228,
@@ -11169,7 +13725,16 @@
       "catch-JPja": "おいおい",
       "catch-KRko": "야야야",
       "catch-EUru": "приятель"
-    }
+    },
+    "rarity": 6,
+    "appearances": [
+      "NL",
+      "WA",
+      "NH",
+      "HHD",
+      "PC"
+    ],
+    "appearance_count": 5
   },
   "kgr00": {
     "id": 229,
@@ -11218,7 +13783,21 @@
       "catch-JPja": "ッポン",
       "catch-KRko": "폴짝",
       "catch-EUru": "детка"
-    }
+    },
+    "rarity": 1,
+    "appearances": [
+      "DNM",
+      "AC",
+      "E_PLUS",
+      "WW",
+      "CF",
+      "NL",
+      "WA",
+      "NH",
+      "HHD",
+      "PC"
+    ],
+    "appearance_count": 10
   },
   "kgr01": {
     "id": 230,
@@ -11267,7 +13846,21 @@
       "catch-JPja": "ッハ",
       "catch-KRko": "응",
       "catch-EUru": "малютка"
-    }
+    },
+    "rarity": 1,
+    "appearances": [
+      "DNM",
+      "AC",
+      "E_PLUS",
+      "WW",
+      "CF",
+      "NL",
+      "WA",
+      "NH",
+      "HHD",
+      "PC"
+    ],
+    "appearance_count": 10
   },
   "kgr02": {
     "id": 231,
@@ -11316,7 +13909,18 @@
       "catch-JPja": "だフン",
       "catch-KRko": "오롤로",
       "catch-EUru": "дитятко"
-    }
+    },
+    "rarity": 4,
+    "appearances": [
+      "DNM",
+      "AC",
+      "E_PLUS",
+      "WA",
+      "NH",
+      "HHD",
+      "PC"
+    ],
+    "appearance_count": 7
   },
   "kgr05": {
     "id": 232,
@@ -11365,7 +13969,20 @@
       "catch-JPja": "だパンク",
       "catch-KRko": "뭘봐",
       "catch-EUru": "лапочка"
-    }
+    },
+    "rarity": 2,
+    "appearances": [
+      "DNM",
+      "AC",
+      "E_PLUS",
+      "CF",
+      "NL",
+      "WA",
+      "NH",
+      "HHD",
+      "PC"
+    ],
+    "appearance_count": 9
   },
   "kgr06": {
     "id": 233,
@@ -11414,7 +14031,17 @@
       "catch-JPja": "よねー",
       "catch-KRko": "이자슥",
       "catch-EUru": "прыг"
-    }
+    },
+    "rarity": 5,
+    "appearances": [
+      "E_PLUS",
+      "NL",
+      "WA",
+      "NH",
+      "HHD",
+      "PC"
+    ],
+    "appearance_count": 6
   },
   "kgr08": {
     "id": 234,
@@ -11463,7 +14090,16 @@
       "catch-JPja": "じゃのう",
       "catch-KRko": "어험",
       "catch-EUru": "карманчик"
-    }
+    },
+    "rarity": 6,
+    "appearances": [
+      "NL",
+      "WA",
+      "NH",
+      "HHD",
+      "PC"
+    ],
+    "appearance_count": 5
   },
   "kgr09": {
     "id": 235,
@@ -11512,7 +14148,16 @@
       "catch-JPja": "やるぜ",
       "catch-KRko": "아자",
       "catch-EUru": "хук"
-    }
+    },
+    "rarity": 6,
+    "appearances": [
+      "NL",
+      "WA",
+      "NH",
+      "HHD",
+      "PC"
+    ],
+    "appearance_count": 5
   },
   "kgr10": {
     "id": 236,
@@ -11561,7 +14206,16 @@
       "catch-JPja": "いいのよ",
       "catch-KRko": "조아요",
       "catch-EUru": "кармашек"
-    }
+    },
+    "rarity": 6,
+    "appearances": [
+      "NL",
+      "WA",
+      "NH",
+      "HHD",
+      "PC"
+    ],
+    "appearance_count": 5
   },
   "lon00": {
     "id": 237,
@@ -11610,7 +14264,20 @@
       "catch-JPja": "メ～ン",
       "catch-KRko": "요～맨",
       "catch-EUru": "че-е-ел"
-    }
+    },
+    "rarity": 2,
+    "appearances": [
+      "AC",
+      "E_PLUS",
+      "WW",
+      "CF",
+      "NL",
+      "WA",
+      "NH",
+      "HHD",
+      "PC"
+    ],
+    "appearance_count": 9
   },
   "lon01": {
     "id": 238,
@@ -11659,7 +14326,18 @@
       "catch-JPja": "ダロガ",
       "catch-KRko": "안그냐",
       "catch-EUru": "буги-вуги"
-    }
+    },
+    "rarity": 4,
+    "appearances": [
+      "WW",
+      "CF",
+      "NL",
+      "WA",
+      "NH",
+      "HHD",
+      "PC"
+    ],
+    "appearance_count": 7
   },
   "lon02": {
     "id": 239,
@@ -11708,7 +14386,17 @@
       "catch-JPja": "だオン",
       "catch-KRko": "티라이온",
       "catch-EUru": "спокойно"
-    }
+    },
+    "rarity": 5,
+    "appearances": [
+      "DNM",
+      "AC",
+      "E_PLUS",
+      "WA",
+      "NH",
+      "PC"
+    ],
+    "appearance_count": 6
   },
   "lon04": {
     "id": 240,
@@ -11757,7 +14445,17 @@
       "catch-JPja": "よな",
       "catch-KRko": "졸지마",
       "catch-EUru": "левушка"
-    }
+    },
+    "rarity": 5,
+    "appearances": [
+      "DNM",
+      "AC",
+      "E_PLUS",
+      "WA",
+      "NH",
+      "PC"
+    ],
+    "appearance_count": 6
   },
   "lon06": {
     "id": 241,
@@ -11806,7 +14504,17 @@
       "catch-JPja": "ハハハ",
       "catch-KRko": "하하하",
       "catch-EUru": "зоосад"
-    }
+    },
+    "rarity": 5,
+    "appearances": [
+      "CF",
+      "NL",
+      "WA",
+      "NH",
+      "HHD",
+      "PC"
+    ],
+    "appearance_count": 6
   },
   "lon07": {
     "id": 242,
@@ -11855,7 +14563,16 @@
       "catch-JPja": "ナハッ",
       "catch-KRko": "크릉",
       "catch-EUru": "капитально"
-    }
+    },
+    "rarity": 6,
+    "appearances": [
+      "NL",
+      "WA",
+      "NH",
+      "HHD",
+      "PC"
+    ],
+    "appearance_count": 5
   },
   "lon08": {
     "id": 243,
@@ -11904,7 +14621,16 @@
       "catch-JPja": "まさしく",
       "catch-KRko": "옳거니",
       "catch-EUru": "честь имею"
-    }
+    },
+    "rarity": 6,
+    "appearances": [
+      "NL",
+      "WA",
+      "NH",
+      "HHD",
+      "PC"
+    ],
+    "appearance_count": 5
   },
   "mnk01": {
     "id": 244,
@@ -11953,7 +14679,18 @@
       "catch-JPja": "ウキャ",
       "catch-KRko": "끼끼",
       "catch-EUru": "пу-пу"
-    }
+    },
+    "rarity": 4,
+    "appearances": [
+      "WW",
+      "CF",
+      "NL",
+      "WA",
+      "NH",
+      "HHD",
+      "PC"
+    ],
+    "appearance_count": 7
   },
   "mnk02": {
     "id": 245,
@@ -12002,7 +14739,18 @@
       "catch-JPja": "でござる",
       "catch-KRko": "하옵니다",
       "catch-EUru": "дружок"
-    }
+    },
+    "rarity": 4,
+    "appearances": [
+      "WW",
+      "CF",
+      "NL",
+      "WA",
+      "NH",
+      "HHD",
+      "PC"
+    ],
+    "appearance_count": 7
   },
   "mnk03": {
     "id": 246,
@@ -12051,7 +14799,18 @@
       "catch-JPja": "ワオ",
       "catch-KRko": "와우",
       "catch-EUru": "шимпатяга"
-    }
+    },
+    "rarity": 4,
+    "appearances": [
+      "WW",
+      "CF",
+      "NL",
+      "WA",
+      "NH",
+      "HHD",
+      "PC"
+    ],
+    "appearance_count": 7
   },
   "mnk04": {
     "id": 247,
@@ -12100,7 +14859,18 @@
       "catch-JPja": "バナーナ",
       "catch-KRko": "바나나",
       "catch-EUru": "ух-эх"
-    }
+    },
+    "rarity": 4,
+    "appearances": [
+      "WW",
+      "CF",
+      "NL",
+      "WA",
+      "NH",
+      "HHD",
+      "PC"
+    ],
+    "appearance_count": 7
   },
   "mnk05": {
     "id": 248,
@@ -12149,7 +14919,18 @@
       "catch-JPja": "だモン",
       "catch-KRko": "몽몽",
       "catch-EUru": "само собой"
-    }
+    },
+    "rarity": 4,
+    "appearances": [
+      "WW",
+      "CF",
+      "NL",
+      "WA",
+      "NH",
+      "HHD",
+      "PC"
+    ],
+    "appearance_count": 7
   },
   "mnk06": {
     "id": 249,
@@ -12198,7 +14979,16 @@
       "catch-JPja": "どっこい",
       "catch-KRko": "빠샤",
       "catch-EUru": "у-у-у"
-    }
+    },
+    "rarity": 6,
+    "appearances": [
+      "NL",
+      "WA",
+      "NH",
+      "HHD",
+      "PC"
+    ],
+    "appearance_count": 5
   },
   "mnk07": {
     "id": 250,
@@ -12247,7 +15037,16 @@
       "catch-JPja": "ウキキ",
       "catch-KRko": "우끼네",
       "catch-EUru": "щекасто"
-    }
+    },
+    "rarity": 6,
+    "appearances": [
+      "NL",
+      "WA",
+      "NH",
+      "HHD",
+      "PC"
+    ],
+    "appearance_count": 5
   },
   "mnk08": {
     "id": 251,
@@ -12296,7 +15095,16 @@
       "catch-JPja": "だぜ",
       "catch-KRko": "흠냐리",
       "catch-EUru": "чавк-чавк"
-    }
+    },
+    "rarity": 6,
+    "appearances": [
+      "NL",
+      "WA",
+      "NH",
+      "HHD",
+      "PC"
+    ],
+    "appearance_count": 5
   },
   "mus00": {
     "id": 252,
@@ -12345,7 +15153,21 @@
       "catch-JPja": "だべ",
       "catch-KRko": "찍찍",
       "catch-EUru": "пип-пип"
-    }
+    },
+    "rarity": 1,
+    "appearances": [
+      "DNM",
+      "AC",
+      "E_PLUS",
+      "WW",
+      "CF",
+      "NL",
+      "WA",
+      "NH",
+      "HHD",
+      "PC"
+    ],
+    "appearance_count": 10
   },
   "mus01": {
     "id": 253,
@@ -12394,7 +15216,21 @@
       "catch-JPja": "てやんで",
       "catch-KRko": "긍가벼",
       "catch-EUru": "фью-фью"
-    }
+    },
+    "rarity": 1,
+    "appearances": [
+      "DNM",
+      "AC",
+      "E_PLUS",
+      "WW",
+      "CF",
+      "NL",
+      "WA",
+      "NH",
+      "HHD",
+      "PC"
+    ],
+    "appearance_count": 10
   },
   "mus02": {
     "id": 254,
@@ -12443,7 +15279,19 @@
       "catch-JPja": "ギャハッ",
       "catch-KRko": "캬학",
       "catch-EUru": "пип"
-    }
+    },
+    "rarity": 3,
+    "appearances": [
+      "E_PLUS",
+      "WW",
+      "CF",
+      "NL",
+      "WA",
+      "NH",
+      "HHD",
+      "PC"
+    ],
+    "appearance_count": 8
   },
   "mus03": {
     "id": 255,
@@ -12492,7 +15340,19 @@
       "catch-JPja": "なーんて",
       "catch-KRko": "글치머",
       "catch-EUru": "сы-ы-ыр"
-    }
+    },
+    "rarity": 3,
+    "appearances": [
+      "E_PLUS",
+      "WW",
+      "CF",
+      "NL",
+      "WA",
+      "NH",
+      "HHD",
+      "PC"
+    ],
+    "appearance_count": 8
   },
   "mus04": {
     "id": 256,
@@ -12541,7 +15401,21 @@
       "catch-JPja": "チュー",
       "catch-KRko": "쪽",
       "catch-EUru": "ревушка"
-    }
+    },
+    "rarity": 1,
+    "appearances": [
+      "DNM",
+      "AC",
+      "E_PLUS",
+      "WW",
+      "CF",
+      "NL",
+      "WA",
+      "NH",
+      "HHD",
+      "PC"
+    ],
+    "appearance_count": 10
   },
   "mus05": {
     "id": 257,
@@ -12590,7 +15464,19 @@
       "catch-JPja": "すっげぇ",
       "catch-KRko": "무진장",
       "catch-EUru": "мастерски"
-    }
+    },
+    "rarity": 3,
+    "appearances": [
+      "E_PLUS",
+      "WW",
+      "CF",
+      "NL",
+      "WA",
+      "NH",
+      "HHD",
+      "PC"
+    ],
+    "appearance_count": 8
   },
   "mus08": {
     "id": 258,
@@ -12639,7 +15525,17 @@
       "catch-JPja": "ですワ",
       "catch-KRko": "달짝지근",
       "catch-EUru": "сладость"
-    }
+    },
+    "rarity": 5,
+    "appearances": [
+      "DNM",
+      "AC",
+      "E_PLUS",
+      "WA",
+      "NH",
+      "PC"
+    ],
+    "appearance_count": 6
   },
   "mus09": {
     "id": 259,
@@ -12688,7 +15584,20 @@
       "catch-JPja": "がってん",
       "catch-KRko": "힐끔힐끔",
       "catch-EUru": "пи-и-и"
-    }
+    },
+    "rarity": 2,
+    "appearances": [
+      "DNM",
+      "AC",
+      "E_PLUS",
+      "CF",
+      "NL",
+      "WA",
+      "NH",
+      "HHD",
+      "PC"
+    ],
+    "appearance_count": 9
   },
   "mus10": {
     "id": 260,
@@ -12737,7 +15646,19 @@
       "catch-JPja": "ルンルン",
       "catch-KRko": "룰룰",
       "catch-EUru": "канноли"
-    }
+    },
+    "rarity": 3,
+    "appearances": [
+      "DNM",
+      "AC",
+      "E_PLUS",
+      "NL",
+      "WA",
+      "NH",
+      "HHD",
+      "PC"
+    ],
+    "appearance_count": 8
   },
   "mus12": {
     "id": 261,
@@ -12786,7 +15707,18 @@
       "catch-JPja": "ピコ",
       "catch-KRko": "앗차",
       "catch-EUru": "ням-ням"
-    }
+    },
+    "rarity": 4,
+    "appearances": [
+      "E_PLUS",
+      "CF",
+      "NL",
+      "WA",
+      "NH",
+      "HHD",
+      "PC"
+    ],
+    "appearance_count": 7
   },
   "mus14": {
     "id": 262,
@@ -12835,7 +15767,17 @@
       "catch-JPja": "にゃろ",
       "catch-KRko": "짜샤",
       "catch-EUru": "коротышка"
-    }
+    },
+    "rarity": 5,
+    "appearances": [
+      "CF",
+      "NL",
+      "WA",
+      "NH",
+      "HHD",
+      "PC"
+    ],
+    "appearance_count": 6
   },
   "mus15": {
     "id": 263,
@@ -12884,7 +15826,17 @@
       "catch-JPja": "ですよね",
       "catch-KRko": "내말이요",
       "catch-EUru": "пи-пи-пи"
-    }
+    },
+    "rarity": 5,
+    "appearances": [
+      "CF",
+      "NL",
+      "WA",
+      "NH",
+      "HHD",
+      "PC"
+    ],
+    "appearance_count": 6
   },
   "mus16": {
     "id": 264,
@@ -12933,7 +15885,16 @@
       "catch-JPja": "おほほ",
       "catch-KRko": "오호호",
       "catch-EUru": "писк"
-    }
+    },
+    "rarity": 6,
+    "appearances": [
+      "NL",
+      "WA",
+      "NH",
+      "HHD",
+      "PC"
+    ],
+    "appearance_count": 5
   },
   "mus17": {
     "id": 265,
@@ -12982,7 +15943,16 @@
       "catch-JPja": "でちゅの",
       "catch-KRko": "그러찍",
       "catch-EUru": "бантик"
-    }
+    },
+    "rarity": 6,
+    "appearances": [
+      "NL",
+      "WA",
+      "NH",
+      "HHD",
+      "PC"
+    ],
+    "appearance_count": 5
   },
   "mus18": {
     "id": 266,
@@ -13031,7 +16001,16 @@
       "catch-JPja": "まあね",
       "catch-KRko": "꼬리꼬리",
       "catch-EUru": "сырок"
-    }
+    },
+    "rarity": 6,
+    "appearances": [
+      "NL",
+      "WA",
+      "NH",
+      "HHD",
+      "PC"
+    ],
+    "appearance_count": 5
   },
   "ocp00": {
     "id": 267,
@@ -13080,7 +16059,21 @@
       "catch-JPja": "タコ",
       "catch-KRko": "쭉쭉",
       "catch-EUru": "все пропало"
-    }
+    },
+    "rarity": 1,
+    "appearances": [
+      "DNM",
+      "AC",
+      "E_PLUS",
+      "WW",
+      "CF",
+      "NL",
+      "WA",
+      "NH",
+      "HHD",
+      "PC"
+    ],
+    "appearance_count": 10
   },
   "ocp01": {
     "id": 268,
@@ -13129,7 +16122,19 @@
       "catch-JPja": "きゃ",
       "catch-KRko": "캬캬",
       "catch-EUru": "хлюп"
-    }
+    },
+    "rarity": 3,
+    "appearances": [
+      "E_PLUS",
+      "WW",
+      "CF",
+      "NL",
+      "WA",
+      "NH",
+      "HHD",
+      "PC"
+    ],
+    "appearance_count": 8
   },
   "ocp02": {
     "id": 269,
@@ -13178,7 +16183,16 @@
       "catch-JPja": "せやねん",
       "catch-KRko": "약히",
       "catch-EUru": "буль"
-    }
+    },
+    "rarity": 6,
+    "appearances": [
+      "NL",
+      "WA",
+      "NH",
+      "HHD",
+      "PC"
+    ],
+    "appearance_count": 5
   },
   "ost00": {
     "id": 270,
@@ -13227,7 +16241,21 @@
       "catch-JPja": "やっぱし",
       "catch-KRko": "역시",
       "catch-EUru": "цыпленок"
-    }
+    },
+    "rarity": 1,
+    "appearances": [
+      "DNM",
+      "AC",
+      "E_PLUS",
+      "WW",
+      "CF",
+      "NL",
+      "WA",
+      "NH",
+      "HHD",
+      "PC"
+    ],
+    "appearance_count": 10
   },
   "ost01": {
     "id": 271,
@@ -13276,7 +16304,19 @@
       "catch-JPja": "ですの",
       "catch-KRko": "그렇지라",
       "catch-EUru": "растяжка"
-    }
+    },
+    "rarity": 3,
+    "appearances": [
+      "E_PLUS",
+      "WW",
+      "CF",
+      "NL",
+      "WA",
+      "NH",
+      "HHD",
+      "PC"
+    ],
+    "appearance_count": 8
   },
   "ost02": {
     "id": 272,
@@ -13325,7 +16365,17 @@
       "catch-JPja": "だチョー",
       "catch-KRko": "그렇다조",
       "catch-EUru": "быстро"
-    }
+    },
+    "rarity": 5,
+    "appearances": [
+      "DNM",
+      "AC",
+      "E_PLUS",
+      "WA",
+      "NH",
+      "PC"
+    ],
+    "appearance_count": 6
   },
   "ost03": {
     "id": 273,
@@ -13374,7 +16424,17 @@
       "catch-JPja": "だメカ",
       "catch-KRko": "치지직",
       "catch-EUru": "дзынь"
-    }
+    },
+    "rarity": 5,
+    "appearances": [
+      "DNM",
+      "AC",
+      "E_PLUS",
+      "WA",
+      "NH",
+      "PC"
+    ],
+    "appearance_count": 6
   },
   "ost05": {
     "id": 274,
@@ -13423,7 +16483,15 @@
       "catch-JPja": "やだわね",
       "catch-KRko": "어머몰라",
       "catch-EUru": "дарлинг"
-    }
+    },
+    "rarity": 7,
+    "appearances": [
+      "E_PLUS",
+      "WA",
+      "NH",
+      "PC"
+    ],
+    "appearance_count": 4
   },
   "ost06": {
     "id": 275,
@@ -13472,7 +16540,16 @@
       "catch-JPja": "およよ",
       "catch-KRko": "오요용",
       "catch-EUru": "не потей"
-    }
+    },
+    "rarity": 6,
+    "appearances": [
+      "NL",
+      "WA",
+      "NH",
+      "HHD",
+      "PC"
+    ],
+    "appearance_count": 5
   },
   "ost07": {
     "id": 276,
@@ -13521,7 +16598,16 @@
       "catch-JPja": "ホロロ",
       "catch-KRko": "호롤로",
       "catch-EUru": "хех"
-    }
+    },
+    "rarity": 6,
+    "appearances": [
+      "NL",
+      "WA",
+      "NH",
+      "HHD",
+      "PC"
+    ],
+    "appearance_count": 5
   },
   "ost08": {
     "id": 277,
@@ -13570,7 +16656,16 @@
       "catch-JPja": "ですのね",
       "catch-KRko": "그랬구나",
       "catch-EUru": "вот так"
-    }
+    },
+    "rarity": 6,
+    "appearances": [
+      "NL",
+      "WA",
+      "NH",
+      "HHD",
+      "PC"
+    ],
+    "appearance_count": 5
   },
   "ost09": {
     "id": 278,
@@ -13619,7 +16714,16 @@
       "catch-JPja": "だミン",
       "catch-KRko": "밍고밍고",
       "catch-EUru": "розочка"
-    }
+    },
+    "rarity": 6,
+    "appearances": [
+      "NL",
+      "WA",
+      "NH",
+      "HHD",
+      "PC"
+    ],
+    "appearance_count": 5
   },
   "ost10": {
     "id": 279,
@@ -13668,7 +16772,16 @@
       "catch-JPja": "アツイわ",
       "catch-KRko": "아뜨뜨",
       "catch-EUru": "искорка"
-    }
+    },
+    "rarity": 6,
+    "appearances": [
+      "NL",
+      "WA",
+      "NH",
+      "HHD",
+      "PC"
+    ],
+    "appearance_count": 5
   },
   "pbr00": {
     "id": 280,
@@ -13717,7 +16830,22 @@
       "catch-JPja": "だワイ",
       "catch-KRko": "다꿇어",
       "catch-EUru": "пф-ф"
-    }
+    },
+    "rarity": 1,
+    "appearances": [
+      "DNM",
+      "AC",
+      "E_PLUS",
+      "WW",
+      "CF",
+      "NL",
+      "WA",
+      "NH",
+      "FILM",
+      "HHD",
+      "PC"
+    ],
+    "appearance_count": 11
   },
   "pbr01": {
     "id": 281,
@@ -13766,7 +16894,21 @@
       "catch-JPja": "カラカラ",
       "catch-KRko": "엄멈머",
       "catch-EUru": "вот"
-    }
+    },
+    "rarity": 1,
+    "appearances": [
+      "DNM",
+      "AC",
+      "E_PLUS",
+      "WW",
+      "CF",
+      "NL",
+      "WA",
+      "NH",
+      "HHD",
+      "PC"
+    ],
+    "appearance_count": 10
   },
   "pbr02": {
     "id": 282,
@@ -13815,7 +16957,21 @@
       "catch-JPja": "バサバサ",
       "catch-KRko": "퍼덕퍼덕",
       "catch-EUru": "глаз-алмаз"
-    }
+    },
+    "rarity": 1,
+    "appearances": [
+      "DNM",
+      "AC",
+      "E_PLUS",
+      "WW",
+      "CF",
+      "NL",
+      "WA",
+      "NH",
+      "HHD",
+      "PC"
+    ],
+    "appearance_count": 10
   },
   "pbr03": {
     "id": 283,
@@ -13864,7 +17020,17 @@
       "catch-JPja": "ッキーッ",
       "catch-KRko": "짜란～",
       "catch-EUru": "капитан"
-    }
+    },
+    "rarity": 5,
+    "appearances": [
+      "DNM",
+      "AC",
+      "E_PLUS",
+      "WA",
+      "NH",
+      "PC"
+    ],
+    "appearance_count": 6
   },
   "pbr05": {
     "id": 284,
@@ -13913,7 +17079,18 @@
       "catch-JPja": "アリョイ",
       "catch-KRko": "내놔",
       "catch-EUru": "курлы"
-    }
+    },
+    "rarity": 4,
+    "appearances": [
+      "E_PLUS",
+      "CF",
+      "NL",
+      "WA",
+      "NH",
+      "HHD",
+      "PC"
+    ],
+    "appearance_count": 7
   },
   "pbr06": {
     "id": 285,
@@ -13962,7 +17139,17 @@
       "catch-JPja": "ダンケ",
       "catch-KRko": "크헐",
       "catch-EUru": "красава"
-    }
+    },
+    "rarity": 5,
+    "appearances": [
+      "E_PLUS",
+      "NL",
+      "WA",
+      "NH",
+      "HHD",
+      "PC"
+    ],
+    "appearance_count": 6
   },
   "pbr07": {
     "id": 286,
@@ -14011,7 +17198,17 @@
       "catch-JPja": "やあッ",
       "catch-KRko": "호옷",
       "catch-EUru": "клекот"
-    }
+    },
+    "rarity": 5,
+    "appearances": [
+      "CF",
+      "NL",
+      "WA",
+      "NH",
+      "HHD",
+      "PC"
+    ],
+    "appearance_count": 6
   },
   "pbr08": {
     "id": 287,
@@ -14060,7 +17257,16 @@
       "catch-JPja": "でーッス",
       "catch-KRko": "수리수리",
       "catch-EUru": "крыло"
-    }
+    },
+    "rarity": 6,
+    "appearances": [
+      "NL",
+      "WA",
+      "NH",
+      "HHD",
+      "PC"
+    ],
+    "appearance_count": 5
   },
   "pbr09": {
     "id": 288,
@@ -14109,7 +17315,16 @@
       "catch-JPja": "そうね",
       "catch-KRko": "그래맞아",
       "catch-EUru": "перышко"
-    }
+    },
+    "rarity": 6,
+    "appearances": [
+      "NL",
+      "WA",
+      "NH",
+      "HHD",
+      "PC"
+    ],
+    "appearance_count": 5
   },
   "pgn00": {
     "id": 289,
@@ -14158,7 +17373,21 @@
       "catch-JPja": "だジョー",
       "catch-KRko": "랄라",
       "catch-EUru": "к-к-крошка"
-    }
+    },
+    "rarity": 1,
+    "appearances": [
+      "DNM",
+      "AC",
+      "E_PLUS",
+      "WW",
+      "CF",
+      "NL",
+      "WA",
+      "NH",
+      "HHD",
+      "PC"
+    ],
+    "appearance_count": 10
   },
   "pgn01": {
     "id": 290,
@@ -14207,7 +17436,21 @@
       "catch-JPja": "だペン",
       "catch-KRko": "팽팽",
       "catch-EUru": "д-дружище"
-    }
+    },
+    "rarity": 1,
+    "appearances": [
+      "DNM",
+      "AC",
+      "E_PLUS",
+      "WW",
+      "CF",
+      "NL",
+      "WA",
+      "NH",
+      "HHD",
+      "PC"
+    ],
+    "appearance_count": 10
   },
   "pgn02": {
     "id": 291,
@@ -14256,7 +17499,21 @@
       "catch-JPja": "ペンペン",
       "catch-KRko": "땡땡",
       "catch-EUru": "ч-чубрик"
-    }
+    },
+    "rarity": 1,
+    "appearances": [
+      "DNM",
+      "AC",
+      "E_PLUS",
+      "WW",
+      "CF",
+      "NL",
+      "WA",
+      "NH",
+      "HHD",
+      "PC"
+    ],
+    "appearance_count": 10
   },
   "pgn03": {
     "id": 292,
@@ -14305,7 +17562,22 @@
       "catch-JPja": "ちぅねん",
       "catch-KRko": "아따",
       "catch-EUru": "ледок"
-    }
+    },
+    "rarity": 1,
+    "appearances": [
+      "DNM",
+      "AC",
+      "E_PLUS",
+      "WW",
+      "CF",
+      "NL",
+      "WA",
+      "NH",
+      "FILM",
+      "HHD",
+      "PC"
+    ],
+    "appearance_count": 11
   },
   "pgn04": {
     "id": 293,
@@ -14354,7 +17626,21 @@
       "catch-JPja": "ツルルン",
       "catch-KRko": "으쓱",
       "catch-EUru": "брр-хм"
-    }
+    },
+    "rarity": 1,
+    "appearances": [
+      "DNM",
+      "AC",
+      "E_PLUS",
+      "WW",
+      "CF",
+      "NL",
+      "WA",
+      "NH",
+      "HHD",
+      "PC"
+    ],
+    "appearance_count": 10
   },
   "pgn05": {
     "id": 294,
@@ -14403,7 +17689,21 @@
       "catch-JPja": "ウフフ",
       "catch-KRko": "우훗훗",
       "catch-EUru": "м-милашка"
-    }
+    },
+    "rarity": 1,
+    "appearances": [
+      "DNM",
+      "AC",
+      "E_PLUS",
+      "WW",
+      "CF",
+      "NL",
+      "WA",
+      "NH",
+      "HHD",
+      "PC"
+    ],
+    "appearance_count": 10
   },
   "pgn06": {
     "id": 295,
@@ -14452,7 +17752,20 @@
       "catch-JPja": "さぶー",
       "catch-KRko": "엣취",
       "catch-EUru": "брр"
-    }
+    },
+    "rarity": 2,
+    "appearances": [
+      "DNM",
+      "AC",
+      "E_PLUS",
+      "CF",
+      "NL",
+      "WA",
+      "NH",
+      "HHD",
+      "PC"
+    ],
+    "appearance_count": 9
   },
   "pgn09": {
     "id": 296,
@@ -14501,7 +17814,15 @@
       "catch-JPja": "だからね",
       "catch-KRko": "뒤집어",
       "catch-EUru": "вот так вот"
-    }
+    },
+    "rarity": 7,
+    "appearances": [
+      "E_PLUS",
+      "WA",
+      "NH",
+      "PC"
+    ],
+    "appearance_count": 4
   },
   "pgn10": {
     "id": 297,
@@ -14550,7 +17871,19 @@
       "catch-JPja": "ツーツツ",
       "catch-KRko": "에헴헴",
       "catch-EUru": "человек"
-    }
+    },
+    "rarity": 3,
+    "appearances": [
+      "AC",
+      "E_PLUS",
+      "CF",
+      "NL",
+      "WA",
+      "NH",
+      "HHD",
+      "PC"
+    ],
+    "appearance_count": 8
   },
   "pgn11": {
     "id": 298,
@@ -14599,7 +17932,17 @@
       "catch-JPja": "クルクル",
       "catch-KRko": "펭글펭글",
       "catch-EUru": "ластошлеп"
-    }
+    },
+    "rarity": 5,
+    "appearances": [
+      "CF",
+      "NL",
+      "WA",
+      "NH",
+      "HHD",
+      "PC"
+    ],
+    "appearance_count": 6
   },
   "pgn12": {
     "id": 299,
@@ -14648,7 +17991,16 @@
       "catch-JPja": "ベイベッ",
       "catch-KRko": "베이베",
       "catch-EUru": "огонек"
-    }
+    },
+    "rarity": 6,
+    "appearances": [
+      "NL",
+      "WA",
+      "NH",
+      "HHD",
+      "PC"
+    ],
+    "appearance_count": 5
   },
   "pgn13": {
     "id": 300,
@@ -14697,7 +18049,16 @@
       "catch-JPja": "じゃんよ",
       "catch-KRko": "맞잖아",
       "catch-EUru": "чхи"
-    }
+    },
+    "rarity": 6,
+    "appearances": [
+      "NL",
+      "WA",
+      "NH",
+      "HHD",
+      "PC"
+    ],
+    "appearance_count": 5
   },
   "pgn14": {
     "id": 301,
@@ -14746,7 +18107,16 @@
       "catch-JPja": "ヒヤリ",
       "catch-KRko": "꽁꽁",
       "catch-EUru": "пенка"
-    }
+    },
+    "rarity": 6,
+    "appearances": [
+      "NL",
+      "WA",
+      "NH",
+      "HHD",
+      "PC"
+    ],
+    "appearance_count": 5
   },
   "pig00": {
     "id": 302,
@@ -14795,7 +18165,21 @@
       "catch-JPja": "どもども",
       "catch-KRko": "꿀꿀",
       "catch-EUru": "хряк-бряк"
-    }
+    },
+    "rarity": 1,
+    "appearances": [
+      "DNM",
+      "AC",
+      "E_PLUS",
+      "WW",
+      "CF",
+      "NL",
+      "WA",
+      "NH",
+      "HHD",
+      "PC"
+    ],
+    "appearance_count": 10
   },
   "pig01": {
     "id": 303,
@@ -14844,7 +18228,21 @@
       "catch-JPja": "だわさ",
       "catch-KRko": "거라예",
       "catch-EUru": "хрюша"
-    }
+    },
+    "rarity": 1,
+    "appearances": [
+      "DNM",
+      "AC",
+      "E_PLUS",
+      "WW",
+      "CF",
+      "NL",
+      "WA",
+      "NH",
+      "HHD",
+      "PC"
+    ],
+    "appearance_count": 10
   },
   "pig02": {
     "id": 304,
@@ -14893,7 +18291,21 @@
       "catch-JPja": "まんねん",
       "catch-KRko": "꾸엑",
       "catch-EUru": "хряк"
-    }
+    },
+    "rarity": 1,
+    "appearances": [
+      "DNM",
+      "AC",
+      "E_PLUS",
+      "WW",
+      "CF",
+      "NL",
+      "WA",
+      "NH",
+      "HHD",
+      "PC"
+    ],
+    "appearance_count": 10
   },
   "pig03": {
     "id": 305,
@@ -14942,7 +18354,21 @@
       "catch-JPja": "とかね",
       "catch-KRko": "아님말구",
       "catch-EUru": "хрюк-хрюк"
-    }
+    },
+    "rarity": 1,
+    "appearances": [
+      "DNM",
+      "AC",
+      "E_PLUS",
+      "WW",
+      "CF",
+      "NL",
+      "WA",
+      "NH",
+      "HHD",
+      "PC"
+    ],
+    "appearance_count": 10
   },
   "pig04": {
     "id": 306,
@@ -14991,7 +18417,21 @@
       "catch-JPja": "よぅ",
       "catch-KRko": "예예",
       "catch-EUru": "хрю-ю-ю"
-    }
+    },
+    "rarity": 1,
+    "appearances": [
+      "DNM",
+      "AC",
+      "E_PLUS",
+      "WW",
+      "CF",
+      "NL",
+      "WA",
+      "NH",
+      "HHD",
+      "PC"
+    ],
+    "appearance_count": 10
   },
   "pig05": {
     "id": 307,
@@ -15040,7 +18480,20 @@
       "catch-JPja": "だブー",
       "catch-KRko": "꼬르륵",
       "catch-EUru": "хрю"
-    }
+    },
+    "rarity": 2,
+    "appearances": [
+      "DNM",
+      "AC",
+      "E_PLUS",
+      "CF",
+      "NL",
+      "WA",
+      "NH",
+      "HHD",
+      "PC"
+    ],
+    "appearance_count": 9
   },
   "pig08": {
     "id": 308,
@@ -15089,7 +18542,19 @@
       "catch-JPja": "でアール",
       "catch-KRko": "이노라",
       "catch-EUru": "сосиска"
-    }
+    },
+    "rarity": 3,
+    "appearances": [
+      "DNM",
+      "AC",
+      "E_PLUS",
+      "NL",
+      "WA",
+      "NH",
+      "HHD",
+      "PC"
+    ],
+    "appearance_count": 8
   },
   "pig09": {
     "id": 309,
@@ -15138,7 +18603,17 @@
       "catch-JPja": "ブヒッ",
       "catch-KRko": "쌀",
       "catch-EUru": "хрю-хряк"
-    }
+    },
+    "rarity": 5,
+    "appearances": [
+      "DNM",
+      "AC",
+      "E_PLUS",
+      "WA",
+      "NH",
+      "PC"
+    ],
+    "appearance_count": 6
   },
   "pig10": {
     "id": 310,
@@ -15187,7 +18662,15 @@
       "catch-JPja": "うん",
       "catch-KRko": "유후",
       "catch-EUru": "хрюля"
-    }
+    },
+    "rarity": 7,
+    "appearances": [
+      "E_PLUS",
+      "WA",
+      "NH",
+      "PC"
+    ],
+    "appearance_count": 4
   },
   "pig11": {
     "id": 311,
@@ -15236,7 +18719,18 @@
       "catch-JPja": "ぷるる",
       "catch-KRko": "아앙",
       "catch-EUru": "хрюмпатяга"
-    }
+    },
+    "rarity": 4,
+    "appearances": [
+      "E_PLUS",
+      "CF",
+      "NL",
+      "WA",
+      "NH",
+      "HHD",
+      "PC"
+    ],
+    "appearance_count": 7
   },
   "pig13": {
     "id": 312,
@@ -15285,7 +18779,17 @@
       "catch-JPja": "ちゃりん",
       "catch-KRko": "땡그랑",
       "catch-EUru": "хрюк"
-    }
+    },
+    "rarity": 5,
+    "appearances": [
+      "CF",
+      "NL",
+      "WA",
+      "NH",
+      "HHD",
+      "PC"
+    ],
+    "appearance_count": 6
   },
   "pig14": {
     "id": 313,
@@ -15334,7 +18838,16 @@
       "catch-JPja": "だトン",
       "catch-KRko": "떼끼에로",
       "catch-EUru": "хряк-с"
-    }
+    },
+    "rarity": 6,
+    "appearances": [
+      "NL",
+      "WA",
+      "NH",
+      "HHD",
+      "PC"
+    ],
+    "appearance_count": 5
   },
   "pig15": {
     "id": 314,
@@ -15383,7 +18896,16 @@
       "catch-JPja": "ウリウリ",
       "catch-KRko": "냠냠",
       "catch-EUru": "уи-и-и"
-    }
+    },
+    "rarity": 6,
+    "appearances": [
+      "NL",
+      "WA",
+      "NH",
+      "HHD",
+      "PC"
+    ],
+    "appearance_count": 5
   },
   "pig16": {
     "id": 315,
@@ -15432,7 +18954,16 @@
       "catch-JPja": "やだも～",
       "catch-KRko": "어우야",
       "catch-EUru": "хрюшка"
-    }
+    },
+    "rarity": 6,
+    "appearances": [
+      "NL",
+      "WA",
+      "NH",
+      "HHD",
+      "PC"
+    ],
+    "appearance_count": 5
   },
   "pig17": {
     "id": 316,
@@ -15481,7 +19012,16 @@
       "catch-JPja": "ブフフ",
       "catch-KRko": "꿀꾸루",
       "catch-EUru": "хрю-хрю"
-    }
+    },
+    "rarity": 6,
+    "appearances": [
+      "NL",
+      "WA",
+      "NH",
+      "HHD",
+      "PC"
+    ],
+    "appearance_count": 5
   },
   "rbt00": {
     "id": 317,
@@ -15530,7 +19070,21 @@
       "catch-JPja": "みたいな",
       "catch-KRko": "그렇지뭐",
       "catch-EUru": "хи-хи"
-    }
+    },
+    "rarity": 1,
+    "appearances": [
+      "DNM",
+      "AC",
+      "E_PLUS",
+      "WW",
+      "CF",
+      "NL",
+      "WA",
+      "NH",
+      "HHD",
+      "PC"
+    ],
+    "appearance_count": 10
   },
   "rbt01": {
     "id": 318,
@@ -15579,7 +19133,21 @@
       "catch-JPja": "ラン",
       "catch-KRko": "룰루랄라",
       "catch-EUru": "малыш"
-    }
+    },
+    "rarity": 1,
+    "appearances": [
+      "DNM",
+      "AC",
+      "E_PLUS",
+      "WW",
+      "CF",
+      "NL",
+      "WA",
+      "NH",
+      "HHD",
+      "PC"
+    ],
+    "appearance_count": 10
   },
   "rbt02": {
     "id": 319,
@@ -15628,7 +19196,21 @@
       "catch-JPja": "はにょ",
       "catch-KRko": "삐용",
       "catch-EUru": "прыг-скок"
-    }
+    },
+    "rarity": 1,
+    "appearances": [
+      "DNM",
+      "AC",
+      "E_PLUS",
+      "WW",
+      "CF",
+      "NL",
+      "WA",
+      "NH",
+      "HHD",
+      "PC"
+    ],
+    "appearance_count": 10
   },
   "rbt03": {
     "id": 320,
@@ -15677,7 +19259,21 @@
       "catch-JPja": "ニンニン",
       "catch-KRko": "닌닌",
       "catch-EUru": "заяссс"
-    }
+    },
+    "rarity": 1,
+    "appearances": [
+      "DNM",
+      "AC",
+      "E_PLUS",
+      "WW",
+      "CF",
+      "NL",
+      "WA",
+      "NH",
+      "HHD",
+      "PC"
+    ],
+    "appearance_count": 10
   },
   "rbt04": {
     "id": 321,
@@ -15726,7 +19322,21 @@
       "catch-JPja": "ムホッ",
       "catch-KRko": "쿨럭",
       "catch-EUru": "мон зайшу"
-    }
+    },
+    "rarity": 1,
+    "appearances": [
+      "DNM",
+      "AC",
+      "E_PLUS",
+      "WW",
+      "CF",
+      "NL",
+      "WA",
+      "NH",
+      "HHD",
+      "PC"
+    ],
+    "appearance_count": 10
   },
   "rbt05": {
     "id": 322,
@@ -15775,7 +19385,21 @@
       "catch-JPja": "だっち",
       "catch-KRko": "꺄오",
       "catch-EUru": "зайчик мой"
-    }
+    },
+    "rarity": 1,
+    "appearances": [
+      "DNM",
+      "AC",
+      "E_PLUS",
+      "WW",
+      "CF",
+      "NL",
+      "WA",
+      "NH",
+      "HHD",
+      "PC"
+    ],
+    "appearance_count": 10
   },
   "rbt06": {
     "id": 323,
@@ -15824,7 +19448,21 @@
       "catch-JPja": "なのサ",
       "catch-KRko": "울랄라",
       "catch-EUru": "зайчишка"
-    }
+    },
+    "rarity": 1,
+    "appearances": [
+      "DNM",
+      "AC",
+      "E_PLUS",
+      "WW",
+      "CF",
+      "NL",
+      "WA",
+      "NH",
+      "HHD",
+      "PC"
+    ],
+    "appearance_count": 10
   },
   "rbt07": {
     "id": 324,
@@ -15873,7 +19511,19 @@
       "catch-JPja": "ってさ",
       "catch-KRko": "라던데",
       "catch-EUru": "зайчонок"
-    }
+    },
+    "rarity": 3,
+    "appearances": [
+      "E_PLUS",
+      "WW",
+      "CF",
+      "NL",
+      "WA",
+      "NH",
+      "HHD",
+      "PC"
+    ],
+    "appearance_count": 8
   },
   "rbt08": {
     "id": 325,
@@ -15922,7 +19572,21 @@
       "catch-JPja": "まろ",
       "catch-KRko": "땡글",
       "catch-EUru": "зайпончик"
-    }
+    },
+    "rarity": 1,
+    "appearances": [
+      "DNM",
+      "AC",
+      "E_PLUS",
+      "WW",
+      "CF",
+      "NL",
+      "WA",
+      "NH",
+      "HHD",
+      "PC"
+    ],
+    "appearance_count": 10
   },
   "rbt09": {
     "id": 326,
@@ -15971,7 +19635,18 @@
       "catch-JPja": "フツーに",
       "catch-KRko": "보통이지",
       "catch-EUru": "ушки"
-    }
+    },
+    "rarity": 4,
+    "appearances": [
+      "WW",
+      "CF",
+      "NL",
+      "WA",
+      "NH",
+      "HHD",
+      "PC"
+    ],
+    "appearance_count": 7
   },
   "rbt10": {
     "id": 327,
@@ -16020,7 +19695,19 @@
       "catch-JPja": "ですね",
       "catch-KRko": "그렇잖아",
       "catch-EUru": "зайчище"
-    }
+    },
+    "rarity": 3,
+    "appearances": [
+      "DNM",
+      "AC",
+      "E_PLUS",
+      "NL",
+      "WA",
+      "NH",
+      "HHD",
+      "PC"
+    ],
+    "appearance_count": 8
   },
   "rbt11": {
     "id": 328,
@@ -16069,7 +19756,18 @@
       "catch-JPja": "ぶいぶい",
       "catch-KRko": "아으셔",
       "catch-EUru": "скок-поскок"
-    }
+    },
+    "rarity": 4,
+    "appearances": [
+      "DNM",
+      "AC",
+      "E_PLUS",
+      "WA",
+      "NH",
+      "HHD",
+      "PC"
+    ],
+    "appearance_count": 7
   },
   "rbt12": {
     "id": 329,
@@ -16118,7 +19816,18 @@
       "catch-JPja": "ルララ",
       "catch-KRko": "쇼봉",
       "catch-EUru": "морковка"
-    }
+    },
+    "rarity": 4,
+    "appearances": [
+      "E_PLUS",
+      "CF",
+      "NL",
+      "WA",
+      "NH",
+      "HHD",
+      "PC"
+    ],
+    "appearance_count": 7
   },
   "rbt13": {
     "id": 330,
@@ -16167,7 +19876,18 @@
       "catch-JPja": "リララ",
       "catch-KRko": "샤방",
       "catch-EUru": "золотце"
-    }
+    },
+    "rarity": 4,
+    "appearances": [
+      "E_PLUS",
+      "CF",
+      "NL",
+      "WA",
+      "NH",
+      "HHD",
+      "PC"
+    ],
+    "appearance_count": 7
   },
   "rbt14": {
     "id": 331,
@@ -16216,7 +19936,15 @@
       "catch-JPja": "ぷぅ",
       "catch-KRko": "뿌우",
       "catch-EUru": "топ-топ"
-    }
+    },
+    "rarity": 7,
+    "appearances": [
+      "E_PLUS",
+      "WA",
+      "NH",
+      "PC"
+    ],
+    "appearance_count": 4
   },
   "rbt15": {
     "id": 332,
@@ -16265,7 +19993,18 @@
       "catch-JPja": "アミーゴ",
       "catch-KRko": "아미고",
       "catch-EUru": "амиго"
-    }
+    },
+    "rarity": 4,
+    "appearances": [
+      "AC",
+      "E_PLUS",
+      "NL",
+      "WA",
+      "NH",
+      "HHD",
+      "PC"
+    ],
+    "appearance_count": 7
   },
   "rbt16": {
     "id": 333,
@@ -16314,7 +20053,17 @@
       "catch-JPja": "まじで",
       "catch-KRko": "진짜진짜",
       "catch-EUru": "карамелька"
-    }
+    },
+    "rarity": 5,
+    "appearances": [
+      "CF",
+      "NL",
+      "WA",
+      "NH",
+      "HHD",
+      "PC"
+    ],
+    "appearance_count": 6
   },
   "rbt17": {
     "id": 334,
@@ -16363,7 +20112,16 @@
       "catch-JPja": "ヤバッ",
       "catch-KRko": "어뜨케",
       "catch-EUru": "вкусняшка"
-    }
+    },
+    "rarity": 6,
+    "appearances": [
+      "NL",
+      "WA",
+      "NH",
+      "HHD",
+      "PC"
+    ],
+    "appearance_count": 5
   },
   "rbt18": {
     "id": 335,
@@ -16412,7 +20170,16 @@
       "catch-JPja": "そうさね",
       "catch-KRko": "나도나도",
       "catch-EUru": "зайчелло"
-    }
+    },
+    "rarity": 6,
+    "appearances": [
+      "NL",
+      "WA",
+      "NH",
+      "HHD",
+      "PC"
+    ],
+    "appearance_count": 5
   },
   "rbt19": {
     "id": 336,
@@ -16461,7 +20228,16 @@
       "catch-JPja": "だムーン",
       "catch-KRko": "거봐라",
       "catch-EUru": "зайцехвост"
-    }
+    },
+    "rarity": 6,
+    "appearances": [
+      "NL",
+      "WA",
+      "NH",
+      "HHD",
+      "PC"
+    ],
+    "appearance_count": 5
   },
   "rhn00": {
     "id": 337,
@@ -16510,7 +20286,21 @@
       "catch-JPja": "ですサイ",
       "catch-KRko": "아뿔소",
       "catch-EUru": "бабах"
-    }
+    },
+    "rarity": 1,
+    "appearances": [
+      "DNM",
+      "AC",
+      "E_PLUS",
+      "WW",
+      "CF",
+      "NL",
+      "WA",
+      "NH",
+      "HHD",
+      "PC"
+    ],
+    "appearance_count": 10
   },
   "rhn01": {
     "id": 338,
@@ -16559,7 +20349,18 @@
       "catch-JPja": "ンフ",
       "catch-KRko": "훗",
       "catch-EUru": "босс"
-    }
+    },
+    "rarity": 4,
+    "appearances": [
+      "WW",
+      "CF",
+      "NL",
+      "WA",
+      "NH",
+      "HHD",
+      "PC"
+    ],
+    "appearance_count": 7
   },
   "rhn02": {
     "id": 339,
@@ -16608,7 +20409,17 @@
       "catch-JPja": "でヤンキ",
       "catch-KRko": "빠직",
       "catch-EUru": "бродяга"
-    }
+    },
+    "rarity": 5,
+    "appearances": [
+      "DNM",
+      "AC",
+      "E_PLUS",
+      "WA",
+      "NH",
+      "PC"
+    ],
+    "appearance_count": 6
   },
   "rhn04": {
     "id": 340,
@@ -16657,7 +20468,17 @@
       "catch-JPja": "のネン",
       "catch-KRko": "뿔뿔",
       "catch-EUru": "шнобель"
-    }
+    },
+    "rarity": 5,
+    "appearances": [
+      "DNM",
+      "AC",
+      "E_PLUS",
+      "WA",
+      "NH",
+      "PC"
+    ],
+    "appearance_count": 6
   },
   "rhn07": {
     "id": 341,
@@ -16706,7 +20527,16 @@
       "catch-JPja": "でシュガ",
       "catch-KRko": "베리베리",
       "catch-EUru": "кексик"
-    }
+    },
+    "rarity": 6,
+    "appearances": [
+      "NL",
+      "WA",
+      "NH",
+      "HHD",
+      "PC"
+    ],
+    "appearance_count": 5
   },
   "rhn08": {
     "id": 342,
@@ -16755,7 +20585,16 @@
       "catch-JPja": "パネェ",
       "catch-KRko": "킁킁",
       "catch-EUru": "йоу"
-    }
+    },
+    "rarity": 6,
+    "appearances": [
+      "NL",
+      "WA",
+      "NH",
+      "HHD",
+      "PC"
+    ],
+    "appearance_count": 5
   },
   "shp00": {
     "id": 343,
@@ -16804,7 +20643,21 @@
       "catch-JPja": "なのね",
       "catch-KRko": "쩝",
       "catch-EUru": "бе-е"
-    }
+    },
+    "rarity": 1,
+    "appearances": [
+      "DNM",
+      "AC",
+      "E_PLUS",
+      "WW",
+      "CF",
+      "NL",
+      "WA",
+      "NH",
+      "HHD",
+      "PC"
+    ],
+    "appearance_count": 10
   },
   "shp01": {
     "id": 344,
@@ -16853,7 +20706,21 @@
       "catch-JPja": "アンドゥ",
       "catch-KRko": "앤쥬",
       "catch-EUru": "мила-ашка"
-    }
+    },
+    "rarity": 1,
+    "appearances": [
+      "DNM",
+      "AC",
+      "E_PLUS",
+      "WW",
+      "CF",
+      "NL",
+      "WA",
+      "NH",
+      "HHD",
+      "PC"
+    ],
+    "appearance_count": 10
   },
   "shp02": {
     "id": 345,
@@ -16902,7 +20769,20 @@
       "catch-JPja": "メェー",
       "catch-KRko": "메에에",
       "catch-EUru": "ребрышко"
-    }
+    },
+    "rarity": 2,
+    "appearances": [
+      "DNM",
+      "AC",
+      "E_PLUS",
+      "CF",
+      "NL",
+      "WA",
+      "NH",
+      "HHD",
+      "PC"
+    ],
+    "appearance_count": 9
   },
   "shp03": {
     "id": 346,
@@ -16951,7 +20831,17 @@
       "catch-JPja": "ウール",
       "catch-KRko": "울",
       "catch-EUru": "бэ-дабинь"
-    }
+    },
+    "rarity": 5,
+    "appearances": [
+      "DNM",
+      "AC",
+      "E_PLUS",
+      "WA",
+      "NH",
+      "PC"
+    ],
+    "appearance_count": 6
   },
   "shp04": {
     "id": 347,
@@ -17000,7 +20890,17 @@
       "catch-JPja": "ありんす",
       "catch-KRko": "포근포근",
       "catch-EUru": "бэ-эби"
-    }
+    },
+    "rarity": 5,
+    "appearances": [
+      "DNM",
+      "AC",
+      "E_PLUS",
+      "WA",
+      "NH",
+      "PC"
+    ],
+    "appearance_count": 6
   },
   "shp07": {
     "id": 348,
@@ -17049,7 +20949,18 @@
       "catch-JPja": "ですのよ",
       "catch-KRko": "됐거든",
       "catch-EUru": "пасемся"
-    }
+    },
+    "rarity": 4,
+    "appearances": [
+      "E_PLUS",
+      "CF",
+      "NL",
+      "WA",
+      "NH",
+      "HHD",
+      "PC"
+    ],
+    "appearance_count": 7
   },
   "shp08": {
     "id": 349,
@@ -17098,7 +21009,17 @@
       "catch-JPja": "ベイビー",
       "catch-KRko": "자기야",
       "catch-EUru": "завитушка"
-    }
+    },
+    "rarity": 5,
+    "appearances": [
+      "E_PLUS",
+      "NL",
+      "WA",
+      "NH",
+      "HHD",
+      "PC"
+    ],
+    "appearance_count": 6
   },
   "shp09": {
     "id": 350,
@@ -17147,7 +21068,17 @@
       "catch-JPja": "イシシ",
       "catch-KRko": "꺄르르",
       "catch-EUru": "овечка"
-    }
+    },
+    "rarity": 5,
+    "appearances": [
+      "CF",
+      "NL",
+      "WA",
+      "NH",
+      "HHD",
+      "PC"
+    ],
+    "appearance_count": 6
   },
   "shp10": {
     "id": 351,
@@ -17196,7 +21127,16 @@
       "catch-JPja": "まつわ",
       "catch-KRko": "달려",
       "catch-EUru": "сосенка"
-    }
+    },
+    "rarity": 6,
+    "appearances": [
+      "NL",
+      "WA",
+      "NH",
+      "HHD",
+      "PC"
+    ],
+    "appearance_count": 5
   },
   "shp11": {
     "id": 352,
@@ -17245,7 +21185,16 @@
       "catch-JPja": "だポテ",
       "catch-KRko": "포테토",
       "catch-EUru": "мутончик"
-    }
+    },
+    "rarity": 6,
+    "appearances": [
+      "NL",
+      "WA",
+      "NH",
+      "HHD",
+      "PC"
+    ],
+    "appearance_count": 5
   },
   "shp12": {
     "id": 353,
@@ -17294,7 +21243,16 @@
       "catch-JPja": "おつかれ",
       "catch-KRko": "수고",
       "catch-EUru": "травинка"
-    }
+    },
+    "rarity": 6,
+    "appearances": [
+      "NL",
+      "WA",
+      "NH",
+      "HHD",
+      "PC"
+    ],
+    "appearance_count": 5
   },
   "shp13": {
     "id": 354,
@@ -17343,7 +21301,16 @@
       "catch-JPja": "グフフ",
       "catch-KRko": "므흐흐",
       "catch-EUru": "бе-бе"
-    }
+    },
+    "rarity": 6,
+    "appearances": [
+      "NL",
+      "WA",
+      "NH",
+      "HHD",
+      "PC"
+    ],
+    "appearance_count": 5
   },
   "shp15": {
     "id": 355,
@@ -17392,7 +21359,13 @@
       "catch-JPja": "ふんふん",
       "catch-KRko": "뿜뿜",
       "catch-EUru": "точно-точно"
-    }
+    },
+    "rarity": 9,
+    "appearances": [
+      "NH",
+      "PC"
+    ],
+    "appearance_count": 2
   },
   "squ00": {
     "id": 356,
@@ -17441,7 +21414,21 @@
       "catch-JPja": "なのよ",
       "catch-KRko": "거얌",
       "catch-EUru": "лень"
-    }
+    },
+    "rarity": 1,
+    "appearances": [
+      "DNM",
+      "AC",
+      "E_PLUS",
+      "WW",
+      "CF",
+      "NL",
+      "WA",
+      "NH",
+      "HHD",
+      "PC"
+    ],
+    "appearance_count": 10
   },
   "squ01": {
     "id": 357,
@@ -17490,7 +21477,21 @@
       "catch-JPja": "ふふん",
       "catch-KRko": "헤헤헤",
       "catch-EUru": "крошка"
-    }
+    },
+    "rarity": 1,
+    "appearances": [
+      "DNM",
+      "AC",
+      "E_PLUS",
+      "WW",
+      "CF",
+      "NL",
+      "WA",
+      "NH",
+      "HHD",
+      "PC"
+    ],
+    "appearance_count": 10
   },
   "squ02": {
     "id": 358,
@@ -17539,7 +21540,21 @@
       "catch-JPja": "でしゅ",
       "catch-KRko": "예용",
       "catch-EUru": "дружище"
-    }
+    },
+    "rarity": 1,
+    "appearances": [
+      "DNM",
+      "AC",
+      "E_PLUS",
+      "WW",
+      "CF",
+      "NL",
+      "WA",
+      "NH",
+      "HHD",
+      "PC"
+    ],
+    "appearance_count": 10
   },
   "squ03": {
     "id": 359,
@@ -17588,7 +21603,21 @@
       "catch-JPja": "つんっ",
       "catch-KRko": "쯧쯧",
       "catch-EUru": "бурундук"
-    }
+    },
+    "rarity": 1,
+    "appearances": [
+      "DNM",
+      "AC",
+      "E_PLUS",
+      "WW",
+      "CF",
+      "NL",
+      "WA",
+      "NH",
+      "HHD",
+      "PC"
+    ],
+    "appearance_count": 10
   },
   "squ04": {
     "id": 360,
@@ -17637,7 +21666,21 @@
       "catch-JPja": "ガジガジ",
       "catch-KRko": "송송",
       "catch-EUru": "орешек"
-    }
+    },
+    "rarity": 1,
+    "appearances": [
+      "DNM",
+      "AC",
+      "E_PLUS",
+      "WW",
+      "CF",
+      "NL",
+      "WA",
+      "NH",
+      "HHD",
+      "PC"
+    ],
+    "appearance_count": 10
   },
   "squ05": {
     "id": 361,
@@ -17686,7 +21729,19 @@
       "catch-JPja": "せいやっ",
       "catch-KRko": "흠냐",
       "catch-EUru": "коллега"
-    }
+    },
+    "rarity": 3,
+    "appearances": [
+      "E_PLUS",
+      "WW",
+      "CF",
+      "NL",
+      "WA",
+      "NH",
+      "HHD",
+      "PC"
+    ],
+    "appearance_count": 8
   },
   "squ06": {
     "id": 362,
@@ -17735,7 +21790,20 @@
       "catch-JPja": "ユー",
       "catch-KRko": "휴",
       "catch-EUru": "уа-а-а"
-    }
+    },
+    "rarity": 2,
+    "appearances": [
+      "AC",
+      "E_PLUS",
+      "WW",
+      "CF",
+      "NL",
+      "WA",
+      "NH",
+      "HHD",
+      "PC"
+    ],
+    "appearance_count": 9
   },
   "squ07": {
     "id": 363,
@@ -17784,7 +21852,21 @@
       "catch-JPja": "ったら",
       "catch-KRko": "까꿍",
       "catch-EUru": "мускатик"
-    }
+    },
+    "rarity": 1,
+    "appearances": [
+      "DNM",
+      "AC",
+      "E_PLUS",
+      "WW",
+      "CF",
+      "NL",
+      "WA",
+      "NH",
+      "HHD",
+      "PC"
+    ],
+    "appearance_count": 10
   },
   "squ08": {
     "id": 364,
@@ -17833,7 +21915,21 @@
       "catch-JPja": "ピカッ",
       "catch-KRko": "콰광",
       "catch-EUru": "вж-ж-ж"
-    }
+    },
+    "rarity": 1,
+    "appearances": [
+      "DNM",
+      "AC",
+      "E_PLUS",
+      "WW",
+      "CF",
+      "NL",
+      "WA",
+      "NH",
+      "HHD",
+      "PC"
+    ],
+    "appearance_count": 10
   },
   "squ09": {
     "id": 365,
@@ -17882,7 +21978,21 @@
       "catch-JPja": "うっふん",
       "catch-KRko": "우훗",
       "catch-EUru": "ах-ах"
-    }
+    },
+    "rarity": 1,
+    "appearances": [
+      "DNM",
+      "AC",
+      "E_PLUS",
+      "WW",
+      "CF",
+      "NL",
+      "WA",
+      "NH",
+      "HHD",
+      "PC"
+    ],
+    "appearance_count": 10
   },
   "squ10": {
     "id": 366,
@@ -17931,7 +22041,19 @@
       "catch-JPja": "キッ",
       "catch-KRko": "사각사각",
       "catch-EUru": "арахис"
-    }
+    },
+    "rarity": 3,
+    "appearances": [
+      "DNM",
+      "AC",
+      "E_PLUS",
+      "NL",
+      "WA",
+      "NH",
+      "HHD",
+      "PC"
+    ],
+    "appearance_count": 8
   },
   "squ11": {
     "id": 367,
@@ -17980,7 +22102,19 @@
       "catch-JPja": "ララー",
       "catch-KRko": "랄랄라",
       "catch-EUru": "ух ты"
-    }
+    },
+    "rarity": 3,
+    "appearances": [
+      "DNM",
+      "AC",
+      "E_PLUS",
+      "NL",
+      "WA",
+      "NH",
+      "HHD",
+      "PC"
+    ],
+    "appearance_count": 8
   },
   "squ13": {
     "id": 368,
@@ -18029,7 +22163,15 @@
       "catch-JPja": "やるわね",
       "catch-KRko": "굿굿",
       "catch-EUru": "ладно"
-    }
+    },
+    "rarity": 7,
+    "appearances": [
+      "E_PLUS",
+      "WA",
+      "NH",
+      "PC"
+    ],
+    "appearance_count": 4
   },
   "squ14": {
     "id": 369,
@@ -18078,7 +22220,15 @@
       "catch-JPja": "ひゅん",
       "catch-KRko": "퓨우",
       "catch-EUru": "хрум"
-    }
+    },
+    "rarity": 7,
+    "appearances": [
+      "E_PLUS",
+      "WA",
+      "NH",
+      "PC"
+    ],
+    "appearance_count": 4
   },
   "squ15": {
     "id": 370,
@@ -18127,7 +22277,17 @@
       "catch-JPja": "デス",
       "catch-KRko": "도톨도톨",
       "catch-EUru": "чок-чок"
-    }
+    },
+    "rarity": 5,
+    "appearances": [
+      "CF",
+      "NL",
+      "WA",
+      "NH",
+      "HHD",
+      "PC"
+    ],
+    "appearance_count": 6
   },
   "squ16": {
     "id": 371,
@@ -18176,7 +22336,16 @@
       "catch-JPja": "クリクリ",
       "catch-KRko": "땡글땡글",
       "catch-EUru": "треники"
-    }
+    },
+    "rarity": 6,
+    "appearances": [
+      "NL",
+      "WA",
+      "NH",
+      "HHD",
+      "PC"
+    ],
+    "appearance_count": 5
   },
   "squ17": {
     "id": 372,
@@ -18225,7 +22394,16 @@
       "catch-JPja": "あながち",
       "catch-KRko": "어차피",
       "catch-EUru": "тихоня"
-    }
+    },
+    "rarity": 6,
+    "appearances": [
+      "NL",
+      "WA",
+      "NH",
+      "HHD",
+      "PC"
+    ],
+    "appearance_count": 5
   },
   "squ18": {
     "id": 373,
@@ -18274,7 +22452,16 @@
       "catch-JPja": "だもんね",
       "catch-KRko": "알아알아",
       "catch-EUru": "фундук"
-    }
+    },
+    "rarity": 6,
+    "appearances": [
+      "NL",
+      "WA",
+      "NH",
+      "HHD",
+      "PC"
+    ],
+    "appearance_count": 5
   },
   "tig00": {
     "id": 374,
@@ -18323,7 +22510,21 @@
       "catch-JPja": "だガー",
       "catch-KRko": "근데",
       "catch-EUru": "гр-р-рольф"
-    }
+    },
+    "rarity": 1,
+    "appearances": [
+      "DNM",
+      "AC",
+      "E_PLUS",
+      "WW",
+      "CF",
+      "NL",
+      "WA",
+      "NH",
+      "HHD",
+      "PC"
+    ],
+    "appearance_count": 10
   },
   "tig01": {
     "id": 375,
@@ -18372,7 +22573,20 @@
       "catch-JPja": "まったく",
       "catch-KRko": "내참",
       "catch-EUru": "манго"
-    }
+    },
+    "rarity": 2,
+    "appearances": [
+      "AC",
+      "E_PLUS",
+      "WW",
+      "CF",
+      "NL",
+      "WA",
+      "NH",
+      "HHD",
+      "PC"
+    ],
+    "appearance_count": 9
   },
   "tig02": {
     "id": 376,
@@ -18421,7 +22635,17 @@
       "catch-JPja": "だトラ",
       "catch-KRko": "으르렁",
       "catch-EUru": "р-рык"
-    }
+    },
+    "rarity": 5,
+    "appearances": [
+      "DNM",
+      "AC",
+      "E_PLUS",
+      "WA",
+      "NH",
+      "PC"
+    ],
+    "appearance_count": 6
   },
   "tig03": {
     "id": 377,
@@ -18470,7 +22694,19 @@
       "catch-JPja": "なのぉー",
       "catch-KRko": "쪼옥쪽",
       "catch-EUru": "р-р-рф"
-    }
+    },
+    "rarity": 3,
+    "appearances": [
+      "DNM",
+      "AC",
+      "E_PLUS",
+      "NL",
+      "WA",
+      "NH",
+      "HHD",
+      "PC"
+    ],
+    "appearance_count": 8
   },
   "tig04": {
     "id": 378,
@@ -18519,7 +22755,17 @@
       "catch-JPja": "じゃが",
       "catch-KRko": "어흥",
       "catch-EUru": "р-разминка"
-    }
+    },
+    "rarity": 5,
+    "appearances": [
+      "E_PLUS",
+      "NL",
+      "WA",
+      "NH",
+      "HHD",
+      "PC"
+    ],
+    "appearance_count": 6
   },
   "tig05": {
     "id": 379,
@@ -18568,7 +22814,16 @@
       "catch-JPja": "アハ～ン",
       "catch-KRko": "잇힝",
       "catch-EUru": "о-ля-ля"
-    }
+    },
+    "rarity": 6,
+    "appearances": [
+      "NL",
+      "WA",
+      "NH",
+      "HHD",
+      "PC"
+    ],
+    "appearance_count": 5
   },
   "tig06": {
     "id": 380,
@@ -18617,7 +22872,16 @@
       "catch-JPja": "でヒョウ",
       "catch-KRko": "그래호",
       "catch-EUru": "хлоп-хлоп"
-    }
+    },
+    "rarity": 6,
+    "appearances": [
+      "NL",
+      "WA",
+      "NH",
+      "HHD",
+      "PC"
+    ],
+    "appearance_count": 5
   },
   "wol00": {
     "id": 381,
@@ -18666,7 +22930,21 @@
       "catch-JPja": "やんか",
       "catch-KRko": "그렇잖여",
       "catch-EUru": "фыр-р-рф"
-    }
+    },
+    "rarity": 1,
+    "appearances": [
+      "DNM",
+      "AC",
+      "E_PLUS",
+      "WW",
+      "CF",
+      "NL",
+      "WA",
+      "NH",
+      "HHD",
+      "PC"
+    ],
+    "appearance_count": 10
   },
   "wol01": {
     "id": 382,
@@ -18715,7 +22993,21 @@
       "catch-JPja": "だぜよ",
       "catch-KRko": "봐봐",
       "catch-EUru": "ау-у-у"
-    }
+    },
+    "rarity": 1,
+    "appearances": [
+      "DNM",
+      "AC",
+      "E_PLUS",
+      "WW",
+      "CF",
+      "NL",
+      "WA",
+      "NH",
+      "HHD",
+      "PC"
+    ],
+    "appearance_count": 10
   },
   "wol02": {
     "id": 383,
@@ -18764,7 +23056,21 @@
       "catch-JPja": "のな",
       "catch-KRko": "거봐",
       "catch-EUru": "ау-рр"
-    }
+    },
+    "rarity": 1,
+    "appearances": [
+      "DNM",
+      "AC",
+      "E_PLUS",
+      "WW",
+      "CF",
+      "NL",
+      "WA",
+      "NH",
+      "HHD",
+      "PC"
+    ],
+    "appearance_count": 10
   },
   "wol03": {
     "id": 384,
@@ -18813,7 +23119,19 @@
       "catch-JPja": "ステキね",
       "catch-KRko": "멋져",
       "catch-EUru": "цап"
-    }
+    },
+    "rarity": 4,
+    "appearances": [
+      "WW",
+      "CF",
+      "NL",
+      "WA",
+      "NH",
+      "FILM",
+      "HHD",
+      "PC"
+    ],
+    "appearance_count": 8
   },
   "wol04": {
     "id": 385,
@@ -18862,7 +23180,16 @@
       "catch-JPja": "ゴホゴホ",
       "catch-KRko": "음음",
       "catch-EUru": "ом-м-м"
-    }
+    },
+    "rarity": 6,
+    "appearances": [
+      "AC",
+      "E_PLUS",
+      "WA",
+      "NH",
+      "PC"
+    ],
+    "appearance_count": 5
   },
   "wol05": {
     "id": 386,
@@ -18911,7 +23238,20 @@
       "catch-JPja": "なのだわ",
       "catch-KRko": "유행이야",
       "catch-EUru": "хрусть"
-    }
+    },
+    "rarity": 2,
+    "appearances": [
+      "DNM",
+      "AC",
+      "E_PLUS",
+      "CF",
+      "NL",
+      "WA",
+      "NH",
+      "HHD",
+      "PC"
+    ],
+    "appearance_count": 9
   },
   "wol06": {
     "id": 387,
@@ -18960,7 +23300,20 @@
       "catch-JPja": "ですダス",
       "catch-KRko": "콜록콜록",
       "catch-EUru": "грызь"
-    }
+    },
+    "rarity": 2,
+    "appearances": [
+      "DNM",
+      "AC",
+      "E_PLUS",
+      "CF",
+      "NL",
+      "WA",
+      "NH",
+      "HHD",
+      "PC"
+    ],
+    "appearance_count": 9
   },
   "wol08": {
     "id": 388,
@@ -19009,7 +23362,15 @@
       "catch-JPja": "だわよ",
       "catch-KRko": "그러하다",
       "catch-EUru": "вздор"
-    }
+    },
+    "rarity": 7,
+    "appearances": [
+      "E_PLUS",
+      "WA",
+      "NH",
+      "PC"
+    ],
+    "appearance_count": 4
   },
   "wol09": {
     "id": 389,
@@ -19058,7 +23419,16 @@
       "catch-JPja": "フワワ",
       "catch-KRko": "후와와",
       "catch-EUru": "пилот"
-    }
+    },
+    "rarity": 6,
+    "appearances": [
+      "NL",
+      "WA",
+      "NH",
+      "HHD",
+      "PC"
+    ],
+    "appearance_count": 5
   },
   "wol10": {
     "id": 390,
@@ -19107,7 +23477,16 @@
       "catch-JPja": "オゥイェ",
       "catch-KRko": "오우예",
       "catch-EUru": "вожак"
-    }
+    },
+    "rarity": 6,
+    "appearances": [
+      "NL",
+      "WA",
+      "NH",
+      "HHD",
+      "PC"
+    ],
+    "appearance_count": 5
   },
   "wol12": {
     "id": 391,
@@ -19156,6 +23535,12 @@
       "catch-JPja": "アハッ",
       "catch-KRko": "아하핫",
       "catch-EUru": "фокстрот"
-    }
+    },
+    "rarity": 9,
+    "appearances": [
+      "NH",
+      "PC"
+    ],
+    "appearance_count": 2
   }
 }

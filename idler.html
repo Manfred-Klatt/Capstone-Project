@@ -356,6 +356,84 @@
             font-weight: bold;
         }
 
+        .bell-clicker-section {
+            background: linear-gradient(135deg, #FFD700 0%, #FFA500 100%);
+            border-radius: 12px;
+            padding: 10px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+            grid-column: 8 / span 1;
+            grid-row: 5 / span 1;
+            position: relative;
+            z-index: 2;
+            border: 3px solid #FFB347;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            transition: transform 0.1s, box-shadow 0.1s;
+            user-select: none;
+        }
+
+        .bell-clicker-section:hover {
+            transform: scale(1.05);
+            box-shadow: 0 6px 16px rgba(0, 0, 0, 0.2);
+        }
+
+        .bell-clicker-section:active {
+            transform: scale(0.95);
+        }
+
+        .bell-clicker-section::before {
+            content: '1×1';
+            position: absolute;
+            top: 5px;
+            right: 5px;
+            background: rgba(0, 0, 0, 0.6);
+            color: white;
+            padding: 2px 6px;
+            border-radius: 4px;
+            font-size: 0.7em;
+            font-weight: bold;
+            display: none;
+            z-index: 10;
+        }
+
+        .game-container.show-grid .bell-clicker-section::before {
+            display: block;
+        }
+
+        .bell-icon {
+            font-size: 3em;
+            animation: bellBounce 2s ease-in-out infinite;
+        }
+
+        @keyframes bellBounce {
+            0%, 100% { transform: translateY(0); }
+            50% { transform: translateY(-5px); }
+        }
+
+        .bell-click-text {
+            position: absolute;
+            font-size: 1.5em;
+            font-weight: bold;
+            color: #FFD700;
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.3);
+            pointer-events: none;
+            animation: floatUp 1s ease-out forwards;
+            z-index: 1000;
+        }
+
+        @keyframes floatUp {
+            0% {
+                opacity: 1;
+                transform: translateY(0);
+            }
+            100% {
+                opacity: 0;
+                transform: translateY(-50px);
+            }
+        }
+
         .island-activities-section {
             background: linear-gradient(135deg, #FFF9E6 0%, #FFEAA7 100%);
             border-radius: 12px;
@@ -1318,7 +1396,7 @@
             box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
             grid-column: 3 / span 6;
             grid-row: 7 / span 3;
-            overflow: auto;
+            overflow: visible;
             position: relative;
             z-index: 2;
             border: 3px solid #BAFFC9;
@@ -1458,7 +1536,7 @@
 
         .villager-tooltip {
             position: absolute;
-            top: 110px;
+            bottom: 110px;
             left: 50%;
             transform: translateX(-50%);
             background: linear-gradient(135deg, #FFF9E6 0%, #FFE8B3 100%);
@@ -2446,6 +2524,11 @@
                     </div>
                 </div>
             </div>
+            
+            <!-- Bell Clicker Section -->
+            <div class="bell-clicker-section" onclick="clickBellBag(event)">
+                <div class="bell-icon">💰</div>
+            </div>
         </div>
         
         <!-- Fish tooltip -->
@@ -2513,7 +2596,7 @@
         });
 
         function enableDragging() {
-            const containers = document.querySelectorAll('.island-activities-section, .shop-section-wrapper, .villagers-section, .calendar-section, .museum-section, .header');
+            const containers = document.querySelectorAll('.island-activities-section, .shop-section-wrapper, .villagers-section, .calendar-section, .museum-section, .header, .bell-clicker-section');
             containers.forEach(container => {
                 container.classList.add('draggable');
                 container.style.cursor = 'move';
@@ -2534,7 +2617,7 @@
         }
 
         function disableDragging() {
-            const containers = document.querySelectorAll('.island-activities-section, .shop-section-wrapper, .villagers-section, .calendar-section, .museum-section, .header');
+            const containers = document.querySelectorAll('.island-activities-section, .shop-section-wrapper, .villagers-section, .calendar-section, .museum-section, .header, .bell-clicker-section');
             containers.forEach(container => {
                 container.classList.remove('draggable');
                 container.style.cursor = '';
@@ -2623,7 +2706,7 @@
 
         function checkCollision(col, row, cols, rows, excludeElement) {
             // Check if the proposed position collides with any existing container
-            const containers = document.querySelectorAll('.island-activities-section, .shop-section-wrapper, .villagers-section, .calendar-section, .museum-section, .header');
+            const containers = document.querySelectorAll('.island-activities-section, .shop-section-wrapper, .villagers-section, .calendar-section, .museum-section, .header, .bell-clicker-section');
             
             for (const container of containers) {
                 if (container === excludeElement) continue;
@@ -2722,7 +2805,7 @@
 
         function saveLayout() {
             const layout = {};
-            const containers = document.querySelectorAll('.island-activities-section, .shop-section-wrapper, .villagers-section, .calendar-section, .museum-section, .header');
+            const containers = document.querySelectorAll('.island-activities-section, .shop-section-wrapper, .villagers-section, .calendar-section, .museum-section, .header, .bell-clicker-section');
             
             containers.forEach((container, index) => {
                 const id = container.id || container.className.split(' ')[0];
@@ -2762,7 +2845,7 @@
         const NOOKIPEDIA_API_URL = 'https://api.nookipedia.com/nh/fish';
         
         // Game state
-        let bells = 500;
+        let bells = 400;
         let bellsPerSecond = 0;
         let totalBellsEarned = 0;
         let fishCache = [];
@@ -2992,6 +3075,31 @@
             // Random interval between 30-45 seconds, affected by rod tier
             fishingAreaNextCatch[area.id] = getFishingInterval();
         });
+        
+        // Click bell bag to earn 10 bells
+        function clickBellBag(event) {
+            bells += 10;
+            totalBellsEarned += 10;
+            updateDisplay();
+            
+            // Create floating +10 text
+            const bellSection = event.currentTarget;
+            const floatingText = document.createElement('div');
+            floatingText.className = 'bell-click-text';
+            floatingText.textContent = '+10';
+            
+            // Position at click location
+            const rect = bellSection.getBoundingClientRect();
+            floatingText.style.left = (rect.width / 2 - 20) + 'px';
+            floatingText.style.top = (rect.height / 2 - 15) + 'px';
+            
+            bellSection.appendChild(floatingText);
+            
+            // Remove after animation completes
+            setTimeout(() => {
+                floatingText.remove();
+            }, 1000);
+        }
         
         // Update calendar display
         function updateCalendar() {
@@ -3696,23 +3804,6 @@
                     slot.className = 'villager-slot';
                     const imageHtml = villager.image_url ? `<img src="${villager.image_url}" alt="${villager.name}" class="villager-portrait" onerror="this.style.display='none'">` : '<div class="villager-placeholder">🐱</div>';
                     
-                    // Find if villager is assigned to any activity
-                    let assignedTo = null;
-                    for (const [upgradeId, assignedVillager] of Object.entries(villagerAssignments)) {
-                        if (assignedVillager.name === villager.name) {
-                            const upgrade = upgrades.find(u => u.id === upgradeId);
-                            assignedTo = upgrade ? upgrade.name : 'Activity';
-                            break;
-                        }
-                    }
-                    
-                    const assignmentRow = assignedTo ? `
-                        <div class="villager-tooltip-row">
-                            <span class="villager-tooltip-label">Assigned:</span>
-                            <span style="color: #6BAA5E; font-weight: bold;">${assignedTo}</span>
-                        </div>
-                    ` : '';
-                    
                     const rarityRow = villager.rarity ? `
                         <div class="villager-tooltip-row">
                             <span class="villager-tooltip-label">Rarity:</span>
@@ -3733,7 +3824,6 @@
                                     <span>${villager.personality || 'Unknown'}</span>
                                 </div>
                                 ${rarityRow}
-                                ${assignmentRow}
                             </div>
                         </div>
                     `;

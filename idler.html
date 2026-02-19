@@ -2959,7 +2959,7 @@
                 id: 'river',
                 name: '🏞️ River',
                 description: 'Freshwater fish',
-                fishTypes: ['River', 'Pond'],
+                fishTypes: ['River', 'River (mouth)', 'River (clifftop)'],
                 rods: 0
             },
             {
@@ -3440,21 +3440,16 @@
         
         // Initialize fallback data immediately
         function initializeFallbackData() {
-            fishCache = [
-                { name: 'Sea Bass', sell: 400, size: 'Large', location: 'Sea' },
-                { name: 'Red Snapper', sell: 3000, size: 'Large', location: 'Sea' },
-                { name: 'Dab', sell: 300, size: 'Medium', location: 'Sea' },
-                { name: 'Olive Flounder', sell: 800, size: 'Large', location: 'Sea' },
-                { name: 'Squid', sell: 500, size: 'Medium', location: 'Sea' },
-                { name: 'Coelacanth', sell: 15000, size: 'Huge', location: 'Sea' },
-                { name: 'Oarfish', sell: 9000, size: 'Huge', location: 'Pier' },
-                { name: 'Tuna', sell: 7000, size: 'Huge', location: 'Pier' },
-                { name: 'Blue Marlin', sell: 10000, size: 'Huge', location: 'Pier' },
-                { name: 'Koi', sell: 4000, size: 'Large', location: 'River' },
-                { name: 'Goldfish', sell: 1300, size: 'Tiny', location: 'Pond' },
-                { name: 'Bitterling', sell: 900, size: 'Tiny', location: 'River' },
-                { name: 'Pale Chub', sell: 200, size: 'Tiny', location: 'River' }
-            ];
+            // Create 80 placeholder fish so museum counter shows correct total during loading
+            fishCache = [];
+            for (let i = 1; i <= 80; i++) {
+                fishCache.push({
+                    name: `Fish ${i}`,
+                    sell: 400,
+                    size: 'Medium',
+                    location: 'Sea'
+                });
+            }
             
             // Organize fish by location
             fishByLocation = {};
@@ -3493,11 +3488,8 @@
             updateLoadingStatus('Loading fish data...');
             const fishDataPromise = fetchFishData();
             
-            updateLoadingStatus('Loading item prices...');
-            const itemPricesPromise = fetchItemPrices();
-            
             // Wait for all to complete
-            await Promise.all([itemPricesPromise, fishDataPromise, villagersDataPromise]);
+            await Promise.all([fishDataPromise, villagersDataPromise]);
             
             updateLoadingStatus('Finalizing...');
             
@@ -3553,6 +3545,20 @@
                     
                     // Only update if we got valid data
                     if (apiFishCache.length > 0) {
+                        // Check for duplicates
+                        const fishNames = new Set();
+                        const duplicates = [];
+                        apiFishCache.forEach(fish => {
+                            if (fishNames.has(fish.name)) {
+                                duplicates.push(fish.name);
+                            }
+                            fishNames.add(fish.name);
+                        });
+                        
+                        if (duplicates.length > 0) {
+                            console.warn(`⚠️ Found ${duplicates.length} duplicate fish:`, duplicates);
+                        }
+                        
                         fishCache = apiFishCache;
                         
                         // Organize fish by location
@@ -3566,6 +3572,31 @@
                         });
                         
                         console.log(`🐟 Loaded ${fishCache.length} fish from API`);
+                        
+                        // Clean up caught/donated fish that don't exist in current fish cache
+                        const validFishNames = new Set(fishCache.map(f => f.name));
+                        const invalidCaught = [];
+                        const invalidDonated = [];
+                        
+                        caughtFish.forEach(fishName => {
+                            if (!validFishNames.has(fishName)) {
+                                invalidCaught.push(fishName);
+                            }
+                        });
+                        
+                        donatedFish.forEach(fishName => {
+                            if (!validFishNames.has(fishName)) {
+                                invalidDonated.push(fishName);
+                            }
+                        });
+                        
+                        // Remove invalid entries
+                        invalidCaught.forEach(name => caughtFish.delete(name));
+                        invalidDonated.forEach(name => donatedFish.delete(name));
+                        
+                        if (invalidCaught.length > 0 || invalidDonated.length > 0) {
+                            console.log(`🧹 Cleaned up ${invalidCaught.length} invalid caught fish and ${invalidDonated.length} invalid donated fish`);
+                        }
                     }
                 } else {
                     // Failed to fetch fish data, using fallback

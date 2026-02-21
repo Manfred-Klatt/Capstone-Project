@@ -3739,7 +3739,8 @@
                 bells -= price;
                 villagerHouses++;
                 updateDisplay();
-                updateVillagersGrid();
+                initVillagersGrid(); // Rebuild grid with new slot
+                updateVillagersGrid(); // Update slot contents
                 console.log(`🏠 Purchased a new house! Villager slots: ${villagerHouses}/10`);
             } else {
                 console.log(`Not enough bells for house. Need: ${formatNumber(price)}, Have: ${formatNumber(bells)}`);

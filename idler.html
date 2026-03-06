@@ -2455,6 +2455,11 @@
                         <!-- Activity point allocation will be added here -->
                     </div>
                     
+                    <!-- Card Pack Shop Button (shown when Card Catalog is owned) -->
+                    <button id="cardPackShopBtn" style="display: none; margin: 10px auto; padding: 10px 20px; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; border: none; border-radius: 8px; cursor: pointer; font-size: 14px; font-weight: bold;" onclick="openCardPackShop()">
+                        🎴 Card Pack Shop
+                    </button>
+                    
                     <!-- Bell Clicker Button -->
                     <div class="bell-clicker-button" onclick="clickBellBag(event)">
                         <div class="bell-icon">💰</div>
@@ -2840,8 +2845,15 @@
         let rerollsRemaining = 3; // Number of free rerolls available during initial selection
         let currentVillagerChoices = []; // Current 3 villagers being shown in selection modal
         let inventory = {
-            fishingRod: 0
+            fishingRod: 0,
+            cardCatalog: false
         };
+        
+        // Card collection system
+        let amiiboCardsCache = []; // All amiibo cards from API
+        let ownedCards = new Set(); // Track owned cards by card number
+        let cardPacksPurchased = 0;
+        let manualCardImageUrls = {}; // Manual image URL mappings
         
         // Store stage (1-4: Nook's Cranny, Nook 'n' Go, Nookway, Nookington's)
         let storeStage = 1;
@@ -2919,6 +2931,18 @@
                         tier: nextTier.tier
                     });
                 }
+            }
+            
+            // Card Catalog - Now using custom API
+            if (storeStage >= 2 && !inventory.cardCatalog) {
+                shopItems.push({
+                    id: 'cardCatalog',
+                    name: '📇 Card Catalog',
+                    description: 'Unlock the ability to purchase amiibo card packs!',
+                    price: 50000,
+                    inventoryKey: 'cardCatalog',
+                    maxPurchases: 1
+                });
             }
             
             // Store upgrades are now handled by the upgrade button, not shop items
@@ -3721,6 +3745,513 @@
             }
         }
         
+        // Load manual card image URL mappings
+        async function loadManualCardImages() {
+            try {
+                const response = await fetch('card-image-urls.json');
+                if (response.ok) {
+                    manualCardImageUrls = await response.json();
+                    console.log(`🎴 Loaded ${Object.keys(manualCardImageUrls).length} manual card image mappings`);
+                }
+            } catch (error) {
+                console.log('ℹ️  No manual card image mappings found (this is normal)');
+            }
+        }
+        
+        // Fetch amiibo cards from custom API
+        async function fetchAmiiboCards() {
+            try {
+                console.log('🎴 Fetching cards from custom API...');
+                const response = await fetch('http://localhost:3001/api/cards');
+                
+                if (!response.ok) {
+                    throw new Error(`API returned ${response.status}`);
+                }
+                
+                const result = await response.json();
+                
+                if (result.success && result.data) {
+                    // Transform API data to match game format
+                    amiiboCardsCache = result.data.map(card => ({
+                        name: card.name,
+                        cardNumber: card.cardNumber,
+                        series: card.series,
+                        type: card.type,
+                        species: card.species,
+                        personality: card.personality,
+                        // Prepend API base URL to image path
+                        image_url: `http://localhost:3001${card.imageUrl}`
+                    }));
+                    
+                    console.log(`✅ Loaded ${amiiboCardsCache.length} cards from custom API`);
+                    return;
+                }
+                
+                throw new Error('Invalid API response format');
+                
+            } catch (error) {
+                console.error('❌ Failed to fetch from custom API:', error.message);
+                console.log('⚠️  Using fallback hardcoded data...');
+                
+                // Fallback to hardcoded data if API fails
+                amiiboCardsCache = [
+                    // Series 1 (001-100) - Fallback data
+                    ...Array.from({length: 100}, (_, i) => {
+                        const num = String(i + 1).padStart(3, '0');
+                        return {
+                            name: `Card ${num}`,
+                            cardNumber: num,
+                            series: 'Series 1',
+                            image_url: `https://dodo.ac/np/images/thumb/f/f9/${num}_amiibo_card_NA.png/167px-${num}_amiibo_card_NA.png`
+                        };
+                    }),
+                // Series 2 (101-200)
+                ...Array.from({length: 100}, (_, i) => {
+                    const num = String(i + 101).padStart(3, '0');
+                    return {
+                        name: `Card ${num}`,
+                        cardNumber: num,
+                        series: 'Series 2',
+                        image_url: `https://dodo.ac/np/images/thumb/f/f9/${num}_amiibo_card_NA.png/167px-${num}_amiibo_card_NA.png`
+                    };
+                }),
+                // Series 3 (201-300)
+                ...Array.from({length: 100}, (_, i) => {
+                    const num = String(i + 201).padStart(3, '0');
+                    return {
+                        name: `Card ${num}`,
+                        cardNumber: num,
+                        series: 'Series 3',
+                        image_url: `https://dodo.ac/np/images/thumb/f/f9/${num}_amiibo_card_NA.png/167px-${num}_amiibo_card_NA.png`
+                    };
+                }),
+                // Series 4 (301-400)
+                ...Array.from({length: 100}, (_, i) => {
+                    const num = String(i + 301).padStart(3, '0');
+                    return {
+                        name: `Card ${num}`,
+                        cardNumber: num,
+                        series: 'Series 4',
+                        image_url: `https://dodo.ac/np/images/thumb/f/f9/${num}_amiibo_card_NA.png/167px-${num}_amiibo_card_NA.png`
+                    };
+                }),
+                // Series 5 (401-448)
+                ...Array.from({length: 48}, (_, i) => {
+                    const num = String(i + 401).padStart(3, '0');
+                    return {
+                        name: `Card ${num}`,
+                        cardNumber: num,
+                        series: 'Series 5',
+                        image_url: `https://dodo.ac/np/images/thumb/f/f9/${num}_amiibo_card_NA.png/167px-${num}_amiibo_card_NA.png`
+                    };
+                }),
+                // Welcome amiibo (1-50)
+                ...Array.from({length: 50}, (_, i) => {
+                    const num = String(i + 1).padStart(2, '0');
+                    return {
+                        name: `Welcome ${num}`,
+                        cardNumber: `WA${num}`,
+                        series: 'Welcome amiibo',
+                        image_url: `https://dodo.ac/np/images/thumb/f/f9/Amiibo_${num}_Welcome.png/167px-Amiibo_${num}_Welcome.png`
+                    };
+                }),
+                // Sanrio Collaboration (1-6)
+                ...Array.from({length: 6}, (_, i) => ({
+                    name: `Sanrio ${String(i + 1)}`,
+                    cardNumber: `S${i + 1}`,
+                    series: 'Sanrio Collaboration',
+                    image_url: `https://dodo.ac/np/images/thumb/f/f9/Sanrio_${i + 1}.png/167px-Sanrio_${i + 1}.png`
+                })),
+                // e-Reader Series 1 (001-060)
+                ...Array.from({length: 60}, (_, i) => {
+                    const num = String(i + 1).padStart(3, '0');
+                    return {
+                        name: `e-Reader ${num}`,
+                        cardNumber: `E1-${num}`,
+                        series: 'e-Reader Series 1',
+                        image_url: `https://dodo.ac/np/images/6/60/Animal_Crossing-e_1-${num}.jpg`
+                    };
+                }),
+                // e-Reader Series 2 (061-120)
+                ...Array.from({length: 60}, (_, i) => {
+                    const num = String(i + 61).padStart(3, '0');
+                    return {
+                        name: `e-Reader ${num}`,
+                        cardNumber: `E2-${num}`,
+                        series: 'e-Reader Series 2',
+                        image_url: `https://dodo.ac/np/images/6/60/Animal_Crossing-e_2-${num}.jpg`
+                    };
+                }),
+                // e-Reader Series 3 (121-210)
+                ...Array.from({length: 90}, (_, i) => {
+                    const num = String(i + 121).padStart(3, '0');
+                    return {
+                        name: `e-Reader ${num}`,
+                        cardNumber: `E3-${num}`,
+                        series: 'e-Reader Series 3',
+                        image_url: `https://dodo.ac/np/images/6/60/Animal_Crossing-e_3-${num}.jpg`
+                    };
+                }),
+                // e-Reader Series 4 (211-270)
+                ...Array.from({length: 60}, (_, i) => {
+                    const num = String(i + 211).padStart(3, '0');
+                    return {
+                        name: `e-Reader ${num}`,
+                        cardNumber: `E4-${num}`,
+                        series: 'e-Reader Series 4',
+                        image_url: `https://dodo.ac/np/images/6/60/Animal_Crossing-e_4-${num}.jpg`
+                    };
+                })
+            ];
+            
+            console.log(`🎴 Loaded ${amiiboCardsCache.length} amiibo cards (fallback data)`);
+            }
+        }
+        
+        // Get available card series grouped by series name
+        function getCardSeries() {
+            const seriesGroups = {};
+            amiiboCardsCache.forEach(card => {
+                if (!seriesGroups[card.series]) {
+                    seriesGroups[card.series] = [];
+                }
+                seriesGroups[card.series].push(card);
+            });
+            return seriesGroups;
+        }
+        
+        // Purchase a card pack from a specific series
+        function buyCardPack(seriesName) {
+            const packPrice = 5000; // 5000 bells per pack
+            
+            if (!inventory.cardCatalog) {
+                console.log('You need to purchase the Card Catalog first!');
+                return;
+            }
+            
+            if (bells < packPrice) {
+                console.log(`Not enough bells! Need ${formatNumber(packPrice)} bells.`);
+                return;
+            }
+            
+            const seriesGroups = getCardSeries();
+            const seriesCards = seriesGroups[seriesName];
+            
+            if (!seriesCards || seriesCards.length === 0) {
+                console.log(`No cards available in series: ${seriesName}`);
+                return;
+            }
+            
+            bells -= packPrice;
+            cardPacksPurchased++;
+            
+            // Open pack - get 3 random cards from the series
+            const cardsInPack = [];
+            for (let i = 0; i < 3; i++) {
+                const randomCard = seriesCards[Math.floor(Math.random() * seriesCards.length)];
+                cardsInPack.push(randomCard);
+                
+                // Add to owned cards (using card number as unique identifier)
+                if (randomCard.cardNumber) {
+                    ownedCards.add(randomCard.cardNumber);
+                }
+            }
+            
+            updateDisplay();
+            showCardPackOpening(cardsInPack, seriesName);
+            
+            console.log(`🎴 Opened ${seriesName} pack! Got ${cardsInPack.length} cards.`);
+        }
+        
+        // Open card pack shop modal
+        function openCardPackShop() {
+            if (!inventory.cardCatalog) {
+                console.log('Card Catalog not purchased yet!');
+                return;
+            }
+            
+            if (amiiboCardsCache.length === 0) {
+                console.log('Loading card data...');
+                fetchAmiiboCards();
+                return;
+            }
+            
+            const seriesGroups = getCardSeries();
+            const seriesNames = Object.keys(seriesGroups).sort();
+            
+            // Create modal
+            const modal = document.createElement('div');
+            modal.id = 'cardPackShopModal';
+            modal.style.cssText = `
+                position: fixed;
+                top: 0;
+                left: 0;
+                width: 100%;
+                height: 100%;
+                background: rgba(0, 0, 0, 0.8);
+                display: flex;
+                flex-direction: column;
+                align-items: center;
+                justify-content: flex-start;
+                z-index: 10000;
+                padding: 20px;
+                overflow-y: auto;
+            `;
+            
+            const header = document.createElement('div');
+            header.style.cssText = `
+                color: white;
+                font-size: 28px;
+                font-weight: bold;
+                margin: 20px 0;
+                text-align: center;
+            `;
+            header.innerHTML = `
+                <div>🎴 Card Pack Shop</div>
+                <div style="font-size: 16px; margin-top: 10px; opacity: 0.9;">
+                    Collection: ${ownedCards.size} / ${amiiboCardsCache.length} cards
+                </div>
+                <div style="font-size: 14px; margin-top: 5px; opacity: 0.8;">
+                    Pack Price: 5,000 Bells (3 random cards per pack)
+                </div>
+            `;
+            modal.appendChild(header);
+            
+            const packsContainer = document.createElement('div');
+            packsContainer.style.cssText = `
+                display: grid;
+                grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+                gap: 15px;
+                max-width: 1200px;
+                width: 100%;
+                margin-bottom: 20px;
+            `;
+            
+            seriesNames.forEach(seriesName => {
+                const seriesCards = seriesGroups[seriesName];
+                const ownedInSeries = seriesCards.filter(card => ownedCards.has(card.cardNumber)).length;
+                
+                const packDiv = document.createElement('div');
+                packDiv.style.cssText = `
+                    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+                    border-radius: 10px;
+                    padding: 20px;
+                    text-align: center;
+                    color: white;
+                    cursor: pointer;
+                    transition: transform 0.2s;
+                    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3);
+                `;
+                
+                packDiv.innerHTML = `
+                    <div style="font-size: 40px; margin-bottom: 10px;">📦</div>
+                    <div style="font-weight: bold; font-size: 18px; margin-bottom: 10px;">${seriesName}</div>
+                    <div style="font-size: 14px; opacity: 0.9; margin-bottom: 10px;">
+                        ${seriesCards.length} cards in series
+                    </div>
+                    <div style="font-size: 14px; opacity: 0.9; margin-bottom: 15px;">
+                        Owned: ${ownedInSeries} / ${seriesCards.length}
+                    </div>
+                    <div style="background: rgba(255,255,255,0.2); padding: 8px; border-radius: 5px; font-weight: bold;">
+                        Buy Pack (5,000 🔔)
+                    </div>
+                `;
+                
+                packDiv.onmouseover = () => packDiv.style.transform = 'scale(1.05)';
+                packDiv.onmouseout = () => packDiv.style.transform = 'scale(1)';
+                packDiv.onclick = () => {
+                    buyCardPack(seriesName);
+                    modal.remove();
+                };
+                
+                packsContainer.appendChild(packDiv);
+            });
+            
+            modal.appendChild(packsContainer);
+            
+            const closeButton = document.createElement('button');
+            closeButton.textContent = 'Close';
+            closeButton.style.cssText = `
+                padding: 10px 30px;
+                font-size: 16px;
+                background: #f44336;
+                color: white;
+                border: none;
+                border-radius: 5px;
+                cursor: pointer;
+                margin-bottom: 20px;
+            `;
+            closeButton.onclick = () => modal.remove();
+            modal.appendChild(closeButton);
+            
+            document.body.appendChild(modal);
+        }
+        
+        // Show card pack opening animation/modal
+        function showCardPackOpening(cards, seriesName) {
+            // Create modal for card pack opening
+            const modal = document.createElement('div');
+            modal.style.cssText = `
+                position: fixed;
+                top: 0;
+                left: 0;
+                width: 100%;
+                height: 100%;
+                background: rgba(0, 0, 0, 0.8);
+                display: flex;
+                flex-direction: column;
+                align-items: center;
+                justify-content: center;
+                z-index: 10000;
+                padding: 20px;
+            `;
+            
+            const title = document.createElement('div');
+            title.textContent = `${seriesName} Pack Opened!`;
+            title.style.cssText = `
+                color: white;
+                font-size: 24px;
+                font-weight: bold;
+                margin-bottom: 20px;
+            `;
+            modal.appendChild(title);
+            
+            const cardsContainer = document.createElement('div');
+            cardsContainer.style.cssText = `
+                display: flex;
+                gap: 20px;
+                flex-wrap: wrap;
+                justify-content: center;
+                max-width: 800px;
+            `;
+            
+            cards.forEach(card => {
+                const cardDiv = document.createElement('div');
+                cardDiv.style.cssText = `
+                    background: white;
+                    border-radius: 10px;
+                    padding: 10px;
+                    text-align: center;
+                    min-width: 180px;
+                    box-shadow: 0 8px 20px rgba(0, 0, 0, 0.5);
+                    position: relative;
+                `;
+                
+                const isNew = !ownedCards.has(card.cardNumber);
+                const newBadge = isNew ? '<div style="position: absolute; top: -10px; right: -10px; background: #FFD700; color: #000; padding: 5px 10px; border-radius: 20px; font-weight: bold; font-size: 12px; box-shadow: 0 2px 8px rgba(0,0,0,0.3);">✨ NEW!</div>' : '';
+                
+                // Use image_url from API, fallback to manual mappings if available
+                const imageUrl = card.image_url || manualCardImageUrls[card.cardNumber];
+                
+                // Determine card color based on series (for placeholder)
+                let cardColor = '#667eea';
+                if (card.series.includes('e-Reader')) {
+                    cardColor = '#FF6B6B'; // Red for e-Reader
+                } else if (card.series.includes('Welcome')) {
+                    cardColor = '#4ECDC4'; // Teal for Welcome amiibo
+                } else if (card.series.includes('Sanrio')) {
+                    cardColor = '#FFB6C1'; // Pink for Sanrio
+                } else if (card.series.includes('Series 1')) {
+                    cardColor = '#667eea'; // Purple for Series 1
+                } else if (card.series.includes('Series 2')) {
+                    cardColor = '#48BB78'; // Green for Series 2
+                } else if (card.series.includes('Series 3')) {
+                    cardColor = '#ED8936'; // Orange for Series 3
+                } else if (card.series.includes('Series 4')) {
+                    cardColor = '#9F7AEA'; // Violet for Series 4
+                } else if (card.series.includes('Series 5')) {
+                    cardColor = '#F56565'; // Red for Series 5
+                }
+                
+                // Build card image HTML - use API image URL if available, otherwise placeholder
+                let cardImageHtml;
+                let hasPlaceholder = false;
+                
+                if (imageUrl) {
+                    // Use real image with fallback to placeholder
+                    cardImageHtml = `
+                        <img src="${imageUrl}" 
+                             alt="${card.name}" 
+                             style="width: 167px; height: auto; border-radius: 8px; margin-bottom: 10px; box-shadow: 0 2px 8px rgba(0,0,0,0.2);"
+                             onerror="this.style.display='none'; this.nextElementSibling.style.display='flex'; this.parentElement.parentElement.title='${card.name}\\nCard #${card.cardNumber || '???'}';">
+                        <div style="display: none; width: 167px; height: 230px; background: linear-gradient(135deg, ${cardColor} 0%, ${cardColor}dd 100%); border-radius: 8px; margin-bottom: 10px; flex-direction: column; align-items: center; justify-content: center; color: white; box-shadow: inset 0 2px 10px rgba(0,0,0,0.2);">
+                            <div style="font-size: 48px; margin-bottom: 10px;">🎴</div>
+                            <div style="font-size: 24px; font-weight: bold;">#${card.cardNumber}</div>
+                        </div>
+                    `;
+                } else {
+                    // Use placeholder - needs tooltip
+                    hasPlaceholder = true;
+                    cardImageHtml = `
+                        <div style="width: 167px; height: 230px; background: linear-gradient(135deg, ${cardColor} 0%, ${cardColor}dd 100%); border-radius: 8px; margin-bottom: 10px; display: flex; flex-direction: column; align-items: center; justify-content: center; color: white; box-shadow: inset 0 2px 10px rgba(0,0,0,0.2);">
+                            <div style="font-size: 48px; margin-bottom: 10px;">🎴</div>
+                            <div style="font-size: 24px; font-weight: bold;">#${card.cardNumber}</div>
+                        </div>
+                    `;
+                }
+                
+                // Add tooltip only if placeholder is shown
+                if (hasPlaceholder) {
+                    cardDiv.title = `${card.name}\nCard #${card.cardNumber || '???'}`;
+                }
+                
+                cardDiv.innerHTML = `
+                    ${newBadge}
+                    ${cardImageHtml}
+                `;
+                
+                cardsContainer.appendChild(cardDiv);
+            });
+            
+            modal.appendChild(cardsContainer);
+            
+            // Button container
+            const buttonContainer = document.createElement('div');
+            buttonContainer.style.cssText = `
+                display: flex;
+                gap: 15px;
+                margin-top: 30px;
+            `;
+            
+            // Open Another button
+            const openAnotherButton = document.createElement('button');
+            openAnotherButton.textContent = '🎴 Open Another Pack';
+            openAnotherButton.style.cssText = `
+                padding: 10px 30px;
+                font-size: 16px;
+                background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+                color: white;
+                border: none;
+                border-radius: 5px;
+                cursor: pointer;
+                font-weight: bold;
+            `;
+            openAnotherButton.onclick = () => {
+                modal.remove();
+                openCardPackShop();
+            };
+            buttonContainer.appendChild(openAnotherButton);
+            
+            // Close button
+            const closeButton = document.createElement('button');
+            closeButton.textContent = 'Close';
+            closeButton.style.cssText = `
+                padding: 10px 30px;
+                font-size: 16px;
+                background: #6c757d;
+                color: white;
+                border: none;
+                border-radius: 5px;
+                cursor: pointer;
+            `;
+            closeButton.onclick = () => modal.remove();
+            buttonContainer.appendChild(closeButton);
+            
+            modal.appendChild(buttonContainer);
+            
+            document.body.appendChild(modal);
+        }
+        
         // Get house purchase price
         function getHousePrice() {
             // Price increases exponentially: 5000, 10000, 20000, 40000, 80000, 160000, 320000
@@ -4433,6 +4964,12 @@
             updateUpgradeButtons();
             updateShopItems();
             updateShopUpgradeButton();
+            
+            // Show/hide Card Pack Shop button
+            const cardPackBtn = document.getElementById('cardPackShopBtn');
+            if (cardPackBtn) {
+                cardPackBtn.style.display = inventory.cardCatalog ? 'block' : 'none';
+            }
         }
         
         // Update shop name based on current store stage
@@ -4583,6 +5120,16 @@
             if (bells >= item.price) {
                 bells -= item.price;
                 inventory[item.inventoryKey]++;
+                
+                // Special handling for Card Catalog
+                if (item.id === 'cardCatalog') {
+                    console.log('📇 Card Catalog unlocked! You can now purchase amiibo card packs!');
+                    // Fetch amiibo card data if not already loaded
+                    if (amiiboCardsCache.length === 0) {
+                        fetchAmiiboCards();
+                    }
+                }
+                
                 buildShopItems();
                 createShopItems(); // Refresh shop UI to show upgrades
                 updateDisplay();
@@ -4988,8 +5535,14 @@
                 purchasedVillagers,
                 villagerCooldownEnd,
                 fishingRodTier,
+                storeStage,
                 villagerHouses,
-                villagerAssignments
+                villagerAssignments,
+                hasCompletedInitialSelection,
+                villagerPoints,
+                rerollsRemaining,
+                ownedCards: Array.from(ownedCards),
+                cardPacksPurchased
             };
             localStorage.setItem('animalCrossingBellsSave', JSON.stringify(gameState));
         }, 5000);
@@ -5062,6 +5615,12 @@
                 if (gameState.rerollsRemaining !== undefined) {
                     rerollsRemaining = gameState.rerollsRemaining;
                 }
+                if (gameState.ownedCards) {
+                    ownedCards = new Set(gameState.ownedCards);
+                }
+                if (gameState.cardPacksPurchased !== undefined) {
+                    cardPacksPurchased = gameState.cardPacksPurchased;
+                }
             }
             calculateCPS();
         }
@@ -5087,7 +5646,9 @@
                 villagerAssignments,
                 hasCompletedInitialSelection,
                 villagerPoints,
-                rerollsRemaining
+                rerollsRemaining,
+                ownedCards: Array.from(ownedCards),
+                cardPacksPurchased
             };
             localStorage.setItem('animalCrossingBellsSave', JSON.stringify(gameState));
         }
@@ -5125,6 +5686,12 @@
                 initializeFallbackData();
                 updateCalendar();
                 loadGame();
+                
+                // Load manual card image mappings
+                await loadManualCardImages();
+                
+                // Fetch amiibo cards from custom API
+                await fetchAmiiboCards();
                 
                 // Setup UI
                 updateShopName();

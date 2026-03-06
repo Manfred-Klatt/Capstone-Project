@@ -2450,6 +2450,27 @@
           100% { opacity: 0.4; }
         }
         
+        @keyframes islandGlow {
+          0% {
+            box-shadow: 0 4px 16px rgba(0,0,0,0.18), 0 0 0 0 rgba(107, 142, 35, 0.7);
+          }
+          50% {
+            box-shadow: 0 4px 16px rgba(0,0,0,0.18), 0 0 20px 8px rgba(139, 195, 74, 0.5);
+          }
+          100% {
+            box-shadow: 0 4px 16px rgba(0,0,0,0.18), 0 0 0 0 rgba(107, 142, 35, 0.7);
+          }
+        }
+        
+        .island-button-glow {
+          animation: islandGlow 2s ease-in-out infinite;
+        }
+        
+        .island-button-glow:hover {
+          animation: none;
+          box-shadow: 0 4px 20px rgba(139, 195, 74, 0.7) !important;
+        }
+        
         .speech-bubble {
           position: relative;
           background: #ffffff;
@@ -2501,8 +2522,8 @@
       
       <!-- Right Side: Sound and Home Buttons -->
       <div style="position: absolute; right: 60px; top: 15px; display: flex; gap: 8px; align-items: center;">
-        <button id="new-button" class="mobile-btn" style="background:rgba(255,255,255,0.9); box-shadow:0 4px 16px rgba(0,0,0,0.18); border:none; cursor:pointer; width:48px; height:48px; border-radius:50%; display:flex; align-items:center; justify-content:center; transition:all 0.3s ease;" aria-label="New button">
-          ⭐
+        <button id="new-button" class="mobile-btn island-button-glow" style="background:rgba(255,255,255,0.9); box-shadow:0 4px 16px rgba(0,0,0,0.18); border:none; cursor:pointer; width:48px; height:48px; border-radius:50%; display:flex; align-items:center; justify-content:center; transition:all 0.3s ease; font-size:24px;" aria-label="New button">
+          🏝️
         </button>
         <button id="sound-toggle-mobile" class="mobile-btn" style="background:rgba(255,255,255,0.9); box-shadow:0 4px 16px rgba(0,0,0,0.18); border:none; cursor:pointer; width:48px; height:48px; border-radius:50%; display:flex; align-items:center; justify-content:center; transition:all 0.3s ease;" aria-label="Toggle sound">
           <img src="images/speaker.png" alt="Sound" style="width:28px; height:28px; transition:all 0.3s ease;">
@@ -3039,16 +3060,11 @@
           });
         }
         
-        // New button event listener for password prompt
+        // New button event listener - navigate to idler.html
         const newButton = document.getElementById('new-button');
         if (newButton) {
           newButton.addEventListener('click', function() {
-            const password = prompt('Please enter the password:');
-            if (password === 'blathers') {
-              window.location.href = 'idler.html';
-            } else if (password !== null) {
-              alert('Incorrect password!');
-            }
+            window.location.href = 'idler.html';
           });
         }
     </script>

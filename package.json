@@ -17,7 +17,6 @@
     "build": "echo 'No build step needed for server deployment'",
     "build:react": "tsc && vite build",
     "build:web": "node build-web.js",
-    "build:android": "npm run build:web && npx cap sync android && cd android && gradlew.bat assembleDebug",
     "preview": "vite preview",
     "test": "NODE_ENV=test jest --detectOpenHandles --forceExit",
     "test:watch": "NODE_ENV=test jest --watch --detectOpenHandles --forceExit",
@@ -33,9 +32,6 @@
     "postinstall": "echo 'Dependencies installed successfully'"
   },
   "dependencies": {
-    "@capacitor/android": "^6.0.0",
-    "@capacitor/core": "^6.0.0",
-    "@capacitor/cli": "^6.0.0",
     "axios": "^1.11.0",
     "bcryptjs": "^2.4.3",
     "compression": "^1.7.4",

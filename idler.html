@@ -2933,8 +2933,8 @@
                 }
             }
             
-            // Card Catalog - Now using custom API
-            if (storeStage >= 2 && !inventory.cardCatalog) {
+            // Card Catalog - DISABLED
+            /* if (storeStage >= 2 && !inventory.cardCatalog) {
                 shopItems.push({
                     id: 'cardCatalog',
                     name: '📇 Card Catalog',
@@ -2943,7 +2943,7 @@
                     inventoryKey: 'cardCatalog',
                     maxPurchases: 1
                 });
-            }
+            } */
             
             // Store upgrades are now handled by the upgrade button, not shop items
         }
@@ -3758,43 +3758,11 @@
             }
         }
         
-        // Fetch amiibo cards from custom API
+        // Fetch amiibo cards from custom API - DISABLED
         async function fetchAmiiboCards() {
-            try {
-                console.log('🎴 Fetching cards from custom API...');
-                const response = await fetch('http://localhost:3001/api/cards');
-                
-                if (!response.ok) {
-                    throw new Error(`API returned ${response.status}`);
-                }
-                
-                const result = await response.json();
-                
-                if (result.success && result.data) {
-                    // Transform API data to match game format
-                    amiiboCardsCache = result.data.map(card => ({
-                        name: card.name,
-                        cardNumber: card.cardNumber,
-                        series: card.series,
-                        type: card.type,
-                        species: card.species,
-                        personality: card.personality,
-                        // Prepend API base URL to image path
-                        image_url: `http://localhost:3001${card.imageUrl}`
-                    }));
-                    
-                    console.log(`✅ Loaded ${amiiboCardsCache.length} cards from custom API`);
-                    return;
-                }
-                
-                throw new Error('Invalid API response format');
-                
-            } catch (error) {
-                console.error('❌ Failed to fetch from custom API:', error.message);
-                console.log('⚠️  Using fallback hardcoded data...');
-                
-                // Fallback to hardcoded data if API fails
-                amiiboCardsCache = [
+            // Card API integration disabled - using minimal fallback data
+            console.log('🎴 Card system disabled');
+            amiiboCardsCache = [
                     // Series 1 (001-100) - Fallback data
                     ...Array.from({length: 100}, (_, i) => {
                         const num = String(i + 1).padStart(3, '0');
@@ -3901,11 +3869,10 @@
                         series: 'e-Reader Series 4',
                         image_url: `https://dodo.ac/np/images/6/60/Animal_Crossing-e_4-${num}.jpg`
                     };
-                })
+                ])
             ];
             
             console.log(`🎴 Loaded ${amiiboCardsCache.length} amiibo cards (fallback data)`);
-            }
         }
         
         // Get available card series grouped by series name
@@ -5687,11 +5654,11 @@
                 updateCalendar();
                 loadGame();
                 
-                // Load manual card image mappings
-                await loadManualCardImages();
+                // Load manual card image mappings - DISABLED
+                // await loadManualCardImages();
                 
-                // Fetch amiibo cards from custom API
-                await fetchAmiiboCards();
+                // Fetch amiibo cards from custom API - DISABLED
+                // await fetchAmiiboCards();
                 
                 // Setup UI
                 updateShopName();

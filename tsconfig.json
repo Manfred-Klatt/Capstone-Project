@@ -20,6 +20,5 @@
       "@/*": ["src/*"]
     }
   },
-  "include": ["src/react/**/*.ts", "src/react/**/*.tsx"],
-  "references": [{ "path": "./tsconfig.node.json" }]
+  "include": ["src/react/**/*.ts", "src/react/**/*.tsx"]
 }
